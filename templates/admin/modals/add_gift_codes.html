@@ -1,0 +1,34 @@
+<div class="modal fade" id="showAddGiftCode" tabindex="-1" role="dialog" aria-labelledby="giftCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Gift Code</h2>
+            </div>
+
+            <div class="modal-body">
+
+                <form class="form-horizontal" method="POST" action="{{ url_for('admin.add_gift_code') }}">
+                      <label class="font-weight-bold"> Gift Codes Added Here will be Automatically Redemption Daily Until Such time that the Code expires</label>
+                    <div class="form-group">
+                        <label class="font-weight-bold" for="gift_code">
+                               Gift Code
+                        </label>
+                        <input type="text" name="gift_code" id="gift_code" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold" for="days_valid">
+                               Number Days Valid
+                        </label>
+                        <input type="number" name="days_valid" id="days_valid" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-sm btn-primary">Submit Gift Code</button>
+                    </div>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+

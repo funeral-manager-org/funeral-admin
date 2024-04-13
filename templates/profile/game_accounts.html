@@ -1,0 +1,63 @@
+
+{% extends "layouts/page.html" %}
+
+{% block content %}
+    <section id="main-content">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title font-weight-bold text-info d-none d-sm-block">
+                    <i class="ti ti-game"> </i>
+                    Game Accounts</h2>
+                <h2 class="card-title font-weight-bold text-info d-block d-sm-none">Accounts</h2>
+            </div>
+                <span class="font-weight-bold text-darken-4">
+                    <span class="text-white btn btn-sm btn-secondary">
+                    Total Game Accounts: {{ total_accounts | number}}
+                    </span>
+                </span>
+
+            <div class="row">
+
+                    {% for game_data in game_accounts %}
+                    <div class="col-12 col-md-6">
+                        <div class="card mb-3 bg-secondary">
+                            <div class="card-body text-white font-weight-bold">
+                                <ol class="list-group">
+                                <li class="list-group-item bg-secondary">
+                                    <a class="card-title font-weight-bold text-info" href="{{ url_for('profile.edit_base', game_id=game_data.game_id) }}" title="Open To Edit Base">
+                                    <span class="text-info">{{ game_data.base_name }}</span>
+                                </a></li>
+
+                                    <li class="list-group-item bg-secondary"><span class="card-title text-white font-weight-bold">Account Type : <span class="text-info">{{ game_data.account_type }}</span></span></li>
+                                    <li class="list-group-item bg-secondary"><span class="card-text text-white font-weight-bold">Power: <span class="text-info">{{ game_data.power| number }}</span></span></li>
+                                    <li class="list-group-item bg-secondary"><span class="card-text font-italic text-white font-weight-bold">State: <span class="text-info">{{ game_data.state }}</span></span></li>
+                                    <li class="list-group-item bg-secondary"><span class="card-text font-italic text-white d-none d-md-block font-weight-bold">Level: <span class="text-info">{{ game_data.base_level }}</span></span></li>
+                                    <li class="list-group-item"> <a class="btn btn-primary btn-sm" href="{{ url_for('profile.edit_base', game_id=game_data.game_id) }}" title="Open To Edit Base">Edit Account</a> </li>
+                                </ol>
+
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+            </div>
+
+                <span class="font-weight-bold text-darken-4 m-b-2">
+                    <span class="text-white btn btn-sm btn-secondary">
+                    Total Game Accounts: {{ total_accounts | number}}
+                    </span>
+                </span>
+
+
+                <a href="#" class="btn btn-bg btn-primary m-t-2" data-toggle="modal" data-target="#showAddGameID">
+                    <i class="ti ti-plus"></i>
+                    Add Account
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% include "gift_codes/modals/add_game_ids.html" %}

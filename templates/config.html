@@ -1,0 +1,32 @@
+
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h2> Settings</h2>
+        </div>
+        <div class="card-body">
+        </div>
+
+        <ul class="list-group">
+            <li class="list-group-item">
+                Request Account Verification <a href="{{ url_for('profile.get_verification') }}" class="btn btn-sm btn-primary">
+                <i class="ti-announcement"> </i> Verification Request </a>
+            </li>
+            <li class="list-group-item">
+                Activate Automatic Gift Code Redemption <a href="{{ url_for('profile.get_gift_codes')}}" class="btn btn-sm btn-primary">
+                <i class="ti-gift"> </i> Auto Gift Codes </a>
+            </li>
+            <li class="list-group-item">
+                List Account on Market <a href="{{ url_for('profile.get_market_listing')}}" class="btn btn-sm btn-primary">
+                <i class="ti-shopping-cart"></i> Start Market Listing </a>
+            </li>
+        </ul>
+    </div>
+
+</section>
+
+{% endblock %}

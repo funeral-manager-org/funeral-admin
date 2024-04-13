@@ -1,0 +1,152 @@
+{% extends "layouts/page.html" %}
+{% block custom_css %}
+<style>
+    .faq-item {
+        margin-bottom: 20px;
+    }
+
+    .faq-item h3 {
+        cursor: pointer;
+    }
+
+    .answer {
+        display: none;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title font-weight-bold text-info"> How Our Services Works</h2>
+        </div>
+        <div class="card-body">
+            <div class="faq-item">
+                <h3 class="card-title font-weight-bold text-info" onclick="toggleAnswer('marketplace')">
+                    <i class="ti ti-shopping-cart"> </i>
+                    Market Place
+                </h3>
+                <div id="marketplace" class="answer" style="display: none;">
+                    <!-- Add your content related to Marketplace here -->
+                    <div class="card-body">
+                            <hr/>
+                                <h5 class="card-title text-danger font-weight-bold">Our Marketplace offers a secure platform for gamers to facilitate transactions, ensuring peace of mind through verified transactions and escrow services.</h5>
+                            <hr/>
+                            <p>
+                                Our Marketplace serves as a dynamic platform facilitating transactions between Sellers and Buyers within the gaming community. Sellers utilize this platform to showcase their intention to sell gaming accounts.
+                            </p>
+                            <p>
+                                Sellers initiate the process by indicating their desire to sell, providing essential details about the gaming account they intend to transfer ownership of.
+                            </p>
+                            <p>
+                                Once a Seller's listing catches the attention of a potential Buyer, communication ensues, allowing for negotiation on terms, including pricing.
+                            </p>
+                            <p>
+                                To ensure a secure transaction, Buyers are required to fund their Escrow Account beforehand. This safeguards both parties' interests and mitigates risks associated with fraudulent activities.
+                            </p>
+                            <p>
+                                Upon mutual agreement between the Seller and Buyer, the Seller proceeds to transfer account credentials securely to the Buyer's designated email address.
+                            </p>
+                            <p>
+                                With the assurance of funds held in Escrow, Sellers can confidently proceed with the transaction, knowing that payment is guaranteed upon completion.
+                            </p>
+                            <p class="font-weight-bold">
+                                So in the Market Place we are essentially providing some degree of trust and security to both the seller and buyer and also
+                                for Sellers and Buyers to know who to sell their accounts to, or purchase accounts from.
+                            </p>
+                            <ul class="font-weight-bold text-info">
+
+                                <li>- Account credentials are never possessed by any individual or developers throughout the transaction process within our marketplace.</li>
+                                <li>- Verification of ownership is automated through IM30 login details provided by sellers, eliminating manual intervention by our developers.</li>
+                                <li>- Sellers are not required to provide email login details associated with the game account until the buyer accepts the terms of sale.</li>
+                                <li>- Email login details are shared by the seller with the buyer only after the buyer has agreed to proceed with the transaction, ensuring privacy and security.</li>
+
+                            </ul>
+                        </div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <h3 class="card-title font-weight-bold text-info" onclick="toggleAnswer('emailService')">
+                    <i class="ti ti-envelope"> </i>
+                    Email Service</h3>
+                <div id="emailService" class="answer" style="display: none;">
+                    <!-- Add your content related to Email Service here -->
+                    <div class="card-body">
+                        <p>
+                            Our Email Service is tailored for farm accounts in Last Shelter: Survival, providing enhanced security and convenience:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>Streamlined Account Activation:</strong> Our service eliminates the need for manual verification of each account activation email, saving time for farmers.
+                            </li>
+                            <li>
+                                <strong>Enhanced Security for Buyers:</strong> For those purchasing farm accounts, our Email Service offers an additional layer of security. Buyers can trust that their farms won't be compromised, as we have the capability to easily reclaim any farm accounts using our service.
+                            </li>
+                        </ul>
+                        <h4 class="card-title font-weight-bold text-danger">Please note:</h4>
+                        <ul class="font-weight-bold text-danger">
+                            <li>
+                                This service is exclusively intended for farm accounts and should not be used for main accounts.
+                            </li>
+                            <li>
+                                By utilizing our Email Service, users can enjoy a seamless experience and peace of mind regarding the security of their gaming assets.
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+            <div class="faq-item">
+                <h3 class="card-title font-weight-bold text-info" onclick="toggleAnswer('giftCodes')">
+                    <i class="ti ti-gift"> </i>
+                    Gift Codes</h3>
+                <div id="giftCodes" class="answer" style="display: none;">
+                    <div class="card-header">
+                        <hr/>
+                        <h5 class="font-weight-bold text-info">Bulk Gift Codes Activation Service simplifies the process of redeeming multiple farm accounts and gift codes at once,
+                        providing efficiency and convenience for users:</h5>
+                    </div>
+                    <div class="card-body">
+                        <hr/>
+                    <ul>
+                        <li>1. <span class="font-weight-bold text-info">Streamlined Redemption Process:</span> Our service allows users to redeem multiple gift codes and farm accounts simultaneously, eliminating the need for manual input of each code and each farm Game ID.</li>
+
+                        <li>2. <span class="font-weight-bold text-info">Efficiency:</span> Users can activate numerous gift codes in a single transaction, saving time and effort compared to redeeming codes individually.</li>
+
+                        <li>3. <span class="font-weight-bold text-info">Enhanced User Experience:</span> By utilizing our Bulk Gift Codes Activation Service, users can enjoy a smoother and more efficient redemption process, enhancing overall satisfaction.</li>
+                    </ul>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-header text-danger">
+                            Please note:
+                        </div>
+                        <ul class="font-weight-bold text-danger">
+                            <li>- This service is intended for bulk activation of gift codes and may not be suitable for individual code redemption needs.</li>
+                            <li>- Users can enjoy the benefits of streamlined code activation, making it easier to access rewards and bonuses associated with gift codes.</li>
+                            <li>- This Service Utilizes the Official Game Code Redemption Services, and will not redeem or attempt to redeem any code unless provided through Official Game Channels</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleAnswer(id) {
+        var answer = document.getElementById(id);
+        if (answer.style.display === "block") {
+            answer.style.display = "none";
+        } else {
+            answer.style.display = "block";
+        }
+    }
+</script>
+{% endblock %}

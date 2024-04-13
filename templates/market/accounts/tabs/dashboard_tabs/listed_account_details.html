@@ -1,0 +1,82 @@
+{% extends "layouts/page.html" %}
+{% block content %}
+    {% include "layouts/social.html" %}
+    <section id="main-content">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold text-info">
+                    <i class="ti ti-user"> </i>
+                    Account Detail</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+
+                        <h5 class="font-weight-bold">Base Name: <span class="text-success">{{ base_detail.base_name }}</span></h5>
+                        <p  class="font-weight-bold">Game ID: <span class="text-info">{{ listed_account.game_id }}</span></p>
+                        <p  class="font-weight-bold">Base Level: <span class="text-info">{{ listed_account.base_level }}</span></p>
+                        <p  class="font-weight-bold">Base Power: <span class="text-info">{{ base_detail.power| number }}</span></p>
+                        <p  class="font-weight-bold">Account Type: <span class="text-info">{{ base_detail.account_type }}</span></p>
+                        <p  class="font-weight-bold">State: <span class="text-info">{{ listed_account.state }}</span></p>
+
+                        <p  class="font-weight-bold"><span class="text-warning">Asking Price: {{ listed_account.item_price | number }} USD</span></p>
+
+                        <button type="button" class="btn btn-warning m-r-2 m-b-2" data-toggle="modal" data-target="#partsModal">
+                            <i class="ti ti-settings"></i>
+                            Show Parts
+                        </button>
+
+                        <button type="button" class="btn btn-primary m-b-2" data-toggle="modal" data-target="#additionalDataModal">
+                            <i class="ti ti-archive"> </i>
+                            Show Extra Detail
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="{{ listed_account.image_url }}" alt="Listing Image" class="img-fluid">
+                    </div>
+                </div>
+            <hr/>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="font-weight-bold text-info">Seller Details</h5>
+
+                        {% if seller_account.seller_name %}
+                            <p class="font-weight-bold">Seller Name: {{ seller_account.seller_name }}</p>
+                        {% endif %}
+                        <p class="font-weight-bold">Seller Rating: {{ seller_account.seller_rating | number }}</p>
+                        <p class="font-weight-bold">Total Accounts Sold: {{ seller_account.total_items_sold | number }}</p>
+                        {% if seller_account.account_verified %}
+                            <p class="text-success"><i class="fas fa-check-circle text-success"></i> Verified Account</p>
+                        {% else %}
+                            <p class="text-danger"><i class="fas fa-times-circle text-danger"></i> Unverified Account</p>
+                        {% endif %}
+                    <p  class="font-weight-bold"><span class="text-warning">Asking Price: {{ listed_account.item_price | number }} USD</span></p>
+
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#makeOfferModal">
+                        <i class="ti ti-money"> </i>
+                        Make an Offer
+                    </button>
+                    </div>
+                <div class="col-md-6">
+                        <h5 class="font-weight-bold text-info">Seller History</h5>
+
+                        <textarea class="form-control" rows="8" name="seller_history" readonly>
+
+                        </textarea>
+
+                        <!-- lets create a seller home page -->
+
+                    <hr/>
+                    <a href="#" class="font-weight-bold text-info">Visit Seller Home Page</a>
+
+                </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% include "market/accounts/modals/apc_parts.html" %}
+{% include "market/accounts/modals/extra_detail.html" %}
+{% include "market/accounts/modals/offer_modal.html" %}

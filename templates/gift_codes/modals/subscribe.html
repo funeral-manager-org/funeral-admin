@@ -1,0 +1,30 @@
+<div class="modal fade" id="showSubscribe" tabindex="-1" role="dialog" aria-labelledby="addSubscribeLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="addSubscribeLabel"> <i class="ti ti-shopping-cart"> </i> Subscribe </h2>
+            </div>
+
+            <div class="modal-body">
+
+                <form class="form-horizontal" method="POST" action="{{ url_for('profile.gift_codes_subscribe') }}">
+                <label class="font-weight-bold text-info">
+                    Once Subscribed all your Game Accounts will be credited Automatically with Gold Recruitment Cards and
+                    Diamonds Whenever a Gift Code has been released.
+                </label>
+
+                    {% if total_bases <= 20 %}
+                        {% include "gift_codes/modals/subscriptions/twenty_bases.html" %}
+                    {% elif total_bases <= 50 %}
+                        {% include "gift_codes/modals/subscriptions/fifty_bases.html" %}
+                    {% elif total_bases <= 100 %}
+                        {% include "gift_codes/modals/subscriptions/hundred_bases.html" %}
+
+                    {% endif %}
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

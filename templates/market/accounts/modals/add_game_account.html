@@ -1,0 +1,47 @@
+
+<div class="modal fade" id="add_account" tabindex="-1" role="dialog" aria-labelledby="add_account_label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="add_account_label"> <i class="ti ti-shopping-cart"> </i>List your Account </h2>
+            </div>
+
+            <div class="modal-body">
+
+                <form class="form-horizontal" method="POST" action="{{ url_for('market.list_game_account') }}">
+                <label class="font-weight-bold text-info">
+                    Insert your Game ID Below in order to start Listing your Account in our Market Place
+                </label>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Game ID<small class="text-info"> Find your game ID in your Game Profile</small></label>
+                         <input name="game_id" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Asking Price (USD)</label>
+                        <input name="price" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Account Login Email</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label>Account Password</label>
+                        <input type="password" class="form-control" id="password" name="password">
+                    </div>
+                    <div class="form-group">
+                        <label>PIN</label>
+                        <input type="password" class="form-control" id="pin" name="pin">
+                    </div>
+
+                    <div class="form-group">
+
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="ti ti-gift"></i>
+                            Submit Account </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,129 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title font-weight-bold text-info">
+                <i class="ti ti-file"> </i>
+                Listing Editor
+            </h3>
+        </div>
+        <div class="card-body">
+        <span class="font-weight-bold text-info">It is essential to ensure that the information entered into this form is accurate - any misleading information may result in negative ratings</span>
+
+            <form method="POST" action="{{ url_for('market.do_update_listed_account') }}">
+
+                <input  class="form-control" type="hidden" id="uid" name="uid" value="{{ listing.uid }}" readonly>
+                <input  class="form-control" type="hidden" id="game_id" name="game_id" value="{{ listing.game_id }}" readonly>
+                <input  class="form-control" type="hidden" id="game_uid" name="game_uid" value="{{ listing.game_uid }}" readonly>
+                <input  class="form-control" type="hidden" id="listing_id" name="listing_id" value="{{ listing.listing_id }}" readonly>
+
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="state">State:</label>
+                    <input  class="form-control" type="number" id="state" name="state" value="{{ listing.state }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="base_level">Base Level:</label>
+                    <input  class="form-control" type="number" id="base_level" name="base_level" value="{{ listing.base_level }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="item_price">Item Price:</label>
+                    <input  class="form-control" type="number" id="item_price" name="item_price" value="{{ listing.item_price }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="image_url">Image URL:</label>
+                    <input  class="form-control" type="text" id="image_url" name="image_url" value="{{ listing.image_url }}" readonly>
+                    <span>Will activate custom screenshots soon</span>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="total_gold_cards">Total Gold Cards:</label>
+                    <input  class="form-control" type="number" id="total_gold_cards" name="total_gold_cards" value="{{ listing.total_gold_cards }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="total_hero_tokens">Total Hero Tokens:</label>
+                    <input  class="form-control" class="form-control" type="number" id="total_hero_tokens" name="total_hero_tokens" value="{{ listing.total_hero_tokens }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="total_skins">Total Skins:</label>
+                    <input  class="form-control" type="number" id="total_skins" name="total_skins" value="{{ listing.total_skins }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="gold_sets_vehicles">Gold Sets Vehicles:</label>
+                    <input  class="form-control" type="number" id="gold_sets_vehicles" name="gold_sets_vehicles" value="{{ listing.gold_sets_vehicles }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="gold_sets_fighters">Gold Sets Fighters:</label>
+                    <input  class="form-control" type="number" id="gold_sets_fighters" name="gold_sets_fighters" value="{{ listing.gold_sets_fighters }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="gold_sets_shooters">Gold Sets Shooters:</label>
+                    <input  class="form-control" type="number" id="gold_sets_shooters" name="gold_sets_shooters" value="{{ listing.gold_sets_shooters }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="bane_blade_sets">Bane Blade Sets:</label>
+                    <input  class="form-control" type="number" id="bane_blade_sets" name="bane_blade_sets" value="{{ listing.bane_blade_sets }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="fighter_units_level">Fighter Units Level:</label>
+                    <input  class="form-control" type="number" id="fighter_units_level" name="fighter_units_level" value="{{ listing.fighter_units_level }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="shooter_units_level">Shooter Units Level:</label>
+                    <input  class="form-control" type="number" id="shooter_units_level" name="shooter_units_level" value="{{ listing.shooter_units_level }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="vehicle_units_level">Vehicle Units Level:</label>
+                    <input  class="form-control" type="number" id="vehicle_units_level" name="vehicle_units_level" value="{{ listing.vehicle_units_level }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="state_season">State Season:</label>
+                    <input  class="form-control" type="number" id="state_season" name="state_season" value="{{ listing.state_season }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="season_heroes">Season Heroes:</label>
+                    <input  class="form-control" type="number" id="season_heroes" name="season_heroes" value="{{ listing.season_heroes }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="sp_heroes">Active SP Heroes:</label>
+                    <input  class="form-control" type="number" id="sp_heroes" name="sp_heroes" value="{{ listing.sp_heroes }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="universal_sp_medals">Universal SP Medals:</label>
+                    <input  class="form-control" type="number" id="universal_sp_medals" name="universal_sp_medals" value="{{ listing.universal_sp_medals }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="amount_spent_packages">Amount Spent on Packages:</label>
+                    <input  class="form-control" type="number" id="amount_spent_packages" name="amount_spent_packages" value="{{ listing.amount_spent_packages }}">
+                </div>
+                <div class="form-group">
+                    <label class="label font-weight-bold text-info" for="vip_shop">VIP Shop:</label>
+                    <input  class="form-control" type="checkbox" id="vip_shop" name="vip_shop" {% if listing.vip_shop %}checked{% endif %} readonly>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="energy_lab_level">Energy Lab Level:</label>
+                    <input  class="form-control" type="number" id="energy_lab_level" name="energy_lab_level" value="{{ listing.energy_lab_level }}">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold text-info" for="energy_lab_password">Energy Lab Password:</label>
+                    {% if listing.energy_lab_password %}
+                        <input  class="form-control" type="text" id="energy_lab_password" name="energy_lab_password" value="{{ listing.energy_lab_password }}">
+                    {% else %}
+                        <input  class="form-control" type="text" id="energy_lab_password" name="energy_lab_password" placeholder="Enter your Energy Lab Pin">
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-shopping-cart"> </i>
+                    List Account in Public Market
+                </button>
+                <button type="submit" class="btn btn-danger">
+                    <i class="ti ti-cut"> </i>
+                    Remove Listing</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

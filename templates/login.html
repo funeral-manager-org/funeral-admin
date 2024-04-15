@@ -4,12 +4,12 @@
 <!--suppress ALL -->
 <div class="login-content">
     <div class="login-logo">
-        <a href="{{ url_for('home.get_home' )}}"><span>LSS, <small> Market Place</small> </span></a>
+        <a href="{{ url_for('home.get_home' )}}"><span>Funeral, <small> Admin</small> </span></a>
     </div>
     {% include "layouts/flash.html" %}
     <div class="login-form">
-        <h4 class="font-weight-bold text-info">Website Login</h4>
-        <label class="font-weight-bold text-info">Login to our website to start using this service</label>
+        <h4 class="font-weight-bold text-info">Login</h4>
+        <label class="font-weight-bold text-info">Login to start using funeral admin</label>
 
         <form action="{{ url_for('auth.do_login')}}" method="POST"  enctype="multipart/form-data">
             <div class="form-group">

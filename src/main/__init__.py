@@ -18,7 +18,7 @@ from src.controller.chat_controller import ChatController
 from src.controller.tool_controller import ToolController
 
 
-from src.firewall import Firewall
+# from src.firewall import Firewall
 
 user_controller = UserController()
 
@@ -32,7 +32,7 @@ tool_controller = ToolController()
 
 chat_io = SocketIO()
 
-firewall = Firewall()
+# firewall = Firewall()
 def _add_blue_prints(app: Flask):
     """
         this function adds blueprints

@@ -73,7 +73,11 @@ class CreateUser(BaseModel):
     password: str
     email: str
     account_verified: bool = Field(default=False)
+
     is_system_admin: bool = Field(default=False)
+    is_company_admin: bool = Field(default=False)
+    is_employee: bool = Field(default=False)
+    is_client: bool = Field(default=False)
 
     @property
     def password_hash(self):
@@ -93,7 +97,11 @@ class PasswordResetUser(BaseModel):
     password: str
     email: str
     account_verified: bool = Field(default=False)
+
     is_system_admin: bool = Field(default=False)
+    is_company_admin: bool = Field(default=False)
+    is_employee: bool = Field(default=False)
+    is_client: bool = Field(default=False)
 
     @property
     def password_hash(self):
@@ -111,7 +119,11 @@ class UserUpdate(BaseModel):
     username: str | None
     email: str
     account_verified: bool = Field(default=False)
+
     is_system_admin: bool = Field(default=False)
+    is_company_admin: bool = Field(default=False)
+    is_employee: bool = Field(default=False)
+    is_client: bool = Field(default=False)
 
     class Config:
         extra = Extra.ignore

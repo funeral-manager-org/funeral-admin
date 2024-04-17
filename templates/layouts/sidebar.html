@@ -11,6 +11,7 @@
                     </div>
                     <li class="label">Main</li>
                     <li><a href="{{ url_for('home.get_home') }}"><i class="ti-home"></i> Home</a></li>
+                    <li><a href="{{ url_for('company.get_admin') }}"><i class="ti-dashboard"></i> admin</a></li>
 
                     {% if user %}
                         <li><a href="{{ url_for('auth.do_logout')}}"><i class="ti-power-off"></i> Logout</a></li>

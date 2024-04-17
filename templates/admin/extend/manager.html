@@ -1,0 +1,60 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs" id="companyTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="companyDetails-tab" data-toggle="tab" href="#companyDetails" role="tab" aria-controls="companyDetails" aria-selected="true">Company Details</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="addBranch-tab" data-toggle="tab" href="#addBranch" role="tab" aria-controls="addBranch" aria-selected="false">Add Company Branch</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="companyTabsContent">
+                <div class="tab-pane fade show active" id="companyDetails" role="tabpanel" aria-labelledby="companyDetails-tab">
+                    <!-- Company Details Tab Content -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Company Details</h3>
+                        </div>
+                        <div class="card-body">
+                                <p><strong>CK/Reg Number:</strong> {{ company.reg_ck }}</p>
+                                <p><strong>VAT Number:</strong> {% if company.vat_number %} {{ company.vat_number }} {% else %} N/A {% endif %}</p>
+                                <p><strong>Company Name:</strong> {{ company.company_name }}</p>
+                                <p><strong>Company Description:</strong> {{ company.company_description }}</p>
+                                <p><strong>Company Slogan:</strong> {{ company.company_slogan }}</p>
+                                <p><strong>Date Registered:</strong> {{ company.date_registered }}</p>
+                                <p><strong>Total Users:</strong> {{ company.total_users }}</p>
+                                <p><strong>Total Clients:</strong> {{ company.total_clients }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="addBranch" role="tabpanel" aria-labelledby="addBranch-tab">
+                    <!-- Add Company Branch Tab Content -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Add Company Branch</h3>
+                        </div>
+                        <div class="card-footer">
+                            <form action="{{ url_for('company.add_company_branch') }}" method="POST">
+                                <div class="form-group">
+                                    <label for="branchName">Branch Name:</label>
+                                    <input type="text" class="form-control" id="branchName" name="branchName" required>
+                                </div>
+                                <!-- Add more form fields as needed -->
+                                <button type="submit" class="btn btn-primary">Add Branch</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

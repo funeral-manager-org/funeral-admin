@@ -1,13 +1,13 @@
-from datetime import datetime
-from enum import Enum
 
 from pydantic import BaseModel, Field
-from utils import create_id, string_today, create_plan_number
+from src.utils import create_id, string_today, create_plan_number, create_employee_id
 
 
 class Company(BaseModel):
     company_id: str = Field(default_factory=create_id)
     admin_uid: str
+    reg_ck: str
+    vat_number: str | None
     company_name: str
     company_description: str
     company_slogan: str
@@ -27,6 +27,7 @@ class CompanyBranches(BaseModel):
     date_registered: str = Field(default_factory=string_today)
     total_users: int = Field(default=1)
     total_clients: int = Field(default=0)
+    total_employees: int = Field(default=1)
 
 
 class PlanTypes(BaseModel):
@@ -73,3 +74,38 @@ class CoverPlanDetails(BaseModel):
     inclusions: list[str]
     exclusions: list[str]
     contact_information: str
+
+
+class EmployeeDetails(BaseModel):
+    """
+    Represents details about an employee.
+
+    Attributes:
+        employee_id (str): The ID of the employee.
+        company_id (str): The ID of the company to which the employee belongs.
+        branch_id (str): The ID of the branch to which the employee is assigned.
+        first_name (str): The first name of the employee.
+        last_name (str): The last name of the employee.
+        email (str): The email address of the employee.
+        contact_number (str): The contact number of the employee.
+        position (str): The position or role of the employee.
+        date_of_birth (str): The date of birth of the employee.
+        date_joined (str): The date when the employee joined the company.
+        salary (float): The salary of the employee.
+        is_active (bool): Indicates whether the employee is currently active or not.
+    """
+    employee_id: str = Field(default_factory=create_employee_id)
+
+    uid: str | None
+    company_id: str
+    branch_id: str
+
+    first_name: str
+    last_name: str
+    email: str
+    contact_number: str
+    position: str
+    date_of_birth: str
+    date_joined: str = Field(default_factory=string_today)
+    salary: float
+    is_active: bool = True

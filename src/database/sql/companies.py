@@ -1,0 +1,177 @@
+from sqlalchemy import Column, String, inspect, Integer, Boolean, JSON
+
+from src.database.constants import ID_LEN, NAME_LEN, SHORT_DESCRIPTION_lEN
+from src.database.sql import Base, engine
+from src.utils import string_today
+
+
+class CompanyORM(Base):
+    __tablename__ = "company"
+    company_id: str = Column(String(ID_LEN), primary_key=True)
+    admin_uid: str = Column(String(ID_LEN))
+    reg_ck: str = Column(String(NAME_LEN))
+    vat_number: str = Column(String(NAME_LEN), nullable=True)
+    company_name: str = Column(String(NAME_LEN))
+    company_description: str = Column(String(SHORT_DESCRIPTION_lEN))
+    company_slogan: str = Column(String(SHORT_DESCRIPTION_lEN))
+    date_registered: str = Column(String(NAME_LEN))
+    total_users: int = Column(Integer)
+    total_clients: int = Column(Integer)
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            Base.metadata.create_all(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            "company_id": self.company_id,
+            "admin_uid": self.admin_uid,
+            "reg_ck": self.reg_ck,
+            "vat_number": self.vat_number,
+            "company_name": self.company_name,
+            "company_description": self.company_description,
+            "company_slogan": self.company_slogan,
+            "date_registered": self.date_registered,
+            "total_users": self.total_users,
+            "total_clients": self.total_clients
+        }
+
+
+class CompanyBranchesORM(Base):
+    __tablename__ = "company_branches"
+    branch_id = Column(String(9), primary_key=True)
+    company_id = Column(String(9))
+    branch_name = Column(String(255))
+    branch_description = Column(String(255))
+    date_registered = Column(String(10), default=string_today)
+    total_users = Column(Integer, default=1)
+    total_clients = Column(Integer, default=0)
+    total_employees = Column(Integer, default=1)
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            Base.metadata.create_all(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            "branch_id": self.branch_id,
+            "company_id": self.company_id,
+            "branch_name": self.branch_name,
+            "branch_description": self.branch_description,
+            "date_registered": self.date_registered,
+            "total_users": self.total_users,
+            "total_clients": self.total_clients,
+            "total_employees": self.total_employees
+        }
+
+
+class CoverPlanDetailsORM(Base):
+    __tablename__ = "cover_plan_details"
+    branch_id = Column(String(9))
+    company_id = Column(String(9))
+
+    plan_number = Column(String(10), primary_key=True)
+    plan_name = Column(String(255))
+    plan_type = Column(String(50))
+    benefits = Column(JSON)
+    coverage_amount = Column(Integer)
+    premium_costs = Column(Integer)
+    additional_details = Column(String(1000))
+    terms_and_conditions = Column(String(1000))
+    inclusions = Column(JSON)
+    exclusions = Column(JSON)
+    contact_information = Column(String(255))
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            Base.metadata.create_all(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            "id": self.id,
+            "branch_id": self.branch_id,
+            "company_id": self.company_id,
+            "plan_number": self.plan_number,
+            "plan_name": self.plan_name,
+            "plan_type": self.plan_type,
+            "benefits": self.benefits,
+            "coverage_amount": self.coverage_amount,
+            "premium_costs": self.premium_costs,
+            "additional_details": self.additional_details,
+            "terms_and_conditions": self.terms_and_conditions,
+            "inclusions": self.inclusions,
+            "exclusions": self.exclusions,
+            "contact_information": self.contact_information
+        }
+
+
+class EmployeeORM(Base):
+    __tablename__ = "employee"
+    employee_id = Column(String(9), primary_key=True)
+    company_id = Column(String(9))
+    branch_id = Column(String(9))
+    first_name = Column(String(255))
+    last_name = Column(String(255))
+    email = Column(String(255))
+    contact_number = Column(String(20))
+    position = Column(String(255))
+    date_of_birth = Column(String(10))
+    date_joined = Column(String(10), default=string_today)
+    salary = Column(Integer)
+    is_active = Column(Boolean, default=True)
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            Base.metadata.create_all(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            "employee_id": self.employee_id,
+            "company_id": self.company_id,
+            "branch_id": self.branch_id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "contact_number": self.contact_number,
+            "position": self.position,
+            "date_of_birth": self.date_of_birth,
+            "date_joined": self.date_joined,
+            "salary": self.salary,
+            "is_active": self.is_active
+        }

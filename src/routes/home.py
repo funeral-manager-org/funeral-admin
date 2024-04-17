@@ -15,6 +15,7 @@ async def get_time():
     # Convert the datetime object to a string
     current_time_str = current_time.strftime("%Y-%m-%d %H:%M:%S.%f")
 
+
     # Return the current time as a JSON response
     return jsonify({'time': current_time_str})
 

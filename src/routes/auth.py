@@ -38,6 +38,7 @@ async def do_login():
                                      'danger')
 
     login_user: User | None = await user_controller.login(email=auth_user.email, password=auth_user.password)
+    print(f"logged in user: {login_user}")
     if login_user and login_user.email == auth_user.email:
         response = await create_response(url_for('company.get_admin'))
 

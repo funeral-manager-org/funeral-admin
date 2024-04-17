@@ -1,3 +1,4 @@
+import uuid, random, string
 from enum import Enum
 from os import path
 from datetime import datetime, timedelta
@@ -105,3 +106,27 @@ def friendlytimestamp(value):
         return f"{weeks} week{'s' if weeks > 1 else ''} ago"
     else:
         return timestamp_dt.strftime("%Y-%m-%d")
+
+
+
+def create_id():
+    return str(uuid.uuid4())
+
+def create_plan_number():
+    # Generate a random alphanumeric string of length 9
+    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=9))
+    # Convert all letters to uppercase
+    random_chars_uppercase = random_chars.upper()
+    return random_chars_uppercase
+def create_claim_number():
+    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=9))
+    random_chars_uppercase = random_chars.upper()
+    return random_chars_uppercase
+
+def create_policy_number():
+    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    random_chars_uppercase = random_chars.upper()
+    return random_chars_uppercase
+
+def string_today():
+    return str(datetime.today())

@@ -11,11 +11,11 @@ send_mail = SendMail()
 
 from src.controller.auth import UserController
 
-from src.controller.wallet_controller import WalletController
+
 from src.controller.paypal_controller import PayPalController
-from src.controller.email_service_controller import EmailController
+
 from src.controller.chat_controller import ChatController
-from src.controller.tool_controller import ToolController
+
 
 
 # from src.firewall import Firewall
@@ -23,11 +23,11 @@ from src.controller.tool_controller import ToolController
 user_controller = UserController()
 
 
-wallet_controller = WalletController()
+
 paypal_controller = PayPalController()
-email_service_controller = EmailController()
+
 chat_controller = ChatController()
-tool_controller = ToolController()
+
 
 
 chat_io = SocketIO()
@@ -75,10 +75,7 @@ def create_app(config):
         encryptor.init_app(app=app)
         chat_io.init_app(app)
         user_controller.init_app(app=app)
-        wallet_controller.init_app(app=app)
-        email_service_controller.init_app(app=app)
         paypal_controller.init_app(app=app, config_instance=config)
         chat_controller.init_app(app=app)
-        tool_controller.init_app(app=app)
 
     return app, chat_io

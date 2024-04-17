@@ -28,6 +28,8 @@ class User(BaseModel):
     - contact_number (str): The contact number of the user.
     """
     uid: str
+    branch_id: str | None
+    company_id: str | None
     username: str | None
     password_hash: str
     email: str
@@ -35,6 +37,7 @@ class User(BaseModel):
     contact_number: str | None
     account_verified: bool = Field(default=False)
     is_system_admin: bool = Field(default=False)
+    is_company_admin: bool = Field(default=False)
 
     class Config:
         orm_mode = True

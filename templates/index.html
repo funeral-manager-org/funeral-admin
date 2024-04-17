@@ -52,7 +52,7 @@
 <section id="main-content">
     <div class="card">
         <div class="card-header">
-            <h1 class="card-title font-weight-bold text-info">
+            <h1 class="card-title font-weight-bold ">
                 <img src="{{ url_for('static', filename='images/logo.jpg') }}" class="img-fluid" width="60" height="30">
                 Funeral Admin </h1>
         </div>
@@ -82,20 +82,20 @@
                     <h2>Client Communication</h2>
                     <p>For clients, the Communications Module enables:</p>
                     <ul class="list-group">
-                        <li class="list-group-item">Policy Registration Confirmation: Automated emails confirming successful policy registration.</li>
-                        <li class="list-group-item">Premium Payment Reminders: Timely notifications reminding clients of upcoming premium payments.</li>
-                        <li class="list-group-item">Claim Status Updates: Regular updates on the status of filed claims, ensuring clients are informed every step of the way.</li>
-                        <li class="list-group-item">Funeral Arrangement Guidance: Guidance and support via email or SMS to assist clients in arranging funeral services and ceremonies.</li>
+                        <li class="font-weight-bold ">1. Policy Registration Confirmation: Automated emails confirming successful policy registration.</li>
+                        <li class="font-weight-bold ">2. Premium Payment Reminders: Timely notifications reminding clients of upcoming premium payments.</li>
+                        <li class="font-weight-bold ">3. Claim Status Updates: Regular updates on the status of filed claims, ensuring clients are informed every step of the way.</li>
+                        <li class="font-weight-bold ">4. Funeral Arrangement Guidance: Guidance and support via email or SMS to assist clients in arranging funeral services and ceremonies.</li>
                     </ul>
             </div>
             <div class="feature">
                     <h2>Management Communication</h2>
                     <p>For management, the Communications Module provides:</p>
                     <ul class="list-group">
-                        <li class="list-group-item">New Policy Registrations: Immediate notifications of new policy registrations, allowing for prompt follow-up and processing.</li>
-                        <li class="list-group-item">Claim Processing Alerts: Real-time alerts on incoming claims, facilitating efficient processing and resolution.</li>
-                        <li class="list-group-item">Premium Payment Monitoring: Regular reports on premium payment status, ensuring proactive management of financial operations.</li>
-                        <li class="list-group-item">Performance Analytics: Comprehensive analytics and reports to track key performance indicators and inform strategic decision-making.</li>
+                        <li class="font-weight-bold ">1. New Policy Registrations: Immediate notifications of new policy registrations, allowing for prompt follow-up and processing.</li>
+                        <li class="font-weight-bold ">2. Claim Processing Alerts: Real-time alerts on incoming claims, facilitating efficient processing and resolution.</li>
+                        <li class="font-weight-bold ">3. Premium Payment Monitoring: Regular reports on premium payment status, ensuring proactive management of financial operations.</li>
+                        <li class="font-weight-bold ">4. Performance Analytics: Comprehensive analytics and reports to track key performance indicators and inform strategic decision-making.</li>
                     </ul>
             </div>
             <div class="feature">
@@ -104,20 +104,20 @@
                 <h2>Employee Dashboard</h2>
                 <p>The Employee Dashboard provides essential tools and features for employees to efficiently manage day-to-day operations, including:</p>
                 <ul class="list-group">
-                    <li class="list-group-item">Policy Management: Manage user accounts, policies, premiums, and claims.</li>
-                    <li  class="list-group-item">Claims Processing: Verify and process claims, ensuring timely resolution.</li>
-                    <li  class="list-group-item">Client Communication: Communicate with clients to address inquiries and provide support.</li>
-                    <li  class="list-group-item">Reports and Analytics: Access reports and analytics to track performance and inform decision-making.</li>
+                    <li class="font-weight-bold ">1. Policy Management: Manage user accounts, policies, premiums, and claims.</li>
+                    <li  class="font-weight-bold ">2. Claims Processing: Verify and process claims, ensuring timely resolution.</li>
+                    <li  class="font-weight-bold ">3. Client Communication: Communicate with clients to address inquiries and provide support.</li>
+                    <li  class="font-weight-bold ">4. Reports and Analytics: Access reports and analytics to track performance and inform decision-making.</li>
                 </ul>
             </div>
             <div class="feature">
                 <h2>Managers Dashboard</h2>
                 <p>The Manager Dashboard offers comprehensive oversight and strategic management capabilities, including:</p>
                 <ul class="list-group">
-                    <li class="list-group-item">Team Management: Manage employee accounts, roles, and permissions.</li>
-                    <li  class="list-group-item">Policy Oversight: Monitor policy performance, trends, and compliance.</li>
-                    <li class="list-group-item">Financial Management: Monitor premium payments, expenses, and revenue.</li>
-                    <li class="list-group-item">Strategic Planning: Access advanced analytics and reports to inform strategic decision-making.</li>
+                    <li class="font-weight-bold ">1. Team Management: Manage employee accounts, roles, and permissions.</li>
+                    <li  class="font-weight-bold ">2. Policy Oversight: Monitor policy performance, trends, and compliance.</li>
+                    <li class="font-weight-bold ">3. Financial Management: Monitor premium payments, expenses, and revenue.</li>
+                    <li class="font-weight-bold ">4. Strategic Planning: Access advanced analytics and reports to inform strategic decision-making.</li>
                 </ul>
             </div>
         </div>
@@ -125,23 +125,23 @@
 
     <div class="card">
         <div class="card-header">
-            <h4 class="card-title font-weight-bold text-info"><i class="ti ti-user"> </i> Login - Create Account</h4>
+            <h4 class="card-title font-weight-bold "><i class="ti ti-user"> </i> Login - Create Account</h4>
         </div>
         <div class="card-body">
             <ul class="list-group">
                 {% if user %}
-                    <li class="list-group-item">
+                    <li class="font-weight-bold ">
                         <a href="{{ url_for('auth.do_logout')}}" class="btn btn-danger btn-block">
                             <i class="ti-power-off"> </i> <strong>Logout</strong>
                         </a>
                     </li>
                 {% else %}
-                    <li class="list-group-item">
+                    <li class="font-weight-bold ">
                         <a href="{{ url_for('auth.get_register') }}" class="btn btn-warning btn-block">
                             <i class="ti-save"> </i> <strong>Create Account Today</strong>
                         </a>
                     </li>
-                    <li class="list-group-item">
+                    <li class="font-weight-bold ">
                         <a href="{{ url_for('auth.get_auth')}}" class="btn btn-primary btn-block">
                             <i class="ti-user"> </i> <strong>Login</strong>
                         </a>

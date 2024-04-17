@@ -33,11 +33,13 @@ class User(BaseModel):
     username: str | None
     password_hash: str
     email: str
-    full_name: str | None
-    contact_number: str | None
+
     account_verified: bool = Field(default=False)
+
     is_system_admin: bool = Field(default=False)
     is_company_admin: bool = Field(default=False)
+    is_employee: bool = Field(default=False)
+    is_client: bool = Field(default=False)
 
     class Config:
         orm_mode = True

@@ -8,7 +8,7 @@ from sqlalchemy import or_
 from src.controller import error_handler, UnauthorizedError, Controllers
 from src.database.models.profile import Profile, ProfileUpdate
 from src.database.models.users import User, CreateUser, UserUpdate, PayPal
-from src.database.sql.user import UserORM, ProfileORM, PayPalORM
+from src.database.sql.user import UserORM, PayPalORM
 from src.emailer import EmailModel
 from src.main import send_mail
 import requests
@@ -58,110 +58,8 @@ class UserController(Controllers):
     async def manage_profiles(self, new_profile: Profile):
         self.profiles[new_profile.uid] = new_profile
 
-    @error_handler
-    async def get_profile_by_uid(self, uid: str) -> Profile | None:
-        """
-        Get the profile for the given user ID.
 
-        :param uid: The user ID for which to retrieve the profile.
-        :return: The Profile instance corresponding to the user ID if found, else None.
-        """
-        # Check if the profile is available in the cache (profiles dictionary)
-        # if uid in self.profiles:
-        #     self.logger.info("Fetching profile from dict {} ")
-        #     return self.profiles.get(uid)
 
-        # Fetch the profile data from the database
-        with self.get_session() as session:
-
-            profile_orm = session.query(ProfileORM).filter(ProfileORM.uid == uid).first()
-            # If the profile_orm is not found, return None
-            if not profile_orm:
-                # game_data = await self._get_game_data(game_id=profile_orm.game_id)
-                # profile = Profile(**game_data, uid=uid)
-                # profile_orm = ProfileORM(**profile.dict())
-                # session.add(profile_orm)
-                # session.commit()
-                profile = Profile(uid=uid)
-            else:
-                # Convert ProfileORM to Profile object
-                profile = Profile(**profile_orm.to_dict())
-
-            # Cache the profile in the dictionary for future use
-            self.profiles[uid] = profile
-        return profile
-
-    @error_handler
-    async def update_profile(self, updated_profile: ProfileUpdate) -> Profile | None:
-        """
-        :param updated_profile:
-        :return:
-        """
-        with self.get_session() as session:
-            original_profile: ProfileORM = session.query(ProfileORM).filter(
-                ProfileORM.uid == updated_profile.uid).first()
-
-            if isinstance(original_profile, ProfileORM):
-                print(original_profile.to_dict())
-                original_profile.main_game_id = updated_profile.main_game_id
-                original_profile.profile_name = updated_profile.profile_name
-                original_profile.notes = updated_profile.notes
-                original_profile.currency = updated_profile.currency
-                session.merge(original_profile)
-                profile = Profile(**original_profile.to_dict())
-                session.commit()
-                self.profiles[profile.uid] = profile
-                return profile
-            return None
-
-    @error_handler
-    async def delete_profile(self, game_id: str) -> bool:
-        """
-        Delete a profile from the database.
-
-        :param game_id:
-
-        :return: True if the profile was successfully deleted, False otherwise.
-        """
-        with self.get_session() as session:
-            # Find the profile with the given UID
-            profile_to_delete: ProfileORM = session.query(ProfileORM).filter(ProfileORM.main_game_id == game_id).first()
-            if isinstance(profile_to_delete, ProfileORM):
-                print(f"Profile to Delete {profile_to_delete.to_dict()}")
-                # Delete the profile from the session
-                session.delete(profile_to_delete)
-                # Commit the transaction to permanently delete the profile from the database
-                session.commit()
-
-                return True
-            else:
-                return False
-
-    @error_handler
-    async def create_profile(self, main_game_id: str, uid: str) -> Profile:
-        """
-
-        :param main_game_id:
-        :param uid:
-
-        :return:
-        """
-        with self.get_session() as session:
-            profile_orm: ProfileORM = session.query(ProfileORM).filter(ProfileORM.uid == uid).first()
-
-            if not isinstance(profile_orm, ProfileORM):
-                profile_: dict[str, str] = await self._get_game_data(game_id=main_game_id)
-                print(profile_)
-
-                profile: Profile = Profile(uid=uid, main_game_id=main_game_id, profile_name=profile_.get('name'))
-                profile_orm: ProfileORM = ProfileORM(**profile.dict())
-
-                session.add(profile_orm)
-                session.commit()
-                self.profiles[profile.uid] = profile
-                return profile
-
-            return Profile(**profile_orm.to_dict())
 
     @error_handler
     async def add_paypal(self, user: User, paypal_email: str) -> PayPal | None:

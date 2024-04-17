@@ -70,7 +70,6 @@ class ClientPersonalInformation(BaseModel):
     date_of_birth: str
     nationality: str
 
-
 class ClientResidentialAddresses(BaseModel):
     uid: str
     branch_uid: str

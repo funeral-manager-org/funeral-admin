@@ -39,7 +39,7 @@ async def do_login():
 
     login_user: User | None = await user_controller.login(email=auth_user.email, password=auth_user.password)
     if login_user and login_user.email == auth_user.email:
-        response = await create_response(url_for('profile.get_profile'))
+        response = await create_response(url_for('company.get_admin'))
 
         # Setting Loging Cookie
         delay = REMEMBER_ME_DELAY if auth_user.remember == "on" else 30

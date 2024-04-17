@@ -17,6 +17,9 @@ class Company(BaseModel):
 
 
 class CompanyBranches(BaseModel):
+    """
+
+    """
     branch_id: str = Field(default_factory=create_id)
     company_id: str
     branch_name: str
@@ -24,6 +27,7 @@ class CompanyBranches(BaseModel):
     date_registered: str = Field(default_factory=string_today)
     total_users: int = Field(default=1)
     total_clients: int = Field(default=0)
+
 
 class PlanTypes(BaseModel):
     """
@@ -34,6 +38,7 @@ class PlanTypes(BaseModel):
 
     plan_number: str
     plan_type: str
+
 
 class CoverPlanDetails(BaseModel):
     """
@@ -52,7 +57,6 @@ class CoverPlanDetails(BaseModel):
         inclusions (List[str]): List of inclusions provided by the plan.
         exclusions (List[str]): List of exclusions from the plan.
         contact_information (str): Contact information for inquiries about the plan.
-        policy_registration_data (PolicyRegistrationData): Policy registration data associated with the plan.
     """
     branch_id: str
     company_id: str

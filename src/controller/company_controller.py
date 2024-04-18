@@ -68,3 +68,15 @@ class CompanyController(Controllers):
                 CompanyBranchesORM.company_id == company_id).all()
             return [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
                     if isinstance(branch_orm, CompanyBranchesORM)]
+    async def get_branch_by_id(self, branch_id: str) -> CompanyBranches | None:
+        """
+
+        :param branch_id:
+        :return:
+        """
+        with self.get_session() as session:
+            branch_orm = session.query(CompanyBranchesORM).filter(CompanyBranchesORM.branch_id == branch_id).first()
+
+            if not isinstance(branch_orm, CompanyBranchesORM):
+                return None
+            return CompanyBranches(**branch_orm.to_dict())

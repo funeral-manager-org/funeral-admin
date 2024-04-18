@@ -1,0 +1,80 @@
+
+
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs" id="companyTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="branchDetails-tab" data-toggle="tab" href="#branchDetails" role="tab" aria-controls="branchDetails" aria-selected="true">Branch Details</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="addEmployees-tab" data-toggle="tab" href="#addEmployees" role="tab" aria-controls="addEmployees" aria-selected="false">Employees</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="clients-tab" data-toggle="tab" href="#clients" role="tab" aria-controls="clients" aria-selected="false">Clients</a>
+                </li>
+
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="companyTabsContent">
+                <div class="tab-pane fade show active" id="branchDetails" role="tabpanel" aria-labelledby="branchDetails-tab">
+                    <!-- Company Details Tab Content -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Branch Details</h3>
+                        </div>
+                        <div class="card-body">
+
+                            <ul class="list-group">
+                                <li class="list-group-item">Branch Name: <span class="font-weight-bold text-info">{{ branch.branch_name }}</span></li>
+                                <li class="list-group-item">Branch Description: <span class="font-weight-bold text-info">{{ branch.branch_description }}</span></li>
+                                <li class="list-group-item">Date Registered: <span class="font-weight-bold text-info">{{ branch.date_registered }}</span></li>
+                                <li class="list-group-item">Total Clients: <span class="font-weight-bold text-info">{{ branch.total_clients }}</span></li>
+                                <li class="list-group-item">Total Employees: <span class="font-weight-bold text-info">{{ branch.total_employees }}</span></li>
+                                <!-- Add more details if needed -->
+                            </ul>
+
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary btn-sm"><i class="fa fa-address-book"> </i> Address</button>
+                            <button class="btn btn-primary btn-sm"><i class="fa fa-address-card-o"> </i> Postal Address</button>
+                            <button class="btn btn-primary btn-sm"><i class="fa fa-envelope-o"> </i> Contact Details</button>
+                            <button class="btn btn-primary btn-sm"><i class="fa fa-credit-card"> </i> Bank Account</button>
+
+                            <button class="btn btn-warning btn-sm m-l-9 font-weight-bold"><i class="fa fa-print"> </i> Print Report</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="addEmployees" role="tabpanel" aria-labelledby="addEmployees-tab">
+                    <!-- Add Company Branch Tab Content -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Employees</h3>
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="clients" role="tabpanel" aria-labelledby="clients-tab">
+                    <!-- Add Company Branch Tab Content -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Clients</h3>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% include "admin/managers/modals/add_branch.html" %}

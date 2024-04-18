@@ -10,7 +10,7 @@
                     <a class="nav-link active" id="companyDetails-tab" data-toggle="tab" href="#companyDetails" role="tab" aria-controls="companyDetails" aria-selected="true">Company Details</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="addBranch-tab" data-toggle="tab" href="#addBranch" role="tab" aria-controls="addBranch" aria-selected="false">Add Company Branch</a>
+                    <a class="nav-link" id="addBranch-tab" data-toggle="tab" href="#addBranch" role="tab" aria-controls="addBranch" aria-selected="false">Branches</a>
                 </li>
             </ul>
         </div>
@@ -40,7 +40,7 @@
                         <div class="card-header">
                             <h3 class="card-title">Company Branches</h3>
                         </div>
-                        <table class="table table-bordered table-striped table-responsive">
+                        <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <td>Name</td>
@@ -50,13 +50,18 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-
+                                {% for branch in company_branches %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ url_for('company.get_branch', branch_id=branch.branch_id) }}" class="font-weight-bold text-info">
+                                                {{ branch.branch_name }}
+                                            </a>
+                                        </td>
+                                        <td>{{ branch.branch_description }}</td>
+                                        <td>{{ branch.total_employees }}</td>
+                                        <td>{{ branch.total_clients }}</td>
+                                    </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                         <div class="card-footer">

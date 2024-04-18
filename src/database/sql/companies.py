@@ -81,7 +81,6 @@ class CompanyBranchesORM(Base):
             "branch_name": self.branch_name,
             "branch_description": self.branch_description,
             "date_registered": self.date_registered,
-            "total_users": self.total_users,
             "total_clients": self.total_clients,
             "total_employees": self.total_employees,
             "address_id": self.address_id,

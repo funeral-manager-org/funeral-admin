@@ -22,6 +22,7 @@ async def get_admin(user: User):
         company_data = await company_controller.get_company_details(company_id=user.company_id)
         company_branches = await company_controller.get_company_branches(company_id=user.company_id)
         print(f" company : {company_data}")
+        print(f"branches : {company_branches}")
     else:
         company_data = {}
         company_branches = []
@@ -97,5 +98,25 @@ async def add_company_branch(user: User):
         flash(message="Error Adding New Branch - possibility is that the branch is already added", category="danger")
         return redirect(url_for('company.get_admin'))
 
-    flash(message="branch successfully added", category="danger")
+    flash(message="branch successfully added", category="success")
     return redirect(url_for('company.get_admin'))
+
+
+@company_route.get('/admin/company/branch/<string:branch_id>')
+@login_required
+async def get_branch(user: User, branch_id: str):
+    """
+
+    :param user:
+    :param branch_id:
+    :return:
+    """
+    branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
+    if not branch:
+        flash(message="Error fetching branch", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    context = dict(user=user, branch=branch)
+    return render_template('admin/managers/branches/details.html', **context)
+
+

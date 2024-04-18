@@ -48,14 +48,18 @@ class CompanyORM(Base):
 
 class CompanyBranchesORM(Base):
     __tablename__ = "company_branches"
-    branch_id = Column(String(9), primary_key=True)
-    company_id = Column(String(9))
-    branch_name = Column(String(255))
+    branch_id = Column(String(ID_LEN), primary_key=True)
+    company_id = Column(String(ID_LEN))
+    branch_name = Column(String(NAME_LEN))
     branch_description = Column(String(255))
     date_registered = Column(String(10), default=string_today)
-    total_users = Column(Integer, default=1)
     total_clients = Column(Integer, default=0)
     total_employees = Column(Integer, default=1)
+    address_id = Column(String(ID_LEN), nullable=True)
+    contact_id = Column(String(ID_LEN), nullable=True)
+    postal_id = Column(String(ID_LEN), nullable=True)
+    bank_account_id = Column(String(ID_LEN), nullable=True)
+
 
     @classmethod
     def create_if_not_table(cls):
@@ -79,14 +83,19 @@ class CompanyBranchesORM(Base):
             "date_registered": self.date_registered,
             "total_users": self.total_users,
             "total_clients": self.total_clients,
-            "total_employees": self.total_employees
+            "total_employees": self.total_employees,
+            "address_id": self.address_id,
+            "contact_id": self.contact_id,
+            "postal_id": self.postal_id,
+            "bank_account_id": self.bank_account_id
+
         }
 
 
 class CoverPlanDetailsORM(Base):
     __tablename__ = "cover_plan_details"
-    branch_id = Column(String(9))
-    company_id = Column(String(9))
+    branch_id = Column(String(ID_LEN))
+    company_id = Column(String(NAME_LEN))
 
     plan_number = Column(String(10), primary_key=True)
     plan_name = Column(String(255))
@@ -135,8 +144,8 @@ class CoverPlanDetailsORM(Base):
 class EmployeeORM(Base):
     __tablename__ = "employee"
     employee_id = Column(String(9), primary_key=True)
-    company_id = Column(String(9))
-    branch_id = Column(String(9))
+    company_id = Column(String(ID_LEN))
+    branch_id = Column(String(ID_LEN))
     first_name = Column(String(255))
     last_name = Column(String(255))
     email = Column(String(255))

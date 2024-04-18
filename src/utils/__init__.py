@@ -134,4 +134,4 @@ def create_employee_id():
     return random_chars_uppercase
 
 def string_today():
-    return str(datetime.today())
+    return str(datetime.today().date())

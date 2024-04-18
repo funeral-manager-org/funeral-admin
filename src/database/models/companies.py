@@ -25,9 +25,15 @@ class CompanyBranches(BaseModel):
     branch_name: str
     branch_description: str
     date_registered: str = Field(default_factory=string_today)
-    total_users: int = Field(default=1)
     total_clients: int = Field(default=0)
     total_employees: int = Field(default=1)
+
+    address_id: str | None
+    contact_id: str | None
+    postal_id: str | None
+    bank_account_id: str | None
+
+
 
 
 class PlanTypes(BaseModel):

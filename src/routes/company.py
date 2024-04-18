@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 
 from src.authentication import login_required
-from src.database.models.companies import Company
+from src.database.models.companies import Company, CompanyBranches
 from src.database.models.users import User
 from src.main import company_controller, user_controller
 
@@ -17,26 +17,29 @@ async def get_admin(user: User):
     """
     context = dict(user=user)
     print(f"User : {user}")
+    print(f"Company ID: {user.company_id}")
     if user.company_id:
         company_data = await company_controller.get_company_details(company_id=user.company_id)
+        company_branches = await company_controller.get_company_branches(company_id=user.company_id)
         print(f" company : {company_data}")
     else:
         company_data = {}
-    context.update(company=company_data)
+        company_branches = []
+    context.update(company=company_data, company_branches=company_branches)
 
     if user.is_system_admin:
         return render_template('admin/admin.html', **context)
     elif user.is_company_admin:
-        return render_template('admin/extend/manager.html', **context)
+        return render_template('admin/managers/manager.html', **context)
     elif user.is_employee:
-        return render_template('admin/extend/employee.html', **context)
+        return render_template('admin/employees/employee.html', **context)
     elif user.is_client:
-        return render_template('admin/extend/clients.html', **context)
+        return render_template('admin/clients/clients.html', **context)
 
     flash(message="you are not a client in this portal consider applying for a cover in a funeral company near you",
           category='success')
 
-    return redirect(url_for('home.get_home'), **context)
+    return redirect(url_for('home.get_home'))
 
 
 @company_route.get('/admin/company/register')
@@ -74,6 +77,7 @@ async def do_register(user: User):
     # context = dict(user=updated_user, company_data=registered_company)
     return redirect(url_for('company.get_admin'))
 
+
 @company_route.post('/admin/company/add-branch')
 @login_required
 async def add_company_branch(user: User):
@@ -82,4 +86,16 @@ async def add_company_branch(user: User):
     :param user:
     :return:
     """
-    pass
+    company_branch = request.form.get('branch_name')
+    company_description = request.form.get('branch_description')
+
+    company_branch = CompanyBranches(company_id=user.company_id, branch_name=company_branch,
+                                     branch_description=company_description)
+
+    added_branch = await company_controller.add_company_branch(company_branch=company_branch)
+    if not added_branch:
+        flash(message="Error Adding New Branch - possibility is that the branch is already added", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    flash(message="branch successfully added", category="danger")
+    return redirect(url_for('company.get_admin'))

@@ -1,6 +1,5 @@
-from sqlalchemy import Column, String, inspect, Enum, Integer, Boolean
+from sqlalchemy import Column, String, inspect, Integer, Boolean
 
-from src.database.models.covers import ClaimStatus, ClaimType, RelationshipToPolicyHolder
 from src.database.constants import ID_LEN, NAME_LEN
 from src.database.sql import Base, engine
 
@@ -71,9 +70,9 @@ class ClaimsORM(Base):
     claimed_for_uid = Column(String(ID_LEN), nullable=True)
 
     date_paid = Column(String(10))
-    claim_status = Column(Enum("ClaimStatus", ClaimStatus.__members__.values()))
+    claim_status = Column(String(36))
     funeral_company = Column(String(255))
-    claim_type = Column(Enum("ClaimType", ClaimType.__members__.values()))
+    claim_type = Column(String(36))
 
     @classmethod
     def create_if_not_table(cls):
@@ -100,9 +99,9 @@ class ClaimsORM(Base):
             "claim_total_paid": self.claim_total_paid,
             "claimed_for_uid": self.claimed_for_uid,
             "date_paid": self.date_paid,
-            "claim_status": self.claim_status.value,
+            "claim_status": self.claim_status,
             "funeral_company": self.funeral_company,
-            "claim_type": self.claim_type.value
+            "claim_type": self.claim_type
         }
 
 
@@ -123,8 +122,7 @@ class PolicyRegistrationDataORM(Base):
     client_signature = Column(String(255))
     employee_signature = Column(String(255))
     payment_method = Column(String(255))
-    relation_to_policy_holder = Column(
-        Enum("RelationshipToPolicyHolder", RelationshipToPolicyHolder.__members__.values()))
+    relation_to_policy_holder = Column(String(NAME_LEN))
     policy_active = Column(Boolean, default=False)
     is_policy_holder = Column(Boolean, default=False)
 
@@ -158,7 +156,7 @@ class PolicyRegistrationDataORM(Base):
             "client_signature": self.client_signature,
             "employee_signature": self.employee_signature,
             "payment_method": self.payment_method,
-            "relation_to_policy_holder": self.relation_to_policy_holder.value,
+            "relation_to_policy_holder": self.relation_to_policy_holder,
             "policy_active": self.policy_active,
             "is_policy_holder": self.is_policy_holder
         }

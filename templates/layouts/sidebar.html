@@ -11,7 +11,26 @@
                     </div>
                     <li class="label">Main</li>
                     <li><a href="{{ url_for('home.get_home') }}"><i class="ti-home"></i> Home</a></li>
-                    <li><a href="{{ url_for('company.get_admin') }}"><i class="ti-dashboard"></i> admin</a></li>
+
+                    <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Managers Admin<span
+                            class="sidebar-collapse-icon ti-angle-down"></span></a>
+                        <ul>
+                            <li><a href="{{ url_for('company.get_admin') }}"><i class="ti-briefcase"></i> Company</a></li>
+                            <li><a href="#"><i class="ti-briefcase"></i> Covers</a></li>
+                            <li><a href="#"><i class="ti-briefcase"></i> Employees</a></li>
+                            <li><a href="#"><i class="ti-briefcase"></i> Clients</a></li>
+                            <li><a href="#"><i class="ti-briefcase"></i> Messaging</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Employees Admin<span
+                            class="sidebar-collapse-icon ti-angle-down"></span></a>
+                        <ul>
+                            <li><a href="#"><i class="ti-briefcase"></i> Covers</a></li>
+                            <li><a href="#"><i class="ti-briefcase"></i> Clients</a></li>
+                            <li><a href="#"><i class="ti-briefcase"></i> Messaging</a></li>
+                        </ul>
+                    </li>
 
                     {% if user %}
                         <li><a href="{{ url_for('auth.do_logout')}}"><i class="ti-power-off"></i> Logout</a></li>

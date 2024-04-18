@@ -2,8 +2,8 @@ import random
 
 from flask import Flask
 
-from src.database.sql.companies import CompanyORM
-from src.database.models.companies import Company
+from src.database.sql.companies import CompanyORM, CompanyBranchesORM
+from src.database.models.companies import Company, CompanyBranches
 from src.controller import Controllers, error_handler
 
 
@@ -39,3 +39,32 @@ class CompanyController(Controllers):
             if isinstance(company_orm, CompanyORM):
                 return Company(**company_orm.to_dict())
             return None
+
+    async def add_company_branch(self, company_branch: CompanyBranches) -> CompanyBranches | None:
+        """
+
+        :param company_branch:
+        :return:
+        """
+
+        with self.get_session() as session:
+            _branch_name = company_branch.branch_name.lower().strip()
+            company_branches_orm = session.query(CompanyBranchesORM).filter(
+                CompanyBranchesORM.branch_name == _branch_name.casefold()).first()
+            if isinstance(company_branches_orm, CompanyBranchesORM):
+                return None
+            session.add(CompanyBranchesORM(**company_branch.dict()))
+            session.commit()
+            return company_branch
+
+    async def get_company_branches(self, company_id: str) -> list[CompanyBranches]:
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            company_branches_orm = session.query(CompanyBranchesORM).filter(
+                CompanyBranchesORM.company_id == company_id).all()
+            return [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
+                    if isinstance(branch_orm, CompanyBranchesORM)]

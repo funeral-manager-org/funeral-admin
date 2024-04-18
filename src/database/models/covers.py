@@ -1,8 +1,6 @@
 from enum import Enum
-
 from pydantic import BaseModel, Field
-
-from utils import create_id, create_policy_number, create_claim_number
+from src.utils import create_id, create_policy_number, create_claim_number
 
 
 class PaymentMethods(Enum):
@@ -30,7 +28,7 @@ class RelationshipToPolicyHolder(Enum):
 class ClaimType(Enum):
     MONEY = "Money"
     SERVICES = "Services"
-    GROCERIES = "GROCERIES"
+    GROCERIES = "Groceries"
     BOTH = "Both"
 
 
@@ -77,7 +75,6 @@ class ClientPersonalInformation(BaseModel):
     bank_account_id: str
 
 
-
 class ClaimStatus(Enum):
     REJECTED = "Rejected"
     APPROVED = "Approved"
@@ -87,6 +84,7 @@ class ClaimStatus(Enum):
 
 class Claims(BaseModel):
     uid: str
+    employee_id: str | None
     branch_uid: str
     company_uid: str
     claim_number: str = Field(default_factory=create_claim_number)
@@ -95,7 +93,7 @@ class Claims(BaseModel):
 
     claim_amount: int
     claim_total_paid: int
-    claimed_for_uid: str
+    claimed_for_uid: str | None
     date_paid: str
     claim_status: ClaimStatus
 

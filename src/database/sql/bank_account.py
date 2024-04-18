@@ -6,7 +6,7 @@ from src.database.sql import Base, engine
 
 class BankAccountORM(Base):
     __tablename__ = 'bank_accounts'
-    uid = Column(String(ID_LEN))
+    bank_account_id = Column(String(ID_LEN))
     account_holder = Column(String(NAME_LEN))
     account_number = Column(String(NAME_LEN), primary_key=True)
     bank_name = Column(String(NAME_LEN), index=True)
@@ -28,7 +28,7 @@ class BankAccountORM(Base):
         Convert the object to a dictionary representation.
         """
         return {
-            'uid': self.uid,
+            'bank_account_id': self.bank_account_id,
             'account_holder': self.account_holder,
             'account_number': self.account_number,
             'bank_name': self.bank_name,

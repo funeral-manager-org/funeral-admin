@@ -1,7 +1,9 @@
 from pydantic import BaseModel, Field
 
+from src.utils import create_id
 
-class BusinessBankAccount(BaseModel):
+
+class BankAccount(BaseModel):
     """
     BusinessBankAccount
 
@@ -13,8 +15,8 @@ class BusinessBankAccount(BaseModel):
     - account_type = Column(String(NAME_LEN))
 
     """
-    company_id: str
-    branch_id: str
+    bank_account_id: str = Field(default_factory=create_id)
+
     account_holder: str = Field(..., description="The name associated with the account")
     account_number: str = Field(..., description="The unique identification number assigned to the account")
     bank_name: str = Field(..., description="The name of the bank where the account is held")

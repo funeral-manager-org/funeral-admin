@@ -1,6 +1,8 @@
 import uuid
 from pydantic import BaseModel, Field
 
+from src.utils import create_id
+
 
 class Address(BaseModel):
     """
@@ -15,10 +17,31 @@ class Address(BaseModel):
     - country (str): The country.
     """
 
-    address_id: str = Field(default_factory=lambda: str(uuid.uuid4()),
+    address_id: str = Field(default_factory=create_id,
                             description="The unique ID of the address.")
     street: str
     city: str
     state: str
     postal_code: str
     country: str
+
+
+class Contacts(BaseModel):
+    contact_id: str = Field(default_factory=create_id)
+    cell: str
+    tel: str
+    email: str
+    facebook: str
+    twitter: str
+    whatsapp: str
+
+
+class PostalAddress(BaseModel):
+    postal_id: str = Field(default_factory=create_id)
+
+    address_line_1: str
+    town_city: str
+    province: str
+    country: str
+    postal_code: str
+

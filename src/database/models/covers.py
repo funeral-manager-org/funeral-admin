@@ -70,54 +70,12 @@ class ClientPersonalInformation(BaseModel):
     date_of_birth: str
     nationality: str
 
-class ClientResidentialAddresses(BaseModel):
-    uid: str
-    branch_uid: str
-    company_uid: str
+    address_id: str
+    contact_id: str
+    postal_id: str
 
-    address_line_1: str
-    address_line_2: str
-    country: str
-    town_city: str
-    province: str
-    postal_code: str
+    bank_account_id: str
 
-
-class ClientPostalAddresses(BaseModel):
-    uid: str
-    branch_uid: str
-    company_uid: str
-
-    address_line_1: str
-    town_city: str
-    province: str
-    country: str
-    postal_code: str
-
-
-class ClientContactDetails(BaseModel):
-    uid: str
-    branch_uid: str
-    company_uid: str
-
-    cell: str
-    tel: str
-    email: str
-    facebook: str
-    twitter: str
-    whatsapp: str
-
-
-class ClientBankDetails(BaseModel):
-    uid: str
-    branch_uid: str
-    company_uid: str
-
-    bank_name: str
-    account_holder: str
-    account_number: str
-    account_type: str
-    branch_code: str
 
 
 class ClaimStatus(Enum):

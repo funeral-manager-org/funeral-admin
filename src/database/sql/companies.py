@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, inspect, Integer, Boolean, JSON
+from sqlalchemy import Column, String, inspect, Integer, Boolean, JSON, Date
 
 from src.database.constants import ID_LEN, NAME_LEN, SHORT_DESCRIPTION_lEN
 from src.database.sql import Base, engine
@@ -59,7 +59,6 @@ class CompanyBranchesORM(Base):
     contact_id = Column(String(ID_LEN), nullable=True)
     postal_id = Column(String(ID_LEN), nullable=True)
     bank_account_id = Column(String(ID_LEN), nullable=True)
-
 
     @classmethod
     def create_if_not_table(cls):
@@ -182,4 +181,68 @@ class EmployeeORM(Base):
             "date_joined": self.date_joined,
             "salary": self.salary,
             "is_active": self.is_active
+        }
+
+
+class SalaryORM(Base):
+    __tablename__ = 'salaries'
+
+    salary_id = Column(Integer, primary_key=True)
+    employee_id = Column(String(ID_LEN))
+    amount = Column(Integer)
+    effective_date = Column(Date)
+    company_id = Column(String(ID_LEN))
+    branch_id = Column(String(ID_LEN))
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            Base.metadata.create_all(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            'salary_id': self.salary_id,
+            'employee_id': self.employee_id,
+            'amount': self.amount,
+            'effective_date': str(self.effective_date),
+            'company_id': self.company_id,
+            'branch_id': self.branch_id
+        }
+
+
+class SalaryPaymentORM(Base):
+    __tablename__ = 'salary_payments'
+
+    payment_id = Column(String(ID_LEN), primary_key=True)
+    salary_id = Column(String(ID_LEN))
+    payment_date = Column(Date)
+    amount_paid = Column(Integer)
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            Base.metadata.create_all(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            'payment_id': self.payment_id,
+            'salary_id': self.salary_id,
+            'payment_date': str(self.payment_date),
+            'amount_paid': self.amount_paid
         }

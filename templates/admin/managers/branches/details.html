@@ -26,7 +26,7 @@
                     <!-- Company Details Tab Content -->
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Branch Details</h3>
+                            <h3 class="card-title"><i class="fa fa-folder-open"> </i> Branch Details</h3>
                         </div>
                         <div class="card-body">
 
@@ -54,9 +54,46 @@
                     <!-- Add Company Branch Tab Content -->
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Employees</h3>
+                            <h3 class="card-title"><i class="fa fa-users"></i> Employees</h3>
                         </div>
 
+                        <div class="card-body">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <td>First Name</td>
+                                        <td>Surname</td>
+                                        <td>Email</td>
+                                        <td>Cell</td>
+                                        <td>Position</td>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for employee in employee_list %}
+                                    <tr>
+                                        <td>{{ employee.first_name }}</td>
+                                        <td>{{ employee.last_name }}</td>
+                                        <td>{{ employee.last_name }}</td>
+                                        <td>{{ employee.email }}</td>
+                                        <td>{{ employee.contact_number }}</td>
+                                        <td>{{ employee.position }}</td>
+                                    </tr>
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary btn-sm">
+                                <i class="ti ti-agenda"> </i>
+                                New Employee
+                            </button>
+                            <button class="btn btn-warning btn-sm">
+                                <i class="fa fa-print"> </i>
+                                Print Details
+                            </button>
+                        </div>
 
                     </div>
                 </div>

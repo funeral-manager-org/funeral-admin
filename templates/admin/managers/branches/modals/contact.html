@@ -10,10 +10,18 @@
                 <ul class="nav nav-tabs" role="tablist">
                     {% if contact %}
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#viewContact" role="tab">View Contact</a>
+                            <a class="nav-link active" data-toggle="tab" href="#viewContact" role="tab">
+
+                                <span class="font-weight-bold"><i class="fa fa-phone"> </i> Contact Details</span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#editContact" role="tab">Edit Contact</a>
+                            <a class="nav-link" data-toggle="tab" href="#editContact" role="tab">
+                                <span class="font-weight-bold">
+                                    <i class="fa fa-file-text"> </i>
+                                    Edit Contact
+                                </span>
+                            </a>
                         </li>
                     {% else %}
                         <li class="nav-item">
@@ -29,13 +37,21 @@
                         <div class="tab-pane active" id="viewContact" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Display contact details here -->
-                                <p class="font-weight-bold">{{ branch.branch_name }} {{ branch.branch_description }} Contact Information </p>
-                                <p>Cell: {{ contact.cell }}</p>
-                                <p>Tel: {{ contact.tel }}</p>
-                                <p>Email: {{ contact.email }}</p>
-                                <p>Facebook: {{ contact.facebook }}</p>
-                                <p>Twitter: {{ contact.twitter }}</p>
-                                <p>WhatsApp: {{ contact.whatsapp }}</p>
+                                <p class="font-weight-bold text-info">{{ branch.branch_name }} {{ branch.branch_description }} Contact Information </p>
+                                <p>Cell: <span class="font-weight-bold text-info">{{ contact.cell }}</span></p>
+                                {% if contact.tel %}
+                                    <p>Tel: <span class="font-weight-bold text-info">{{ contact.tel }}</span></p>
+                                {% endif %}
+                                <p>Email: <span class="font-weight-bold text-info">{{ contact.email }}</span></p>
+                                {% if contact.facebook %}
+                                <p>Facebook: <span class="font-weight-bold text-info">{{ contact.facebook }}</span></p>
+                                {% endif %}
+                                {% if contact.twitter %}
+                                <p>Twitter: <span class="font-weight-bold text-info">{{ contact.twitter }}</span></p>
+                                {% endif %}
+                                {% if contact.whatsapp %}
+                                <p>WhatsApp: <span class="font-weight-bold text-info">{{ contact.whatsapp }}</span></p>
+                                {% endif %}
                             </div>
                         </div>
                         <!-- Edit Contact Tab -->

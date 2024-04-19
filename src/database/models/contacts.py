@@ -21,7 +21,7 @@ class Address(BaseModel):
                             description="The unique ID of the address.")
     street: str
     city: str
-    state: str
+    state_province: str
     postal_code: str
     country: str
 

@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 
+from src.database.models.contacts import Address
 from src.authentication import login_required
 from src.database.models.companies import Company, CompanyBranches
 from src.database.models.users import User
@@ -115,8 +116,26 @@ async def get_branch(user: User, branch_id: str):
     if not branch:
         flash(message="Error fetching branch", category="danger")
         return redirect(url_for('company.get_admin'))
-
     context = dict(user=user, branch=branch)
+    if branch.address_id:
+        address = await company_controller.get_branch_address(address_id=branch.address_id)
+        context.update(address=address)
     return render_template('admin/managers/branches/details.html', **context)
 
 
+@company_route.post('/admin/company/branch/add-branch-address/<string:branch_id>')
+@login_required
+async def add_branch_address(user: User, branch_id: str):
+    """
+
+    :param branch_id:
+    :param user:
+    :return:
+    """
+    branch_address = Address(**request.form)
+    branch_address_ = await company_controller.add_branch_address(branch_address=branch_address)
+    branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
+    branch.address_id = branch_address_.address_id
+
+    updated_branch = await company_controller.update_company_branch(company_branch=branch)
+    return redirect(url_for('company.get_branch', branch_id=branch_id))

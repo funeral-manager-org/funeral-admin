@@ -1,14 +1,15 @@
 from sqlalchemy import Column, String, inspect
 
+from src.database.constants import ID_LEN
 from src.database.sql import Base, engine
 
 
 class AddressORM(Base):
     __tablename__ = "addresses"
-    address_id = Column(String(9), primary_key=True)
+    address_id = Column(String(ID_LEN), primary_key=True)
     street = Column(String(255))
-    city = Column(String(100))
-    state = Column(String(100))
+    city = Column(String(255))
+    state_province = Column(String(255))
     postal_code = Column(String(20))
     country = Column(String(100))
 
@@ -30,7 +31,7 @@ class AddressORM(Base):
             "address_id": self.address_id,
             "street": self.street,
             "city": self.city,
-            "state": self.state,
+            "state_province": self.state_province,
             "postal_code": self.postal_code,
             "country": self.country
         }

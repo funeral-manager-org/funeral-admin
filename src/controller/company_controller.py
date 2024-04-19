@@ -2,6 +2,8 @@ import random
 
 from flask import Flask
 
+from src.database.sql.contacts import AddressORM
+from src.database.models.contacts import Address
 from src.database.sql.companies import CompanyORM, CompanyBranchesORM
 from src.database.models.companies import Company, CompanyBranches
 from src.controller import Controllers, error_handler
@@ -57,6 +59,31 @@ class CompanyController(Controllers):
             session.commit()
             return company_branch
 
+    async def update_company_branch(self, company_branch: CompanyBranches):
+        """
+
+        :param company_branch:
+        :return:
+        """
+        with self.get_session() as session:
+            branch_orm = session.query(CompanyBranchesORM).filter_by(branch_id=company_branch.branch_id).first()
+            if branch_orm:
+                # Update the attributes of the retrieved branch record
+                branch_orm.branch_name = company_branch.branch_name
+                branch_orm.company_id = company_branch.company_id
+                branch_orm.branch_description = company_branch.branch_description
+                branch_orm.date_registered = company_branch.date_registered
+                branch_orm.total_clients = company_branch.total_clients
+                branch_orm.total_employees = company_branch.total_employees
+                branch_orm.address_id = company_branch.address_id
+                branch_orm.contact_id = company_branch.contact_id
+                branch_orm.postal_id = company_branch.postal_id
+                branch_orm.bank_account_id = company_branch.bank_account_id
+
+                session.commit()
+                return company_branch
+            return None
+
     async def get_company_branches(self, company_id: str) -> list[CompanyBranches]:
         """
 
@@ -68,6 +95,7 @@ class CompanyController(Controllers):
                 CompanyBranchesORM.company_id == company_id).all()
             return [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
                     if isinstance(branch_orm, CompanyBranchesORM)]
+
     async def get_branch_by_id(self, branch_id: str) -> CompanyBranches | None:
         """
 
@@ -80,3 +108,21 @@ class CompanyController(Controllers):
             if not isinstance(branch_orm, CompanyBranchesORM):
                 return None
             return CompanyBranches(**branch_orm.to_dict())
+
+    async def add_branch_address(self, branch_address: Address) -> Address:
+        """
+
+        :param branch_address:
+        :return:
+        """
+        with self.get_session() as session:
+            session.add(AddressORM(**branch_address.dict()))
+            session.commit()
+            return branch_address
+
+    async def get_branch_address(self, address_id: str) -> Address | None:
+        with self.get_session() as session:
+            branch_address = session.query(AddressORM).filter_by(address_id=address_id).first()
+            if isinstance(branch_address, AddressORM):
+                return Address(**branch_address.to_dict())
+            return None

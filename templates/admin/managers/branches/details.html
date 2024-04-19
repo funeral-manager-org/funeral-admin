@@ -41,10 +41,19 @@
 
                         </div>
                         <div class="card-footer">
-                            <button class="btn btn-primary btn-sm"><i class="fa fa-address-book"> </i> Address</button>
-                            <button class="btn btn-primary btn-sm"><i class="fa fa-address-card-o"> </i> Postal Address</button>
-                            <button class="btn btn-primary btn-sm"><i class="fa fa-envelope-o"> </i> Contact Details</button>
-                            <button class="btn btn-primary btn-sm"><i class="fa fa-credit-card"> </i> Bank Account</button>
+
+                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#addressID">
+                                <i class="fa fa-address-book"> </i> Address
+                            </a>
+                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#postalID">
+                                <i class="fa fa-address-card-o"> </i> Postal Address
+                            </a>
+                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#contactID">
+                                <i class="fa fa-envelope-o"> </i> Contact Details
+                            </a>
+                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#accountID">
+                                <i class="fa fa-credit-card"> </i> Bank Account
+                            </a>
 
                             <button class="btn btn-warning btn-sm m-l-9 font-weight-bold"><i class="fa fa-print"> </i> Print Report</button>
                         </div>
@@ -115,3 +124,8 @@
 {% endblock %}
 
 {% include "admin/managers/modals/add_branch.html" %}
+
+{% include 'admin/managers/branches/modals/address.html' %}
+{% include 'admin/managers/branches/modals/bank_account.html' %}
+{% include 'admin/managers/branches/modals/contact.html' %}
+{% include 'admin/managers/branches/modals/postal.html' %}

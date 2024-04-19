@@ -109,13 +109,23 @@ class CompanyController(Controllers):
                 return None
             return CompanyBranches(**branch_orm.to_dict())
 
-    async def add_branch_address(self, branch_address: Address) -> Address:
+    async def add_update_branch_address(self, branch_address: Address) -> Address:
         """
 
         :param branch_address:
         :return:
         """
         with self.get_session() as session:
+            branch_address_orm = session.query(AddressORM).filter_by(address_id=branch_address.address_id).first()
+
+            if isinstance(branch_address_orm, AddressORM):
+                branch_address_orm.street = branch_address.street
+                branch_address_orm.city = branch_address.city
+                branch_address_orm.state_province = branch_address.state_province
+                branch_address_orm.postal_code = branch_address.postal_code
+                session.commit()
+                return branch_address
+
             session.add(AddressORM(**branch_address.dict()))
             session.commit()
             return branch_address

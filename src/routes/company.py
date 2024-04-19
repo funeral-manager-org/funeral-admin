@@ -127,13 +127,13 @@ async def get_branch(user: User, branch_id: str):
 @login_required
 async def add_branch_address(user: User, branch_id: str):
     """
-
+        this will add or update a branch address
     :param branch_id:
     :param user:
     :return:
     """
     branch_address = Address(**request.form)
-    branch_address_ = await company_controller.add_branch_address(branch_address=branch_address)
+    branch_address_ = await company_controller.add_update_branch_address(branch_address=branch_address)
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     branch.address_id = branch_address_.address_id
 

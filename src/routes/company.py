@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
+from pydantic import ValidationError
 
-from src.database.models.contacts import Address
+from src.database.models.contacts import Address, PostalAddress
 from src.authentication import login_required
 from src.database.models.companies import Company, CompanyBranches
 from src.database.models.users import User
@@ -116,10 +117,17 @@ async def get_branch(user: User, branch_id: str):
     if not branch:
         flash(message="Error fetching branch", category="danger")
         return redirect(url_for('company.get_admin'))
+
     context = dict(user=user, branch=branch)
+
     if branch.address_id:
         address = await company_controller.get_branch_address(address_id=branch.address_id)
         context.update(address=address)
+
+    if branch.postal_id:
+        postal = await company_controller.get_branch_postal_address(postal_id=branch.postal_id)
+        context.update(postal_address=postal)
+
     return render_template('admin/managers/branches/details.html', **context)
 
 
@@ -132,10 +140,53 @@ async def add_branch_address(user: User, branch_id: str):
     :param user:
     :return:
     """
-    branch_address = Address(**request.form)
+    try:
+        branch_address = Address(**request.form)
+    except ValidationError as e:
+        flash(message="Error adding branch address please input all fields", category="danger")
+        return redirect(url_for('company.get_branch', branch_id=branch_id))
+
     branch_address_ = await company_controller.add_update_branch_address(branch_address=branch_address)
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     branch.address_id = branch_address_.address_id
 
     updated_branch = await company_controller.update_company_branch(company_branch=branch)
+    flash(message="successfully updated branch physical address", category="success")
     return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+
+@company_route.post('/admin/company/branch/branch-postal-address/<string:branch_id>')
+@login_required
+async def add_postal_address(user: User, branch_id: str):
+    """
+
+    :param user:
+    :param branch_id:
+    :return:
+    """
+    try:
+        branch_postal_address = PostalAddress(**request.form)
+    except ValidationError as e:
+        flash(message="Error adding branch address please input all fields", category="danger")
+        return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+    branch_postal_address_ = await company_controller.add_branch_postal_address(
+        branch_postal_address=branch_postal_address)
+
+    branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
+    branch.postal_id = branch_postal_address_.postal_id
+    updated_branch = await company_controller.update_company_branch(company_branch=branch)
+    flash(message="successfully updated branch postal address", category="success")
+    return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+
+@company_route.post('/admin/company/branch/branch-contact/<string:branch_id>')
+@login_required
+async def add_update_branch_contacts(user: User, branch_id: str):
+    """
+
+    :param user:
+    :param branch_id:
+    :return:
+    """
+    pass

@@ -2,8 +2,8 @@ import random
 
 from flask import Flask
 
-from src.database.sql.contacts import AddressORM
-from src.database.models.contacts import Address
+from src.database.sql.contacts import AddressORM, PostalAddressORM
+from src.database.models.contacts import Address, PostalAddress
 from src.database.sql.companies import CompanyORM, CompanyBranchesORM
 from src.database.models.companies import Company, CompanyBranches
 from src.controller import Controllers, error_handler
@@ -135,4 +135,38 @@ class CompanyController(Controllers):
             branch_address = session.query(AddressORM).filter_by(address_id=address_id).first()
             if isinstance(branch_address, AddressORM):
                 return Address(**branch_address.to_dict())
+            return None
+
+    async def add_branch_postal_address(self, branch_postal_address: PostalAddress) -> PostalAddress | None:
+        """
+
+        :param branch_postal_address:
+        :return:
+        """
+        with self.get_session() as session:
+            _postal_id = branch_postal_address.postal_id
+            branch_postal_orm = session.query(PostalAddressORM).filter_by(postal_id=_postal_id).first()
+            if isinstance(branch_postal_orm, PostalAddressORM):
+                branch_postal_orm.address_line_1 = branch_postal_address.address_line_1
+                branch_postal_orm.town_city = branch_postal_address.town_city
+                branch_postal_orm.province = branch_postal_address.province
+                branch_postal_orm.country = branch_postal_address.country
+                branch_postal_orm.postal_code = branch_postal_address.postal_code
+                session.commit()
+                return branch_postal_address
+
+            session.add(PostalAddressORM(**branch_postal_address.dict()))
+            session.commit()
+            return branch_postal_address
+
+    async def get_branch_postal_address(self, postal_id: str) -> PostalAddress | None:
+        """
+
+        :param postal_id:
+        :return:
+        """
+        with self.get_session() as session:
+            postal_address_orm = session.query(PostalAddressORM).filter_by(postal_id=postal_id).first()
+            if isinstance(postal_address_orm, PostalAddressORM):
+                return PostalAddress(**postal_address_orm.to_dict())
             return None

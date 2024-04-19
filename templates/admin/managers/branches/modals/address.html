@@ -48,6 +48,7 @@
                             <span class="font-weight-bold text-info">{{ branch.branch_name }} <span class="font-weight-light text-dark">Branch Address</span></span>
                             <hr/>
                             <form action="{{ url_for('company.add_branch_address', branch_id=branch.branch_id) }}" method="POST">
+                                <input type="hidden" name="address_id" value="{{ address.address_id }}" />
                                 <div class="form-group">
                                     <label for="street">Street</label>
                                     <input type="text" name="street" id="street" class="form-control" value="{{ address.street }}" />

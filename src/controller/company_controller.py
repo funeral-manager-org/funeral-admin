@@ -2,6 +2,8 @@ import random
 
 from flask import Flask
 
+from src.database.sql.bank_account import BankAccountORM
+from src.database.models.bank_accounts import BankAccount
 from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
 from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.database.sql.companies import CompanyORM, CompanyBranchesORM
@@ -211,4 +213,43 @@ class CompanyController(Controllers):
                 branch_contact = Contacts(**branch_contact_orm.to_dict())
                 return branch_contact
 
+            return None
+
+    async def add_branch_bank_account(self, branch_bank_account: BankAccount) -> BankAccount | None:
+        """
+        Add or update a branch bank account in the database.
+
+        :param branch_bank_account: Instance of BankAccount containing bank account details.
+        :return: Added or updated BankAccount instance if successful, None otherwise.
+        """
+        with self.get_session() as session:
+            bank_account_orm = session.query(BankAccountORM).filter_by(
+                bank_account_id=branch_bank_account.bank_account_id).first()
+
+            if isinstance(bank_account_orm, BankAccountORM):
+                # If the bank account already exists, update its details
+                bank_account_orm.account_holder = branch_bank_account.account_holder
+                bank_account_orm.account_number = branch_bank_account.account_number
+                bank_account_orm.bank_name = branch_bank_account.bank_name
+                bank_account_orm.branch = branch_bank_account.branch
+                bank_account_orm.account_type = branch_bank_account.account_type
+                session.commit()
+                return branch_bank_account
+
+            # If the bank account does not exist, add it to the database
+            session.add(BankAccountORM(**branch_bank_account.dict()))
+            session.commit()
+            return branch_bank_account
+
+    async def get_branch_bank_account(self, bank_account_id: str) -> BankAccount| None:
+        """
+
+        :param bank_account_id:
+        :return:
+        """
+        with self.get_session() as session:
+            bank_account_orm = session.query(BankAccountORM).filter_by(bank_account_id=bank_account_id).first()
+
+            if isinstance(bank_account_orm, BankAccountORM):
+                return BankAccount(**bank_account_orm.to_dict())
             return None

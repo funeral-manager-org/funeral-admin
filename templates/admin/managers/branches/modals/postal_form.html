@@ -1,5 +1,6 @@
 <form action="{{ url_for('company.add_postal_address', branch_id=branch.branch_id) }}" method="POST">
     <!-- Add your form fields here -->
+    {% if postal_address %}<input type="hidden" name="postal_id" value="{{ postal_address.postal_id }}" />{% endif %}
     <div class="form-group">
         <label for="address_line_1" class="font-weight-bold text-info">Address Line 1</label>
         {% if postal_address %}

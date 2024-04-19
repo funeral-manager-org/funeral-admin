@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
+from src.database.models.bank_accounts import BankAccount
 from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.authentication import login_required
 from src.database.models.companies import Company, CompanyBranches
@@ -132,6 +133,10 @@ async def get_branch(user: User, branch_id: str):
         contact = await company_controller.get_branch_contact(contact_id=branch.contact_id)
         context.update(contact=contact)
 
+    if branch.bank_account_id:
+        bank_account = await  company_controller.get_branch_bank_account(bank_account_id=branch.bank_account_id)
+        context.update(bank_account=bank_account)
+
     return render_template('admin/managers/branches/details.html', **context)
 
 
@@ -210,6 +215,29 @@ async def add_update_branch_contacts(user: User, branch_id: str):
     return redirect(url_for('company.get_branch', branch_id=branch_id))
 
 
+@company_route.post('/admin/company/branch/bank-account/<string:branch_id>')
+@login_required
+async def add_bank_account(user: User, branch_id: str):
+    """
 
+    :param user:
+    :param branch_id:
+    :return:
+    """
+    try:
+        branch_bank_account = BankAccount(**request.form)
+    except ValidationError as e:
+        flash(message="Please fill in all required fields", category="danger")
+        return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+    branch_bank_account_ = await company_controller.add_branch_bank_account(branch_bank_account=branch_bank_account)
+
+    branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
+    branch.bank_account_id = branch_bank_account_.bank_account_id
+
+    updated_branch = await company_controller.update_company_branch(company_branch=branch)
+
+    flash(message="successfully updated branch bank account", category="success")
+    return redirect(url_for('company.get_branch', branch_id=branch_id))
 
 

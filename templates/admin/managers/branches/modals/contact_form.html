@@ -3,6 +3,7 @@
     <form action="{{ url_for('company.add_update_branch_contacts', branch_id=branch.branch_id) }}" method="POST">
         <!-- Add your form fields here -->
         <div class="form-group">
+            {% if contact %}<input type="hidden" name="contact_id" value="{{ contact.contact_id }}" />{% endif %}
             <label for="cell" class="font-weight-bold text-info">Cell:</label>
             {% if contact %}
                 <input type="tel" class="form-control" id="cell" name="cell" value="{{ contact.cell }}" required>

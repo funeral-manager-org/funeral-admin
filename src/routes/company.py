@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
-from src.database.models.contacts import Address, PostalAddress
+from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.authentication import login_required
 from src.database.models.companies import Company, CompanyBranches
 from src.database.models.users import User
@@ -128,6 +128,10 @@ async def get_branch(user: User, branch_id: str):
         postal = await company_controller.get_branch_postal_address(postal_id=branch.postal_id)
         context.update(postal_address=postal)
 
+    if branch.contact_id:
+        contact = await company_controller.get_branch_contact(contact_id=branch.contact_id)
+        context.update(contact=contact)
+
     return render_template('admin/managers/branches/details.html', **context)
 
 
@@ -189,4 +193,23 @@ async def add_update_branch_contacts(user: User, branch_id: str):
     :param branch_id:
     :return:
     """
-    pass
+    try:
+
+        branch_contacts = Contacts(**request.form)
+    except ValidationError as e:
+        flash(message="Please ensure to fill in all required fields", category="danger")
+        return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+    branch_contacts_ = await company_controller.add_branch_contacts(branch_contacts=branch_contacts)
+    branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
+    branch.contact_id = branch_contacts_.contact_id
+
+    updated_branch = await company_controller.update_company_branch(company_branch=branch)
+
+    flash(message="successfully updated branch contact details", category="success")
+    return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+
+
+
+

@@ -39,13 +39,13 @@ class AddressORM(Base):
 
 class ContactsORM(Base):
     __tablename__ = "contacts"
-    contact_id = Column(String(9), primary_key=True)
+    contact_id = Column(String(ID_LEN), primary_key=True)
     cell = Column(String(20))
-    tel = Column(String(20))
+    tel = Column(String(20), nullable=True)
     email = Column(String(255))
-    facebook = Column(String(255))
-    twitter = Column(String(255))
-    whatsapp = Column(String(20))
+    facebook = Column(String(255), nullable=True)
+    twitter = Column(String(255), nullable=True)
+    whatsapp = Column(String(20), nullable=True)
 
     @classmethod
     def create_if_not_table(cls):

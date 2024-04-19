@@ -2,8 +2,8 @@ import random
 
 from flask import Flask
 
-from src.database.sql.contacts import AddressORM, PostalAddressORM
-from src.database.models.contacts import Address, PostalAddress
+from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
+from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.database.sql.companies import CompanyORM, CompanyBranchesORM
 from src.database.models.companies import Company, CompanyBranches
 from src.controller import Controllers, error_handler
@@ -169,4 +169,46 @@ class CompanyController(Controllers):
             postal_address_orm = session.query(PostalAddressORM).filter_by(postal_id=postal_id).first()
             if isinstance(postal_address_orm, PostalAddressORM):
                 return PostalAddress(**postal_address_orm.to_dict())
+            return None
+
+    async def add_branch_contacts(self, branch_contacts: Contacts) -> Contacts | None:
+        """
+        Add branch contacts to the database.
+
+        :param branch_contacts: Instance of Contacts containing contact details.
+        :return: Added Contacts instance if successful, None otherwise.
+        """
+        with self.get_session() as session:
+            contact_orm = session.query(ContactsORM).filter_by(contact_id=branch_contacts.contact_id).first()
+            if isinstance(contact_orm, ContactsORM):
+                # Update existing contact details
+                contact_orm.cell = branch_contacts.cell
+                contact_orm.tel = branch_contacts.tel
+                contact_orm.email = branch_contacts.email
+                contact_orm.facebook = branch_contacts.facebook
+                contact_orm.twitter = branch_contacts.twitter
+                contact_orm.whatsapp = branch_contacts.whatsapp
+                session.commit()
+                return branch_contacts
+            # Add new contact details
+            session.add(ContactsORM(**branch_contacts.dict()))
+            session.commit()
+            return branch_contacts
+
+    async def get_branch_contact(self, contact_id: str) -> Contacts | None:
+        """
+        Retrieve branch contact details from the database.
+
+        :param contact_id: The ID of the branch whose contact details to retrieve.
+        :return: Contacts instance if found, None otherwise.
+        """
+        with self.get_session() as session:
+            # Query the database for the contact details associated with the given branch_id
+            branch_contact_orm = session.query(ContactsORM).filter_by(contact_id=contact_id).first()
+
+            if isinstance(branch_contact_orm, ContactsORM):
+                # If contact details exist, create a Contacts instance from the retrieved data
+                branch_contact = Contacts(**branch_contact_orm.to_dict())
+                return branch_contact
+
             return None

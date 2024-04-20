@@ -23,10 +23,18 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="addBranch-tab" data-toggle="tab" href="#adminTasks" role="tab" aria-controls="adminTasks" aria-selected="false">
+                    <a class="nav-link" id="adminTasks-tab" data-toggle="tab" href="#adminTasks" role="tab" aria-controls="adminTasks" aria-selected="false">
                         <span class="font-weight-bold text-info">
                             <i class="fa fa-folder"> </i>
                             Admin
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="subscriptions-tab" data-toggle="tab" href="#subscription" role="tab" aria-controls="adminTasks" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-paypal"> </i>
+                            Subscription
                         </span>
                     </a>
                 </li>
@@ -39,7 +47,10 @@
                     <!-- Company Details Tab Content -->
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Company Details</h3>
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-folder-o"></i>
+                                Company Details
+                            </h3>
                         </div>
                         <div class="card-body">
                             <ul class="list-unstyled">
@@ -59,7 +70,10 @@
                     <!-- Add Company Branch Tab Content -->
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Company Branches</h3>
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-folder-open"> </i>
+                                Company Branches
+                            </h3>
                         </div>
                         <table class="table table-bordered table-striped">
                             <thead>
@@ -97,15 +111,41 @@
                 <div class="tab-pane fade" id="adminTasks" role="tabpanel" aria-labelledby="adminTasks-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Admin Tasks</h3>
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-file-excel-o"> </i>
+                                Admin Tasks
+                            </h3>
                         </div>
 
                         <div class="card-body">
-                            <a class="btn btn-sm btn-primary text-white">Employee Positions</a>
-                            <a class="btn btn-sm btn-primary  text-white">Employee Roles &amp; Access</a>
+                            <a class="btn btn-sm btn-primary  text-white">
+                                <span class="font-weight-bold">x
+                                    <i class="fa fa-user-secret"> </i>
+                                    Employee Roles &amp; Access Rights
+                                </span>
+                            </a>
+
+                            <a class="btn btn-sm btn-primary text-white">
+                                <span class="font-weight-bold">
+                                    <i class="fa fa-users"> </i>
+                                    Employee Positions
+                                </span>
+                            </a>
                         </div>
                     </div>
                 </div>
+                <div class="tab-pane fade" id="subscription" role="tabpanel" aria-labelledby="subscription-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-paypal"> </i>
+                                Subscriptions
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </div>

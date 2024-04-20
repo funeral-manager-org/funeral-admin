@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, Field
 from src.utils import create_id, string_today, create_plan_number, create_employee_id
 
@@ -32,8 +31,6 @@ class CompanyBranches(BaseModel):
     contact_id: str | None
     postal_id: str | None
     bank_account_id: str | None
-
-
 
 
 class PlanTypes(BaseModel):
@@ -90,8 +87,8 @@ class EmployeeDetails(BaseModel):
         employee_id (str): The ID of the employee.
         company_id (str): The ID of the company to which the employee belongs.
         branch_id (str): The ID of the branch to which the employee is assigned.
-        first_name (str): The first name of the employee.
-        last_name (str): The last name of the employee.
+        full_names (str): The first name and middle name of the employee.
+        last_name (str): The last name or surname of the employee.
         email (str): The email address of the employee.
         contact_number (str): The contact number of the employee.
         position (str): The position or role of the employee.
@@ -100,13 +97,14 @@ class EmployeeDetails(BaseModel):
         salary (float): The salary of the employee.
         is_active (bool): Indicates whether the employee is currently active or not.
     """
+
     employee_id: str = Field(default_factory=create_employee_id)
 
     uid: str | None
     company_id: str
     branch_id: str
 
-    first_name: str
+    full_names: str
     last_name: str
     email: str
     contact_number: str

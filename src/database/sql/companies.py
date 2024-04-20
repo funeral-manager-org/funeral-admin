@@ -144,7 +144,7 @@ class EmployeeORM(Base):
     employee_id = Column(String(9), primary_key=True)
     company_id = Column(String(ID_LEN))
     branch_id = Column(String(ID_LEN))
-    first_name = Column(String(255))
+    full_names = Column(String(255))
     last_name = Column(String(255))
     email = Column(String(255))
     contact_number = Column(String(20))
@@ -172,7 +172,7 @@ class EmployeeORM(Base):
             "employee_id": self.employee_id,
             "company_id": self.company_id,
             "branch_id": self.branch_id,
-            "first_name": self.first_name,
+            "full_names": self.full_names,
             "last_name": self.last_name,
             "email": self.email,
             "contact_number": self.contact_number,

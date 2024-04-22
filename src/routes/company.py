@@ -123,7 +123,8 @@ async def get_branch(user: User, branch_id: str):
     employee_list: list[EmployeeDetails] = await company_controller.get_branch_employees(branch_id=branch_id)
     print("#################################################")
     print(employee_list)
-    context = dict(user=user, branch=branch, employee_roles=employee_roles, employee_list=employee_list)
+    context = dict(user=user, branch=branch, employee_roles=employee_roles, employee_list=employee_list,
+                   total_employees=len(employee_list))
 
     if branch.address_id:
         address = await company_controller.get_branch_address(address_id=branch.address_id)

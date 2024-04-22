@@ -120,7 +120,10 @@ async def get_branch(user: User, branch_id: str):
         flash(message="Error fetching branch", category="danger")
         return redirect(url_for('company.get_admin'))
     employee_roles: list[str] = await company_controller.get_employee_roles(company_id=user.company_id)
-    context = dict(user=user, branch=branch, employee_roles=employee_roles)
+    employee_list: list[EmployeeDetails] = await company_controller.get_branch_employees(branch_id=branch_id)
+    print("#################################################")
+    print(employee_list)
+    context = dict(user=user, branch=branch, employee_roles=employee_roles, employee_list=employee_list)
 
     if branch.address_id:
         address = await company_controller.get_branch_address(address_id=branch.address_id)
@@ -256,20 +259,25 @@ async def add_employee(user: User, branch_id: str):
 
         new_employee.company_id = user.company_id
         new_employee.branch_id = branch_id
+        new_employee.email = new_employee.email.lower().strip()
     except ValidationError as e:
         print(str(e))
         flash(message="Please fill in all required employee details", category='danger')
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
     employee_ = await company_controller.add_employee(employee=new_employee)
+    print(f"New Employee : {employee_}")
     branch = await company_controller.get_branch_by_id(branch_id=branch_id)
     branch.total_employees += 1
     updated_branch = await company_controller.update_company_branch(company_branch=branch)
 
     if employee_.email:
-        new_user = await user_controller.get_by_email(email=employee_.email)
-        if not new_user:
 
+        new_user = await user_controller.get_by_email(email=employee_.email)
+
+        if new_user:
+            pass
+        else:
             password = await user_controller.create_employee_password()
             password_hash = encryptor.create_hash(password=password)
 
@@ -277,7 +285,7 @@ async def add_employee(user: User, branch_id: str):
                              branch_id=branch_id,
                              company_id=user.company_id,
                              username=employee_.email,
-                             email=employee_.email.lower(),
+                             email=employee_.email,
                              password_hash=password_hash,
                              is_employee=True)
 
@@ -285,13 +293,13 @@ async def add_employee(user: User, branch_id: str):
 
             send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user,
                                                                                          password=password)
-            message = """
-            Your Employee has successfully been added.
-                We have sent an Email to your employee with their login details
-                Your Employee also need to click a link on the email to verify their email address            
-            """
-            flash(message=message, category="success")
-            return redirect(url_for('company.get_branch', branch_id=branch_id))
+        message = """
+        Your Employee has successfully been added.
+            We have sent an Email to your employee with their login details
+            Your Employee also need to click a link on the email to verify their email address            
+        """
+        flash(message=message, category="success")
+        return redirect(url_for('company.get_branch', branch_id=branch_id))
 
     message = "We where unable to add your employee please try again if the problem persists please notify admin"
 

@@ -285,6 +285,24 @@ class CompanyController(Controllers):
                 employee_orm.is_active = employee.is_active
 
                 session.commit()
+                return employee
 
             session.add(EmployeeORM(**employee.dict()))
+
+            session.commit()
+
             return employee
+
+    async def get_branch_employees(self, branch_id: str) -> list[EmployeeDetails]:
+        """
+
+        :param branch_id:
+        :return:
+        """
+        with self.get_session() as session:
+            employees_orm = session.query(EmployeeORM).filter_by(branch_id=branch_id).all()
+            print("EMPLOYEE ORM")
+            print(employees_orm)
+            return [EmployeeDetails(**employee.to_dict()) for employee in employees_orm if
+                    isinstance(employee, EmployeeORM)]
+

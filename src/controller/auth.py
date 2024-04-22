@@ -6,6 +6,7 @@ import uuid
 from flask import Flask, render_template
 from pydantic import ValidationError
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 
 from src.controller import error_handler, UnauthorizedError, Controllers
 from src.database.models.profile import Profile, ProfileUpdate
@@ -26,7 +27,6 @@ class UserController(Controllers):
         self.profiles: dict[str, Profile] = {}
         self.users: dict[str, User] = {}
 
-
     def init_app(self, app: Flask):
         super().init_app(app=app)
 
@@ -36,8 +36,6 @@ class UserController(Controllers):
 
     async def manage_profiles(self, new_profile: Profile):
         self.profiles[new_profile.uid] = new_profile
-
-
 
     @error_handler
     async def add_paypal(self, user: User, paypal_email: str) -> PayPal | None:
@@ -234,6 +232,42 @@ class UserController(Controllers):
                 raise UnauthorizedError(description="Cannot Login User please check your login details")
             return user if user.is_login(password=password) else None
 
+    async def add_employee(self, user: User) -> User | None:
+        """
+        Add or update a user in the database.
+
+        :param user: User details to add or update.
+        :return: The added or updated user details.
+        """
+        with self.get_session() as session:
+            email = user.email.lower().strip()
+            user_data: UserORM = session.query(UserORM).filter_by(email=email).first()
+            if user_data:
+                # Update user data if user exists
+                user_data.uid = user.uid
+                user_data.branch_id = user.branch_id
+                user_data.company_id = user.company_id
+                user_data.username = user.username
+                user_data.password_hash = user.password_hash
+                user_data.account_verified = user.account_verified
+                user_data.is_system_admin = user.is_system_admin
+                user_data.is_company_admin = user.is_company_admin
+                user_data.is_employee = user.is_employee
+                user_data.is_client = user.is_client
+
+            else:
+                # Create new user if user does not exist
+                new_user = UserORM(**user.dict(exclude_unset=True))  # Exclude unset fields
+                session.add(new_user)
+
+            try:
+                session.commit()
+                return user
+            except IntegrityError:
+                # Handle integrity error (e.g., duplicate email)
+                session.rollback()
+                return None
+
     @error_handler
     async def send_verification_email(self, user: User, password: str) -> None:
         """
@@ -289,12 +323,12 @@ class UserController(Controllers):
                 return User(**account_orm.to_dict())
             return None
 
-    async def create_employee_password(self):
+    @staticmethod
+    async def create_employee_password():
         """
 
         :return:
         """
         random_chars = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
         # Convert all letters to uppercase
-        random_chars_uppercase = random_chars.upper()
-        return random_chars_uppercase
+        return random_chars.lower()

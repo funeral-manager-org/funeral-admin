@@ -252,14 +252,11 @@ async def add_employee(user: User, branch_id: str):
     :return:
     """
     try:
-
         new_employee = EmployeeDetails(**request.form)
 
         new_employee.company_id = user.company_id
         new_employee.branch_id = branch_id
-
     except ValidationError as e:
-
         print(str(e))
         flash(message="Please fill in all required employee details", category='danger')
         return redirect(url_for('company.get_branch', branch_id=branch_id))
@@ -284,14 +281,16 @@ async def add_employee(user: User, branch_id: str):
                              password_hash=password_hash,
                              is_employee=True)
 
-            new_employee_user = await user_controller.post(user=_new_user)
-            send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user)
+            new_employee_user = await user_controller.add_employee(user=_new_user)
+
+            send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user,
+                                                                                         password=password)
             message = """
             Your Employee has successfully been added.
                 We have sent an Email to your employee with their login details
                 Your Employee also need to click a link on the email to verify their email address            
             """
-            flash(message=message,category="success")
+            flash(message=message, category="success")
             return redirect(url_for('company.get_branch', branch_id=branch_id))
 
     message = "We where unable to add your employee please try again if the problem persists please notify admin"

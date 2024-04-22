@@ -144,6 +144,7 @@ class EmployeeORM(Base):
     employee_id = Column(String(9), primary_key=True)
     company_id = Column(String(ID_LEN))
     branch_id = Column(String(ID_LEN))
+    uid = Column(String(ID_LEN))
     full_names = Column(String(255))
     last_name = Column(String(255))
     role = Column(String(36))

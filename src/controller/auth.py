@@ -1,3 +1,5 @@
+import random
+import string
 import time
 import uuid
 
@@ -233,7 +235,7 @@ class UserController(Controllers):
             return user if user.is_login(password=password) else None
 
     @error_handler
-    async def send_verification_email(self, user: User) -> None:
+    async def send_verification_email(self, user: User, password: str) -> None:
         """
         Sends a verification email to the specified user.
 
@@ -244,7 +246,7 @@ class UserController(Controllers):
         self._verification_tokens[token] = dict(email=user.email, timestamp=int(time.time()))
         # Render the email template
         email_html = render_template("email_templates/verification_email.html", user=user,
-                                     verification_link=verification_link)
+                                     verification_link=verification_link, password=password)
 
         msg = EmailModel(subject_="last-shelter.vip Email Verification",
                          to_=user.email,
@@ -286,3 +288,13 @@ class UserController(Controllers):
             if isinstance(account_orm, UserORM):
                 return User(**account_orm.to_dict())
             return None
+
+    async def create_employee_password(self):
+        """
+
+        :return:
+        """
+        random_chars = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+        # Convert all letters to uppercase
+        random_chars_uppercase = random_chars.upper()
+        return random_chars_uppercase

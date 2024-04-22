@@ -48,7 +48,7 @@ async def do_login():
         response.set_cookie('auth', value=login_user.uid, expires=expiration, httponly=True)
 
         if not login_user.account_verified:
-            _ = await user_controller.send_verification_email(user=login_user)
+            _ = await user_controller.send_verification_email(user=login_user, password=auth_user.password)
             flash(message="A verification email has been sent please verify your email", category="danger")
         return response
     else:

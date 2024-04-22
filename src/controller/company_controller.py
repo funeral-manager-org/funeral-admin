@@ -1,13 +1,13 @@
 import random
-
+from datetime import datetime
 from flask import Flask
 
 from src.database.sql.bank_account import BankAccountORM
 from src.database.models.bank_accounts import BankAccount
 from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
 from src.database.models.contacts import Address, PostalAddress, Contacts
-from src.database.sql.companies import CompanyORM, CompanyBranchesORM
-from src.database.models.companies import Company, CompanyBranches
+from src.database.sql.companies import CompanyORM, CompanyBranchesORM, EmployeeORM
+from src.database.models.companies import Company, CompanyBranches, EmployeeRoles, EmployeeDetails
 from src.controller import Controllers, error_handler
 
 
@@ -61,7 +61,7 @@ class CompanyController(Controllers):
             session.commit()
             return company_branch
 
-    async def update_company_branch(self, company_branch: CompanyBranches):
+    async def update_company_branch(self, company_branch: CompanyBranches) -> CompanyBranches | None:
         """
 
         :param company_branch:
@@ -110,6 +110,14 @@ class CompanyController(Controllers):
             if not isinstance(branch_orm, CompanyBranchesORM):
                 return None
             return CompanyBranches(**branch_orm.to_dict())
+
+    async def get_employee_roles(self, company_id: str) -> list[str]:
+        """
+
+        :param company_id:
+        :return:
+        """
+        return EmployeeRoles.get_all_roles()
 
     async def add_update_branch_address(self, branch_address: Address) -> Address:
         """
@@ -241,7 +249,7 @@ class CompanyController(Controllers):
             session.commit()
             return branch_bank_account
 
-    async def get_branch_bank_account(self, bank_account_id: str) -> BankAccount| None:
+    async def get_branch_bank_account(self, bank_account_id: str) -> BankAccount | None:
         """
 
         :param bank_account_id:
@@ -253,3 +261,30 @@ class CompanyController(Controllers):
             if isinstance(bank_account_orm, BankAccountORM):
                 return BankAccount(**bank_account_orm.to_dict())
             return None
+
+    async def add_employee(self, employee: EmployeeDetails) -> EmployeeDetails | None:
+        """
+
+        :param employee:
+        :return:
+        """
+        with self.get_session() as session:
+            _id_number = employee.id_number
+            employee_orm = session.query(EmployeeORM).filter_by(id_number=_id_number).first()
+            if isinstance(employee_orm, EmployeeORM):
+                employee_orm.full_names = employee.full_names
+                employee_orm.last_name = employee.last_name
+                employee_orm.role = employee.role
+                employee_orm.id_number = employee.id_number
+                employee_orm.email = employee.email
+                employee_orm.contact_number = employee.contact_number
+                employee_orm.position = employee.position
+                employee_orm.date_of_birth = datetime.strptime(employee.date_of_birth, '%Y-%m-%d').date()
+                employee_orm.date_joined = datetime.strptime(employee.date_joined, '%Y-%m-%d').date()
+                employee_orm.salary = employee.salary
+                employee_orm.is_active = employee.is_active
+
+                session.commit()
+
+            session.add(EmployeeORM(**employee.dict()))
+            return employee

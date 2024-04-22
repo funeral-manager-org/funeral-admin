@@ -5,8 +5,9 @@
                 <h2 id="employeeLabel" class="card-title"> <i class="fa fa-address-book"></i> New Employee </h2>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal" action="/add_employee" method="POST">
+                <form class="form-horizontal" action="{{ url_for('company.add_employee', branch_id=branch.branch_id) }}" method="POST">
                     <!-- Full Names -->
+
                     <div class="form-group">
                         <label class="control-label" for="full_names">Full Names:</label>
                         <input type="text" class="form-control" id="full_names" name="full_names" required>
@@ -35,6 +36,15 @@
                     <div class="form-group">
                         <label class="control-label" for="salary">Salary:</label>
                         <input type="number" class="form-control" id="salary" name="salary" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="salary">Employee Role</label>
+                        <select name="role" id="role" class="form-control">
+                        <option value="" selected>Select Employee Role</option>
+                            {% for role in employee_roles %}
+                                <option value="{{ role }}">{{ role }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
 
                     <!-- Submit Button -->

@@ -79,6 +79,75 @@ class CoverPlanDetails(BaseModel):
     contact_information: str
 
 
+###########################################################################################
+##### EMPLOYEE ROLES
+###########################################################################################
+
+class EmployeeRoles:
+    ADMIN = 'Administrator'
+    DIRECTOR = 'Funeral Director'
+    RECEPTIONIST = 'Receptionist'
+    ACCOUNTANT = 'Accountant'
+    MORTICIAN = 'Mortician'
+    SUPPORT_STAFF = 'Support Staff'
+    SERVICE_MANAGER = 'Service Manager'  # New role for managing extra services
+    @classmethod
+    def get_all_roles(cls):
+        return [value for name, value in vars(cls).items() if not name.startswith('__') and isinstance(value, str)]
+
+
+class EmployeePermissions:
+    # Existing permissions
+    VIEW_CLIENT_INFO = 'View/Edit Client Information'
+    SCHEDULE_APPOINTMENTS = 'Schedule Appointments'
+    CREATE_INVOICES = 'Create/Manage Invoices'
+    MANAGE_INVENTORY = 'Manage Inventory'
+    VIEW_FINANCIAL_REPORTS = 'View Financial Reports'
+    ACCESS_EMPLOYEE_RECORDS = 'Access Employee Records'
+    GENERATE_REPORTS = 'Generate Reports'
+    ADMIN_TASKS = 'Perform System Administration Tasks'
+
+    # New permissions for extra services
+    MANAGE_EXTRA_SERVICES = 'Manage Extra Services'
+    VIEW_SERVICE_COVERS = 'View Service Covers'
+
+
+class Employee:
+    def __init__(self, name, role):
+        self.name = name
+        self.role = role
+        self.permissions = set()
+
+    def add_permission(self, permission):
+        self.permissions.add(permission)
+
+    def has_permission(self, permission):
+        return permission in self.permissions
+
+
+# Define employee roles
+employee_roles = {
+    EmployeeRoles.ADMIN: [EmployeePermissions.VIEW_CLIENT_INFO, EmployeePermissions.SCHEDULE_APPOINTMENTS,
+                          EmployeePermissions.CREATE_INVOICES, EmployeePermissions.MANAGE_INVENTORY,
+                          EmployeePermissions.VIEW_FINANCIAL_REPORTS, EmployeePermissions.ACCESS_EMPLOYEE_RECORDS,
+                          EmployeePermissions.GENERATE_REPORTS, EmployeePermissions.ADMIN_TASKS],
+
+    EmployeeRoles.DIRECTOR: [EmployeePermissions.VIEW_CLIENT_INFO, EmployeePermissions.SCHEDULE_APPOINTMENTS,
+                             EmployeePermissions.CREATE_INVOICES, EmployeePermissions.MANAGE_INVENTORY,
+                             EmployeePermissions.ACCESS_EMPLOYEE_RECORDS],
+
+    EmployeeRoles.RECEPTIONIST: [EmployeePermissions.VIEW_CLIENT_INFO, EmployeePermissions.SCHEDULE_APPOINTMENTS],
+
+    EmployeeRoles.ACCOUNTANT: [EmployeePermissions.CREATE_INVOICES, EmployeePermissions.VIEW_FINANCIAL_REPORTS],
+
+    EmployeeRoles.MORTICIAN: [EmployeePermissions.VIEW_CLIENT_INFO, EmployeePermissions.MANAGE_INVENTORY],
+
+    EmployeeRoles.SUPPORT_STAFF: [EmployeePermissions.VIEW_CLIENT_INFO],
+
+    EmployeeRoles.SERVICE_MANAGER: [EmployeePermissions.MANAGE_EXTRA_SERVICES, EmployeePermissions.VIEW_SERVICE_COVERS]
+}
+
+
 class EmployeeDetails(BaseModel):
     """
     Represents details about an employee.
@@ -101,14 +170,17 @@ class EmployeeDetails(BaseModel):
     employee_id: str = Field(default_factory=create_employee_id)
 
     uid: str | None
-    company_id: str
-    branch_id: str
+    company_id: str | None
+    branch_id: str | None
 
     full_names: str
     last_name: str
+    id_number: str
+    role: str
     email: str
     contact_number: str
     position: str
+    role: str
     date_of_birth: str
     date_joined: str = Field(default_factory=string_today)
     salary: float

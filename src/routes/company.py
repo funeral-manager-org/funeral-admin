@@ -4,9 +4,10 @@ from pydantic import ValidationError
 from src.database.models.bank_accounts import BankAccount
 from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.authentication import login_required
-from src.database.models.companies import Company, CompanyBranches
+from src.database.models.companies import Company, CompanyBranches, EmployeeDetails
 from src.database.models.users import User
-from src.main import company_controller, user_controller
+from src.main import company_controller, user_controller, encryptor
+from src.utils import create_id
 
 company_route = Blueprint('company', __name__)
 
@@ -118,8 +119,8 @@ async def get_branch(user: User, branch_id: str):
     if not branch:
         flash(message="Error fetching branch", category="danger")
         return redirect(url_for('company.get_admin'))
-
-    context = dict(user=user, branch=branch)
+    employee_roles: list[str] = await company_controller.get_employee_roles(company_id=user.company_id)
+    context = dict(user=user, branch=branch, employee_roles=employee_roles)
 
     if branch.address_id:
         address = await company_controller.get_branch_address(address_id=branch.address_id)
@@ -241,3 +242,48 @@ async def add_bank_account(user: User, branch_id: str):
     return redirect(url_for('company.get_branch', branch_id=branch_id))
 
 
+@company_route.post('/admin/company/branch/add-employee/<string:branch_id>')
+@login_required
+async def add_employee(user: User, branch_id: str):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+
+        new_employee = EmployeeDetails(**request.form)
+
+        new_employee.company_id = user.company_id
+        new_employee.branch_id = branch_id
+
+    except ValidationError as e:
+
+        print(str(e))
+        flash(message="Please fill in all required employee details", category='danger')
+        return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+    employee_ = await company_controller.add_employee(employee=new_employee)
+    branch = await company_controller.get_branch_by_id(branch_id=branch_id)
+    branch.total_employees += 1
+    updated_branch = await company_controller.update_company_branch(company_branch=branch)
+
+    if employee_.email:
+        new_user = await user_controller.get_by_email(email=employee_.email)
+        if not new_user:
+
+            password = await user_controller.create_employee_password()
+            password_hash = encryptor.create_hash(password=password)
+
+            _new_user = User(uid=create_id(),
+                             branch_id=branch_id,
+                             company_id=user.company_id,
+                             username=employee_.email,
+                             email=employee_.email.lower(),
+                             password_hash=password_hash,
+                             is_employee=True)
+
+            new_employee_user = await user_controller.post(user=_new_user)
+            send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user)
+
+        # TODO - send email to invite employee to create password

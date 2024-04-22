@@ -247,6 +247,7 @@ async def add_bank_account(user: User, branch_id: str):
 async def add_employee(user: User, branch_id: str):
     """
 
+    :param branch_id:
     :param user:
     :return:
     """
@@ -285,5 +286,17 @@ async def add_employee(user: User, branch_id: str):
 
             new_employee_user = await user_controller.post(user=_new_user)
             send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user)
+            message = """
+            Your Employee has successfully been added.
+                We have sent an Email to your employee with their login details
+                Your Employee also need to click a link on the email to verify their email address            
+            """
+            flash(message=message,category="success")
+            return redirect(url_for('company.get_branch', branch_id=branch_id))
 
-        # TODO - send email to invite employee to create password
+    message = "We where unable to add your employee please try again if the problem persists please notify admin"
+
+    flash(message=message, category="danger")
+    return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+

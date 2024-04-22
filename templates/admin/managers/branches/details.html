@@ -111,7 +111,11 @@
                                 <tbody>
                                 {% for employee in employee_list %}
                                     <tr>
-                                        <td class="font-weight-bold">{{ employee.full_names }}</td>
+                                        <td class="font-weight-bold">
+                                            <a href="{{ url_for('company.get_employee', employee_id=employee.employee_id, branch_id=branch.branch_id) }}" class="text-info" title="Manage Employee">
+                                                {{ employee.full_names }}
+                                            </a>
+                                        </td>
                                         <td class="font-weight-bold">{{ employee.last_name }}</td>
 
                                         <td class="font-weight-bold">{{ employee.email }}</td>

@@ -308,3 +308,18 @@ async def add_employee(user: User, branch_id: str):
     return redirect(url_for('company.get_branch', branch_id=branch_id))
 
 
+@company_route.get('/admin/company/branch/employee/<string:branch_id>/<string:employee_id>')
+@login_required
+async def get_employee(user: User, branch_id: str, employee_id: str):
+    """
+
+    :param user:
+    :param employee_id:
+    :param branch_id:
+    :return:
+    """
+    employee_detail: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
+    if employee_detail:
+        branch = await company_controller.get_branch_by_id(branch_id=branch_id)
+        context = dict(user=user, employee_detail=employee_detail, branch=branch)
+        return render_template('admin/managers/branches/employee.html', **context)

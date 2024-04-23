@@ -1,6 +1,7 @@
 import random
 from datetime import datetime
 from flask import Flask
+from sqlalchemy.exc import OperationalError
 
 from src.database.sql.bank_account import BankAccountORM
 from src.database.models.bank_accounts import BankAccount
@@ -262,7 +263,7 @@ class CompanyController(Controllers):
                 return BankAccount(**bank_account_orm.to_dict())
             return None
 
-    async def add_employee(self, employee: EmployeeDetails) -> EmployeeDetails | None:
+    async def add_employee(self, employee: EmployeeDetails) -> tuple[bool, EmployeeDetails| None]:
         """
 
         :param employee:
@@ -285,13 +286,14 @@ class CompanyController(Controllers):
                 employee_orm.is_active = employee.is_active
 
                 session.commit()
-                return employee
-
-            session.add(EmployeeORM(**employee.dict()))
-
-            session.commit()
-
-            return employee
+                return False, employee
+            try:
+                session.add(EmployeeORM(**employee.dict()))
+                session.commit()
+            except OperationalError as e:
+                session.rollback()
+                return False, None
+            return True, employee
 
     async def get_branch_employees(self, branch_id: str) -> list[EmployeeDetails]:
         """

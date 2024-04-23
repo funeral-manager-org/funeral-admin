@@ -8,11 +8,21 @@
             <ul class="nav nav-tabs" id="employeeTabs" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active" id="viewEmployee-tab" data-toggle="tab" href="#viewEmployee" role="tab"
-                       aria-controls="viewEmployee" aria-selected="true">View Employee</a>
+                       aria-controls="viewEmployee" aria-selected="true">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-user"> </i>
+                            Employee
+                        </span>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="editEmployee-tab" data-toggle="tab" href="#editEmployee" role="tab"
-                       aria-controls="editEmployee" aria-selected="false">Edit Employee</a>
+                       aria-controls="editEmployee" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-user"> </i>
+                            Edit Employee
+                        </span>
+                    </a>
                 </li>
             </ul>
         </div>
@@ -22,54 +32,115 @@
                 <!-- View Employee Tab -->
                 <div class="tab-pane fade show active" id="viewEmployee" role="tabpanel"
                      aria-labelledby="viewEmployee-tab">
-                    <h4>View Employee Details</h4>
-                    <div class="form-group">
-                        <label for="employeeId">Employee ID</label>
-                        <input type="text" class="form-control" id="employeeId" value="{{ employee_detail.employee_id }}" readonly>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-user"> </i>
+                                Employee Details
+                            </h4>
+                        </div>
+                        <ul class="list-unstyled">
+                            <li class="font-weight-bold">Employee Number: <span class="text-info">{{ employee_detail.employee_id }}</span></li>
+                            <li class="font-weight-bold">Full Names: <span class="text-info">{{ employee_detail.full_names }}</span></li>
+                            <li class="font-weight-bold">Surname: <span class="text-info">{{ employee_detail.last_name }}</span></li>
+                            <li class="font-weight-bold">Date Of Birth: <span class="text-info">{{ employee_detail.date_of_birth }}</span></li>
+                            <li class="font-weight-bold">ID Number: <span class="text-info">{{ employee_detail.id_number }}</span></li>
+                            <li class="font-weight-bold">Email: <span class="text-info">{{ employee_detail.email }}</span></li>
+                            <li class="font-weight-bold">Role: <span class="text-info">{{ employee_detail.role }}</span></li>
+                            <li class="font-weight-bold">Salary: <span class="text-info">R {{ employee_detail.salary| number }}.00</span></li>
+                        </ul>
+                        <div class="card-footer">
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fa fa-address-card"> </i>
+                                Address
+                            </button>
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fa fa-address-card-o"></i>
+                                Postal Address
+                            </button>
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fa fa-mobile-phone"> </i>
+                                Contact Details
+                            </button>
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fa fa-bank"> </i>
+                                Bank Account
+                            </button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="fullName">Full Name</label>
-                        <input type="text" class="form-control" id="fullName" value="{{ employee_detail.full_names }}" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" class="form-control" id="lastName" value="{{ employee_detail.last_name }}" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="idNumber">ID Number</label>
-                        <input type="text" class="form-control" id="idNumber" value="{{ employee_detail.id_number }}" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" value="{{ employee_detail.email }}" readonly>
-                    </div>
-                    <!-- Add more fields as needed -->
                 </div>
 
                 <!-- Edit Employee Tab -->
-                <div class="tab-pane fade" id="editEmployee" role="tabpanel"
-                     aria-labelledby="editEmployee-tab">
-                    <h4>Edit Employee Details</h4>
-                    <form action="/update_employee" method="post">
-                        <div class="form-group">
-                            <label for="editFullName">Full Name</label>
-                            <input type="text" class="form-control" id="editFullName" name="full_names" value="{{ employee_detail.full_names }}">
+                <div class="tab-pane fade" id="editEmployee" role="tabpanel" aria-labelledby="editEmployee-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-file-text"> </i>
+                                Edit Employee Details
+                            </h4>
                         </div>
-                        <div class="form-group">
-                            <label for="editLastName">Last Name</label>
-                            <input type="text" class="form-control" id="editLastName" name="last_name" value="{{ employee_detail.last_name }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="editIdNumber">ID Number</label>
-                            <input type="text" class="form-control" id="editIdNumber" name="id_number" value="{{ employee_detail.id_number }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="editEmail">Email</label>
-                            <input type="email" class="form-control" id="editEmail" name="email" value="{{ employee_detail.email }}">
-                        </div>
-                        <!-- Add more fields as needed -->
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </form>
+                            <form action="{{ url_for('company.add_employee', branch_id=branch.branch_id) }}" method="post">
+
+                                <div class="form-group">
+                                    <label for="full_names" class="font-weight-bold">Full Name</label>
+                                    <input type="text" class="form-control" id="full_names" name="full_names" value="{{ employee_detail.full_names }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="last_name"  class="font-weight-bold">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ employee_detail.last_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_number"  class="font-weight-bold">ID Number</label>
+                                    <input type="text" class="form-control" id="id_number" name="id_number" value="{{ employee_detail.id_number }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="date_of_birth"  class="font-weight-bold">Date Of Birth</label>
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ employee_detail.date_of_birth }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email" class="font-weight-bold">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="{{ employee_detail.email }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="contact_number" class="font-weight-bold">Contact Number</label>
+                                    <input type="tel" class="form-control" id="contact_number" name="contact_number" value="{{ employee_detail.contact_number }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="position"  class="font-weight-bold">Position</label>
+                                    <input type="text" class="form-control" id="position" name="position" value="{{ employee_detail.position }}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="role" class="font-weight-bold">Role</label>
+                                    <select class="form-control" name="role" id="role">
+                                        <option value="{{ employee_detail.role }}" selected>{{ employee_detail.role }}</option>
+                                        {% for role in employee_roles %}
+                                            <option value="{{ role }}" selected>{{ role }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="salary" class="font-weight-bold">Salary(ZAR)</label>
+                                    <input type="number" class="form-control" id="salary" name="salary" value="{{ employee_detail.salary}}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="is_active" class="font-weight-bold">Is Active</label>
+                                    <select id="is_active" name="is_active" class="form-control">
+                                        {% if employee_detail.is_active == True %}
+                                            <option value="True" selected>True</option>
+                                            <option value="False">False</option>
+                                        {% else %}
+                                            <option value="True">True</option>
+                                            <option value="False" selected>False</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+
+                                <!-- Add more fields as needed -->
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                    </div>
                 </div>
             </div>
         </div>

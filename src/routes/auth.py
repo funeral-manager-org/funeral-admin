@@ -49,11 +49,11 @@ async def do_login():
 
         if not login_user.account_verified:
             _ = await user_controller.send_verification_email(user=login_user, password=auth_user.password)
-            flash(message="A verification email has been sent please verify your email", category="danger")
+            flash(message="A verification email has been sent please verify your email", category="success")
         return response
     else:
         return await create_response(url_for('auth.get_auth'),
-                                     'Login failed. you may not be registered in this system', 'danger')
+                                     'Login failed. please try again', 'danger')
 
 
 @auth_route.get('/dashboard/logout')

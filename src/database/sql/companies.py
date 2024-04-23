@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, inspect, Integer, Boolean, JSON, Date
+from sqlalchemy import Column, String, inspect, Integer, Boolean, JSON, Date, Text
 
 from src.database.constants import ID_LEN, NAME_LEN, SHORT_DESCRIPTION_lEN
 from src.database.sql import Base, engine
@@ -98,13 +98,13 @@ class CoverPlanDetailsORM(Base):
     plan_number = Column(String(10), primary_key=True)
     plan_name = Column(String(255))
     plan_type = Column(String(50))
-    benefits = Column(JSON)
+    benefits = Column(Text)
     coverage_amount = Column(Integer)
     premium_costs = Column(Integer)
     additional_details = Column(String(1000))
     terms_and_conditions = Column(String(1000))
-    inclusions = Column(JSON)
-    exclusions = Column(JSON)
+    inclusions = Column(Text)
+    exclusions = Column(Text)
     contact_information = Column(String(255))
 
     @classmethod
@@ -153,7 +153,7 @@ class EmployeeORM(Base):
     contact_number = Column(String(20))
     position = Column(String(255))
     date_of_birth = Column(String(10))
-    date_joined = Column(String(10), default=string_today)
+    date_joined = Column(String(10))
     salary = Column(Integer)
     is_active = Column(Boolean, default=True)
 

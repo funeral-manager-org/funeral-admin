@@ -40,9 +40,11 @@ async def get_admin(user: User):
         return render_template('admin/employees/employee.html', **context)
     elif user.is_client:
         return render_template('admin/clients/clients.html', **context)
+    message = """If you want to register your funeral company please click on register company below
+    If you are an employee of a funeral company that uses this system please inform your administrator so they can register you
+    on their company"""
 
-    flash(message="you are not a client in this portal consider applying for a cover in a funeral company near you",
-          category='success')
+    flash(message=message, category='success')
 
     return redirect(url_for('home.get_home'))
 
@@ -266,45 +268,51 @@ async def add_employee(user: User, branch_id: str):
         flash(message="Please fill in all required employee details", category='danger')
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
-    employee_ = await company_controller.add_employee(employee=new_employee)
+    new_employee, employee_ = await company_controller.add_employee(employee=new_employee)
     print(f"New Employee : {employee_}")
-    branch = await company_controller.get_branch_by_id(branch_id=branch_id)
-    branch.total_employees += 1
-    updated_branch = await company_controller.update_company_branch(company_branch=branch)
 
-    if employee_.email:
+    if new_employee:
+        branch = await company_controller.get_branch_by_id(branch_id=branch_id)
+        branch.total_employees += 1
+        updated_branch = await company_controller.update_company_branch(company_branch=branch)
 
-        new_user = await user_controller.get_by_email(email=employee_.email)
+        if employee_.email:
 
-        if new_user:
-            pass
-        else:
-            password = await user_controller.create_employee_password()
-            password_hash = encryptor.create_hash(password=password)
+            new_user = await user_controller.get_by_email(email=employee_.email)
 
-            _new_user = User(uid=create_id(),
-                             branch_id=branch_id,
-                             company_id=user.company_id,
-                             username=employee_.email,
-                             email=employee_.email,
-                             password_hash=password_hash,
-                             is_employee=True)
+            if new_user:
+                pass
+            else:
+                password = await user_controller.create_employee_password()
+                password_hash = encryptor.create_hash(password=password)
 
-            new_employee_user = await user_controller.add_employee(user=_new_user)
+                _new_user = User(uid=create_id(),
+                                 branch_id=branch_id,
+                                 company_id=user.company_id,
+                                 username=employee_.email,
+                                 email=employee_.email,
+                                 password_hash=password_hash,
+                                 is_employee=True)
 
-            send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user,
-                                                                                         password=password)
-        message = """
-        Your Employee has successfully been added.
-            We have sent an Email to your employee with their login details
-            Your Employee also need to click a link on the email to verify their email address            
-        """
+                new_employee_user = await user_controller.add_employee(user=_new_user)
+
+                send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user,
+                                                                                             password=password)
+            message = """
+            Your Employee has successfully been added.
+                We have sent an Email to your employee with their login details
+                Your Employee also need to click a link on the email to verify their email address            
+            """
+            flash(message=message, category="success")
+            return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+    if employee_:
+        message = "Employee was successfully updated"
         flash(message=message, category="success")
-        return redirect(url_for('company.get_branch', branch_id=branch_id))
+    else:
+        message = "We where unable to add your employee please try again if the problem persists please notify admin"
+        flash(message=message, category="danger")
 
-    message = "We where unable to add your employee please try again if the problem persists please notify admin"
-
-    flash(message=message, category="danger")
     return redirect(url_for('company.get_branch', branch_id=branch_id))
 
 
@@ -319,7 +327,8 @@ async def get_employee(user: User, branch_id: str, employee_id: str):
     :return:
     """
     employee_detail: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
+    employee_roles: list[str] = await company_controller.get_employee_roles(company_id=user.company_id)
     if employee_detail:
         branch = await company_controller.get_branch_by_id(branch_id=branch_id)
-        context = dict(user=user, employee_detail=employee_detail, branch=branch)
+        context = dict(user=user, employee_detail=employee_detail, branch=branch, employee_roles=employee_roles)
         return render_template('admin/managers/branches/employee.html', **context)

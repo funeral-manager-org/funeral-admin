@@ -183,5 +183,5 @@ class EmployeeDetails(BaseModel):
     role: str
     date_of_birth: str
     date_joined: str = Field(default_factory=string_today)
-    salary: float
+    salary: int
     is_active: bool = True

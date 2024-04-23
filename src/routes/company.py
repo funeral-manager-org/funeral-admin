@@ -162,7 +162,7 @@ async def add_branch_address(user: User, branch_id: str):
         flash(message="Error adding branch address please input all fields", category="danger")
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
-    branch_address_ = await company_controller.add_update_branch_address(branch_address=branch_address)
+    branch_address_ = await company_controller.add_update_address(address=branch_address)
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     branch.address_id = branch_address_.address_id
 
@@ -186,8 +186,7 @@ async def add_postal_address(user: User, branch_id: str):
         flash(message="Error adding branch address please input all fields", category="danger")
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
-    branch_postal_address_ = await company_controller.add_branch_postal_address(
-        branch_postal_address=branch_postal_address)
+    branch_postal_address_ = await company_controller.add_postal_address(postal_address=branch_postal_address)
 
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     branch.postal_id = branch_postal_address_.postal_id
@@ -222,7 +221,7 @@ async def add_update_branch_contacts(user: User, branch_id: str):
     return redirect(url_for('company.get_branch', branch_id=branch_id))
 
 
-@company_route.post('/admin/company/branch/bank-account/<string:branch_id>')
+@company_route.post('/admin/company/branch/bank-account/add/<string:branch_id>')
 @login_required
 async def add_bank_account(user: User, branch_id: str):
     """
@@ -237,7 +236,7 @@ async def add_bank_account(user: User, branch_id: str):
         flash(message="Please fill in all required fields", category="danger")
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
-    branch_bank_account_ = await company_controller.add_branch_bank_account(branch_bank_account=branch_bank_account)
+    branch_bank_account_ = await company_controller.add_bank_account(bank_account=branch_bank_account)
 
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     branch.bank_account_id = branch_bank_account_.bank_account_id
@@ -248,7 +247,7 @@ async def add_bank_account(user: User, branch_id: str):
     return redirect(url_for('company.get_branch', branch_id=branch_id))
 
 
-@company_route.post('/admin/company/branch/add-employee/<string:branch_id>')
+@company_route.post('/admin/company/branch/employee/add/<string:branch_id>')
 @login_required
 async def add_employee(user: User, branch_id: str):
     """
@@ -316,7 +315,7 @@ async def add_employee(user: User, branch_id: str):
     return redirect(url_for('company.get_branch', branch_id=branch_id))
 
 
-@company_route.get('/admin/company/branch/employee/<string:branch_id>/<string:employee_id>')
+@company_route.get('/admin/company/branch/employee/get/<string:branch_id>/<string:employee_id>')
 @login_required
 async def get_employee(user: User, branch_id: str, employee_id: str):
     """
@@ -349,3 +348,52 @@ async def get_employee(user: User, branch_id: str, employee_id: str):
             context.update(contact=contact)
 
         return render_template('admin/managers/branches/employee.html', **context)
+
+
+@company_route.post('/admin/company/branch/employee/address/add/<string:branch_id>/<string:employee_id>')
+@login_required
+async def add_employee_address(user: User, branch_id: str, employee_id: str):
+    """
+
+    :return:
+    """
+    try:
+        address = Address(**request.form)
+    except ValidationError as e:
+        print(str(e))
+        flash(message="Please input all required fields", category="danger")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
+    address = await company_controller.add_update_address(address=address)
+    employee = await company_controller.get_employee(employee_id=employee_id)
+    employee.address_id = address.address_id
+    employee_ = await company_controller.add_employee(employee=employee)
+    message = "successfully update employee physical address"
+    flash(message=message, category="success")
+    return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
+
+@company_route.post('/admin/company/branch/employee/bank-account/add/<string:branch_id>/<string:employee_id>')
+@login_required
+async def add_employee_bank_account(user: User, employee_id: str):
+    """
+
+    :param user:
+    :param employee_id:
+    :return:
+    """
+    try:
+        bank_account = BankAccount(**request.form)
+    except ValidationError as e:
+        print(str(e))
+        flash(message="Please input all required fields", category="danger")
+        return redirect(url_for('company.get_employee', employee_id=employee_id))
+
+    bank_account = await company_controller.add_bank_account(bank_account=bank_account)
+    employee = await company_controller.get_employee(employee_id=employee_id)
+    employee.bank_account_id = employee.bank_account_id
+    employee_ = await company_controller.add_employee(employee=employee)
+    message = "successfully update employee bank account"
+    flash(message=message, category="success")
+    redirect(url_for('company.get_employee', employee_id=employee_id))
+

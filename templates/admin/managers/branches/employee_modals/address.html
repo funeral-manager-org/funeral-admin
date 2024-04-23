@@ -1,4 +1,4 @@
-<div class="modal fade" id="addressID" tabindex="-1" role="dialog" aria-labelledby="addressLabel" aria-hidden="true">
+<div class="modal fade" id="employeeAddressID" tabindex="-1" role="dialog" aria-labelledby="addressLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -29,7 +29,7 @@
                         <div class="card-footer">
                             {% if address %}
                                 <!-- Display address details here -->
-                                <p class="font-weight-bold text-info">{{ branch.branch_name }} {{ branch.branch_description }}</p>
+                                <p class="font-weight-bold text-info">{{ employee_detail.full_names }} {{ employee_detail.last_name }}</p>
                                 <p>Street: <span class="font-weight-bold text-info">{{ address.street }}</span></p>
                                 <p>City: <span class="font-weight-bold text-info">{{ address.city }}</span></p>
                                 <p>State: <span class="font-weight-bold text-info">{{ address.state_province }}</span></p>
@@ -45,9 +45,9 @@
                     <!-- Edit Address Tab -->
                     <div class="tab-pane" id="editAddress" role="tabpanel">
                         <div class="card-footer">
-                            <span class="font-weight-bold text-info">{{ branch.branch_name }} <span class="font-weight-light text-dark">Branch Address</span></span>
+                            <span class="font-weight-bold text-info">{{ employee_detail.full_names }} <span class="font-weight-light text-dark">Address</span></span>
                             <hr/>
-                            <form action="{{ url_for('company.add_branch_address', branch_id=branch.branch_id) }}" method="POST">
+                            <form action="{{ url_for('company.add_employee_address',branch_id=employee_detail.branch_id, employee_id=employee_detail.employee_id) }}" method="POST">
                                 <input type="hidden" name="address_id" value="{{ address.address_id }}" />
                                 <div class="form-group">
                                     <label for="street">Street</label>
@@ -81,7 +81,7 @@
                         <div class="card-footer">
                             <!-- Form for adding new address -->
                             <span class="font-weight-bold text-info">Add Branch Address</span>
-                            <form action="{{ url_for('company.add_branch_address', branch_id=branch.branch_id) }}" method="POST">
+                            <form action="{{ url_for('company.add_employee_address',branch_id=employee_detail.branch_id, employee_id=employee_detail.employee_id) }}" method="POST">
                                 <div class="form-group">
                                     <label for="street">Street</label>
                                     <input type="text" name="street" id="street" class="form-control" />

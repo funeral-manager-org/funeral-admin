@@ -120,26 +120,26 @@ class CompanyController(Controllers):
         """
         return EmployeeRoles.get_all_roles()
 
-    async def add_update_branch_address(self, branch_address: Address) -> Address:
+    async def add_update_address(self, address: Address) -> Address:
         """
 
-        :param branch_address:
+        :param address:
         :return:
         """
         with self.get_session() as session:
-            branch_address_orm = session.query(AddressORM).filter_by(address_id=branch_address.address_id).first()
+            branch_address_orm = session.query(AddressORM).filter_by(address_id=address.address_id).first()
 
             if isinstance(branch_address_orm, AddressORM):
-                branch_address_orm.street = branch_address.street
-                branch_address_orm.city = branch_address.city
-                branch_address_orm.state_province = branch_address.state_province
-                branch_address_orm.postal_code = branch_address.postal_code
+                branch_address_orm.street = address.street
+                branch_address_orm.city = address.city
+                branch_address_orm.state_province = address.state_province
+                branch_address_orm.postal_code = address.postal_code
                 session.commit()
-                return branch_address
+                return address
 
-            session.add(AddressORM(**branch_address.dict()))
+            session.add(AddressORM(**address.dict()))
             session.commit()
-            return branch_address
+            return address
 
     async def get_address(self, address_id: str) -> Address | None:
         with self.get_session() as session:
@@ -148,27 +148,27 @@ class CompanyController(Controllers):
                 return Address(**branch_address.to_dict())
             return None
 
-    async def add_branch_postal_address(self, branch_postal_address: PostalAddress) -> PostalAddress | None:
+    async def add_postal_address(self, postal_address: PostalAddress) -> PostalAddress | None:
         """
 
-        :param branch_postal_address:
+        :param postal_address:
         :return:
         """
         with self.get_session() as session:
-            _postal_id = branch_postal_address.postal_id
+            _postal_id = postal_address.postal_id
             branch_postal_orm = session.query(PostalAddressORM).filter_by(postal_id=_postal_id).first()
             if isinstance(branch_postal_orm, PostalAddressORM):
-                branch_postal_orm.address_line_1 = branch_postal_address.address_line_1
-                branch_postal_orm.town_city = branch_postal_address.town_city
-                branch_postal_orm.province = branch_postal_address.province
-                branch_postal_orm.country = branch_postal_address.country
-                branch_postal_orm.postal_code = branch_postal_address.postal_code
+                branch_postal_orm.address_line_1 = postal_address.address_line_1
+                branch_postal_orm.town_city = postal_address.town_city
+                branch_postal_orm.province = postal_address.province
+                branch_postal_orm.country = postal_address.country
+                branch_postal_orm.postal_code = postal_address.postal_code
                 session.commit()
-                return branch_postal_address
+                return postal_address
 
-            session.add(PostalAddressORM(**branch_postal_address.dict()))
+            session.add(PostalAddressORM(**postal_address.dict()))
             session.commit()
-            return branch_postal_address
+            return postal_address
 
     async def get_postal_address(self, postal_id: str) -> PostalAddress | None:
         """
@@ -224,31 +224,31 @@ class CompanyController(Controllers):
 
             return None
 
-    async def add_branch_bank_account(self, branch_bank_account: BankAccount) -> BankAccount | None:
+    async def add_bank_account(self, bank_account: BankAccount) -> BankAccount | None:
         """
         Add or update a branch bank account in the database.
 
-        :param branch_bank_account: Instance of BankAccount containing bank account details.
+        :param bank_account: Instance of BankAccount containing bank account details.
         :return: Added or updated BankAccount instance if successful, None otherwise.
         """
         with self.get_session() as session:
             bank_account_orm = session.query(BankAccountORM).filter_by(
-                bank_account_id=branch_bank_account.bank_account_id).first()
+                bank_account_id=bank_account.bank_account_id).first()
 
             if isinstance(bank_account_orm, BankAccountORM):
                 # If the bank account already exists, update its details
-                bank_account_orm.account_holder = branch_bank_account.account_holder
-                bank_account_orm.account_number = branch_bank_account.account_number
-                bank_account_orm.bank_name = branch_bank_account.bank_name
-                bank_account_orm.branch = branch_bank_account.branch
-                bank_account_orm.account_type = branch_bank_account.account_type
+                bank_account_orm.account_holder = bank_account.account_holder
+                bank_account_orm.account_number = bank_account.account_number
+                bank_account_orm.bank_name = bank_account.bank_name
+                bank_account_orm.branch = bank_account.branch
+                bank_account_orm.account_type = bank_account.account_type
                 session.commit()
-                return branch_bank_account
+                return bank_account
 
             # If the bank account does not exist, add it to the database
-            session.add(BankAccountORM(**branch_bank_account.dict()))
+            session.add(BankAccountORM(**bank_account.dict()))
             session.commit()
-            return branch_bank_account
+            return bank_account
 
     async def get_bank_account(self, bank_account_id: str) -> BankAccount | None:
         """
@@ -284,6 +284,10 @@ class CompanyController(Controllers):
                 employee_orm.date_joined = datetime.strptime(employee.date_joined, '%Y-%m-%d').date()
                 employee_orm.salary = employee.salary
                 employee_orm.is_active = employee.is_active
+                employee_orm.address_id = employee.address_id
+                employee_orm.postal_id = employee.postal_id
+                employee_orm.bank_account_id = employee.bank_account_id
+                employee_orm.contact_id = employee.contact_id
 
                 session.commit()
                 return False, employee
@@ -303,8 +307,6 @@ class CompanyController(Controllers):
         """
         with self.get_session() as session:
             employees_orm = session.query(EmployeeORM).filter_by(branch_id=branch_id).all()
-            print("EMPLOYEE ORM")
-            print(employees_orm)
             return [EmployeeDetails(**employee.to_dict()) for employee in employees_orm if
                     isinstance(employee, EmployeeORM)]
 

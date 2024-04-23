@@ -157,10 +157,10 @@ class EmployeeORM(Base):
     salary = Column(Integer)
     is_active = Column(Boolean, default=True)
 
-    address_id = Column(String(ID_LEN))
-    contact_id = Column(String(ID_LEN))
-    postal_id = Column(String(ID_LEN))
-    bank_account_id = Column(String(ID_LEN))
+    address_id = Column(String(ID_LEN), nullable=True)
+    contact_id = Column(String(ID_LEN), nullable=True)
+    postal_id = Column(String(ID_LEN), nullable=True)
+    bank_account_id = Column(String(ID_LEN), nullable=True)
 
     @classmethod
     def create_if_not_table(cls):

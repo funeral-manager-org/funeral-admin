@@ -1,4 +1,4 @@
-<div class="modal fade" id="accountID" tabindex="-1" role="dialog" aria-labelledby="accountLabel" aria-hidden="true">
+<div class="modal fade" id="employeeAccountID" tabindex="-1" role="dialog" aria-labelledby="accountLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -43,7 +43,7 @@
                         <!-- View Bank Account Tab -->
                         <div class="tab-pane active" id="viewAccount" role="tabpanel">
                             <div class="card-footer">
-                                <p class="font-weight-bold text-info">{{ branch.branch_name }} Bank Account</p>
+                                <p class="font-weight-bold text-info">{{ employee_detail.full_names }} Bank Account</p>
                                 <p>Account Holder: {{ bank_account.account_holder }}</p>
                                 <p>Account Number: {{ bank_account.account_number }}</p>
                                 <p>Bank Name: {{ bank_account.bank_name }}</p>

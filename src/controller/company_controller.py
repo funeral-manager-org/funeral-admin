@@ -141,7 +141,7 @@ class CompanyController(Controllers):
             session.commit()
             return branch_address
 
-    async def get_branch_address(self, address_id: str) -> Address | None:
+    async def get_address(self, address_id: str) -> Address | None:
         with self.get_session() as session:
             branch_address = session.query(AddressORM).filter_by(address_id=address_id).first()
             if isinstance(branch_address, AddressORM):
@@ -170,7 +170,7 @@ class CompanyController(Controllers):
             session.commit()
             return branch_postal_address
 
-    async def get_branch_postal_address(self, postal_id: str) -> PostalAddress | None:
+    async def get_postal_address(self, postal_id: str) -> PostalAddress | None:
         """
 
         :param postal_id:
@@ -206,7 +206,7 @@ class CompanyController(Controllers):
             session.commit()
             return branch_contacts
 
-    async def get_branch_contact(self, contact_id: str) -> Contacts | None:
+    async def get_contact(self, contact_id: str) -> Contacts | None:
         """
         Retrieve branch contact details from the database.
 
@@ -250,7 +250,7 @@ class CompanyController(Controllers):
             session.commit()
             return branch_bank_account
 
-    async def get_branch_bank_account(self, bank_account_id: str) -> BankAccount | None:
+    async def get_bank_account(self, bank_account_id: str) -> BankAccount | None:
         """
 
         :param bank_account_id:
@@ -263,7 +263,7 @@ class CompanyController(Controllers):
                 return BankAccount(**bank_account_orm.to_dict())
             return None
 
-    async def add_employee(self, employee: EmployeeDetails) -> tuple[bool, EmployeeDetails| None]:
+    async def add_employee(self, employee: EmployeeDetails) -> tuple[bool, EmployeeDetails | None]:
         """
 
         :param employee:
@@ -308,9 +308,7 @@ class CompanyController(Controllers):
             return [EmployeeDetails(**employee.to_dict()) for employee in employees_orm if
                     isinstance(employee, EmployeeORM)]
 
-
-
-    async def get_employee(self, employee_id: str) -> EmployeeDetails| None:
+    async def get_employee(self, employee_id: str) -> EmployeeDetails | None:
         """
 
         :param employee_id:
@@ -321,3 +319,4 @@ class CompanyController(Controllers):
             if isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict())
             return None
+

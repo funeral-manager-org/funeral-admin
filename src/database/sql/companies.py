@@ -157,6 +157,11 @@ class EmployeeORM(Base):
     salary = Column(Integer)
     is_active = Column(Boolean, default=True)
 
+    address_id = Column(String(ID_LEN))
+    contact_id = Column(String(ID_LEN))
+    postal_id = Column(String(ID_LEN))
+    bank_account_id = Column(String(ID_LEN))
+
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
@@ -185,7 +190,11 @@ class EmployeeORM(Base):
             "date_of_birth": self.date_of_birth,
             "date_joined": self.date_joined,
             "salary": self.salary,
-            "is_active": self.is_active
+            "is_active": self.is_active,
+            "address_id": self.address_id,
+            "contact_id": self.contact_id,
+            "postal_id": self.postal_id,
+            "bank_account_id": self.bank_account_id
         }
 
 

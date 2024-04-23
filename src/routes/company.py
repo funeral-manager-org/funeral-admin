@@ -129,19 +129,19 @@ async def get_branch(user: User, branch_id: str):
                    total_employees=len(employee_list))
 
     if branch.address_id:
-        address = await company_controller.get_branch_address(address_id=branch.address_id)
+        address = await company_controller.get_address(address_id=branch.address_id)
         context.update(address=address)
 
     if branch.postal_id:
-        postal = await company_controller.get_branch_postal_address(postal_id=branch.postal_id)
+        postal = await company_controller.get_postal_address(postal_id=branch.postal_id)
         context.update(postal_address=postal)
 
     if branch.contact_id:
-        contact = await company_controller.get_branch_contact(contact_id=branch.contact_id)
+        contact = await company_controller.get_contact(contact_id=branch.contact_id)
         context.update(contact=contact)
 
     if branch.bank_account_id:
-        bank_account = await  company_controller.get_branch_bank_account(bank_account_id=branch.bank_account_id)
+        bank_account = await company_controller.get_bank_account(bank_account_id=branch.bank_account_id)
         context.update(bank_account=bank_account)
 
     return render_template('admin/managers/branches/details.html', **context)
@@ -331,4 +331,21 @@ async def get_employee(user: User, branch_id: str, employee_id: str):
     if employee_detail:
         branch = await company_controller.get_branch_by_id(branch_id=branch_id)
         context = dict(user=user, employee_detail=employee_detail, branch=branch, employee_roles=employee_roles)
+
+        if employee_detail.address_id:
+            address = await company_controller.get_address(address_id=employee_detail.address_id)
+            context.update(address=address)
+
+        if employee_detail.postal_id:
+            postal_address = await company_controller.get_postal_address(postal_id=employee_detail.postal_id)
+            context.update(postal_address=postal_address)
+
+        if employee_detail.bank_account_id:
+            bank_account = await company_controller.get_bank_account(bank_account_id=employee_detail.bank_account_id)
+            context.update(bank_account=bank_account)
+
+        if employee_detail.contact_id:
+            contact = await company_controller.get_contact(contact_id=employee_detail.contact_id)
+            context.update(contact=contact)
+
         return render_template('admin/managers/branches/employee.html', **context)

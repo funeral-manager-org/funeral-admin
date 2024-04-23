@@ -185,3 +185,9 @@ class EmployeeDetails(BaseModel):
     date_joined: str = Field(default_factory=string_today)
     salary: int
     is_active: bool = True
+
+    address_id: str | None
+    contact_id: str | None
+    postal_id: str | None
+    bank_account_id: str | None
+

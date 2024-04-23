@@ -1,0 +1,60 @@
+<form action="{{ url_for('company.add_employee_postal_address', branch_id=employee_detail.branch_id, employee_id=employee_detail.employee_id) }}" method="POST">
+    <!-- Add your form fields here -->
+    {% if postal_address %}<input type="hidden" name="postal_id" value="{{ postal_address.postal_id }}" />{% endif %}
+    <div class="form-group">
+        <label for="address_line_1" class="font-weight-bold text-info">Address Line 1</label>
+        {% if postal_address %}
+            <input type="text" name="address_line_1" id="address_line_1" class="form-control" placeholder="Address Line 1"
+                   value="{{ postal_address.address_line_1 }}" required>
+        {% else %}
+            <input type="text" name="address_line_1" id="address_line_1" class="form-control" placeholder="Address Line 1" required>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        <label for="town_city" class="font-weight-bold text-info">Town City</label>
+        {% if postal_address %}
+            <input type="text" name="town_city" id="town_city" class="form-control" placeholder="Town/City"
+                   value="{{ postal_address.town_city }}" required >
+        {% else %}
+            <input type="text" name="town_city" id="town_city" class="form-control" placeholder="Town/City" required>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        <label for="province" class="font-weight-bold text-info">Province</label>
+        {% if postal_address %}
+            <input type="text" name="province" id="province" class="form-control" placeholder="Province"
+                   value="{{ postal_address.province }}"
+                   required>
+        {% else %}
+            <input type="text" name="province" id="province" class="form-control" placeholder="Province" required>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        <label for="country" class="font-weight-bold text-info">Country</label>
+        {% if postal_address %}
+            <input type="text" name="country" id="country" class="form-control" placeholder="Country"
+                   value="{{ postal_address.country }}" required>
+        {% else %}
+            <input type="text" name="country" id="country" class="form-control" placeholder="Country" required>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        <label for="postal_code" class="font-weight-bold text-info">Postal Code</label>
+        {% if postal_address %}
+            <input type="text" name="postal_code" id="postal_code" class="form-control" placeholder="Postal Code"
+                   value="{{ postal_address.postal_code }}"
+                   required>
+        {% else %}
+            <input type="text" name="postal_code" id="postal_code" class="form-control" placeholder="Postal Code" required>
+        {% endif %}
+    </div>
+    {% if postal_address %}
+        <div class="form-group">
+            <button type="submit" class="btn btn-sm btn-warning"><i class="fa fa-file-text-o"> </i> Update Postal Address</button>
+        </div>
+    {% else %}
+        <div class="form-group">
+            <button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-file-text"> </i> Add Postal Address</button>
+        </div>
+    {% endif %}
+</form>

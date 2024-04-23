@@ -20,7 +20,7 @@ class CompanyController(Controllers):
 
     def init_app(self, app: Flask):
         super().init_app(app=app)
-
+    @error_handler
     async def register_company(self, company: Company) -> Company | None:
         """
 
@@ -38,6 +38,7 @@ class CompanyController(Controllers):
 
             return company
 
+    @error_handler
     async def get_company_details(self, company_id: str) -> Company | None:
         with self.get_session() as session:
             company_orm = session.query(CompanyORM).filter(CompanyORM.company_id == company_id).first()
@@ -45,6 +46,7 @@ class CompanyController(Controllers):
                 return Company(**company_orm.to_dict())
             return None
 
+    @error_handler
     async def add_company_branch(self, company_branch: CompanyBranches) -> CompanyBranches | None:
         """
 
@@ -62,6 +64,7 @@ class CompanyController(Controllers):
             session.commit()
             return company_branch
 
+    @error_handler
     async def update_company_branch(self, company_branch: CompanyBranches) -> CompanyBranches | None:
         """
 
@@ -87,6 +90,7 @@ class CompanyController(Controllers):
                 return company_branch
             return None
 
+    @error_handler
     async def get_company_branches(self, company_id: str) -> list[CompanyBranches]:
         """
 
@@ -99,6 +103,7 @@ class CompanyController(Controllers):
             return [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
                     if isinstance(branch_orm, CompanyBranchesORM)]
 
+    @error_handler
     async def get_branch_by_id(self, branch_id: str) -> CompanyBranches | None:
         """
 
@@ -112,6 +117,7 @@ class CompanyController(Controllers):
                 return None
             return CompanyBranches(**branch_orm.to_dict())
 
+    @error_handler
     async def get_employee_roles(self, company_id: str) -> list[str]:
         """
 
@@ -120,7 +126,8 @@ class CompanyController(Controllers):
         """
         return EmployeeRoles.get_all_roles()
 
-    async def add_update_address(self, address: Address) -> Address:
+    @error_handler
+    async def add_update_address(self, address: Address) -> Address| None:
         """
 
         :param address:
@@ -136,11 +143,15 @@ class CompanyController(Controllers):
                 branch_address_orm.postal_code = address.postal_code
                 session.commit()
                 return address
+            try:
+                session.add(AddressORM(**address.dict()))
+                session.commit()
+                return address
+            except OperationalError as e:
+                print(str(e))
+                return None
 
-            session.add(AddressORM(**address.dict()))
-            session.commit()
-            return address
-
+    @error_handler
     async def get_address(self, address_id: str) -> Address | None:
         with self.get_session() as session:
             branch_address = session.query(AddressORM).filter_by(address_id=address_id).first()
@@ -148,6 +159,7 @@ class CompanyController(Controllers):
                 return Address(**branch_address.to_dict())
             return None
 
+    @error_handler
     async def add_postal_address(self, postal_address: PostalAddress) -> PostalAddress | None:
         """
 
@@ -170,6 +182,7 @@ class CompanyController(Controllers):
             session.commit()
             return postal_address
 
+    @error_handler
     async def get_postal_address(self, postal_id: str) -> PostalAddress | None:
         """
 
@@ -182,30 +195,32 @@ class CompanyController(Controllers):
                 return PostalAddress(**postal_address_orm.to_dict())
             return None
 
-    async def add_branch_contacts(self, branch_contacts: Contacts) -> Contacts | None:
+    @error_handler
+    async def add_contacts(self, contact: Contacts) -> Contacts | None:
         """
         Add branch contacts to the database.
 
-        :param branch_contacts: Instance of Contacts containing contact details.
+        :param contact: Instance of Contacts containing contact details.
         :return: Added Contacts instance if successful, None otherwise.
         """
         with self.get_session() as session:
-            contact_orm = session.query(ContactsORM).filter_by(contact_id=branch_contacts.contact_id).first()
+            contact_orm = session.query(ContactsORM).filter_by(contact_id=contact.contact_id).first()
             if isinstance(contact_orm, ContactsORM):
                 # Update existing contact details
-                contact_orm.cell = branch_contacts.cell
-                contact_orm.tel = branch_contacts.tel
-                contact_orm.email = branch_contacts.email
-                contact_orm.facebook = branch_contacts.facebook
-                contact_orm.twitter = branch_contacts.twitter
-                contact_orm.whatsapp = branch_contacts.whatsapp
+                contact_orm.cell = contact.cell
+                contact_orm.tel = contact.tel
+                contact_orm.email = contact.email
+                contact_orm.facebook = contact.facebook
+                contact_orm.twitter = contact.twitter
+                contact_orm.whatsapp = contact.whatsapp
                 session.commit()
-                return branch_contacts
+                return contact
             # Add new contact details
-            session.add(ContactsORM(**branch_contacts.dict()))
+            session.add(ContactsORM(**contact.dict()))
             session.commit()
-            return branch_contacts
+            return contact
 
+    @error_handler
     async def get_contact(self, contact_id: str) -> Contacts | None:
         """
         Retrieve branch contact details from the database.
@@ -224,6 +239,7 @@ class CompanyController(Controllers):
 
             return None
 
+    @error_handler
     async def add_bank_account(self, bank_account: BankAccount) -> BankAccount | None:
         """
         Add or update a branch bank account in the database.
@@ -244,12 +260,17 @@ class CompanyController(Controllers):
                 bank_account_orm.account_type = bank_account.account_type
                 session.commit()
                 return bank_account
+            try:
+                # If the bank account does not exist, add it to the database
+                session.add(BankAccountORM(**bank_account.dict()))
+                session.commit()
+                return bank_account
+            except OperationalError as e:
+                print(str(e))
+                session.rollback()
+                return None
 
-            # If the bank account does not exist, add it to the database
-            session.add(BankAccountORM(**bank_account.dict()))
-            session.commit()
-            return bank_account
-
+    @error_handler
     async def get_bank_account(self, bank_account_id: str) -> BankAccount | None:
         """
 
@@ -263,6 +284,7 @@ class CompanyController(Controllers):
                 return BankAccount(**bank_account_orm.to_dict())
             return None
 
+    @error_handler
     async def add_employee(self, employee: EmployeeDetails) -> tuple[bool, EmployeeDetails | None]:
         """
 
@@ -299,6 +321,7 @@ class CompanyController(Controllers):
                 return False, None
             return True, employee
 
+    @error_handler
     async def get_branch_employees(self, branch_id: str) -> list[EmployeeDetails]:
         """
 
@@ -310,6 +333,7 @@ class CompanyController(Controllers):
             return [EmployeeDetails(**employee.to_dict()) for employee in employees_orm if
                     isinstance(employee, EmployeeORM)]
 
+    @error_handler
     async def get_employee(self, employee_id: str) -> EmployeeDetails | None:
         """
 

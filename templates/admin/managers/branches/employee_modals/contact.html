@@ -37,7 +37,7 @@
                         <div class="tab-pane active" id="viewContact" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Display contact details here -->
-                                <p class="font-weight-bold text-info">{{ branch.branch_name }} {{ branch.branch_description }} Contact Information </p>
+                                <p class="font-weight-bold text-info">{{ employee_detail.full_names }} {{ employee_detail.last_name }} Contact Information </p>
                                 <p>Cell: <span class="font-weight-bold text-info">{{ contact.cell }}</span></p>
                                 {% if contact.tel %}
                                     <p>Tel: <span class="font-weight-bold text-info">{{ contact.tel }}</span></p>
@@ -58,7 +58,7 @@
                         <div class="tab-pane" id="editContact" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Form for editing existing contact -->
-                                {% include "admin/managers/branches/modals/contact_form.html" %}
+                                {% include "admin/managers/branches/employee_modals/contact_form.html" %}
                             </div>
                         </div>
                     {% else %}
@@ -66,7 +66,7 @@
                         <div class="tab-pane active" id="addContact" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Form for adding new contact -->
-                               {% include "admin/managers/branches/modals/contact_form.html" %}
+                               {% include "admin/managers/branches/employee_modals/contact_form.html" %}
                             </div>
                         </div>
                     {% endif %}

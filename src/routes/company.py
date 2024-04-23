@@ -211,7 +211,7 @@ async def add_update_branch_contacts(user: User, branch_id: str):
         flash(message="Please ensure to fill in all required fields", category="danger")
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
-    branch_contacts_ = await company_controller.add_branch_contacts(branch_contacts=branch_contacts)
+    branch_contacts_ = await company_controller.add_contacts(contact=branch_contacts)
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     branch.contact_id = branch_contacts_.contact_id
 
@@ -294,7 +294,11 @@ async def add_employee(user: User, branch_id: str):
                                  is_employee=True)
 
                 new_employee_user = await user_controller.add_employee(user=_new_user)
+                # Updating UID for Employee
+                employee_.uid = new_employee_user.uid
+                new_employee, employee_ = await company_controller.add_employee(employee=employee_)
 
+                # Sending Verification Email for New Employees
                 send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user,
                                                                                              password=password)
             message = """
@@ -327,6 +331,7 @@ async def get_employee(user: User, branch_id: str, employee_id: str):
     """
     employee_detail: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
     employee_roles: list[str] = await company_controller.get_employee_roles(company_id=user.company_id)
+
     if employee_detail:
         branch = await company_controller.get_branch_by_id(branch_id=branch_id)
         context = dict(user=user, employee_detail=employee_detail, branch=branch, employee_roles=employee_roles)
@@ -346,7 +351,7 @@ async def get_employee(user: User, branch_id: str, employee_id: str):
         if employee_detail.contact_id:
             contact = await company_controller.get_contact(contact_id=employee_detail.contact_id)
             context.update(contact=contact)
-
+        print(context)
         return render_template('admin/managers/branches/employee.html', **context)
 
 
@@ -365,9 +370,17 @@ async def add_employee_address(user: User, branch_id: str, employee_id: str):
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
     address = await company_controller.add_update_address(address=address)
+    if not address:
+        message = "Error updating employee physical address"
+        flash(message=message, category="danger")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
+    # Updating Address ID
     employee = await company_controller.get_employee(employee_id=employee_id)
     employee.address_id = address.address_id
-    employee_ = await company_controller.add_employee(employee=employee)
+
+    new_employee, employee_ = await company_controller.add_employee(employee=employee)
+
     message = "successfully update employee physical address"
     flash(message=message, category="success")
     return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
@@ -375,9 +388,10 @@ async def add_employee_address(user: User, branch_id: str, employee_id: str):
 
 @company_route.post('/admin/company/branch/employee/bank-account/add/<string:branch_id>/<string:employee_id>')
 @login_required
-async def add_employee_bank_account(user: User, employee_id: str):
+async def add_employee_bank_account(user: User, branch_id: str, employee_id: str):
     """
 
+    :param branch_id:
     :param user:
     :param employee_id:
     :return:
@@ -387,13 +401,77 @@ async def add_employee_bank_account(user: User, employee_id: str):
     except ValidationError as e:
         print(str(e))
         flash(message="Please input all required fields", category="danger")
-        return redirect(url_for('company.get_employee', employee_id=employee_id))
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
     bank_account = await company_controller.add_bank_account(bank_account=bank_account)
+    if not bank_account:
+        message = "Unable to create or update bank account"
+        flash(message=message, category="success")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
+    # Setting Employee bank_account_id
     employee = await company_controller.get_employee(employee_id=employee_id)
-    employee.bank_account_id = employee.bank_account_id
-    employee_ = await company_controller.add_employee(employee=employee)
+    employee.bank_account_id = bank_account.bank_account_id
+
+    new_employee, employee_ = await company_controller.add_employee(employee=employee)
+
     message = "successfully update employee bank account"
     flash(message=message, category="success")
-    redirect(url_for('company.get_employee', employee_id=employee_id))
+    return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
+
+@company_route.post('/admin/company/branch/employee/contacts/add/<string:branch_id>/<string:employee_id>')
+@login_required
+async def add_employee_contacts(user: User, branch_id: str, employee_id: str):
+    """
+
+    :param user:
+    :param branch_id:
+    :param employee_id:
+    :return:
+    """
+    try:
+        contact = Contacts(**request.form)
+    except ValidationError as e:
+        print(str(e))
+        flash(message="Please input all required fields", category="danger")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
+    contact = await company_controller.add_contacts(contact=contact)
+    employee = await company_controller.get_employee(employee_id=employee_id)
+    employee.contact_id = contact.contact_id
+
+    new_employee, employee_ = await company_controller.add_employee(employee=employee)
+
+    message = "successfully update employee contact details"
+    flash(message=message, category="success")
+    return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
+
+@company_route.post('/admin/company/branch/employee/postal-address/add/<string:branch_id>/<string:employee_id>')
+@login_required
+async def add_employee_postal_address(user: User, branch_id: str, employee_id: str):
+    """
+
+    :param user:
+    :param branch_id:
+    :param employee_id:
+    :return:
+    """
+    try:
+        postal_address = PostalAddress(**request.form)
+    except ValidationError as e:
+        print(str(e))
+        flash(message="Please input all required fields", category="danger")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
+    # Updating Employee Postal ID
+    postal_address = await company_controller.add_postal_address(postal_address=postal_address)
+    employee = await company_controller.get_employee(employee_id=employee_id)
+    employee.postal_id = postal_address.postal_id
+
+    new_employee, employee_ = await company_controller.add_employee(employee=employee)
+
+    message = "successfully update employee contact details"
+    flash(message=message, category="success")
+    return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))

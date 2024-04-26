@@ -1,0 +1,62 @@
+<div class="modal fade" id="addPlanID" tabindex="-1" role="dialog" aria-labelledby="addPlanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+
+        <div class="modal-content">
+            <hr/>
+            <div class="modal-header">
+                <h2 id="addPlanLabel"> <i class="ti ti-folder"> </i>Add Plan </h2>
+            </div>
+
+            <div class="modal-body">
+                <form action="{{ url_for('covers.add_plan_cover') }}" method="POST">
+
+                    <div class="form-group">
+                        <label class="font-weight-bold text-success">Note: for multiple items please use commas to separate each item</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="plan_name">Plan Name:</label>
+                        <input type="text" class="form-control" id="plan_name" name="plan_name" placeholder="Enter plan name">
+                    </div>
+                    <div class="form-group">
+                        <label for="plan_type">Plan Type:</label>
+                        <input type="text" class="form-control" id="plan_type" name="plan_type" placeholder="Enter plan type">
+                    </div>
+                    <div class="form-group">
+                        <label for="benefits">Benefits:</label>
+                        <input type="text" class="form-control" id="benefits" name="benefits" placeholder="Enter benefits">
+                    </div>
+                    <div class="form-group">
+                        <label for="coverage_amount">Coverage Amount:</label>
+                        <input type="number" class="form-control" id="coverage_amount" name="coverage_amount" placeholder="Enter coverage amount">
+                    </div>
+                    <div class="form-group">
+                        <label for="premium_costs">Premium Costs:</label>
+                        <input type="number" class="form-control" id="premium_costs" name="premium_costs" placeholder="Enter premium costs">
+                    </div>
+                    <div class="form-group">
+                        <label for="additional_details">Additional Details:</label>
+                        <textarea class="form-control" id="additional_details" name="additional_details" rows="3" placeholder="Enter additional details"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="inclusions">Inclusions:</label>
+                        <textarea class="form-control" id="inclusions" name="inclusions" rows="3" placeholder="Enter inclusions"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="exclusions">Exclusions:</label>
+                        <textarea class="form-control" id="exclusions" name="exclusions" placeholder="Enter exclusions"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="terms_and_conditions">Terms and Conditions:</label>
+                        <textarea class="form-control" id="terms_and_conditions" name="terms_and_conditions" rows="3" placeholder="Enter terms and conditions"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_information">Contact Information:</label>
+                        <input type="text" class="form-control" id="contact_information" name="contact_information" placeholder="Enter contact information">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Plan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

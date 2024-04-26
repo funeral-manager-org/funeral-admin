@@ -346,3 +346,15 @@ class CompanyController(Controllers):
                 return EmployeeDetails(**employee_orm.to_dict())
             return None
 
+    @error_handler
+    async def get_company_employees(self, company_id: str) -> list[EmployeeDetails]:
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            employees_orm_list = session.query(EmployeeORM).filter_by(company_id=company_id).all()
+            return [EmployeeDetails(**employee_orm.to_dict()) for employee_orm in employees_orm_list
+                    if isinstance(employee_orm, EmployeeORM)]
+

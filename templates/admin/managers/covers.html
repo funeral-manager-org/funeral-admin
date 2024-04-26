@@ -1,0 +1,155 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title font-weight-bold text-info">
+                <i class="fa fa-folder-open"> </i>
+                Covers
+            </h3>
+
+        </div>
+
+
+
+
+        <ul class="nav nav-tabs" id="companyTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="companyDetails-tab" data-toggle="tab" href="#companyDetails" role="tab" aria-controls="companyDetails" aria-selected="true">
+                    <span class="font-weight-bold text-info">
+                        <i class="fa fa-folder"> </i>
+                        Active Covers
+                    </span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="createPlan-tab" data-toggle="tab" href="#createPlan" role="tab" aria-controls="createPlan" aria-selected="false">
+                    <span class="font-weight-bold text-info">
+                        <i class="fa fa-folder"> </i>
+                        Create Plan
+                    </span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" id="addBranch-tab" data-toggle="tab" href="#addBranch" role="tab" aria-controls="addBranch" aria-selected="false">
+                    <span class="font-weight-bold text-info">
+                        <i class="fa fa-folder"> </i>
+                            Reports
+                    </span>
+                </a>
+            </li>
+
+        </ul>
+
+
+            <div class="tab-content" id="companyTabsContent">
+                <div class="tab-pane fade show active" id="companyDetails" role="tabpanel" aria-labelledby="companyDetails-tab">
+                    <!-- Company Details Tab Content -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-folder-open-o"> </i>
+                                Active Covers
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <td class="font-weight-bold text-info">Plan Number</td>
+                                        <td class="font-weight-bold text-info">Plan Name</td>
+                                        <td class="font-weight-bold text-info">Plan Type</td>
+                                        <td class="font-weight-bold text-info">Coverage</td>
+                                        <td class="font-weight-bold text-info">Premium</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for plan in cover_plans %}
+                                        <tr>
+                                            <td>{{ plan.plan_number }}</td>
+                                            <td>{{ plan.plan_name }}</td>
+                                            <td>{{ plan.plan_type }}</td>
+                                            <td>{{ plan.coverage_amount }}</td>
+                                            <td>{{ plan.premium_costs }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="createPlan" role="tabpanel" aria-labelledby="createPlan-tab">
+                    <!-- Add Company Branch Tab Content -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Create Plan</h3>
+                        </div>
+                        <div class="card-body">
+                          <form action="{{ url_for('covers.add_plan_cover') }}" method="POST">
+
+                                        <div class="form-group">
+                                            <label class="font-weight-bold text-success">Note: for multiple items please use commas to separate each item</label>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="plan_name">Plan Name:</label>
+                                            <input type="text" class="form-control" id="plan_name" name="plan_name" placeholder="Enter plan name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="plan_type">Plan Type:</label>
+                                            <input type="text" class="form-control" id="plan_type" name="plan_type" placeholder="Enter plan type">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="benefits">Benefits:</label>
+                                            <input type="text" class="form-control" id="benefits" name="benefits" placeholder="Enter benefits">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="coverage_amount">Coverage Amount:</label>
+                                            <input type="number" class="form-control" id="coverage_amount" name="coverage_amount" placeholder="Enter coverage amount">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="premium_costs">Premium Costs:</label>
+                                            <input type="number" class="form-control" id="premium_costs" name="premium_costs" placeholder="Enter premium costs">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="additional_details">Additional Details:</label>
+                                            <textarea class="form-control" id="additional_details" name="additional_details" rows="3" placeholder="Enter additional details"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inclusions">Inclusions:</label>
+                                            <textarea class="form-control" id="inclusions" name="inclusions" rows="3" placeholder="Enter inclusions"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exclusions">Exclusions:</label>
+                                            <textarea class="form-control" id="exclusions" name="exclusions" placeholder="Enter exclusions"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="terms_and_conditions">Terms and Conditions:</label>
+                                            <textarea class="form-control" id="terms_and_conditions" name="terms_and_conditions" rows="3" placeholder="Enter terms and conditions"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="contact_information">Contact Information:</label>
+                                            <input type="text" class="form-control" id="contact_information" name="contact_information" placeholder="Enter contact information">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Add Plan</button>
+                                    </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="addBranch" role="tabpanel" aria-labelledby="addBranch-tab">
+                    <!-- Add Company Branch Tab Content -->
+
+                </div>
+            </div>
+    </div>
+
+</section>
+
+{% endblock %}
+

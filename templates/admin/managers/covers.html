@@ -69,15 +69,15 @@
                                 <tbody>
                                     {% for plan in cover_details %}
                                         <tr>
-                                            <td class="font-weight-bold text-info">
-                                                <a href="{{ url_for('covers.get_plan_cover', company_id=plan.company_id, plan_number=plan.plan_number) }}">
+                                            <td class="font-weight-bold">
+                                                <a class="text-info" href="{{ url_for('covers.get_plan_cover', company_id=plan.company_id, plan_number=plan.plan_number) }}">
                                                     {{ plan.plan_number }}
                                                 </a>
                                             </td>
-                                            <td>{{ plan.plan_name }}</td>
-                                            <td>{{ plan.plan_type }}</td>
-                                            <td>{{ plan.coverage_amount }}</td>
-                                            <td>{{ plan.premium_costs }}</td>
+                                            <td class="font-weight-bold">{{ plan.plan_name| title }}</td>
+                                            <td class="font-weight-bold">{{ plan.plan_type| title }}</td>
+                                            <td>R {{ plan.coverage_amount| number }}.00</td>
+                                            <td>R {{ plan.premium_costs| number }}.00</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>

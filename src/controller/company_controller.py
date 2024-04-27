@@ -3,8 +3,8 @@ from datetime import datetime
 from flask import Flask
 from sqlalchemy.exc import OperationalError
 
-from src.database.models.covers import PolicyRegistrationData
-from src.database.sql.covers import PolicyRegistrationDataORM
+from src.database.models.covers import PolicyRegistrationData, ClientPersonalInformation
+from src.database.sql.covers import PolicyRegistrationDataORM, ClientPersonalInformationORM
 from src.database.sql.bank_account import BankAccountORM
 from src.database.models.bank_accounts import BankAccount
 from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
@@ -404,7 +404,7 @@ class CompanyController(Controllers):
             return [CoverPlanDetails(**plan.to_dict()) for plan in cover_details_list
                     if isinstance(plan, CoverPlanDetailsORM)]
 
-    async def get_plan_cover(self, company_id: str, plan_number: str) -> CoverPlanDetails:
+    async def get_plan_cover(self, company_id: str, plan_number: str) -> CoverPlanDetails | None:
         """
 
         :param company_id:
@@ -412,12 +412,11 @@ class CompanyController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            plan_cover_orm = session.query(CoverPlanDetailsORM).filter_by(company_id=company_id, plan_number=plan_number).first()
+            plan_cover_orm = session.query(CoverPlanDetailsORM).filter_by(company_id=company_id,
+                                                                          plan_number=plan_number).first()
             if isinstance(plan_cover_orm, CoverPlanDetailsORM):
                 return CoverPlanDetails(**plan_cover_orm.to_dict())
             return None
-
-
 
     async def get_plan_subscribers(self, plan_number: str) -> list[PolicyRegistrationData]:
         """
@@ -430,3 +429,94 @@ class CompanyController(Controllers):
             return [PolicyRegistrationData(**subscriber.to_dict()) for subscriber in plan_subscribers
                     if isinstance(subscriber, PolicyRegistrationDataORM)]
 
+    async def get_policy_holders(self, company_id: str) -> list[ClientPersonalInformation]:
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            policy_holders_list = session.query(ClientPersonalInformationORM).filter_by(company_id=company_id).all()
+            return [ClientPersonalInformation(**holder.to_dict()) for holder in policy_holders_list]
+
+    async def add_policy_holder(self, policy_holder: ClientPersonalInformation) -> ClientPersonalInformation:
+        """
+        Add or update a policy holder in the database.
+
+        :param policy_holder: ClientPersonalInformation instance
+        :return: None
+        """
+        with self.get_session() as session:
+            uid = policy_holder.uid
+            branch_id = policy_holder.branch_id
+            company_id = policy_holder.company_id
+
+            # Query the database to check if the policy holder already exists
+            policy_holder_orm = session.query(ClientPersonalInformationORM).filter_by(
+                uid=uid).first()
+
+            if policy_holder_orm:
+                # Update all fields for the existing policy holder
+                policy_holder_orm.branch_id = branch_id
+                policy_holder_orm.company_id = company_id
+                policy_holder_orm.title = policy_holder.title
+                policy_holder_orm.full_names = policy_holder.full_names
+                policy_holder_orm.surname = policy_holder.surname
+                policy_holder_orm.id_number = policy_holder.id_number
+                policy_holder_orm.date_of_birth = policy_holder.date_of_birth
+                policy_holder_orm.nationality = policy_holder.nationality
+                policy_holder_orm.is_policy_holder = policy_holder.is_policy_holder
+                policy_holder_orm.policy_number = policy_holder.policy_number
+                policy_holder_orm.address_id = policy_holder.address_id
+                policy_holder_orm.contact_id = policy_holder.contact_id
+                policy_holder_orm.postal_id = policy_holder.postal_id
+                policy_holder_orm.bank_account_id = policy_holder.bank_account_id
+            else:
+                # Create a new policy holder entry
+                policy_holder_orm = ClientPersonalInformationORM(**policy_holder.dict())
+
+            session.add(policy_holder_orm)
+            session.commit()
+            return policy_holder
+
+    async def add_policy_data(self, policy_data: PolicyRegistrationData) -> PolicyRegistrationData:
+        """
+        Add or update policy data in the database.
+
+        :param policy_data: PolicyRegistrationData instance
+        :return: PolicyRegistrationData instance
+        """
+        with self.get_session() as session:
+            uid = policy_data.uid
+            branch_id = policy_data.branch_id
+            company_id = policy_data.company_id
+
+            # Query the database to check if the policy data already exists
+            policy_data_orm = session.query(PolicyRegistrationDataORM).filter_by(
+                uid=uid, company_id=company_id).first()
+
+            if policy_data_orm:
+                # Update all fields for the existing policy data
+                policy_data_orm.branch_id = branch_id
+                policy_data_orm.company_id = company_id
+                policy_data_orm.policy_number = policy_data.policy_number
+                policy_data_orm.plan_number = policy_data.plan_number
+                policy_data_orm.policy_type = policy_data.policy_type
+                policy_data_orm.total_family_members = policy_data.total_family_members
+                policy_data_orm.total_premiums = policy_data.total_premiums
+                policy_data_orm.payment_code_reference = policy_data.payment_code_reference
+                policy_data_orm.date_activated = policy_data.date_activated
+                policy_data_orm.first_premium_date = policy_data.first_premium_date
+                policy_data_orm.payment_day = policy_data.payment_day
+                policy_data_orm.client_signature = policy_data.client_signature
+                policy_data_orm.employee_signature = policy_data.employee_signature
+                policy_data_orm.payment_method = policy_data.payment_method
+                policy_data_orm.policy_active = policy_data.policy_active
+            else:
+                # Create a new policy data entry
+                policy_data_orm = PolicyRegistrationDataORM(**policy_data.dict())
+
+            session.add(policy_data_orm)
+            session.commit()
+
+            return policy_data

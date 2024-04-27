@@ -7,8 +7,8 @@ from src.database.sql.bank_account import BankAccountORM
 from src.database.models.bank_accounts import BankAccount
 from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
 from src.database.models.contacts import Address, PostalAddress, Contacts
-from src.database.sql.companies import CompanyORM, CompanyBranchesORM, EmployeeORM
-from src.database.models.companies import Company, CompanyBranches, EmployeeRoles, EmployeeDetails
+from src.database.sql.companies import CompanyORM, CompanyBranchesORM, EmployeeORM, CoverPlanDetailsORM
+from src.database.models.companies import Company, CompanyBranches, EmployeeRoles, EmployeeDetails, CoverPlanDetails
 from src.controller import Controllers, error_handler
 
 
@@ -20,6 +20,7 @@ class CompanyController(Controllers):
 
     def init_app(self, app: Flask):
         super().init_app(app=app)
+
     @error_handler
     async def register_company(self, company: Company) -> Company | None:
         """
@@ -127,7 +128,7 @@ class CompanyController(Controllers):
         return EmployeeRoles.get_all_roles()
 
     @error_handler
-    async def add_update_address(self, address: Address) -> Address| None:
+    async def add_update_address(self, address: Address) -> Address | None:
         """
 
         :param address:
@@ -358,3 +359,58 @@ class CompanyController(Controllers):
             return [EmployeeDetails(**employee_orm.to_dict()) for employee_orm in employees_orm_list
                     if isinstance(employee_orm, EmployeeORM)]
 
+    async def create_plan_cover(self, plan_cover: CoverPlanDetails) -> CoverPlanDetails:
+        """
+        Create or update a cover plan in the database.
+
+        :param plan_cover: CoverPlanDetails instance
+        :return: CoverPlanDetails instance
+        """
+        with self.get_session() as session:
+            _plan_name = plan_cover.plan_name.casefold()
+            company_id = plan_cover.company_id
+            cover_plan_orm = session.query(CoverPlanDetailsORM).filter_by(plan_name=_plan_name,
+                                                                          company_id=company_id).first()
+
+            if cover_plan_orm:  # If cover plan exists, update its fields
+                # cover_plan_orm.plan_number = plan_cover.plan_number
+                cover_plan_orm.plan_type = plan_cover.plan_type
+                cover_plan_orm.benefits = plan_cover.benefits
+                cover_plan_orm.coverage_amount = plan_cover.coverage_amount
+                cover_plan_orm.premium_costs = plan_cover.premium_costs
+                cover_plan_orm.additional_details = plan_cover.additional_details
+                cover_plan_orm.terms_and_conditions = plan_cover.terms_and_conditions
+                cover_plan_orm.inclusions = plan_cover.inclusions
+                cover_plan_orm.exclusions = plan_cover.exclusions
+                cover_plan_orm.contact_information = plan_cover.contact_information
+            else:  # If cover plan doesn't exist, create a new entry
+                cover_plan_orm = CoverPlanDetailsORM(**plan_cover.dict())
+
+            session.add(cover_plan_orm)
+            session.commit()
+
+            return plan_cover
+
+    async def get_company_covers(self, company_id: str) -> list[CoverPlanDetails]:
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            cover_details_list = session.query(CoverPlanDetailsORM).filter_by(company_id=company_id).all()
+            return [CoverPlanDetails(**plan.to_dict()) for plan in cover_details_list
+                    if isinstance(plan, CoverPlanDetailsORM)]
+
+    async def get_plan_cover(self, company_id: str, plan_number: str) -> CoverPlanDetails:
+        """
+
+        :param company_id:
+        :param plan_number:
+        :return:
+        """
+        with self.get_session() as session:
+            plan_cover_orm = session.query(CoverPlanDetailsORM).filter_by(company_id=company_id, plan_number=plan_number).first()
+            if isinstance(plan_cover_orm, CoverPlanDetailsORM):
+                return CoverPlanDetails(**plan_cover_orm.to_dict())
+            return None

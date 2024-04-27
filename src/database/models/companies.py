@@ -62,7 +62,6 @@ class CoverPlanDetails(BaseModel):
         exclusions (List[str]): List of exclusions from the plan.
         contact_information (str): Contact information for inquiries about the plan.
     """
-    branch_id: str | None
     company_id: str | None
 
     plan_number: str = Field(default_factory=create_plan_number)

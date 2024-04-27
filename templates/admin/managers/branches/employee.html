@@ -37,10 +37,8 @@
                         <!-- and more -->
                     </a>
                 </li>
-
             </ul>
         </div>
-
         <div class="card-body">
             <div class="tab-content" id="employeeTabsContent">
                 <!-- View Employee Tab -->
@@ -80,7 +78,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Edit Employee Tab -->
                 <div class="tab-pane fade" id="editEmployee" role="tabpanel" aria-labelledby="editEmployee-tab">
                     <div class="card">
@@ -91,7 +88,6 @@
                             </h4>
                         </div>
                             <form action="{{ url_for('company.add_employee', branch_id=branch.branch_id) }}" method="post">
-
                                 <div class="form-group">
                                     <label for="full_names" class="font-weight-bold">Full Name</label>
                                     <input type="text" class="form-control" id="full_names" name="full_names" value="{{ employee_detail.full_names }}">
@@ -120,7 +116,6 @@
                                     <label for="position"  class="font-weight-bold">Position</label>
                                     <input type="text" class="form-control" id="position" name="position" value="{{ employee_detail.position }}">
                                 </div>
-
                                 <div class="form-group">
                                     <label for="role" class="font-weight-bold">Role</label>
                                     <select class="form-control" name="role" id="role">
@@ -134,7 +129,6 @@
                                     <label for="salary" class="font-weight-bold">Salary(ZAR)</label>
                                     <input type="number" class="form-control" id="salary" name="salary" value="{{ employee_detail.salary}}">
                                 </div>
-
                                 <div class="form-group">
                                     <label for="is_active" class="font-weight-bold">Is Active</label>
                                     <select id="is_active" name="is_active" class="form-control">
@@ -147,14 +141,12 @@
                                         {% endif %}
                                     </select>
                                 </div>
-
                                 <!-- Add more fields as needed -->
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
                             </form>
                     </div>
                 </div>
 
-                <!-- Adminstrative Tasks -->
                 <div class="tab-pane fade" id="admin" role="tabpanel" aria-labelledby="adminTasksLabel-tab">
                     <div class="card">
                         <div class="card-header">

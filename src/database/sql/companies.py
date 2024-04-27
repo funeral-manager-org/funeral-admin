@@ -92,12 +92,13 @@ class CompanyBranchesORM(Base):
 
 class CoverPlanDetailsORM(Base):
     __tablename__ = "cover_plan_details"
-    branch_id = Column(String(ID_LEN))
+
     company_id = Column(String(NAME_LEN))
 
     plan_number = Column(String(10), primary_key=True)
     plan_name = Column(String(255))
     plan_type = Column(String(50))
+
     benefits = Column(Text)
     coverage_amount = Column(Integer)
     premium_costs = Column(Integer)
@@ -122,8 +123,7 @@ class CoverPlanDetailsORM(Base):
         Convert the object to a dictionary representation.
         """
         return {
-            "id": self.id,
-            "branch_id": self.branch_id,
+
             "company_id": self.company_id,
             "plan_number": self.plan_number,
             "plan_name": self.plan_name,

@@ -37,20 +37,20 @@
                         <div class="tab-pane active" id="viewContact" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Display contact details here -->
-                                <p class="font-weight-bold text-info">{{ branch.branch_name }} {{ branch.branch_description }} Contact Information </p>
-                                <p>Cell: <span class="font-weight-bold text-info">{{ contact.cell }}</span></p>
+                                    <p class="font-weight-bold text-info">{{ branch.branch_name }} {{ branch.branch_description }} Contact Information </p>
+                                    <p class="font-weight-bold">Cell: <span class="font-weight-bold text-info">{{ contact.cell }}</span></p>
                                 {% if contact.tel %}
-                                    <p>Tel: <span class="font-weight-bold text-info">{{ contact.tel }}</span></p>
+                                    <p  class="font-weight-bold">Tel: <span class="font-weight-bold text-info">{{ contact.tel }}</span></p>
                                 {% endif %}
-                                <p>Email: <span class="font-weight-bold text-info">{{ contact.email }}</span></p>
+                                    <p  class="font-weight-bold">Email: <span class="font-weight-bold text-info">{{ contact.email }}</span></p>
                                 {% if contact.facebook %}
-                                <p>Facebook: <span class="font-weight-bold text-info">{{ contact.facebook }}</span></p>
+                                    <p  class="font-weight-bold">Facebook: <span class="font-weight-bold text-info">{{ contact.facebook }}</span></p>
                                 {% endif %}
                                 {% if contact.twitter %}
-                                <p>Twitter: <span class="font-weight-bold text-info">{{ contact.twitter }}</span></p>
+                                    <p  class="font-weight-bold">Twitter: <span class="font-weight-bold text-info">{{ contact.twitter }}</span></p>
                                 {% endif %}
                                 {% if contact.whatsapp %}
-                                <p>WhatsApp: <span class="font-weight-bold text-info">{{ contact.whatsapp }}</span></p>
+                                    <p  class="font-weight-bold">WhatsApp: <span class="font-weight-bold text-info">{{ contact.whatsapp }}</span></p>
                                 {% endif %}
                             </div>
                         </div>

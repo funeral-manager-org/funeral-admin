@@ -30,11 +30,11 @@
                             {% if address %}
                                 <!-- Display address details here -->
                                 <p class="font-weight-bold text-info">{{ branch.branch_name }} {{ branch.branch_description }}</p>
-                                <p>Street: <span class="font-weight-bold text-info">{{ address.street }}</span></p>
-                                <p>City: <span class="font-weight-bold text-info">{{ address.city }}</span></p>
-                                <p>State: <span class="font-weight-bold text-info">{{ address.state_province }}</span></p>
-                                <p>Postal Code: <span class="font-weight-bold text-info">{{ address.postal_code }}</span></p>
-                                <p>Country: <span class="font-weight-bold text-info">{{ address.country }}</span></p>
+                                <p class="font-weight-bold">Street: <span class="font-weight-bold text-info">{{ address.street }}</span></p>
+                                <p class="font-weight-bold">City: <span class="font-weight-bold text-info">{{ address.city }}</span></p>
+                                <p class="font-weight-bold">State: <span class="font-weight-bold text-info">{{ address.state_province }}</span></p>
+                                <p class="font-weight-bold">Postal Code: <span class="font-weight-bold text-info">{{ address.postal_code }}</span></p>
+                                <p class="font-weight-bold">Country: <span class="font-weight-bold text-info">{{ address.country }}</span></p>
                                 <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-print"> </i> Print </a>
                             {% else %}
                                 <p>Address not available please create new address</p>

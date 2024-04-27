@@ -6,6 +6,7 @@ def bootstrapper():
     from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
     from src.database.sql.covers import ClientPersonalInformationORM, ClaimsORM, PolicyRegistrationDataORM
 
+
     classes_to_create = [UserORM, PayPalORM, CompanyORM, EmployeeORM, CompanyBranchesORM, CoverPlanDetailsORM,
                          BankAccountORM, AddressORM, PostalAddressORM, ContactsORM, ClientPersonalInformationORM,
                          ClaimsORM, PolicyRegistrationDataORM]

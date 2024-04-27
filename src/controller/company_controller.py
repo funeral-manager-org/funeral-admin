@@ -3,6 +3,8 @@ from datetime import datetime
 from flask import Flask
 from sqlalchemy.exc import OperationalError
 
+from src.database.models.covers import PolicyRegistrationData
+from src.database.sql.covers import PolicyRegistrationDataORM
 from src.database.sql.bank_account import BankAccountORM
 from src.database.models.bank_accounts import BankAccount
 from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
@@ -414,3 +416,17 @@ class CompanyController(Controllers):
             if isinstance(plan_cover_orm, CoverPlanDetailsORM):
                 return CoverPlanDetails(**plan_cover_orm.to_dict())
             return None
+
+
+
+    async def get_plan_subscribers(self, plan_number: str) -> list[PolicyRegistrationData]:
+        """
+
+        :param plan_number:
+        :return:
+        """
+        with self.get_session() as session:
+            plan_subscribers = session.query(PolicyRegistrationDataORM).filter_by(plan_number=plan_number).all()
+            return [PolicyRegistrationData(**subscriber.to_dict()) for subscriber in plan_subscribers
+                    if isinstance(subscriber, PolicyRegistrationDataORM)]
+

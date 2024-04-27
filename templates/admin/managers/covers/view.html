@@ -5,20 +5,36 @@
 <section id="main-content">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Plan Cover Details</h3>
+            <h3 class="card-title font-weight-bold text-info">
+                <i class="fa fa-umbrella"></i>
+                Plan Cover Details
+            </h3>
         </div>
 
         <div class="card-body">
             <!-- Tab navigation -->
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" id="details-tab" data-toggle="tab" href="#details" role="tab" aria-controls="details" aria-selected="true">Details</a>
+                    <a class="nav-link active" id="details-tab" data-toggle="tab" href="#details" role="tab" aria-controls="details" aria-selected="true">
+                        <span class="font-weight-bold text-info">
+                            Cover Details
+                        </span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="edit-tab" data-toggle="tab" href="#edit" role="tab" aria-controls="edit" aria-selected="false">Edit</a>
+                    <a class="nav-link" id="edit-tab" data-toggle="tab" href="#edit" role="tab" aria-controls="edit" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+                            Edit Cover
+                        </span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="clients-tab" data-toggle="tab" href="#clients" role="tab" aria-controls="clients" aria-selected="false">Subscribed Clients</a>
+                    <a class="nav-link" id="clients-tab" data-toggle="tab" href="#clients" role="tab" aria-controls="clients" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+
+                            Subscribed Clients
+                        </span>
+                    </a>
                 </li>
             </ul>
 
@@ -29,43 +45,51 @@
                     <div class="card-body">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">{{ plan_cover.plan_name }}</h3>
+                                <h3 class="card-title font-weight-bold text-info">
+                                    <i class="fa fa-umbrella">
+                                        {{ plan_cover.plan_name }}
+                                    </i>
+                                </h3>
                             </div>
 
                             <ol class="m-t-10 font-weight-bold col-lg-6 col-md-6">
                                 <li>Plan Number: <span class="text-info pull-right">{{ plan_cover.plan_number }}</span></li>
-                                <li>Plan Type: <span class="text-info pull-right">{{ plan_cover.plan_type }}</span></li>
+                                <li>Plan Type: <span class="text-info pull-right">{{ plan_cover.plan_type| title }}</span></li>
+                                <li><hr></li>
                                 <li>Benefits
                                     <ul class="list-inline pull-right">
                                         {% for benefit in plan_cover.benefits.split(',') %}
-                                            <li class="list-inline-item text-success">{{ benefit.strip() }}</li>,
+                                            <li class="list-inline-item text-success">{{ benefit.strip()| title }}</li>,
                                         {% endfor %}
                                     </ul>
                                 </li>
 
-                                <li>Coverage Amount: <span class="text-info pull-right">R {{ plan_cover.coverage_amount | number }}.00</span></li>
-                                <li>Premium Costs: <span class="text-info pull-right">R {{ plan_cover.premium_costs | number }}.00</span></li>
                                 <li>Additional Details: <span class="text-info pull-right">{{ plan_cover.additional_details }}</span></li>
-                                <li>Terms and Conditions:
-                                    <textarea class="form-control" disabled>
-                                        {{ plan_cover.terms_and_conditions }}
-                                    </textarea>
-                                </li>
                                 <li>Inclusions:
                                     <ul class="list-inline pull-right">
                                         {% for inclusion in plan_cover.inclusions.split(',') %}
-                                            <li class="list-inline-item text-success"> {{ inclusion.strip() }}, </li>
+                                            <li class="list-inline-item text-success"> {{ inclusion.strip()| title }}, </li>
                                         {% endfor %}
                                     </ul>
                                 </li>
                                 <li>Exclusions:
                                     <ul class="list-inline pull-right">
-                                        {% for exclusion in  plan_cover.exclusions %}
+                                        {% for exclusion in  plan_cover.exclusions.split(',') %}
                                             <li class="list-inline-item text-success"> {{ exclusion.strip() }}, </li>
                                         {% endfor %}
                                     </ul>
                                 </li>
+                                <li><hr></li>
+                                <li><label for="terms" class="font-weight-bold">Terms and Conditions:</label>
+                                    <textarea id="terms" class="form-control" disabled>
+                                        {{ plan_cover.terms_and_conditions }}
+                                    </textarea>
+                                </li>
 
+                                <li><hr/></li>
+                                <li>Coverage Amount: <span class="text-info pull-right">R {{ plan_cover.coverage_amount | number }}.00</span></li>
+                                <li>Premium Costs: <span class="text-info pull-right">R {{ plan_cover.premium_costs | number }}.00</span></li>
+                                <li><hr/></li>
                                 <li>Contact Information: <span class="text-info pull-right">{{ plan_cover.contact_information }}</span></li>
                             </ol>
                         </div>
@@ -86,10 +110,34 @@
                     <div class="card-body">
                         <!-- Display subscribed clients here -->
                         <!-- Assuming you have a list of subscribed clients -->
-                        {% for client in subscribed_clients %}
-                            <p>{{ client.name }}, {{ client.email }}</p>
-                            <!-- Add other client details as needed -->
-                        {% endfor %}
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr class="font-weight-bold text-info">
+                                    <td>Policy Number</td>
+                                    <td>Plan Number</td>
+                                    <td>Policy Type</td>
+                                    <td>Total Members</td>
+                                    <td>Premium</td>
+                                    <td>Date Activated</td>
+                                    <td>Payment Day</td>
+                                    <td>Payment Method</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for client in subscribed_clients %}
+                                    <tr>
+                                        <td>{{ client.policy_number }}</td>
+                                        <td>{{ client.plan_number }}</td>
+                                        <td>{{ client.policy_type }}</td>
+                                        <td>{{ client.total_family_members }}</td>
+                                        <td>{{ client.total_premiums }}</td>
+                                        <td>{{ client.date_activated }}</td>
+                                        <td>{{ client.payment_day }}</td>
+                                        <td>{{ client.payment_method }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

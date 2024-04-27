@@ -65,6 +65,7 @@ async def get_plan_cover(user: User, company_id: str, plan_number: str):
         return redirect('home.get_home')
 
     plan_cover = await company_controller.get_plan_cover(company_id=company_id, plan_number=plan_number)
-    context = dict(user=user, plan_cover=plan_cover)
+    subscribed_clients = await company_controller.get_plan_subscribers(plan_number=plan_number)
+    context = dict(user=user, plan_cover=plan_cover, subscribed_clients=subscribed_clients)
     return render_template('admin/managers/covers/view.html', **context)
 

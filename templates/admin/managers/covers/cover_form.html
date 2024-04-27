@@ -1,0 +1,89 @@
+
+         <form action="{{ url_for('covers.add_plan_cover') }}" method="POST">
+
+            <div class="form-group">
+                <label class="font-weight-bold text-success">Note: for multiple items please use commas to separate each item</label>
+            </div>
+            <div class="form-group">
+                <label for="plan_name">Plan Name:</label>
+                <input type="text" class="form-control"
+                       id="plan_name" name="plan_name"
+                       placeholder="Enter plan name"
+                       {% if plan_cover %}value="{{ plan_cover.plan_name }}"{% endif %}
+
+                >
+            </div>
+            <div class="form-group">
+                <label for="plan_type">Plan Type:</label>
+                <input type="text" class="form-control"
+                       id="plan_type" name="plan_type"
+                       placeholder="Enter plan type"
+                       {% if plan_cover %}value="{{ plan_cover.plan_type }}"{% endif %}
+                >
+            </div>
+            <div class="form-group">
+                <label for="benefits">Benefits:</label>
+                <input type="text" class="form-control"
+                       id="benefits" name="benefits"
+                       placeholder="Enter benefits"
+                       {% if plan_cover %}value="{{ plan_cover.benefits }}"{% endif %}
+
+                >
+            </div>
+            <div class="form-group">
+                <label for="coverage_amount">Coverage Amount:</label>
+                <input type="number" class="form-control"
+                       id="coverage_amount"
+                       name="coverage_amount"
+                       placeholder="Enter coverage amount"
+                       {% if plan_cover %}value="{{ plan_cover.coverage_amount }}"{% endif %}
+                >
+            </div>
+            <div class="form-group">
+                <label for="premium_costs">Premium Costs:</label>
+                <input type="number" class="form-control"
+                       id="premium_costs" name="premium_costs"
+                       placeholder="Enter premium costs"
+                       {% if plan_cover %}value="{{ plan_cover.premium_costs }}"{% endif %}
+
+                >
+            </div>
+            <div class="form-group">
+                <label for="additional_details">Additional Details:</label>
+                <textarea class="form-control"
+                          id="additional_details" name="additional_details"
+                          rows="3" placeholder="Enter additional details"
+                >{% if plan_cover %}{{ plan_cover.additional_details }}{% endif %}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="inclusions">Inclusions:</label>
+                <textarea class="form-control"
+                          id="inclusions" name="inclusions" rows="3"
+                          placeholder="Enter inclusions">{% if plan_cover %}{{ plan_cover.inclusions }}{% endif %}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="exclusions">Exclusions:</label>
+                <textarea class="form-control"
+                          id="exclusions" name="exclusions" rows="3"
+                          placeholder="Enter exclusions">{% if plan_cover %}{{ plan_cover.exclusions }}{% endif %}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="terms_and_conditions">Terms and Conditions:</label>
+                <textarea class="form-control"
+                          id="terms_and_conditions" name="terms_and_conditions" rows="3"
+                          placeholder="Enter terms and conditions">{% if plan_cover %}{{ plan_cover.terms_and_conditions }}{% endif %}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="contact_information">Contact Information:</label>
+                <input type="text" class="form-control"
+                       id="contact_information" name="contact_information"
+                       placeholder="Enter contact information"
+                       {% if plan_cover %}value="{{ plan_cover.contact_information }}"{% endif %}
+
+                >
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">
+            <i class="fa fa-save"></i>
+                {% if plan_cover %}Update Plan{% else %}Create Plan{% endif %}
+            </button>
+        </form>

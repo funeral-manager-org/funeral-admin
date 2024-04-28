@@ -11,7 +11,9 @@ class PaymentMethods(Enum):
     persal_deduction = "Persal Deduction"
     intermediary = "Intermediary"
     declaration = "Declaration"
-
+    @classmethod
+    def get_payment_methods(cls):
+        return [method.value for method in cls]
 
 class RelationshipToPolicyHolder(Enum):
     SELF = "Self"
@@ -53,7 +55,6 @@ class PolicyRegistrationData(BaseModel):
 
     payment_method: str | None
     policy_active: bool = Field(default=False)
-
 
 
 class ClientPersonalInformation(BaseModel):

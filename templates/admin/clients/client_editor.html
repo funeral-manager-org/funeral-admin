@@ -1,0 +1,165 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+    <section id="main-content">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title font-weight-bold text-info">
+                    <i class="fa fa-users"> </i>
+                    Clients Admin
+                </h2>
+            </div>
+            <div class="card-body">
+                <!-- Tab navigation -->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+
+                    <li class="nav-item">
+                        <a class="nav-link active" id="viewer-tab" data-toggle="tab" href="#viewer" role="tab" aria-controls="viewer" aria-selected="false">
+                            <span class="font-weight-bold text-info">
+                                <i class="fa fa-file-text"> </i>
+                                Policy Details
+                            </span>
+                        </a>
+                    </li>
+
+
+                    <li class="nav-item">
+                        <a class="nav-link" id="editor-tab" data-toggle="tab" href="#editor" role="tab" aria-controls="editor" aria-selected="false">
+                            <span class="font-weight-bold text-info">
+                                <i class="fa fa-file-text"> </i>
+                                Client Editor
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="cover-tab" data-toggle="tab" href="#cover" role="tab" aria-controls="cover" aria-selected="false">
+                            <span class="font-weight-bold text-info">
+                                <i class="fa fa-credit-card"> </i>
+                                Policy Editor
+                            </span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" id="premiums-tab" data-toggle="tab" href="#premiums" role="tab" aria-controls="premiums" aria-selected="false">
+                            <span class="font-weight-bold text-info">
+                                <i class="fa fa-credit-card"> </i>
+                                Upcoming Premiums
+                            </span>
+                        </a>
+                    </li>
+
+
+                </ul>
+
+                <!-- Tab content -->
+                <div class="tab-content" id="myTabContent">
+                    <!-- Client capture tab -->
+                    <div class="tab-pane fade show active" id="viewer" role="tabpanel" aria-labelledby="viewer-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Funeral Policy of : <span class="text-info">{{ policy_holder.full_names }} {{ policy_holder.surname }}</span></h3>
+                            </div>
+                            <div class="card-body">
+                                <ul>
+                                    <li class="font-weight-bold">Title: <span class="text-info">{{ policy_holder.title }}</span></li>
+                                    <li class="font-weight-bold">ID Number: <span class="text-info">{{ policy_holder.id_number }}</span></li>
+                                    <li class="font-weight-bold">Date of Birth: <span class="text-info">{{ policy_holder.date_of_birth }}</span></li>
+                                    <li class="font-weight-bold">Nationality: <span class="text-info">{{ policy_holder.nationality }}</span></li>
+                                    <li class="font-weight-bold">Is Policy Holder: <span class="text-info">{{ "Yes" if policy_holder.is_policy_holder else "No" }}</span></li>
+                                    <li class="font-weight-bold">Plan Number: <span class="text-info">{{ policy_holder.plan_number }}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card">
+
+                            <div class="card-header">
+                                <h3 class="card-title">Policy Number : <span class="text-info">{{ policy_data.policy_number }}</span></h3>
+                            </div>
+
+
+                            <div class="card-body">
+                                <ul>
+                                    <li class="font-weight-bold">Policy Number: <span class="text-info">{{ policy_data.policy_number }}</span></li>
+                                    <li class="font-weight-bold">Plan Number: <span class="text-info">{{ policy_data.plan_number }}</span></li>
+                                    <li class="font-weight-bold">Policy Type: <span class="text-info">{{ policy_data.policy_type }}</span></li>
+                                    <li class="font-weight-bold">Total Family Members: <span class="text-info">{{ policy_data.total_family_members }}</span></li>
+
+                                    <li class="font-weight-bold">Payment Code Reference: <span class="text-info">{{ policy_data.payment_code_reference }}</span></li>
+                                    {% if  policy_data.date_activated %}
+                                        <li class="font-weight-bold">Date Activated: <span class="text-info">{{ policy_data.date_activated }}</span></li>
+                                    {% endif %}
+                                    {% if  policy_data.first_premium_date %}
+                                        <li class="font-weight-bold">First Premium Date: <span class="text-info">{{ policy_data.first_premium_date }}</span></li>
+                                    {% endif %}
+                                    {% if  policy_data.payment_day %}
+                                        <li class="font-weight-bold">Payment Day: <span class="text-info">{{ policy_data.payment_day }}</span></li>
+                                    {% endif %}
+                                    {% if policy_data.client_signature %}
+                                        <li class="font-weight-bold">Client Signature: <span class="text-info">{{ policy_data.client_signature }}</span></li>
+                                    {% endif %}
+                                    {% if  policy_data.employee_signature %}
+                                        <li class="font-weight-bold">Employee Signature: <span class="text-info">{{ policy_data.employee_signature }}</span></li>
+                                    {% endif %}
+                                    {% if  policy_data.payment_method %}
+                                        <li class="font-weight-bold">Payment Method: <span class="text-info">{{ policy_data.payment_method }}</span></li>
+                                    {% endif %}
+
+                                    <li class="font-weight-bold">Policy Active: <span class="text-info">{{ "Yes" if policy_data.policy_active else "No" }}</span></li>
+                                    <li class="font-weight-bold">Monthly Premiums: <span class="text-info">R {{ policy_data.total_premiums| number }}.00</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade" id="editor" role="tabpanel" aria-labelledby="editor-tab">
+                        <div class="card-body">
+                            <!-- Client capture form -->
+                            <div class="card-header">
+                                <h3 class="font-weight-bold card-title">
+                                    <i class="fa fa-file-text"> </i>
+                                    Client Editor
+                                </h3>
+                            </div>
+                            <div class="card-body m-t-10">
+                                {% include 'admin/clients/forms/client_capture.html' %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="cover" role="tabpanel" aria-labelledby="cover-tab">
+                        <div class="card-body">
+                            <!-- Content for upcoming premiums tab goes here -->
+                            <div class="card-header">
+                                <h3 class="font-weight-bold card-title">
+                                    <i class="fa fa-credit-card"> </i>
+                                    Policy Editor
+                                </h3>
+                            </div>
+                            <div class="card-body m-t-10">
+                                {% include 'admin/clients/forms/cover_editor.html' %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Upcoming premiums tab -->
+                    <div class="tab-pane fade" id="premiums" role="tabpanel" aria-labelledby="premiums-tab">
+                        <div class="card-body">
+                            <!-- Content for upcoming premiums tab goes here -->
+                            <div class="card-header">
+                                <h3 class="font-weight-bold card-title">
+                                    <i class="fa fa-credit-card"> </i>
+                                    Upcoming Premiums
+                                </h3>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

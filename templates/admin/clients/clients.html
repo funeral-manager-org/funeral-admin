@@ -53,23 +53,25 @@
                             </div>
 
                             <table class="table table-striped table-bordered">
-                                <thead>
+                                <thead class="font-weight-bold text-info">
                                     <tr>
-                                        <th>Title</th>
-                                        <th>Full Names</th>
-                                        <th>Surname</th>
-                                        <th>ID Number</th>
-                                        <th>Date of Birth</th>
-                                        <th>Nationality</th>
-                                        <th>Policy Holder</th>
-                                        <th>Plan Number</th>
+                                        <td>Full Names</td>
+                                        <td>Surname</td>
+                                        <td>ID Number</td>
+                                        <td>Date of Birth</td>
+                                        <td>Nationality</td>
+                                        <td>Policy Holder</td>
+                                        <td>Plan Number</td>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for policy_holder in policy_holders_list %}
                                         <tr>
-                                            <td>{{ policy_holder.title }}</td>
-                                            <td>{{ policy_holder.full_names }}</td>
+                                            <td class="font-weight-bold text-info">
+                                                <a href="{{ url_for('clients.get_client', uid=policy_holder.uid) }}">
+                                                    {{ policy_holder.title }} {{ policy_holder.full_names }}
+                                                </a>
+                                            </td>
                                             <td>{{ policy_holder.surname }}</td>
                                             <td>{{ policy_holder.id_number }}</td>
                                             <td>{{ policy_holder.date_of_birth }}</td>

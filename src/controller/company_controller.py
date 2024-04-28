@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask
 from sqlalchemy.exc import OperationalError
 
-from src.database.models.covers import PolicyRegistrationData, ClientPersonalInformation
+from src.database.models.covers import PolicyRegistrationData, ClientPersonalInformation, PaymentMethods
 from src.database.sql.covers import PolicyRegistrationDataORM, ClientPersonalInformationORM
 from src.database.sql.bank_account import BankAccountORM
 from src.database.models.bank_accounts import BankAccount
@@ -18,7 +18,19 @@ class CompanyController(Controllers):
 
     def __init__(self):
         super().__init__()
-        pass
+
+        self.countries = [
+            "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde",
+            "Cameroon", "Central African Republic", "Chad", "Comoros",
+            "Democratic Republic of the Congo", "Republic of the Congo", "Djibouti",
+            "Equatorial Guinea", "Eritrea", "Ethiopia", "Gabon", "Gambia", "Ghana",
+            "Guinea", "Guinea-Bissau", "Ivory Coast", "Kenya", "Lesotho", "Liberia",
+            "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Mozambique",
+            "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe",
+            "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa",
+            "South Sudan", "Sudan", "Swaziland", "Tanzania", "Togo", "Uganda",
+            "Zambia", "Zimbabwe"
+        ]
 
     def init_app(self, app: Flask):
         super().init_app(app=app)
@@ -349,7 +361,6 @@ class CompanyController(Controllers):
                 return EmployeeDetails(**employee_orm.to_dict())
             return None
 
-    @error_handler
     async def get_company_employees(self, company_id: str) -> list[EmployeeDetails]:
         """
 
@@ -439,6 +450,21 @@ class CompanyController(Controllers):
             policy_holders_list = session.query(ClientPersonalInformationORM).filter_by(company_id=company_id).all()
             return [ClientPersonalInformation(**holder.to_dict()) for holder in policy_holders_list]
 
+    async def get_policy_holder(self, uid: str) -> ClientPersonalInformation | None:
+        with self.get_session() as session:
+            policy_holder_orm = session.query(ClientPersonalInformationORM).filter_by(uid=uid).first()
+            if isinstance(policy_holder_orm, ClientPersonalInformationORM):
+                return ClientPersonalInformation(**policy_holder_orm.to_dict())
+            return None
+
+    async def get_policy_data(self, uid: str):
+        with self.get_session() as session:
+            policy_data_orm = session.query(PolicyRegistrationDataORM).filter_by(uid=uid).first()
+            if isinstance(policy_data_orm, PolicyRegistrationDataORM):
+                return PolicyRegistrationData(**policy_data_orm.to_dict())
+            return None
+    async def get_payment_methods(self) -> list[str]:
+        return PaymentMethods.get_payment_methods()
     async def add_policy_holder(self, policy_holder: ClientPersonalInformation) -> ClientPersonalInformation:
         """
         Add or update a policy holder in the database.
@@ -466,7 +492,7 @@ class CompanyController(Controllers):
                 policy_holder_orm.date_of_birth = policy_holder.date_of_birth
                 policy_holder_orm.nationality = policy_holder.nationality
                 policy_holder_orm.is_policy_holder = policy_holder.is_policy_holder
-                policy_holder_orm.policy_number = policy_holder.policy_number
+                policy_holder_orm.policy_number = policy_holder.plan_number
                 policy_holder_orm.address_id = policy_holder.address_id
                 policy_holder_orm.contact_id = policy_holder.contact_id
                 policy_holder_orm.postal_id = policy_holder.postal_id
@@ -520,3 +546,7 @@ class CompanyController(Controllers):
             session.commit()
 
             return policy_data
+
+
+    async def get_countries(self):
+        return self.countries

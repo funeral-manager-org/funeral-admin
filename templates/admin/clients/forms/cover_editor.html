@@ -1,0 +1,66 @@
+
+
+
+    <div class="card">
+            <div class="card-header">
+                    <h2 class="card-title font-weight-bold text-info">Edit Policy Registration Data</h2>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('clients.edit_policy_details') }}" method="post">
+                        <input type="hidden" class="form-control" id="uid" name="uid" value="{{ policy_data.uid }}" required>
+                        <input type="hidden" class="form-control" id="branch_id" name="branch_id" value="{{ policy_data.branch_id }}" required>
+                        <input type="hidden" class="form-control" id="company_id" name="company_id" value="{{ policy_data.company_id }}" required>
+
+                        <input type="hidden" class="form-control" id="policy_number" name="policy_number"
+                               value="{{ policy_data.policy_number }}" required>
+
+                        <input type="hidden" class="form-control" id="plan_number" name="plan_number"
+                               value="{{ policy_data.plan_number }}" required>
+                        <input type="hidden" class="form-control" id="policy_type" name="policy_type"
+                               value="{{ policy_data.policy_type }}" required>
+                        <input type="hidden" class="form-control" id="total_family_members" name="total_family_members"
+                               value="{{ policy_data.total_family_members }}" required>
+                    <div class="form-group">
+                        <label for="total_premiums">Total Premiums</label>
+                        <input type="number" class="form-control" id="total_premiums" name="total_premiums"
+                               value="{{ policy_data.total_premiums }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment_code_reference">Payment Code Reference</label>
+                        <input type="text" class="form-control" id="payment_code_reference" name="payment_code_reference"
+                               value="{{ policy_data.payment_code_reference }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date_activated">Date Activated</label>
+                        <input type="date" class="form-control" id="date_activated" name="date_activated"
+                               value="{{ policy_data.date_activated }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="first_premium_date">First Premium Date</label>
+                        <input type="date" class="form-control" id="first_premium_date" name="first_premium_date"
+                               value="{{ policy_data.first_premium_date }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="payment_day">Payment Day</label>
+                        <input type="number" class="form-control" id="payment_day" name="payment_day"
+                               value="{{ policy_data.payment_day }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="payment_method">Payment Method</label>
+                        <select class="form-control" id="payment_method" name="payment_method">
+                            {% for method in payment_methods %}
+                                <option value="{{ method }}">{{ method }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="policy_active"
+                               name="policy_active" {% if policy_data.policy_active %}checked{% endif %}>
+                        <label class="form-check-label" for="policy_active">Policy Active</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+    </div>

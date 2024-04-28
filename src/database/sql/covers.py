@@ -17,8 +17,10 @@ class ClientPersonalInformationORM(Base):
     date_of_birth = Column(String(10))
     nationality = Column(String(NAME_LEN))
 
-    is_policy_holder = Column(Boolean)
+    insured_party = Column(String(36))
+    relation_to_policy_holder = Column(String(30))
     plan_number = Column(String(9))
+    policy_number = Column(String(9))
 
     address_id = Column(String(ID_LEN), nullable=True)
     contact_id = Column(String(ID_LEN), nullable=True)
@@ -49,8 +51,10 @@ class ClientPersonalInformationORM(Base):
             "id_number": self.id_number,
             "date_of_birth": self.date_of_birth,
             "nationality": self.nationality,
-            "is_policy_holder": self.is_policy_holder,
+            "insured_party": self.insured_party,
+            "relation_to_policy_holder": self.relation_to_policy_holder,
             "plan_number": self.plan_number,
+            "policy_number": self.policy_number,
             "address_id": self.address_id,
             "contact_id": self.contact_id,
             "postal_id": self.postal_id,

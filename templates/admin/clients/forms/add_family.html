@@ -1,0 +1,64 @@
+<div class="modal fade" id="addFamilyID" tabindex="-1" role="dialog" aria-labelledby="addFamilyLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+
+        <div class="modal-content">
+            <hr/>
+            <div class="modal-header">
+                <h2 class="card-title text-info" id="addFamilyLabel"> <i class="fa fa-users"> </i>Add Beneficiary or Dependents </h2>
+            </div>
+
+            <div class="modal-body">
+                <form action="{{ url_for('clients.add_beneficiary_dependent', policy_number=policy_data.policy_number) }}" method="post">
+                    <input type="hidden" name="company_id" value="{{ policy_data.company_id }}">
+                    <input type="hidden" name="branch_id" value="{{ policy_data.branch_id }}">
+                    <input type="hidden" name="policy_number" value="{{ policy_data.policy_number }}">
+                    <input type="hidden" name="plan_number" value="{{ policy_data.plan_number }}">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="full_names">Full Names</label>
+                        <input type="text" class="form-control" id="full_names" name="full_names" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="surname">Surname</label>
+                        <input type="text" class="form-control" id="surname" name="surname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_number">Contact Number</label>
+                        <input type="tel" class="form-control" id="contact_number" name="contact_number" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_number">ID Number</label>
+                        <input type="text" class="form-control" id="id_number" name="id_number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth</label>
+                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nationality">Nationality</label>
+                        <select name="nationality" id="nationality" class="form-control">
+                            <option value="" selected disabled>Select Country of Residence</option>
+                            {% for country in countries %}
+                                <option value="{{ country }}">{{ country }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="client_type">Client Type</label>
+
+                        <select id="insured_party" name="insured_party" class="form-control">
+                            <option value="" selected disabled>Select if your client is Dependent or Beneficiary</option>
+                            <option value="Dependent">Dependent</option>
+                            <option value="Beneficiary">Beneficiary</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

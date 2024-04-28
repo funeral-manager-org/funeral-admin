@@ -4,6 +4,7 @@
 <form action="{{ url_for('clients.add_client') }}" method="post">
 
     <input type="hidden" name="company_id" value="{{ user.company_id }}">
+    <input type="hidden" name="insured_party" value="Policy Holder">
     <!-- policy_holder uid if form is on edit mode -->
     {% if policy_holder %}
         <input type="hidden" name="uid" value="{{ policy_holder.uid }}">

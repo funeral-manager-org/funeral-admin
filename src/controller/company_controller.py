@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask
 from sqlalchemy.exc import OperationalError
 
-from src.database.models.covers import PolicyRegistrationData, ClientPersonalInformation, PaymentMethods
+from src.database.models.covers import PolicyRegistrationData, ClientPersonalInformation, PaymentMethods, InsuredParty
 from src.database.sql.covers import PolicyRegistrationDataORM, ClientPersonalInformationORM
 from src.database.sql.bank_account import BankAccountORM
 from src.database.models.bank_accounts import BankAccount
@@ -447,7 +447,8 @@ class CompanyController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            policy_holders_list = session.query(ClientPersonalInformationORM).filter_by(company_id=company_id).all()
+            policy_holder = InsuredParty.POLICY_HOLDER.value
+            policy_holders_list = session.query(ClientPersonalInformationORM).filter_by(company_id=company_id, insured_party=policy_holder).all()
             return [ClientPersonalInformation(**holder.to_dict()) for holder in policy_holders_list]
 
     async def get_policy_holder(self, uid: str) -> ClientPersonalInformation | None:
@@ -463,8 +464,21 @@ class CompanyController(Controllers):
             if isinstance(policy_data_orm, PolicyRegistrationDataORM):
                 return PolicyRegistrationData(**policy_data_orm.to_dict())
             return None
+
+    async def get_beneficiaries(self, policy_number: str):
+        """
+
+        :param policy_number:
+        :return:
+        """
+        with self.get_session() as session:
+            beneficiaries_list_orm = session.query(ClientPersonalInformationORM).filter_by(
+                policy_number=policy_number).all()
+            return [ClientPersonalInformation(**client.to_dict()) for client in beneficiaries_list_orm]
+
     async def get_payment_methods(self) -> list[str]:
         return PaymentMethods.get_payment_methods()
+
     async def add_policy_holder(self, policy_holder: ClientPersonalInformation) -> ClientPersonalInformation:
         """
         Add or update a policy holder in the database.
@@ -477,7 +491,7 @@ class CompanyController(Controllers):
             branch_id = policy_holder.branch_id
             company_id = policy_holder.company_id
 
-            # Query the database to check if the policy holder already exists
+
             policy_holder_orm = session.query(ClientPersonalInformationORM).filter_by(
                 uid=uid).first()
 
@@ -491,8 +505,8 @@ class CompanyController(Controllers):
                 policy_holder_orm.id_number = policy_holder.id_number
                 policy_holder_orm.date_of_birth = policy_holder.date_of_birth
                 policy_holder_orm.nationality = policy_holder.nationality
-                policy_holder_orm.is_policy_holder = policy_holder.is_policy_holder
-                policy_holder_orm.policy_number = policy_holder.plan_number
+                policy_holder_orm.policy_number = policy_holder.policy_number
+                policy_holder_orm.insured_party = policy_holder.insured_party
                 policy_holder_orm.address_id = policy_holder.address_id
                 policy_holder_orm.contact_id = policy_holder.contact_id
                 policy_holder_orm.postal_id = policy_holder.postal_id
@@ -547,6 +561,17 @@ class CompanyController(Controllers):
 
             return policy_data
 
-
     async def get_countries(self):
         return self.countries
+
+    async def get_policy_with_policy_number(self, policy_number: str) -> PolicyRegistrationData | None:
+        """
+
+        :param policy_number:
+        :return:
+        """
+        with self.get_session() as session:
+            policy_data_orm = session.query(PolicyRegistrationDataORM).filter_by(policy_number=policy_number).first()
+            if isinstance(policy_data_orm, PolicyRegistrationDataORM):
+                return PolicyRegistrationData(**policy_data_orm.to_dict())
+            return None

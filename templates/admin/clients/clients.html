@@ -48,7 +48,7 @@
                             <div class="card-header">
                                 <h3 class="font-weight-bold card-title">
                                     <i class="fa fa-users"> </i>
-                                    Clients
+                                    Clients - Policy Holders
                                 </h3>
                             </div>
 
@@ -60,7 +60,6 @@
                                         <td>ID Number</td>
                                         <td>Date of Birth</td>
                                         <td>Nationality</td>
-                                        <td>Policy Holder</td>
                                         <td>Plan Number</td>
                                     </tr>
                                 </thead>
@@ -76,7 +75,6 @@
                                             <td>{{ policy_holder.id_number }}</td>
                                             <td>{{ policy_holder.date_of_birth }}</td>
                                             <td>{{ policy_holder.nationality }}</td>
-                                            <td>{% if policy_holder.is_policy_holder %} Yes {% else %} No {% endif %}</td>
                                             <td>{{ policy_holder.plan_number or "N/A" }}</td>
                                         </tr>
                                     {% endfor %}

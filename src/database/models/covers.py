@@ -11,9 +11,11 @@ class PaymentMethods(Enum):
     persal_deduction = "Persal Deduction"
     intermediary = "Intermediary"
     declaration = "Declaration"
+
     @classmethod
     def get_payment_methods(cls):
         return [method.value for method in cls]
+
 
 class RelationshipToPolicyHolder(Enum):
     SELF = "Self"
@@ -57,6 +59,12 @@ class PolicyRegistrationData(BaseModel):
     policy_active: bool = Field(default=False)
 
 
+class InsuredParty(Enum):
+    POLICY_HOLDER = "Policy Holder"
+    BENEFICIARY = "Beneficiary"
+    DEPENDENT = "DEPENDENT"
+
+
 class ClientPersonalInformation(BaseModel):
     uid: str = Field(default_factory=create_id)
     branch_id: str
@@ -70,8 +78,10 @@ class ClientPersonalInformation(BaseModel):
     date_of_birth: str
     nationality: str
 
-    is_policy_holder: bool = Field(default=False)
+    insured_party: str | None
+    relation_to_policy_holder: str | None
     plan_number: str | None
+    policy_number: str | None
 
     address_id: str | None
     contact_id: str | None

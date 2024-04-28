@@ -69,6 +69,7 @@
                                     <li class="font-weight-bold">Nationality: <span class="text-info">{{ policy_holder.nationality }}</span></li>
                                     <li class="font-weight-bold">Is Policy Holder: <span class="text-info">{{ "Yes" if policy_holder.is_policy_holder else "No" }}</span></li>
                                     <li class="font-weight-bold">Plan Number: <span class="text-info">{{ policy_holder.plan_number }}</span></li>
+                                    <li class="font-weight-bold">Policy Number: <span class="text-info">{{ policy_holder.policy_number }}</span></li>
                                 </ul>
                             </div>
                         </div>
@@ -111,6 +112,42 @@
                                 </ul>
                             </div>
                         </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Beneficiaries &amp; Dependents </h3>
+                            </div>
+                            <div class="card-body">
+                            <table class="table table-bordered table-striped">
+                                    <thead>
+                                    <thead class="font-weight-bold text-info">
+                                        <tr>
+                                            <td>Full Names</td>
+                                            <td>Surname</td>
+                                            <td>ID Number</td>
+                                            <td>Date of Birth</td>
+                                            <td>Nationality</td>
+                                            <td>Plan Number</td>
+                                            <td>Insured Party</td>
+                                        </tr>
+                                    </thead>
+                                </thead>
+                                    {% for policy_holder in beneficiaries %}
+                                        <tr>
+                                            <td class="font-weight-bold text-info">
+                                                    {{ policy_holder.title }} {{ policy_holder.full_names }}
+                                            </td>
+                                            <td>{{ policy_holder.surname }}</td>
+                                            <td>{{ policy_holder.id_number }}</td>
+                                            <td>{{ policy_holder.date_of_birth }}</td>
+                                            <td>{{ policy_holder.nationality }}</td>
+                                            <td>{{ policy_holder.plan_number or "N/A" }}</td>
+                                            <td>{{ policy_holder.insured_party }}</td>
+                                        </tr>
+                                    {% endfor %}
+                            </table>
+
+                            </div>
+                        </div>
 
                     </div>
                     <div class="tab-pane fade" id="editor" role="tabpanel" aria-labelledby="editor-tab">
@@ -138,7 +175,7 @@
                                 </h3>
                             </div>
                             <div class="card-body m-t-10">
-                                {% include 'admin/clients/forms/cover_editor.html' %}
+                                {% include 'admin/clients/forms/policy_editor.html' %}
                             </div>
 
                         </div>

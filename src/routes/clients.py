@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from src.database.models.companies import CoverPlanDetails
 from src.main import company_controller
-from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData
+from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, InsuredParty
 from src.authentication import login_required
 from src.database.models.users import User
 
@@ -41,13 +41,17 @@ async def get_client(user: User, uid: str):
     """
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     policy_holder = await company_controller.get_policy_holder(uid=uid)
+    beneficiaries = await company_controller.get_beneficiaries(policy_number=policy_holder.policy_number)
+
     plan_covers = await company_controller.get_company_covers(company_id=user.company_id)
     countries = await company_controller.get_countries()
     policy_data = await company_controller.get_policy_data(uid=policy_holder.uid)
+
     payment_methods = await company_controller.get_payment_methods()
+
     context = dict(user=user, company_branches=company_branches, plan_covers=plan_covers,
                    policy_holder=policy_holder, policy_data=policy_data, countries=countries,
-                   payment_methods=payment_methods)
+                   payment_methods=payment_methods, beneficiaries=beneficiaries)
 
     return render_template('admin/clients/client_editor.html', **context)
 
@@ -63,14 +67,13 @@ async def add_client(user: User):
     try:
         policy_holder: ClientPersonalInformation = ClientPersonalInformation(**request.form)
         print(policy_holder)
+        policy_holder.insured_party = str(InsuredParty.POLICY_HOLDER.value)
     except ValidationError as e:
         print(str(e))
         flash(message="Unable to create or update client please provide all required details", category="danger")
         return redirect(url_for('clients.get_clients'))
 
-    policy_holder = await company_controller.add_policy_holder(policy_holder=policy_holder)
-
-    plan_cover: CoverPlanDetails = await company_controller.get_plan_cover(
+    plan_cover = await company_controller.get_plan_cover(
         company_id=user.company_id, plan_number=policy_holder.plan_number)
 
     policy = PolicyRegistrationData(uid=policy_holder.uid,
@@ -79,6 +82,9 @@ async def add_client(user: User):
                                     plan_number=policy_holder.plan_number,
                                     policy_type=plan_cover.plan_type,
                                     total_premiums=plan_cover.premium_costs)
+
+    policy_holder.policy_number = policy.policy_number
+    policy_holder = await company_controller.add_policy_holder(policy_holder=policy_holder)
 
     policy_ = await company_controller.add_policy_data(policy_data=policy)
 
@@ -104,10 +110,36 @@ async def edit_policy_details(user: User):
         uid = policy_data.uid
     except ValidationError as e:
         print(str(e))
-        flash(message="there was an error trying to edit policy data",category="danger")
+        flash(message="there was an error trying to edit policy data", category="danger")
         return redirect(url_for("clients.get_clients"))
+
     policy_ = await company_controller.add_policy_data(policy_data=policy_data)
     print(policy_)
 
     flash(message="Successfully updated Policy Data", category="success")
     return redirect(url_for("clients.get_client", uid=uid))
+
+
+@clients_route.post('/admin/employees/client/policy/<string:policy_number>/add-beneficiary-dependent')
+@login_required
+async def add_beneficiary_dependent(user: User, policy_number: str):
+    """
+
+    :param policy_number:
+    :param user:
+    :return:
+    """
+    try:
+        policy_data = await company_controller.get_policy_with_policy_number(policy_number=policy_number)
+        beneficiary_data = ClientPersonalInformation(**request.form)
+        print(beneficiary_data)
+
+    except ValidationError as e:
+        print(str(e))
+        flash(message="Error adding beneficiary", category="danger")
+        return redirect(url_for('clients.get_clients'))
+
+    new_beneficiary = await company_controller.add_policy_holder(policy_holder=beneficiary_data)
+
+    flash(message="Successfully updated policy", category="success")
+    return redirect(url_for('clients.get_client', uid=policy_data.uid))

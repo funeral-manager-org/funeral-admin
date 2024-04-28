@@ -60,7 +60,18 @@
                                name="policy_active" {% if policy_data.policy_active %}checked{% endif %}>
                         <label class="form-check-label" for="policy_active">Policy Active</label>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-sm btn-primary pull-left">
+                        Submit
+                    </button>
+
+                    <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0 pull-right" data-toggle="modal" data-target="#addFamilyID">
+                        Add Beneficiary or Dependents
+                    </a>
+                </div>
                 </form>
             </div>
     </div>
+
+
+{% include 'admin/clients/forms/add_family.html' %}

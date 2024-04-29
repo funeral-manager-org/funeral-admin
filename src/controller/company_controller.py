@@ -1,17 +1,17 @@
-import random
 from datetime import datetime
+
 from flask import Flask
 from sqlalchemy.exc import OperationalError
 
-from src.database.models.covers import PolicyRegistrationData, ClientPersonalInformation, PaymentMethods, InsuredParty
-from src.database.sql.covers import PolicyRegistrationDataORM, ClientPersonalInformationORM
-from src.database.sql.bank_account import BankAccountORM
-from src.database.models.bank_accounts import BankAccount
-from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
-from src.database.models.contacts import Address, PostalAddress, Contacts
-from src.database.sql.companies import CompanyORM, CompanyBranchesORM, EmployeeORM, CoverPlanDetailsORM
-from src.database.models.companies import Company, CompanyBranches, EmployeeRoles, EmployeeDetails, CoverPlanDetails
 from src.controller import Controllers, error_handler
+from src.database.models.bank_accounts import BankAccount
+from src.database.models.companies import Company, CompanyBranches, EmployeeRoles, EmployeeDetails, CoverPlanDetails
+from src.database.models.contacts import Address, PostalAddress, Contacts
+from src.database.models.covers import PolicyRegistrationData, ClientPersonalInformation, PaymentMethods, InsuredParty
+from src.database.sql.bank_account import BankAccountORM
+from src.database.sql.companies import CompanyORM, CompanyBranchesORM, EmployeeORM, CoverPlanDetailsORM
+from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
+from src.database.sql.covers import PolicyRegistrationDataORM, ClientPersonalInformationORM
 
 
 class CompanyController(Controllers):
@@ -44,7 +44,7 @@ class CompanyController(Controllers):
         """
         with self.get_session() as session:
             company_name = company.company_name.strip().lower()
-            company_list = session.query(CompanyORM).filter(CompanyORM.company_name == company_name).all()
+            company_list = session.query(CompanyORM).filter_by(company_name=company_name).all()
             if company_list:
                 return None
             company_orm = CompanyORM(**company.dict())
@@ -56,7 +56,7 @@ class CompanyController(Controllers):
     @error_handler
     async def get_company_details(self, company_id: str) -> Company | None:
         with self.get_session() as session:
-            company_orm = session.query(CompanyORM).filter(CompanyORM.company_id == company_id).first()
+            company_orm = session.query(CompanyORM).filter_by(company_id=company_id).first()
             if isinstance(company_orm, CompanyORM):
                 return Company(**company_orm.to_dict())
             return None
@@ -71,8 +71,8 @@ class CompanyController(Controllers):
 
         with self.get_session() as session:
             _branch_name = company_branch.branch_name.lower().strip()
-            company_branches_orm = session.query(CompanyBranchesORM).filter(
-                CompanyBranchesORM.branch_name == _branch_name.casefold()).first()
+            company_branches_orm = session.query(CompanyBranchesORM).filter_by(
+                branch_name == _branch_name.casefold()).first()
             if isinstance(company_branches_orm, CompanyBranchesORM):
                 return None
             session.add(CompanyBranchesORM(**company_branch.dict()))
@@ -113,8 +113,7 @@ class CompanyController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            company_branches_orm = session.query(CompanyBranchesORM).filter(
-                CompanyBranchesORM.company_id == company_id).all()
+            company_branches_orm = session.query(CompanyBranchesORM).filter_by(company_id=company_id).all()
             return [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
                     if isinstance(branch_orm, CompanyBranchesORM)]
 
@@ -126,7 +125,7 @@ class CompanyController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            branch_orm = session.query(CompanyBranchesORM).filter(CompanyBranchesORM.branch_id == branch_id).first()
+            branch_orm = session.query(CompanyBranchesORM).filter_by(branch_id=branch_id).first()
 
             if not isinstance(branch_orm, CompanyBranchesORM):
                 return None
@@ -361,6 +360,7 @@ class CompanyController(Controllers):
                 return EmployeeDetails(**employee_orm.to_dict())
             return None
 
+    @error_handler
     async def get_company_employees(self, company_id: str) -> list[EmployeeDetails]:
         """
 
@@ -372,6 +372,7 @@ class CompanyController(Controllers):
             return [EmployeeDetails(**employee_orm.to_dict()) for employee_orm in employees_orm_list
                     if isinstance(employee_orm, EmployeeORM)]
 
+    @error_handler
     async def create_plan_cover(self, plan_cover: CoverPlanDetails) -> CoverPlanDetails:
         """
         Create or update a cover plan in the database.
@@ -404,6 +405,7 @@ class CompanyController(Controllers):
 
             return plan_cover
 
+    @error_handler
     async def get_company_covers(self, company_id: str) -> list[CoverPlanDetails]:
         """
 
@@ -415,6 +417,7 @@ class CompanyController(Controllers):
             return [CoverPlanDetails(**plan.to_dict()) for plan in cover_details_list
                     if isinstance(plan, CoverPlanDetailsORM)]
 
+    @error_handler
     async def get_plan_cover(self, company_id: str, plan_number: str) -> CoverPlanDetails | None:
         """
 
@@ -429,6 +432,7 @@ class CompanyController(Controllers):
                 return CoverPlanDetails(**plan_cover_orm.to_dict())
             return None
 
+    @error_handler
     async def get_plan_subscribers(self, plan_number: str) -> list[PolicyRegistrationData]:
         """
 
@@ -440,6 +444,7 @@ class CompanyController(Controllers):
             return [PolicyRegistrationData(**subscriber.to_dict()) for subscriber in plan_subscribers
                     if isinstance(subscriber, PolicyRegistrationDataORM)]
 
+    @error_handler
     async def get_policy_holders(self, company_id: str) -> list[ClientPersonalInformation]:
         """
 
@@ -452,6 +457,7 @@ class CompanyController(Controllers):
                                                                                         insured_party=policy_holder).all()
             return [ClientPersonalInformation(**holder.to_dict()) for holder in policy_holders_list]
 
+    @error_handler
     async def get_policy_holder(self, uid: str) -> ClientPersonalInformation | None:
         with self.get_session() as session:
             policy_holder_orm = session.query(ClientPersonalInformationORM).filter_by(uid=uid).first()
@@ -459,6 +465,7 @@ class CompanyController(Controllers):
                 return ClientPersonalInformation(**policy_holder_orm.to_dict())
             return None
 
+    @error_handler
     async def get_policy_data(self, uid: str):
         with self.get_session() as session:
             policy_data_orm = session.query(PolicyRegistrationDataORM).filter_by(uid=uid).first()
@@ -466,6 +473,7 @@ class CompanyController(Controllers):
                 return PolicyRegistrationData(**policy_data_orm.to_dict())
             return None
 
+    @error_handler
     async def get_beneficiaries(self, policy_number: str):
         """
 
@@ -477,9 +485,11 @@ class CompanyController(Controllers):
                 policy_number=policy_number).all()
             return [ClientPersonalInformation(**client.to_dict()) for client in beneficiaries_list_orm]
 
+    @error_handler
     async def get_payment_methods(self) -> list[str]:
         return PaymentMethods.get_payment_methods()
 
+    @error_handler
     async def add_policy_holder(self, policy_holder: ClientPersonalInformation) -> ClientPersonalInformation:
         """
         Add or update a policy holder in the database.
@@ -519,6 +529,7 @@ class CompanyController(Controllers):
             session.commit()
             return policy_holder
 
+    @error_handler
     async def add_policy_data(self, policy_data: PolicyRegistrationData) -> PolicyRegistrationData:
         """
         Add or update policy data in the database.
@@ -561,9 +572,11 @@ class CompanyController(Controllers):
 
             return policy_data
 
+    @error_handler
     async def get_countries(self):
         return self.countries
 
+    @error_handler
     async def get_policy_with_policy_number(self, policy_number: str) -> PolicyRegistrationData | None:
         """
 
@@ -576,21 +589,25 @@ class CompanyController(Controllers):
                 return PolicyRegistrationData(**policy_data_orm.to_dict())
             return None
 
+    @error_handler
     async def search_policies_by_id_number(self, id_number: str) -> list[PolicyRegistrationData]:
         """
-
-        :param id_number:
-        :return:
+        Search for policies by ID number.
+        :param id_number: The ID number of the client to search for.
+        :return: List of policies associated with the ID number.
         """
         with self.get_session() as session:
-            client_data_orm = session.query(ClientPersonalInformationORM).filter_by(id_number=id_number).first()
-            if isinstance(client_data_orm, ClientPersonalInformationORM):
-                policy_number = client_data_orm.policy_number
-                policy_data_orm_list = session.query(PolicyRegistrationDataORM).filter_by(policy_number=policy_number).all()
-                return [PolicyRegistrationData(**policy_orm.to_dict()) for policy_orm in policy_data_orm_list
-                        if isinstance(policy_orm, PolicyRegistrationDataORM)]
-            return []
+            # Perform a single query to fetch policies by ID number
+            policies_orm = session.query(PolicyRegistrationDataORM) \
+                .join(ClientPersonalInformationORM,
+                      ClientPersonalInformationORM.policy_number == PolicyRegistrationDataORM.policy_number) \
+                .filter(ClientPersonalInformationORM.id_number == id_number) \
+                .all()
 
+            # Convert ORM objects to PolicyRegistrationData objects
+            return [PolicyRegistrationData(**policy_orm.to_dict()) for policy_orm in policies_orm]
+
+    @error_handler
     async def search_policies_by_policy_number(self, policy_number: str) -> list[PolicyRegistrationData]:
         """
 
@@ -602,6 +619,7 @@ class CompanyController(Controllers):
             return [PolicyRegistrationData(**policy_orm.to_dict()) for policy_orm in policy_data_orm_list
                     if isinstance(policy_orm, PolicyRegistrationDataORM)]
 
+    @error_handler
     async def search_policies_by_policy_holder_name(self, policy_holder_name: str) -> list[PolicyRegistrationData]:
         '''
         Search for policies by policy holder name.

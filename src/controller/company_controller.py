@@ -448,7 +448,8 @@ class CompanyController(Controllers):
         """
         with self.get_session() as session:
             policy_holder = InsuredParty.POLICY_HOLDER.value
-            policy_holders_list = session.query(ClientPersonalInformationORM).filter_by(company_id=company_id, insured_party=policy_holder).all()
+            policy_holders_list = session.query(ClientPersonalInformationORM).filter_by(company_id=company_id,
+                                                                                        insured_party=policy_holder).all()
             return [ClientPersonalInformation(**holder.to_dict()) for holder in policy_holders_list]
 
     async def get_policy_holder(self, uid: str) -> ClientPersonalInformation | None:
@@ -490,7 +491,6 @@ class CompanyController(Controllers):
             uid = policy_holder.uid
             branch_id = policy_holder.branch_id
             company_id = policy_holder.company_id
-
 
             policy_holder_orm = session.query(ClientPersonalInformationORM).filter_by(
                 uid=uid).first()
@@ -575,3 +575,46 @@ class CompanyController(Controllers):
             if isinstance(policy_data_orm, PolicyRegistrationDataORM):
                 return PolicyRegistrationData(**policy_data_orm.to_dict())
             return None
+
+    async def search_policies_by_id_number(self, id_number: str) -> list[PolicyRegistrationData]:
+        """
+
+        :param id_number:
+        :return:
+        """
+        with self.get_session() as session:
+            client_data_orm = session.query(ClientPersonalInformationORM).filter_by(id_number=id_number).first()
+            if isinstance(client_data_orm, ClientPersonalInformationORM):
+                policy_number = client_data_orm.policy_number
+                policy_data_orm_list = session.query(PolicyRegistrationDataORM).filter_by(policy_number=policy_number).all()
+                return [PolicyRegistrationData(**policy_orm.to_dict()) for policy_orm in policy_data_orm_list
+                        if isinstance(policy_orm, PolicyRegistrationDataORM)]
+            return []
+
+    async def search_policies_by_policy_number(self, policy_number: str) -> list[PolicyRegistrationData]:
+        """
+
+        :param policy_number:
+        :return:
+        """
+        with self.get_session() as session:
+            policy_data_orm_list = session.query(PolicyRegistrationDataORM).filter_by(policy_number=policy_number).all()
+            return [PolicyRegistrationData(**policy_orm.to_dict()) for policy_orm in policy_data_orm_list
+                    if isinstance(policy_orm, PolicyRegistrationDataORM)]
+
+    async def search_policies_by_policy_holder_name(self, policy_holder_name: str) -> list[PolicyRegistrationData]:
+        '''
+        Search for policies by policy holder name.
+        :param policy_holder_name: The name of the policy holder to search for.
+        :return: List of policies matching the policy holder name.
+        '''
+        with self.get_session() as session:
+            # Perform a single query to fetch policies by policy holder name
+            policies_orm = session.query(PolicyRegistrationDataORM) \
+                .join(ClientPersonalInformationORM,
+                      ClientPersonalInformationORM.policy_number == PolicyRegistrationDataORM.policy_number) \
+                .filter(ClientPersonalInformationORM.full_names == policy_holder_name) \
+                .all()
+
+            # Convert ORM objects to PolicyRegistrationData objects
+            return [PolicyRegistrationData(**policy_orm.to_dict()) for policy_orm in policies_orm]

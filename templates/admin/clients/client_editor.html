@@ -114,11 +114,11 @@
                         </div>
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Beneficiaries &amp; Dependents </h3>
+                                <h3 class="card-title font-weight-bold text-info">Beneficiaries &amp; Dependents </h3>
                             </div>
                             <div class="card-body">
                             <table class="table table-bordered table-striped">
-                                    <thead>
+
                                     <thead class="font-weight-bold text-info">
                                         <tr>
                                             <td>Full Names</td>
@@ -130,22 +130,28 @@
                                             <td>Insured Party</td>
                                         </tr>
                                     </thead>
-                                </thead>
-                                    {% for policy_holder in beneficiaries %}
-                                        <tr>
-                                            <td class="font-weight-bold text-info">
-                                                    {{ policy_holder.title }} {{ policy_holder.full_names }}
-                                            </td>
-                                            <td>{{ policy_holder.surname }}</td>
-                                            <td>{{ policy_holder.id_number }}</td>
-                                            <td>{{ policy_holder.date_of_birth }}</td>
-                                            <td>{{ policy_holder.nationality }}</td>
-                                            <td>{{ policy_holder.plan_number or "N/A" }}</td>
-                                            <td>{{ policy_holder.insured_party }}</td>
-                                        </tr>
-                                    {% endfor %}
+                                    <tbody>
+                                        {% for policy_holder in beneficiaries %}
+                                            <tr>
+                                                <td class="font-weight-bold text-info">
+                                                        {{ policy_holder.title }} {{ policy_holder.full_names }}
+                                                </td>
+                                                <td>{{ policy_holder.surname }}</td>
+                                                <td>{{ policy_holder.id_number }}</td>
+                                                <td>{{ policy_holder.date_of_birth }}</td>
+                                                <td>{{ policy_holder.nationality }}</td>
+                                                <td>{{ policy_holder.plan_number or "N/A" }}</td>
+                                                <td>{{ policy_holder.insured_party }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
                             </table>
 
+                            </div>
+                            <div class="card-footer">
+                                <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0 pull-right" data-toggle="modal" data-target="#addFamilyID">
+                                    Add Beneficiary or Dependents
+                                </a>
                             </div>
                         </div>
 
@@ -200,3 +206,6 @@
     </section>
 
 {% endblock %}
+
+
+{% include 'admin/clients/forms/add_family.html' %}

@@ -10,11 +10,9 @@ encryptor = Encryptor()
 send_mail = SendMail()
 
 from src.controller.auth import UserController
-from src.controller.company_controller import  CompanyController
+from src.controller.company_controller import CompanyController
 from src.controller.paypal_controller import PayPalController
 from src.controller.chat_controller import ChatController
-
-
 
 # from src.firewall import Firewall
 
@@ -23,9 +21,8 @@ company_controller = CompanyController()
 paypal_controller = PayPalController()
 chat_controller = ChatController()
 
-
-
 chat_io = SocketIO()
+
 
 # firewall = Firewall()
 def _add_blue_prints(app: Flask):
@@ -40,9 +37,9 @@ def _add_blue_prints(app: Flask):
     from src.routes.employees import employee_route
     from src.routes.covers import covers_route
     from src.routes.clients import clients_route
+    from src.routes.policies import policy_route
 
-
-    for route in [auth_route, home_route, company_route, employee_route, covers_route, clients_route]:
+    for route in [auth_route, home_route, company_route, employee_route, covers_route, clients_route, policy_route]:
         app.register_blueprint(route)
 
 
@@ -80,6 +77,3 @@ def create_app(config):
         chat_controller.init_app(app=app)
 
     return app, chat_io
-
-
-

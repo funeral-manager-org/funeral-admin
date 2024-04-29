@@ -1,0 +1,137 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title font-weight-bold text-info">
+                <i class="fa fa-umbrella"> </i>
+                Policies
+            </h2>
+        </div>
+        <div class="card-body">
+            <!-- Tab navigation -->
+            <ul class="nav nav-tabs" id="policiesTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="policies-list-tab" data-toggle="tab" href="#policies-list" role="tab" aria-controls="policies-list" aria-selected="true">Policies List</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="outstanding-policies-tab" data-toggle="tab" href="#outstanding-policies" role="tab" aria-controls="outstanding-policies" aria-selected="false">Outstanding Policies</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="search-policies-tab" data-toggle="tab" href="#search-policies" role="tab" aria-controls="search-policies" aria-selected="false">Search Policies</a>
+                </li>
+            </ul>
+
+            <!-- Tab content -->
+            <div class="tab-content" id="policiesTabContent">
+                <!-- Policies List tab -->
+                <div class="tab-pane fade show active" id="policies-list" role="tabpanel" aria-labelledby="policies-list-tab">
+                    <div class="card-body">
+                        <!-- Content for policies list tab goes here -->
+                        <div class="card-header">
+                            <h3 class="font-weight-bold card-title">
+                                <i class="fa fa-list"> </i>
+                                Policies List
+                            </h3>
+                        </div>
+                        <!-- Table to display policies list -->
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <!-- Define table headers -->
+                                    <th>Policy Number</th>
+                                    <th>Plan Number</th>
+                                    <th>Policy Type</th>
+                                    <!-- Add more headers as needed -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Loop through policies and display each policy -->
+                                {% for policy in policies_list %}
+                                <tr>
+                                    <!-- Display policy details -->
+                                    <td>{{ policy.policy_number }}</td>
+                                    <td>{{ policy.plan_number }}</td>
+                                    <td>{{ policy.policy_type }}</td>
+                                    <!-- Add more columns as needed -->
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Outstanding Policies tab -->
+                <div class="tab-pane fade" id="outstanding-policies" role="tabpanel" aria-labelledby="outstanding-policies-tab">
+                    <div class="card-body">
+                        <!-- Content for outstanding policies tab goes here -->
+                        <div class="card-header">
+                            <h3 class="font-weight-bold card-title">
+                                <i class="fa fa-exclamation-triangle"> </i>
+                                Outstanding Policies
+                            </h3>
+                        </div>
+                        <!-- Table to display outstanding policies -->
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <!-- Define table headers -->
+                                    <th>Policy Number</th>
+                                    <th>Plan Number</th>
+                                    <th>Policy Type</th>
+                                    <!-- Add more headers as needed -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Loop through outstanding policies and display each policy -->
+                                {% for policy in outstanding_policies %}
+                                <tr>
+                                    <!-- Display policy details -->
+                                    <td>{{ policy.policy_number }}</td>
+                                    <td>{{ policy.plan_number }}</td>
+                                    <td>{{ policy.policy_type }}</td>
+                                    <!-- Add more columns as needed -->
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Search Policies tab -->
+                <div class="tab-pane fade" id="search-policies" role="tabpanel" aria-labelledby="search-policies-tab">
+                    <div class="card-body">
+                        <!-- Content for search policies tab goes here -->
+                        <div class="card-header">
+                            <h3 class="font-weight-bold card-title">
+                                <i class="fa fa-search"> </i>
+                                Search Policies
+                            </h3>
+                        </div>
+                        <!-- Form to search policies -->
+                        <form action="{{ url_for('policy.search_policies') }}" method="post" id="search-form">
+                            <div class="form-group">
+                                <label for="search-option">Search Option</label><br>
+                                <input type="radio" id="search-id-number" name="search-option" value="id_number" checked>
+                                <label for="search-id-number">ID Number</label><br>
+                                <input type="radio" id="search-policy-number" name="search-option" value="policy_number">
+                                <label for="search-policy-number">Policy Number</label><br>
+                                <input type="radio" id="search-policy-holder-name" name="search-option" value="policy_holder_name">
+                                <label for="search-policy-holder-name">Policy Holder Name</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="search-input">Search Value</label>
+                                <input type="text" class="form-control" id="search-input" name="search-input" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

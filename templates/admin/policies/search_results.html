@@ -1,0 +1,56 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title font-weight-bold text-info">
+                <i class="fa fa-search"> </i>
+                Search Results
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Policy Number</th>
+                            <th>Plan Number</th>
+                            <th>Policy Type</th>
+                            <th>Members</th>
+                            <th>Premiums</th>
+                            <th>Date Activated</th>
+                            <th>Payment Day</th>
+                            <th>Is Active</th>
+                            <!-- Add more columns as needed -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if policies_list %}
+                            {% for policy in policies_list %}
+                                <tr>
+                                    <td>{{ policy.policy_number }}</td>
+                                    <td>{{ policy.plan_number }}</td>
+                                    <td>{{ policy.policy_type }}</td>
+                                    <td>{{ policy.total_family_members }}</td>
+                                    <td>R {{ policy.total_premiums| number }}.00</td>
+                                    <td>{{ policy.date_activated }}</td>
+                                    <td>{{ policy.payment_day }}</td>
+                                    <td>{{ policy.policy_active }}</td>
+
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3">No policies found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

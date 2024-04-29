@@ -1,0 +1,77 @@
+<div class="modal fade" id="clientAccountID" tabindex="-1" role="dialog" aria-labelledby="accountLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="accountLabel" class="card-title"> <i class="fa fa-bank"></i> Bank Account </h2>
+            </div>
+
+            <div class="modal-body">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    {% if bank_account %}
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#viewAccount" role="tab">
+                                <span class="font-weight-bold text-info">
+                                    <i class="fa fa-bank"> </i>
+                                    Bank Account
+                                </span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#editAccount" role="tab">
+                                <span class="font-weight-bold  text-info">
+                                    <i class="fa fa-file-text"> </i>
+                                    Edit Bank Account
+                                </span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#addAccount" role="tab">
+                                <span class="font-weight-bold text-info">
+                                    <i class="fa fa-bank"> </i>
+                                    Bank Account
+                                </span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    {% if bank_account %}
+                        <!-- View Bank Account Tab -->
+                        <div class="tab-pane active" id="viewAccount" role="tabpanel">
+                            <div class="card-footer">
+                                <p class="font-weight-bold text-info">{{ policy_holder.full_names }} Bank Account</p>
+                                <p class="font-weight-bold">Account Holder: <span class="text-info">{{ bank_account.account_holder }}</span></p>
+                                <p class="font-weight-bold">Account Number: <span class="text-info">{{ bank_account.account_number }}</span></p>
+                                <p class="font-weight-bold">Bank Name: <span class="text-info">{{ bank_account.bank_name }}</span></p>
+                                <p class="font-weight-bold">Branch: <span class="text-info">{{ bank_account.branch }}</span></p>
+                                <p class="font-weight-bold">Account Type: <span class="text-info">{{ bank_account.account_type }}</span></p>
+                            </div>
+                        </div>
+                        <!-- Edit Bank Account Tab -->
+                        <div class="tab-pane" id="editAccount" role="tabpanel">
+                            <div class="card-footer">
+                                <!-- Form for editing existing bank account -->
+                              {% include 'admin/clients/client_modals/account_form.html' %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Add Bank Account Tab -->
+                        <div class="tab-pane active" id="addAccount" role="tabpanel">
+                            <div class="card-footer">
+                                <!-- Form for adding new bank account -->
+                                <div class="card-header">
+                                    <h3 class="card-title"> Add Bank Account</h3>
+                                </div>
+                                {% include 'admin/clients/client_modals/account_form.html' %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

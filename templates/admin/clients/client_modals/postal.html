@@ -1,0 +1,61 @@
+
+
+<div class="modal fade" id="employeePostalID" tabindex="-1" role="dialog" aria-labelledby="postalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="postalLabel" class="card-title"> <i class="fa fa-address-card"></i> Postal Address </h2>
+            </div>
+            <div class="modal-body">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    {% if postal_address %}
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#viewPostal" role="tab">Postal Address</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#editPostal" role="tab">Edit Postal Address</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#addPostal" role="tab">Postal Address</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    {% if postal_address %}
+                        <!-- View Postal Address Tab -->
+                        <div class="tab-pane active" id="viewPostal" role="tabpanel">
+                            <div class="card-footer">
+                                <!-- Display postal address details here -->
+                                <p class="font-weight-bold text-info">{{ employee_detail.full_names }} {{ employee_detail.last_name }}</p>
+                                <p>Address Line 1: <span class="font-weight-bold text-info">{{ postal_address.address_line_1 }}</span></p>
+                                <p>Town/City: <span class="font-weight-bold text-info">{{ postal_address.town_city }}</span></p>
+                                <p>Province: <span class="font-weight-bold text-info">{{ postal_address.province }}</span></p>
+                                <p>Country: <span class="font-weight-bold text-info">{{ postal_address.country }}</span></p>
+                                <p>Postal Code: <span class="font-weight-bold text-info">{{ postal_address.postal_code }}</span></p>
+                            </div>
+                        </div>
+                        <!-- Edit Postal Address Tab -->
+                        <div class="tab-pane" id="editPostal" role="tabpanel">
+                            <div class="card-footer">
+                                <!-- Form for editing existing postal address -->
+                                {% include 'admin/managers/branches/employee_modals/postal_form.html' %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Add Postal Address Tab -->
+                        <div class="tab-pane active" id="addPostal" role="tabpanel">
+                            <div class="card-footer">
+                                <!-- Form for adding new postal address -->
+                                {% include 'admin/managers/branches/employee_modals/postal_form.html' %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

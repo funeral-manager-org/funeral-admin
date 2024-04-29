@@ -75,4 +75,26 @@
         <i class="fa fa-save"></i>
         Update
     </button>
+
+    <button type="submit" class="btn btn-sm btn-primary">
+        <i class="fa fa-save"></i>
+        Contact Details
+    </button>
+    <button type="submit" class="btn btn-sm btn-primary">
+        <i class="fa fa-save"></i>
+        Postal Address
+    </button>
+    <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientAddressID">
+        <i class="fa fa-save"></i>
+        Physical Address
+    </a>
+    <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientAccountID">
+        <i class="fa fa-credit-card"> </i> Bank Account
+    </a>
+
 </form>
+
+
+{% include "admin/clients/client_modals/bank_account.html" %}
+{% include "admin/clients/client_modals/address.html" %}
+

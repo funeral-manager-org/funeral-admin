@@ -512,6 +512,7 @@ class CompanyController(Controllers):
 
             if policy_holder_orm:
                 # Update all fields for the existing policy holder
+                policy_holder_orm.uid = uid
                 policy_holder_orm.branch_id = branch_id
                 policy_holder_orm.company_id = company_id
                 policy_holder_orm.title = policy_holder.title
@@ -526,11 +527,11 @@ class CompanyController(Controllers):
                 policy_holder_orm.contact_id = policy_holder.contact_id
                 policy_holder_orm.postal_id = policy_holder.postal_id
                 policy_holder_orm.bank_account_id = policy_holder.bank_account_id
-            else:
-                # Create a new policy holder entry
-                policy_holder_orm = ClientPersonalInformationORM(**policy_holder.dict())
 
-            session.add(policy_holder_orm)
+            else:
+                policy_holder_orm = ClientPersonalInformationORM(**policy_holder.dict())
+                session.add(policy_holder_orm)
+
             session.commit()
             return policy_holder
 

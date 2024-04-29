@@ -1,0 +1,77 @@
+<div class="modal fade" id="employeeContactID" tabindex="-1" role="dialog" aria-labelledby="contactLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="contactLabel" class="card-title"> <i class="fa fa-envelope"></i> Contact </h2>
+            </div>
+
+            <div class="modal-body">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    {% if contact %}
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#viewContact" role="tab">
+
+                                <span class="font-weight-bold"><i class="fa fa-phone"> </i> Contact Details</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#editContact" role="tab">
+                                <span class="font-weight-bold">
+                                    <i class="fa fa-file-text"> </i>
+                                    Edit Contact
+                                </span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#addContact" role="tab">Add Contact</a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    {% if contact %}
+                        <!-- View Contact Tab -->
+                        <div class="tab-pane active" id="viewContact" role="tabpanel">
+                            <div class="card-footer">
+                                <!-- Display contact details here -->
+                                <p class="font-weight-bold text-info">{{ employee_detail.full_names }} {{ employee_detail.last_name }} Contact Information </p>
+                                <p>Cell: <span class="font-weight-bold text-info">{{ contact.cell }}</span></p>
+                                {% if contact.tel %}
+                                    <p>Tel: <span class="font-weight-bold text-info">{{ contact.tel }}</span></p>
+                                {% endif %}
+                                <p>Email: <span class="font-weight-bold text-info">{{ contact.email }}</span></p>
+                                {% if contact.facebook %}
+                                <p>Facebook: <span class="font-weight-bold text-info">{{ contact.facebook }}</span></p>
+                                {% endif %}
+                                {% if contact.twitter %}
+                                <p>Twitter: <span class="font-weight-bold text-info">{{ contact.twitter }}</span></p>
+                                {% endif %}
+                                {% if contact.whatsapp %}
+                                <p>WhatsApp: <span class="font-weight-bold text-info">{{ contact.whatsapp }}</span></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Edit Contact Tab -->
+                        <div class="tab-pane" id="editContact" role="tabpanel">
+                            <div class="card-footer">
+                                <!-- Form for editing existing contact -->
+                                {% include "admin/managers/branches/employee_modals/contact_form.html" %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Add Contact Tab -->
+                        <div class="tab-pane active" id="addContact" role="tabpanel">
+                            <div class="card-footer">
+                                <!-- Form for adding new contact -->
+                               {% include "admin/managers/branches/employee_modals/contact_form.html" %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

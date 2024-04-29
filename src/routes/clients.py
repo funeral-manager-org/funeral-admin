@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
 
-from src.database.models.companies import CoverPlanDetails
-from src.main import company_controller
-from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, InsuredParty
 from src.authentication import login_required
+from src.database.models.bank_accounts import BankAccount
+from src.database.models.contacts import Address
+from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, InsuredParty
 from src.database.models.users import User
+from src.main import company_controller
 
 clients_route = Blueprint('clients', __name__)
 
@@ -52,6 +53,16 @@ async def get_client(user: User, uid: str):
     context = dict(user=user, company_branches=company_branches, plan_covers=plan_covers,
                    policy_holder=policy_holder, policy_data=policy_data, countries=countries,
                    payment_methods=payment_methods, beneficiaries=beneficiaries)
+
+    if policy_holder.bank_account_id:
+        bank_account = await company_controller.get_bank_account(bank_account_id=policy_holder.bank_account_id)
+        context.update(bank_account=bank_account)
+
+    if policy_holder.address_id:
+        address = await company_controller.get_address(address_id=policy_holder.address_id)
+        context.update(address=address)
+
+    # TODO add Contacts and Postal Address
 
     return render_template('admin/clients/client_editor.html', **context)
 
@@ -143,3 +154,59 @@ async def add_beneficiary_dependent(user: User, policy_number: str):
 
     flash(message="Successfully updated policy", category="success")
     return redirect(url_for('clients.get_client', uid=policy_data.uid))
+
+
+@clients_route.post('/admin/employees/client/add-bank-account/<string:uid>')
+@login_required
+async def add_bank_account(user: User, uid: str):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+        client_bank_account = BankAccount(**request.form)
+    except ValidationError as e:
+        print(str(e))
+        flash(message="Error adding Bank Account please provide all details", category="danger")
+        return url_for('clients.get_client', uid=uid)
+
+    stored_bank_account = await company_controller.add_bank_account(bank_account=client_bank_account)
+    if stored_bank_account:
+        client_personal_data = await company_controller.get_policy_holder(uid=uid)
+        client_personal_data.bank_account_id = stored_bank_account.bank_account_id
+        updated_client_data = await company_controller.add_policy_holder(policy_holder=client_personal_data)
+        if updated_client_data:
+            flash(message="successfully updated client bank account", category="success")
+            return redirect(url_for('clients.get_client', uid=uid))
+
+    flash(message="error trying to update client bank account please try again later", category="danger")
+    return redirect(url_for('clients.get_client', uid=uid))
+
+
+@clients_route.post('/admin/employees/client/address/<string:uid>')
+@login_required
+async def add_address(user: User, uid: str):
+    """
+
+    :param user:
+    :param uid:
+    :return:
+    """
+    try:
+        client_address = Address(**request.form)
+    except ValidationError as e:
+        print(str(e))
+        flash(message="Error adding Address please provide all details", category="danger")
+        return url_for('clients.get_client', uid=uid)
+    stored_address = await company_controller.add_update_address(address=client_address)
+    if stored_address.address_id:
+        client_personal_data = await company_controller.get_policy_holder(uid=uid)
+        client_personal_data.address_id = stored_address.address_id
+        updated_client_data = await company_controller.add_policy_holder(policy_holder=client_personal_data)
+        if updated_client_data:
+            flash(message="successfully updated client address", category="success")
+            return redirect(url_for('clients.get_client', uid=uid))
+
+    flash(message="error trying to update client address please try again later", category="danger")
+    return redirect(url_for('clients.get_client', uid=uid))

@@ -1,0 +1,60 @@
+
+
+    <form
+        action="{{ url_for('company.add_employee_contacts', branch_id=employee_detail.branch_id, employee_id=employee_detail.employee_id) }}" method="POST">
+        <!-- Add your form fields here -->
+        <div class="form-group">
+            {% if contact %}<input type="hidden" name="contact_id" value="{{ contact.contact_id }}" />{% endif %}
+            <label for="cell" class="font-weight-bold text-info">Cell:</label>
+            {% if contact %}
+                <input type="tel" class="form-control" id="cell" name="cell" value="{{ contact.cell }}" required>
+            {% else %}
+                <input type="tel" class="form-control" id="cell" name="cell"   required>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="tel" class="font-weight-bold text-info">Tel:</label>
+            {% if contact %}
+                <input type="tel" class="form-control" id="tel" name="tel" value="{{ contact.tel }}">
+            {% else %}
+                <input type="tel" class="form-control" id="tel" name="tel">
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="email" class="font-weight-bold text-info">Email:</label>
+            {% if contact %}
+                <input type="email" class="form-control" id="email" name="email" value="{{ contact.email }}" required>
+            {% else %}
+                <input type="email" class="form-control" id="email" name="email" required>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="facebook" class="font-weight-bold text-info">Facebook:</label>
+            {% if contact %}
+                <input type="text" class="form-control" id="facebook" name="facebook" value="{{ contact.facebook }}" >
+            {% else %}
+                <input type="text" class="form-control" id="facebook" name="facebook">
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="twitter" class="font-weight-bold text-info">Twitter:</label>
+            {% if contact %}
+                <input type="text" class="form-control" id="twitter" name="twitter" value="{{ contact.twitter }}">
+            {% else %}
+                <input type="text" class="form-control" id="twitter" name="twitter">
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="whatsapp" class="font-weight-bold text-info">WhatsApp:</label>
+            {% if contact %}
+                <input type="tel" class="form-control" id="whatsapp" name="whatsapp" value="{{ contact.whatsapp }}">
+            {% else %}
+                <input type="tel" class="form-control" id="whatsapp" name="whatsapp">
+            {% endif %}
+        </div>
+        {% if contact %}
+                <button type="submit" class="btn btn-sm btn-primary">Update Contact</button>
+        {% else %}
+                <button type="submit" class="btn btn-sm btn-primary">Add Contact</button>
+        {% endif %}
+    </form>

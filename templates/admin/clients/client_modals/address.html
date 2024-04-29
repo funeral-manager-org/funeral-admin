@@ -1,0 +1,121 @@
+<div class="modal fade" id="clientAddressID" tabindex="-1" role="dialog" aria-labelledby="addressLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="addressLabel" class="card-title"> <i class="fa fa-address-book"></i> Address </h2>
+            </div>
+
+            <div class="modal-body">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    {% if  address %}
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#viewAddress" role="tab">Branch Address</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#editAddress" role="tab">Edit Address</a>
+                    </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#addAddress" role="tab">Add Address</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                {% if address %}
+                    <!-- View Address Tab -->
+                    <div class="tab-pane active" id="viewAddress" role="tabpanel">
+                        <div class="card-footer">
+                            {% if address %}
+                                <!-- Display address details here -->
+                                <p class="font-weight-bold text-info">{{ policy_holder.full_names }} {{ policy_holder.surname }}</p>
+                                <p>Street: <span class="font-weight-bold text-info">{{ address.street }}</span></p>
+                                <p>City: <span class="font-weight-bold text-info">{{ address.city }}</span></p>
+                                <p>State: <span class="font-weight-bold text-info">{{ address.state_province }}</span></p>
+                                <p>Postal Code: <span class="font-weight-bold text-info">{{ address.postal_code }}</span></p>
+                                <p>Country: <span class="font-weight-bold text-info">{{ address.country }}</span></p>
+                                <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-print"> </i> Print </a>
+                            {% else %}
+                                <p>Address not available please create new address</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Edit Address Tab -->
+                    <div class="tab-pane" id="editAddress" role="tabpanel">
+                        <div class="card-footer">
+                            <span class="font-weight-bold text-info">{{ policy_holder.full_names }} {{ policy_holder.surname }} <span class="font-weight-light text-dark">Address</span></span>
+                            <hr/>
+                            <form action="{{ url_for('clients.add_address',uid=policy_holder.uid) }}" method="POST">
+                                <input type="hidden" name="address_id" value="{{ address.address_id }}" />
+                                <div class="form-group">
+                                    <label for="street">Street</label>
+                                    <input type="text" name="street" id="street" class="form-control" value="{{ address.street }}" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input type="text" name="city" id="city" class="form-control"  value="{{ address.city }}"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="state_province">Province</label>
+                                    <input type="text" name="state_province" id="state_province" class="form-control" value="{{ address.state_province }}"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="postal_code">Postal Code</label>
+                                    <input type="text" name="postal_code" id="postal_code" class="form-control" value="{{ address.postal_code }}"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="country">Country</label>
+                                    <input type="text" name="country" id="country" class="form-control" value="{{ address.country }}"/>
+                                </div>
+                                <div class="form-group">
+                                        <button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-address-card-o"> </i> Edit Address</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                                    <!-- Add Address Tab -->
+                    <div class="tab-pane active" id="addAddress" role="tabpanel">
+                        <div class="card-footer">
+                            <!-- Form for adding new address -->
+                            <span class="font-weight-bold text-info">Add Branch Address</span>
+                            <form action="{{ url_for('clients.add_address',uid=policy_holder.uid) }}" method="POST">
+                                <div class="form-group">
+                                    <label for="street">Street</label>
+                                    <input type="text" name="street" id="street" class="form-control" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input type="text" name="city" id="city" class="form-control" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="state_province">Province</label>
+                                    <input type="text" name="state_province" id="state_province" class="form-control" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="postal_code">Postal Code</label>
+                                    <input type="text" name="postal_code" id="postal_code" class="form-control" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="country">Country</label>
+                                    <input type="text" name="country" id="country" class="form-control" />
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-address-card"> </i> Add Address</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

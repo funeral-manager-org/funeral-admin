@@ -1,0 +1,32 @@
+
+
+
+
+  <form action="{{ url_for('clients.add_bank_account', uid=policy_holder.uid) }}" method="POST">
+        <!-- Add your form fields here -->
+        {% if bank_account %}<input type="hidden" name="bank_account_id" value="{{ bank_account.bank_account_id }}">{% endif %}
+        <div class="form-group">
+            <label for="account_holder">Account Holder:</label>
+            <input type="text" class="form-control" id="account_holder" name="account_holder" {% if bank_account %}value="{{ bank_account.account_holder }}"{% else %}value="{{ policy_holder.full_names }} {{ policy_holder.surname }}"{% endif %} required>
+        </div>
+        <div class="form-group">
+            <label for="account_number">Account Number:</label>
+            <input type="text" class="form-control" id="account_number" name="account_number" {% if bank_account %}value="{{ bank_account.account_number }}"{% endif %} required>
+        </div>
+        <div class="form-group">
+            <label for="bank_name">Bank Name:</label>
+            <input type="text" class="form-control" id="bank_name" name="bank_name" {% if bank_account %}value="{{ bank_account.bank_name }}"{% endif %} required>
+        </div>
+        <div class="form-group">
+            <label for="branch">Branch:</label>
+            <input type="text" class="form-control" id="branch" name="branch"  {% if bank_account %}value="{{ bank_account.branch }}"{% endif %} required>
+        </div>
+        <div class="form-group">
+            <label for="account_type">Account Type:</label>
+            <input type="text" class="form-control" id="account_type" name="account_type" {% if bank_account %}value="{{ bank_account.account_type }}"{% endif %} required>
+        </div>
+        <button type="submit" class="btn btn-sm btn-primary">
+        <i class="fa fa-save"> </i>
+            {% if bank_account %}Edit Bank Account{% else %} Add Bank Account{% endif %}
+        </button>
+</form>

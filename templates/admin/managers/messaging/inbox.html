@@ -1,0 +1,132 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs" id="messagingTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="sms-tab" data-toggle="tab" href="#sms" role="tab" aria-controls="sms" aria-selected="true">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-comment"></i> SMS
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="whatsapp-tab" data-toggle="tab" href="#whatsapp" role="tab" aria-controls="whatsapp" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-whatsapp"></i> WhatsApp
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab" aria-controls="email" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-envelope"></i> Email
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="messagingTabContent">
+                <div class="tab-pane fade show active" id="sms" role="tabpanel" aria-labelledby="sms-tab">
+                    <!-- SMS Inbox Content Goes Here -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-inbox"></i> SMS Inbox
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>From</th>
+                                            <th>Message</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>+123456789</td>
+                                            <td>Hello, how are you?</td>
+                                            <td>2024-04-20</td>
+                                        </tr>
+                                        <!-- Add more rows for additional SMS messages -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="whatsapp" role="tabpanel" aria-labelledby="whatsapp-tab">
+                    <!-- WhatsApp Inbox Content Goes Here -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-whatsapp"></i> WhatsApp Inbox
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>From</th>
+                                            <th>Message</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>+123456789</td>
+                                            <td>Hello, how are you?</td>
+                                            <td>2024-04-20</td>
+                                        </tr>
+                                        <!-- Add more rows for additional WhatsApp messages -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="email" role="tabpanel" aria-labelledby="email-tab">
+                    <!-- Email Inbox Content Goes Here -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-envelope"></i> Email Inbox
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>From</th>
+                                            <th>Subject</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>sender@example.com</td>
+                                            <td>Hello, how are you?</td>
+                                            <td>2024-04-20</td>
+                                        </tr>
+                                        <!-- Add more rows for additional email messages -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

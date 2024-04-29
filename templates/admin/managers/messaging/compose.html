@@ -1,0 +1,154 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs" id="messagingTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="sms-tab" data-toggle="tab" href="#sms" role="tab" aria-controls="sms" aria-selected="true">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-comment"></i> SMS
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="whatsapp-tab" data-toggle="tab" href="#whatsapp" role="tab" aria-controls="whatsapp" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-whatsapp"></i> WhatsApp
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab" aria-controls="email" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-envelope"></i> Email
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="messagingTabContent">
+                <div class="tab-pane fade show active" id="sms" role="tabpanel" aria-labelledby="sms-tab">
+                    <!-- Compose SMS Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-pencil-alt"></i> Compose SMS
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                    <label class="font-weight-bold" for="smsRecipientType">Recipient Type:</label>
+                                    <select class="form-control" id="smsRecipientType">
+                                        <option value="client">Clients</option>
+                                        <option value="employee">Employees</option>
+                                        <option value="lapsed">Clients with Lapsed Policies</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold" for="smsBranch">Recipients in Branch</label>
+                                    <select class="form-control" id="smsBranch">
+                                        {% for branch in company_branches %}
+                                            <option value="{{ branch.branch_id }}">{{ branch.branch_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold text-info" for="smsMessage">Message:</label>
+                                    <textarea class="col-12" rows="12" id="smsMessage"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary"><i class="fa fa-send-o"> </i> Send SMS</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="whatsapp" role="tabpanel" aria-labelledby="whatsapp-tab">
+                    <!-- Compose WhatsApp Message Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-pencil-alt"></i> Compose WhatsApp Message
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                    <label class="font-weight-bold" for="whatsappRecipientType">Recipient Type:</label>
+                                    <select class="form-control" id="whatsappRecipientType">
+                                        <option value="client">Clients</option>
+                                        <option value="employee">Employees</option>
+                                        <option value="lapsed">Clients with Lapsed Policies</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold" for="whatsappBranch">Recipients in Branch</label>
+                                    <select class="form-control" id="whatsappBranch">
+                                        {% for branch in company_branches %}
+                                            <option value="{{ branch.branch_id }}">{{ branch.branch_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold text-info" for="whatsappMessage">Message:</label>
+                                    <textarea class="col-12" id="whatsappMessage" rows="12"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-whatsapp"> </i>
+                                    WhatsAPP
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="email" role="tabpanel" aria-labelledby="email-tab">
+                    <!-- Compose Email Message Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-pencil-alt"></i> Compose Email Message
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                    <label class="font-weight-bold" for="recipient_type">Recipient Type:</label>
+                                    <select class="form-control" id="recipient_type" name="recipient_type">
+                                        <option value="client">Clients</option>
+                                        <option value="employee">Employees</option>
+                                        <option value="lapsed">Clients with Lapsed Policies</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold" for="to_branch">Recipients in Branch</label>
+                                    <select class="form-control" name="to_branch" id="to_branch">
+                                        {% for branch in company_branches %}
+                                            <option value="{{ branch.branch_id }}">{{ branch.branch_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold text-info" for="subject">Subject</label>
+                                    <input type="text" class="form-control" id="subject" name="subject">
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold text-info" for="message">Message</label>
+                                    <textarea class="col-12" id="message" name="message" rows="12"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-envelope-o"> </i>
+                                    Email
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

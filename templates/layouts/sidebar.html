@@ -19,8 +19,20 @@
                             <li><a href="{{ url_for('covers.get_covers') }}"><i class="ti-briefcase"></i> Covers</a></li>
                             <li><a href="{{ url_for('employees.get_employees') }}"><i class="ti-briefcase"></i> Employees</a></li>
 
-                            <li><a href="#"><i class="ti-briefcase"></i> Messaging</a></li>
+
+                            <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
+                                    class="sidebar-collapse-icon ti-angle-down"></span></a>
+                                <ul>
+                                    <li><a href="{{ url_for('messaging.get_topup') }}"><i class="ti-credit-card"></i> TopUps</a></li>
+                                    <li><a href="{{ url_for('messaging.get_inbox') }}"><i class="fa fa-inbox"></i> Inbox</a></li>
+                                    <li><a href="{{ url_for('messaging.get_sent') }}"><i class="fa fa-send"></i> Sent</a></li>
+                                    <li><a href="{{ url_for('messaging.get_compose') }}"><i class="fa fa-send"></i> Compose</a></li>
+                                    <li><a href="{{ url_for('messaging.get_admin') }}"><i class="fa fa-cogs"></i> Settings & Stats</a></li>
+                                </ul>
+                            </li>
+
                         </ul>
+
                     </li>
 
                     <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Employees Admin<span

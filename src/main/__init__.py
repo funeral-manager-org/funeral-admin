@@ -38,8 +38,10 @@ def _add_blue_prints(app: Flask):
     from src.routes.covers import covers_route
     from src.routes.clients import clients_route
     from src.routes.policies import policy_route
-
-    for route in [auth_route, home_route, company_route, employee_route, covers_route, clients_route, policy_route]:
+    from src.routes.messaging import messaging_route
+    routes = [auth_route, home_route, company_route, employee_route, covers_route, clients_route, policy_route,
+              messaging_route]
+    for route in routes:
         app.register_blueprint(route)
 
 

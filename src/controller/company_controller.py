@@ -347,6 +347,11 @@ class CompanyController(Controllers):
             return [EmployeeDetails(**employee.to_dict()) for employee in employees_orm if
                     isinstance(employee, EmployeeORM)]
 
+    async def get_branch_policy_holders(self, branch_id: str) -> list[ClientPersonalInformation]:
+        with self.get_session() as session:
+            clients_orm_list = session.query(ClientPersonalInformationORM).filter_by(branch_id=branch_id).all()
+            return [ClientPersonalInformation(**client.to_dict()) for client in clients_orm_list]
+
     @error_handler
     async def get_employee(self, employee_id: str) -> EmployeeDetails | None:
         """

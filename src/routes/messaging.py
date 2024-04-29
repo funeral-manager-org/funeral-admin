@@ -1,13 +1,11 @@
+from flask import Blueprint, render_template, url_for, flash, redirect, request
 
-from flask import Blueprint, render_template, url_for, flash, redirect
-
+from src.database.models.covers import ClientPersonalInformation
 from src.authentication import login_required
 from src.database.models.users import User
-from src.main import company_controller
+from src.main import company_controller, messaging_controller
 
 messaging_route = Blueprint('messaging', __name__)
-
-
 
 
 @messaging_route.get('/admin/administrator/cloudflare')
@@ -33,7 +31,7 @@ async def get_admin(user: User):
 
 @messaging_route.post('/admin/administrator/messaging/sms-settings')
 @login_required
-async def update_sms_settings(user :User):
+async def update_sms_settings(user: User):
     """
 
     :param user:
@@ -45,7 +43,7 @@ async def update_sms_settings(user :User):
 
 @messaging_route.post('/admin/administrator/messaging/whatsapp-settings')
 @login_required
-async def update_whatsapp_settings(user :User):
+async def update_whatsapp_settings(user: User):
     """
 
     :param user:
@@ -69,6 +67,7 @@ async def get_sent(user: User):
     context = dict(user=user)
     return render_template('admin/managers/messaging/sent.html', **context)
 
+
 @messaging_route.get('/admin/administrator/messaging/compose')
 @login_required
 async def get_compose(user: User):
@@ -90,9 +89,46 @@ async def get_employee_sent(user: User):
     context = dict(user=user)
     return render_template('admin/managers/messaging/sent.html', **context)
 
+
 @messaging_route.get('/admin/employees/messaging/compose')
 @login_required
 async def get_employee_compose(user: User):
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     context = dict(user=user, company_branches=company_branches)
     return render_template('admin/managers/messaging/compose.html', **context)
+
+
+# #############################################################################
+
+
+@messaging_route.post('/admin/messaging/sms/compose')
+@login_required
+async def send_composed_sms_message(user: User):
+    """
+        processes both managers and employees compose message
+        will redirect to the compose of employee or manager upon completion
+    :param user:
+    :return:
+    """
+
+    recipient_type = request.form.get('recipient_type')
+    to_branch = request.form.get('to_branch')
+    message = request.form.get('message')
+    print(recipient_type, to_branch, message)
+
+    if recipient_type.casefold() == "employee":
+        branch_employees = await company_controller.get_branch_employees(branch_id=to_branch)
+        print(f"Branch Emmployees = {branch_employees}")
+    elif recipient_type.casefold() == "client":
+        branch_clients: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
+            branch_id=to_branch)
+        recipient_list = [client.contact_id for client in branch_clients if client.contact_id]
+        print(f"Branch Clients : {branch_clients}")
+
+    is_sent = await messaging_controller.send_sms(recipient="0768255575",message="test message")
+    if user.is_employee:
+        flash(message="Message Successfully sent", category="success")
+        return redirect(url_for('messaging.get_employee_compose'))
+
+    flash(message="Message Successfully sent", category="success")
+    return redirect(url_for('messaging.get_compose'))

@@ -14,13 +14,28 @@
             <!-- Tab navigation -->
             <ul class="nav nav-tabs" id="policiesTab" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" id="policies-list-tab" data-toggle="tab" href="#policies-list" role="tab" aria-controls="policies-list" aria-selected="true">Policies List</a>
+                    <a class="nav-link active" id="policies-list-tab" data-toggle="tab" href="#policies-list" role="tab" aria-controls="policies-list" aria-selected="true">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-list-alt"> </i>
+                            Policies List
+                        </span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="outstanding-policies-tab" data-toggle="tab" href="#outstanding-policies" role="tab" aria-controls="outstanding-policies" aria-selected="false">Outstanding Policies</a>
+                    <a class="nav-link" id="outstanding-policies-tab" data-toggle="tab" href="#outstanding-policies" role="tab" aria-controls="outstanding-policies" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-exclamation-triangle"> </i>
+                            Outstanding Policies
+                        </span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="search-policies-tab" data-toggle="tab" href="#search-policies" role="tab" aria-controls="search-policies" aria-selected="false">Search Policies</a>
+                    <a class="nav-link" id="search-policies-tab" data-toggle="tab" href="#search-policies" role="tab" aria-controls="search-policies" aria-selected="false">
+                        <span class="font-weight-bold text-info">
+                            <i class="fa fa-search"> </i>
+                            Search Policies
+                        </span>
+                    </a>
                 </li>
             </ul>
 
@@ -44,7 +59,12 @@
                                     <th>Policy Number</th>
                                     <th>Plan Number</th>
                                     <th>Policy Type</th>
-                                    <!-- Add more headers as needed -->
+                                    <th>Members</th>
+                                    <th>Premiums</th>
+                                    <th>Date Activated</th>
+                                    <th>Payment Day</th>
+                                    <th>Is Active</th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -55,7 +75,11 @@
                                     <td>{{ policy.policy_number }}</td>
                                     <td>{{ policy.plan_number }}</td>
                                     <td>{{ policy.policy_type }}</td>
-                                    <!-- Add more columns as needed -->
+                                    <td>{{ policy.total_family_members }}</td>
+                                    <td>R {{ policy.total_premiums| number }}.00</td>
+                                    <td>{{ policy.date_activated }}</td>
+                                    <td>{{ policy.payment_day }}</td>
+                                    <td>{{ policy.policy_active }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -81,6 +105,12 @@
                                     <th>Policy Number</th>
                                     <th>Plan Number</th>
                                     <th>Policy Type</th>
+                                    <th>Members</th>
+                                    <th>Premiums</th>
+                                    <th>Date Activated</th>
+                                    <th>Payment Day</th>
+                                    <th>Is Active</th>
+
                                     <!-- Add more headers as needed -->
                                 </tr>
                             </thead>
@@ -92,7 +122,11 @@
                                     <td>{{ policy.policy_number }}</td>
                                     <td>{{ policy.plan_number }}</td>
                                     <td>{{ policy.policy_type }}</td>
-                                    <!-- Add more columns as needed -->
+                                    <td>{{ policy.total_family_members }}</td>
+                                    <td>R {{ policy.total_premiums| number }}.00</td>
+                                    <td>{{ policy.date_activated }}</td>
+                                    <td>{{ policy.payment_day }}</td>
+                                    <td>{{ policy.policy_active }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

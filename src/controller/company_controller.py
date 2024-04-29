@@ -636,3 +636,23 @@ class CompanyController(Controllers):
 
             # Convert ORM objects to PolicyRegistrationData objects
             return [PolicyRegistrationData(**policy_orm.to_dict()) for policy_orm in policies_orm]
+
+    @error_handler
+    async def return_all_active_company_policies(self) -> list[PolicyRegistrationData]:
+        """
+
+        :return:
+        """
+        with self.get_session() as session:
+            policies_orm_list = session.query(PolicyRegistrationDataORM).filter_by(policy_active=True).all()
+            return [PolicyRegistrationData(**policy.to_dict()) for policy in policies_orm_list]
+
+    @error_handler
+    async def return_all_outstanding_company_policies(self) -> list[PolicyRegistrationData]:
+        """
+
+        :return:
+        """
+        with self.get_session() as session:
+            policies_orm_list = session.query(PolicyRegistrationDataORM).filter_by(policy_active=False).all()
+            return [PolicyRegistrationData(**policy.to_dict()) for policy in policies_orm_list]

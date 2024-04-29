@@ -20,8 +20,9 @@ async def get_policies(user: User):
         :param user:
         :return:
     """
-
-    context = dict(user=user)
+    policies_list = await company_controller.return_all_active_company_policies()
+    outstanding_policies = await company_controller.return_all_outstanding_company_policies()
+    context = dict(user=user, policies_list=policies_list, outstanding_policies=outstanding_policies)
     return render_template('admin/policies/policies.html', **context)
 
 

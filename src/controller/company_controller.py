@@ -196,8 +196,10 @@ class CompanyController(Controllers):
         :return:
         """
         with self.get_session() as session:
+
             _postal_id = postal_address.postal_id
             branch_postal_orm = session.query(PostalAddressORM).filter_by(postal_id=_postal_id).first()
+
             if isinstance(branch_postal_orm, PostalAddressORM):
                 if postal_address.address_line_1:
                     branch_postal_orm.address_line_1 = postal_address.address_line_1

@@ -81,4 +81,4 @@ def create_app(config):
         chat_controller.init_app(app=app)
         messaging_controller.init_app(app=app)
 
-    return app, chat_io
+    return app, chat_io, messaging_controller

@@ -98,7 +98,7 @@ async def get_employee_compose(user: User):
     return render_template('admin/managers/messaging/compose.html', **context)
 
 
-# #############################################################################
+#################################################################################################
 
 
 @messaging_route.post('/admin/messaging/sms/compose')
@@ -123,9 +123,13 @@ async def send_composed_sms_message(user: User):
         branch_clients: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
             branch_id=to_branch)
         recipient_list = [client.contact_id for client in branch_clients if client.contact_id]
-        print(f"Branch Clients : {branch_clients}")
+        contact_list = [await company_controller.get_contact(contact_id=contact_id) for contact_id in recipient_list]
+        recipient_list = [contact.cell for contact in contact_list]
+        print(f"Branch Clients : {recipient_list}")
+        for cell in recipient_list:
+            is_sent = await messaging_controller.send_sms(recipient=cell, message=message)
+            print(f"is Sent : {is_sent}")
 
-    is_sent = await messaging_controller.send_sms(recipient="0768255575",message="test message")
     if user.is_employee:
         flash(message="Message Successfully sent", category="success")
         return redirect(url_for('messaging.get_employee_compose'))

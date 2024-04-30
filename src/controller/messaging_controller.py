@@ -12,7 +12,7 @@ class EmailService:
         # Code to send email via email service API
         print(f"Sending email to {recipient} with subject: {subject} and body: {body}")
         # Simulate sending email asynchronously
-        await asyncio.sleep(2)
+        # await asyncio.sleep(2)
         print("Email sent successfully")
 
     async def receive_email(self, sender: str, subject: str, body: str):
@@ -27,7 +27,7 @@ class SMSService:
         # Code to send SMS via SMS service API
         print(f"Sending SMS to {recipient} with message: {message}")
         # Simulate sending SMS asynchronously
-        await asyncio.sleep(1)
+        # await asyncio.sleep(1)
         print("SMS sent successfully")
 
     async def receive_sms(self, sender: str, message: str):
@@ -42,7 +42,7 @@ class WhatsAppService:
         # Code to send WhatsApp message via WhatsApp service API
         print(f"Sending WhatsApp message to {recipient} with message: {message}")
         # Simulate sending WhatsApp message asynchronously
-        await asyncio.sleep(3)
+        # await asyncio.sleep(3)
         print("WhatsApp message sent successfully")
 
     async def receive_whatsapp_message(self, sender: str, message: str):
@@ -73,40 +73,54 @@ class MessagingController(Controllers):
         await self.email_queue.put((recipient, subject, body))
 
     async def send_sms(self, recipient: str, message: str):
-        print(f"putting message to Queue : {message}")
+        print(f"Putting Message to Queue : {message}")
         await self.sms_queue.put((recipient, message))
+        # print(await self.sms_queue.get())
+        return True
 
     async def send_whatsapp_message(self, recipient: str, message: str):
         await self.whatsapp_queue.put((recipient, message))
+        return True
 
     async def process_email_queue(self):
-        while True:
-            print("is is processing email")
-            recipient, subject, body = await self.email_queue.get()
-            await self.email_service.send_email(recipient, subject, body)
-            self.email_queue.task_done()
+        print("Processing Email")
+        if self.email_queue.empty():
+            print("No Email Messages")
+            return
+
+        recipient, subject, body = await self.email_queue.get()
+        await self.email_service.send_email(recipient, subject, body)
+        self.email_queue.task_done()
 
     async def process_sms_queue(self):
-        while True:
-            print("is is processing SMS")
-            recipient, message = await self.sms_queue.get()
-            await self.sms_service.send_sms(recipient, message)
-            self.sms_queue.task_done()
+
+        print("Processing SMS")
+        if self.sms_queue.empty():
+            print("No SMS Messages")
+            return
+        recipient, message = await self.sms_queue.get()
+        print(f"Found SMS Message: {message}")
+        await self.sms_service.send_sms(recipient, message)
+        self.sms_queue.task_done()
 
     async def process_whatsapp_queue(self):
-        while True:
-            print("is is processing Whastapp")
-            recipient, message = await self.whatsapp_queue.get()
-            await self.whatsapp_service.send_whatsapp_message(recipient, message)
-            self.whatsapp_queue.task_done()
 
-    async def start_processing(self):
-        await asyncio.gather(
-            self.process_email_queue(),
-            self.process_sms_queue(),
-            self.process_whatsapp_queue()
-        )
+        print("Processing WhatsApp")
+        if self.whatsapp_queue.empty():
+            print("No WhatsAPP Messages")
+            return
+
+        recipient, message = await self.whatsapp_queue.get()
+        await self.whatsapp_service.send_whatsapp_message(recipient, message)
+        self.whatsapp_queue.task_done()
 
     async def start_app(self):
-        await self.start_processing()
+        print("loop started")
+        while True:
+            await self.process_email_queue(),
+            await self.process_sms_queue(),
+            await self.process_whatsapp_queue()
+            await asyncio.sleep(15)
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
 

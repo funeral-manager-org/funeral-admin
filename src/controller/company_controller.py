@@ -72,13 +72,14 @@ class CompanyController(Controllers):
         with self.get_session() as session:
             _branch_name = company_branch.branch_name.lower().strip()
             company_branches_orm = session.query(CompanyBranchesORM).filter_by(
-                branch_name == _branch_name.casefold()).first()
+                branch_name=_branch_name.casefold()).first()
             if isinstance(company_branches_orm, CompanyBranchesORM):
                 return None
             session.add(CompanyBranchesORM(**company_branch.dict()))
             session.commit()
             return company_branch
 
+    # noinspection DuplicatedCode
     @error_handler
     async def update_company_branch(self, company_branch: CompanyBranches) -> CompanyBranches | None:
         """
@@ -90,7 +91,7 @@ class CompanyController(Controllers):
             branch_orm = session.query(CompanyBranchesORM).filter_by(branch_id=company_branch.branch_id).first()
             if branch_orm:
                 # Update the attributes of the retrieved branch record
-                branch_orm.branch_name = company_branch.branch_name
+                branch_orm.branch_name = company_branch.branch_name.lower()
                 branch_orm.company_id = company_branch.company_id
                 branch_orm.branch_description = company_branch.branch_description
                 branch_orm.date_registered = company_branch.date_registered
@@ -377,6 +378,7 @@ class CompanyController(Controllers):
             return [EmployeeDetails(**employee_orm.to_dict()) for employee_orm in employees_orm_list
                     if isinstance(employee_orm, EmployeeORM)]
 
+    # noinspection DuplicatedCode
     @error_handler
     async def create_plan_cover(self, plan_cover: CoverPlanDetails) -> CoverPlanDetails:
         """
@@ -392,7 +394,9 @@ class CompanyController(Controllers):
                                                                           company_id=company_id).first()
 
             if cover_plan_orm:  # If cover plan exists, update its fields
-                # cover_plan_orm.plan_number = plan_cover.plan_number
+                cover_plan_orm.company_id = plan_cover.company_id
+                cover_plan_orm.plan_name = plan_cover.plan_name
+                cover_plan_orm.plan_number = plan_cover.plan_number
                 cover_plan_orm.plan_type = plan_cover.plan_type
                 cover_plan_orm.benefits = plan_cover.benefits
                 cover_plan_orm.coverage_amount = plan_cover.coverage_amount
@@ -452,14 +456,17 @@ class CompanyController(Controllers):
     @error_handler
     async def get_policy_holders(self, company_id: str) -> list[ClientPersonalInformation]:
         """
-
+            Policy Holders or Clients are the same thing
+            Policy Holders are just clients who actually owns the policy
         :param company_id:
         :return:
         """
         with self.get_session() as session:
+            # This means we will only obtain policyholders for a specific company
             policy_holder = InsuredParty.POLICY_HOLDER.value
-            policy_holders_list = session.query(ClientPersonalInformationORM).filter_by(company_id=company_id,
-                                                                                        insured_party=policy_holder).all()
+            policy_holders_list = session.query(ClientPersonalInformationORM).filter_by(
+                company_id=company_id, insured_party=policy_holder).all()
+
             return [ClientPersonalInformation(**holder.to_dict()) for holder in policy_holders_list]
 
     @error_handler
@@ -494,6 +501,7 @@ class CompanyController(Controllers):
     async def get_payment_methods(self) -> list[str]:
         return PaymentMethods.get_payment_methods()
 
+    # noinspection DuplicatedCode
     @error_handler
     async def add_policy_holder(self, policy_holder: ClientPersonalInformation) -> ClientPersonalInformation:
         """
@@ -511,8 +519,7 @@ class CompanyController(Controllers):
                 uid=uid).first()
 
             if policy_holder_orm:
-                # Update all fields for the existing policy holder
-                policy_holder_orm.uid = uid
+                # policy_holder_orm.uid = uid
                 policy_holder_orm.branch_id = branch_id
                 policy_holder_orm.company_id = company_id
                 policy_holder_orm.title = policy_holder.title
@@ -535,6 +542,7 @@ class CompanyController(Controllers):
             session.commit()
             return policy_holder
 
+    # noinspection DuplicatedCode
     @error_handler
     async def add_policy_data(self, policy_data: PolicyRegistrationData) -> PolicyRegistrationData:
         """

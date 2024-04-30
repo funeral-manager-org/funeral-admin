@@ -1,6 +1,6 @@
 
 
-<div class="modal fade" id="employeePostalID" tabindex="-1" role="dialog" aria-labelledby="postalLabel" aria-hidden="true">
+<div class="modal fade" id="clientPostalID" tabindex="-1" role="dialog" aria-labelledby="postalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -29,7 +29,7 @@
                         <div class="tab-pane active" id="viewPostal" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Display postal address details here -->
-                                <p class="font-weight-bold text-info">{{ employee_detail.full_names }} {{ employee_detail.last_name }}</p>
+                                <p class="font-weight-bold text-info">{{ policy_holder.full_names }} {{ policy_holder.surname }}</p>
                                 <p>Address Line 1: <span class="font-weight-bold text-info">{{ postal_address.address_line_1 }}</span></p>
                                 <p>Town/City: <span class="font-weight-bold text-info">{{ postal_address.town_city }}</span></p>
                                 <p>Province: <span class="font-weight-bold text-info">{{ postal_address.province }}</span></p>
@@ -41,7 +41,7 @@
                         <div class="tab-pane" id="editPostal" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Form for editing existing postal address -->
-                                {% include 'admin/managers/branches/employee_modals/postal_form.html' %}
+                                {% include 'admin/clients/client_modals/postal_form.html' %}
                             </div>
                         </div>
                     {% else %}
@@ -49,7 +49,7 @@
                         <div class="tab-pane active" id="addPostal" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Form for adding new postal address -->
-                                {% include 'admin/managers/branches/employee_modals/postal_form.html' %}
+                                {% include 'admin/clients/client_modals/postal_form.html' %}
                             </div>
                         </div>
                     {% endif %}

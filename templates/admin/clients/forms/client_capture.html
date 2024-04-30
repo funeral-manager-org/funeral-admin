@@ -76,14 +76,14 @@
         Update
     </button>
 
-    <button type="submit" class="btn btn-sm btn-primary">
+    <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientContactID">
         <i class="fa fa-save"></i>
         Contact Details
-    </button>
-    <button type="submit" class="btn btn-sm btn-primary">
+    </a>
+    <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientPostalID">
         <i class="fa fa-save"></i>
         Postal Address
-    </button>
+    </a>
     <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientAddressID">
         <i class="fa fa-save"></i>
         Physical Address
@@ -97,4 +97,6 @@
 
 {% include "admin/clients/client_modals/bank_account.html" %}
 {% include "admin/clients/client_modals/address.html" %}
+{% include "admin/clients/client_modals/postal.html" %}
+{% include "admin/clients/client_modals/contact.html" %}
 

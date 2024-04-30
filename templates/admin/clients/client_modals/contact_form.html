@@ -1,7 +1,7 @@
 
 
     <form
-        action="{{ url_for('company.add_employee_contacts', branch_id=employee_detail.branch_id, employee_id=employee_detail.employee_id) }}" method="POST">
+        action="{{ url_for('clients.add_contacts', uid=policy_holder.uid) }}" method="POST">
         <!-- Add your form fields here -->
         <div class="form-group">
             {% if contact %}<input type="hidden" name="contact_id" value="{{ contact.contact_id }}" />{% endif %}

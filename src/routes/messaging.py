@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
+from pydantic import ValidationError
 
 from src.database.models.messaging import SMSCompose, RecipientTypes
 from src.database.models.covers import ClientPersonalInformation
@@ -72,8 +73,9 @@ async def get_sent(user: User):
 @messaging_route.get('/admin/administrator/messaging/compose')
 @login_required
 async def get_compose(user: User):
+    recipient_list: list[str] = RecipientTypes.get_fields()
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
-    context = dict(user=user, company_branches=company_branches)
+    context = dict(user=user, company_branches=company_branches, recipient_list=recipient_list)
     return render_template('admin/managers/messaging/compose.html', **context)
 
 
@@ -101,7 +103,13 @@ async def get_employee_compose(user: User):
 
 #################################################################################################
 
-async def send_sms_to_branch_policy_holders(composed_sms):
+async def send_sms_to_branch_policy_holders(composed_sms: SMSCompose):
+    """
+        # TODO investigate how to run this as a separate thread and just respond to user separately
+        will send sms to branch policy holders
+    :param composed_sms:
+    :return:
+    """
     # Obtain Policy Holders in Branch
     branch_clients = await company_controller.get_branch_policy_holders(branch_id=composed_sms.to_branch)
     # Use The Contact ID's to obtain the Contact Records from database
@@ -111,10 +119,19 @@ async def send_sms_to_branch_policy_holders(composed_sms):
     recipient_list = [contact.cell for contact in contact_list if contact.cell]
     # For Every Cell Number Send a Message - this will insert the message into the out message Queue
     for cell in recipient_list:
-        await messaging_controller.send_sms(recipient=cell, message=composed_sms.message)
+        is_sent = await messaging_controller.send_sms(recipient=cell, message=composed_sms.message)
+        #TODO - we can start updating the local database showing the sms was sent
+        # on the Queue after its delivered we can update the message delivered on the local database
 
 
-async def send_sms_to_branch_employees(composed_sms):
+async def send_sms_to_branch_employees(composed_sms: SMSCompose):
+    """
+        # TODO investigate how to run this as a separate thread and just respond to user separately
+
+        will send sms to branch_employees
+    :param composed_sms:
+    :return:
+    """
     branch_employees = await company_controller.get_branch_employees(branch_id=composed_sms.to_branch)
     employees_contact_numbers = []
     for employee in branch_employees:
@@ -129,16 +146,39 @@ async def send_sms_to_branch_employees(composed_sms):
             employees_contact_numbers.append(contact.cell)
     # Send SMS to each employee's contact number
     for cell in employees_contact_numbers:
-        await messaging_controller.send_sms(recipient=cell, message=composed_sms.message)
+        is_sent = await messaging_controller.send_sms(recipient=cell, message=composed_sms.message)
+        #TODO - we can start updating the local database showing the sms was sent
+        # on the Queue after its delivered we can update the message delivered on the local database
+
+
+async def send_sms_to_branch_lapsed_policy_holders(composed_sms: SMSCompose):
+    """
+        # TODO investigate how to run this as a separate thread and just respond to user separately
+
+    :param composed_sms:
+    :return:
+    """
+    lapsed_policy_holders: list[
+        ClientPersonalInformation] = await company_controller.get_branch_policy_holders_with_lapsed_policies(
+        branch_id=composed_sms.to_branch)
+    policy_holder_contact_numbers = []
+
+    for policy_holder in lapsed_policy_holders:
+        if policy_holder.contact_id:
+            # Fetch contact details
+            contact = await company_controller.get_contact(contact_id=policy_holder.contact_id)
+            # Extract cell numbers from contacts
+            policy_holder_contact_numbers.append(contact.cell)
+
+    for cell in policy_holder_contact_numbers:
+        is_sent = await messaging_controller.send_sms(recipient=cell, message=composed_sms.message)
 
 
 async def create_response(user: User):
     if user.is_employee and not user.is_company_admin:
-        flash(message="Message Successfully sent", category="success")
         return redirect(url_for('messaging.get_employee_compose'))
 
     # This will return company admin compose
-    flash(message="Message Successfully sent", category="success")
     return redirect(url_for('messaging.get_compose'))
 
 
@@ -151,19 +191,23 @@ async def send_composed_sms_message(user: User):
     :param user:
     :return:
     """
-
-    composed_sms = SMSCompose(**request.form)
+    try:
+        composed_sms = SMSCompose(**request.form)
+    except ValidationError as e:
+        print(str(e))
+        flash(message="Error sending SMS please ensure to fill in the form", category="danger")
+        return await create_response(user=user)
 
     if composed_sms.recipient_type.casefold() == RecipientTypes.EMPLOYEES.value.casefold():
-        await send_sms_to_branch_employees(composed_sms)
+        # Could Be interesting to just send this to a separate thread
+        await send_sms_to_branch_employees(composed_sms=composed_sms)
 
     elif composed_sms.recipient_type.casefold() == RecipientTypes.CLIENTS.value.casefold():
-        await send_sms_to_branch_policy_holders(composed_sms)
+        await send_sms_to_branch_policy_holders(composed_sms=composed_sms)
 
     elif composed_sms.recipient_type.casefold() == RecipientTypes.LAPSED_POLICY.value.casefold():
-        # Get Policy Holders with Lapsed Policies
-        pass
+        # Get policyholders with Lapsed Policies
+        await send_sms_to_branch_lapsed_policy_holders(composed_sms)
 
-
-
+    flash(message="Message Successfully sent", category="success")
     return await create_response(user=user)

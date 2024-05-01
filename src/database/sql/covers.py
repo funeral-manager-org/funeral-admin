@@ -137,7 +137,6 @@ class PolicyRegistrationDataORM(Base):
 
     policy_active = Column(Boolean, default=False)
 
-
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):

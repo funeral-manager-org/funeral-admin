@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Flask
 from sqlalchemy.exc import OperationalError
-
+from sqlalchemy.orm import joinedload
 from src.controller import Controllers, error_handler
 from src.database.models.bank_accounts import BankAccount
 from src.database.models.companies import Company, CompanyBranches, EmployeeRoles, EmployeeDetails, CoverPlanDetails
@@ -400,6 +400,48 @@ class CompanyController(Controllers):
             clients_orm_list = session.query(ClientPersonalInformationORM).filter_by(branch_id=branch_id).all()
             return [ClientPersonalInformation(**client.to_dict()) for client in clients_orm_list]
 
+    # async def get_branch_policy_holders_with_lapsed_policies(self, branch_id: str) -> list[ClientPersonalInformation]:
+    #     """
+    #
+    #     :param branch_id:
+    #     :return:
+    #     """
+    #     with self.get_session() as session:
+    #         lapsed_policies = session.query(PolicyRegistrationDataORM).filter_by(policy_active=False).all()
+    #         policy_holders_policy_numbers = [policy.policy_number in for policy in lapsed_policies]
+    #         policy_holders = []
+    #         for policy_number in policy_holders_policy_numbers:
+    #             policy_holder = session.query(ClientPersonalInformationORM).filter_by(policy_number=policy_number).first()
+    #             policy_holders.append(ClientPersonalInformation(**policy_holder.to_dict()))
+    #
+    #         return policy_holders
+    #
+
+    async def get_branch_policy_holders_with_lapsed_policies(self, branch_id: str) -> list[ClientPersonalInformation]:
+        """
+        Get policy holders with lapsed policies for a given branch.
+
+        :param branch_id: ID of the branch
+        :return: List of ClientPersonalInformation objects
+        """
+        with self.get_session() as session:
+            # Get lapsed policies
+            lapsed_policies = session.query(PolicyRegistrationDataORM).filter_by(branch_id=branch_id,
+                                                                                 policy_active=False).all()
+
+            # Extract policy numbers of lapsed policies
+            policy_numbers = [policy.policy_number for policy in
+                              session.query(PolicyRegistrationDataORM).filter_by(
+                                  branch_id=branch_id, policy_active=False).all()]
+
+            policy_holders = session.query(ClientPersonalInformationORM) \
+                .filter(ClientPersonalInformationORM.policy_number.in_(policy_numbers)) \
+                .options(joinedload(ClientPersonalInformationORM.policy_number)) \
+                .all()
+
+            # Convert ClientPersonalInformationORM objects to ClientPersonalInformation objects
+            return [ClientPersonalInformation(**policy_holder.to_dict()) for policy_holder in policy_holders]
+
     @error_handler
     async def get_employee(self, employee_id: str) -> EmployeeDetails | None:
         """
@@ -559,7 +601,6 @@ class CompanyController(Controllers):
     async def get_payment_methods(self) -> list[str]:
         return PaymentMethods.get_payment_methods()
 
-
     @error_handler
     async def add_policy_holder(self, policy_holder: ClientPersonalInformation) -> ClientPersonalInformation:
         """
@@ -612,7 +653,6 @@ class CompanyController(Controllers):
             # Commit changes to the database
             session.commit()
             return policy_holder
-
 
     # noinspection DuplicatedCode
     @error_handler

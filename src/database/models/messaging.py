@@ -24,23 +24,29 @@ class RecipientTypes(Enum):
 class SMSCompose(BaseModel):
 
     message_id: str = Field(default_factory=create_id)
+    reference: str | None
     message: str
+    from_cell: str
+    to_cell: str
     to_branch: str
     recipient_type: str
     date_time_composed: str = Field(default_factory=date_time)
     date_time_sent: str | None
     is_delivered: bool = Field(default=False)
+    client_responded: bool = Field(default=False)
 
 
 class SMSInbox(BaseModel):
 
-    to_branch: str
     message_id: str = Field(default_factory=create_id)
-    is_response: bool
-    parent_messaged_id: str | None
+    to_branch: str
+    parent_reference: str | None
+    from_cell: str | None
+    is_response: bool = Field(default=True)
+    previous_history: str | None
     message: str
-    date_time_received: str
-    is_read: bool
+    date_time_received: str = Field(default_factory=date_time)
+    is_read: bool = Field(default=False)
 
 
 class EmailCompose(BaseModel):

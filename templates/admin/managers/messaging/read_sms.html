@@ -1,0 +1,35 @@
+
+
+
+
+
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">SMS Message</h3>
+        </div>
+
+        <div class="card-body">
+            <div class="form-group">
+                <label for="history" class="font-weight-bold">Previous Messages</label>
+                <textarea id="history" class="col-12" rows="8">
+                    {{ sms.previous_history}}
+                </textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="message" class="font-weight-bold">Response</label>
+                <textarea id="message" class="col-12" rows="8">
+                    {{ sms.message }}
+                </textarea>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

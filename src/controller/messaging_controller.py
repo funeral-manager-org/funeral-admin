@@ -5,8 +5,12 @@ import timeit
 from flask import Flask
 
 from src.controller import Controllers
-from src.database.models.messaging import SMSInbox, EmailCompose
-from src.database.sql.messaging import SMSInboxORM
+from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose
+from src.database.sql.messaging import SMSInboxORM, SMSComposeORM
+
+
+def date_time() -> str:
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 class EmailService:
@@ -30,35 +34,104 @@ class SMSService(Controllers):
     def __init__(self):
         super().__init__()
         self.sms_service_api = None
-        self.inbox_queue = asyncio.Queue()
+
+        # Inbox Messages
+        self.inbox_queue: dict[str: list[SMSInbox]] = {}
+
+        # Sent Messages
+        self.sent_messages_queue: dict[str: list[SMSCompose]] = {}
+
+        # a dict of reference or message_id from the api provider matched with the branch_id in the application
+        self.sent_references: dict[str: list[str]] = {}
 
     def init_app(self, app: Flask):
-        super().init_app(app=app)
 
-    async def check_incoming_sms_api(self) -> SMSInbox:
+        super().init_app(app=app)
+        # TODO Initialize the SMS API
+
+    async def check_incoming_sms_api(self) -> list[SMSInbox]:
         """
             for whichever SMS API i am using map the message to SMS Inbox and return
         :return:
         """
-        pass
+        # TODO Complete the API Implementation to fetch incoming SMS Messages Here
+        if self.sms_service_api:
+            # Use the References to match incoming messages to previously sent messages in order to identify responses
+            for branch_id, references in self.sent_references:
+                for message_sent_reference in references:
+                    # save each reference used when constructing the inboxMessage
+                    pass
 
-    async def send_sms(self, recipient: str, message: str):
+        return []
+
+    async def send_sms(self, composed_sms: SMSCompose):
+        """
+            Sending the SMS Messages to the Outside World this will feed the Sent Box
+        :param composed_sms:
+        :return:
+        """
         # Code to send SMS via SMS service API
-        print(f"Sending SMS to {recipient} with message: {message}")
+        print(f"Sending SMS to {composed_sms.to_cell} with message: {composed_sms.message}")
+
+        if self.sms_service_api:
+            # API is initialized do send message
+            # sent reference from the api call when sending the message
+            sent_reference = ""
+            composed_sms.reference = sent_reference
+            sent_references = self.sent_references.get(composed_sms.to_branch, [])
+            sent_references.append(sent_reference)
+            self.sent_references[composed_sms.to_branch] = sent_references
+
+        composed_sms.date_time_sent = date_time()
+
+        # The Sent Messages will read from this Queue
+        composed_messages: list[SMSCompose] = self.sent_messages_queue.get(composed_sms.to_branch, [])
+        composed_messages.append(composed_sms)
+
+        self.sent_messages_queue[composed_sms.to_branch] = composed_messages
+
+        # Saving the Sent Messages to the Database
+        with self.get_session() as session:
+            session.add(SMSComposeORM(**composed_sms.dict()))
+            session.commit()
+
         # Simulate sending SMS asynchronously
         # await asyncio.sleep(1)
         print("SMS sent successfully")
 
-    async def retrieve_sms_service(self):
+    async def retrieve_sms_responses_service(self):
+        """
+            Fetching the SMS Messages which are sent to this company or as responses
+            this will feed the inbox
+        :return:
+        """
         # Code to receive SMS from SMS service API
         if self.sms_service_api:
-            # Message Retrieved from API
-            message: SMSInbox = await self.check_incoming_sms_api()
 
-            # Putting the Message to the inbox Queue
-            await self.inbox_queue.put(message)
-            # Storing the Message to Database
-            await self.store_sms_to_database_inbox(sms_message=message)
+            # Message Retrieved from API
+            incoming__messages: list[SMSInbox] = await self.check_incoming_sms_api()
+
+            for message in incoming__messages:
+                inbox_messages: list[SMSInbox] = self.inbox_queue.get(message.to_branch, [])
+
+                sent_references: list[str] = self.sent_references[message.to_branch]
+                sent_references.remove(message.parent_reference)
+                self.sent_references[message.to_branch] = sent_references
+                original_message = await self.mark_message_as_responded(reference=message.parent_reference)
+                message.previous_history += f"""
+                -------------------------------------------------------------------------------------------------------
+                date_response : {date_time()}
+                
+                original_message:
+
+                {original_message.message}
+                """
+
+                inbox_messages.append(message)
+                self.inbox_queue[message.to_branch] = inbox_messages
+
+                # Storing the Message to Database
+                await self.store_sms_to_database_inbox(sms_message=message)
 
     async def store_sms_to_database_inbox(self, sms_message: SMSInbox) -> SMSInbox:
         with self.get_session() as session:
@@ -69,7 +142,27 @@ class SMSService(Controllers):
     async def get_inbox_messages_from_database(self, branch_id: str) -> list[SMSInbox]:
         with self.get_session() as session:
             inbox_list = session.query(SMSInboxORM).filter_by(to_branch=branch_id).all()
-            return [SMSInbox(**inbox.to_dict()) for inbox in inbox_list]
+            return [SMSInbox(**inbox.to_dict()) for inbox in inbox_list if isinstance(inbox, SMSInboxORM)]
+
+    async def get_sent_box_messages_from_database(self, branch_id: str) -> list[SMSCompose]:
+        with self.get_session() as session:
+            compose_orm_list = session.query(SMSComposeORM).filter_by(branch_id=branch_id).all()
+            return [SMSCompose(**sms.to_dict()) for sms in compose_orm_list if isinstance(sms, SMSComposeORM)]
+
+    async def mark_message_as_responded(self, reference: str) -> SMSCompose | None:
+        with self.get_session() as session:
+            message_orm = session.query(SMSComposeORM).filter_by(reference=reference).first()
+            if isinstance(message_orm, SMSComposeORM):
+                sms_compose = SMSCompose(**message_orm.to_dict())
+                message_orm.client_responded =True
+                message_orm.is_delivered = True
+
+                sms_compose.is_delivered = True
+                sms_compose.client_responded = True
+                session.commit()
+
+                return sms_compose
+            return None
 
 
 class WhatsAppService:
@@ -102,6 +195,14 @@ class MessagingController(Controllers):
 
         self.loop = asyncio.get_event_loop()
 
+    # ------------------------------------------------------------------------------------------------------------------
+    #----  Routes
+
+    async def get_sms_inbox(self, branch_id: str) -> list[SMSInbox]:
+
+        return self.sms_service.inbox_queue.get(branch_id, [])
+
+
     def init_app(self, app: Flask):
         super().init_app(app=app)
         self.loop.create_task(self.start_app())
@@ -115,10 +216,9 @@ class MessagingController(Controllers):
         """
         await self.email_queue.put(email)
 
-    async def send_sms(self, recipient: str, message: str):
-        print(f"Putting Message to Queue : {message}")
-        await self.sms_queue.put((recipient, message))
-        # print(await self.sms_queue.get())
+    async def send_sms(self, composed_sms: SMSCompose):
+        await self.sms_queue.put(composed_sms)
+
         return True
 
     async def send_whatsapp_message(self, recipient: str, message: str):
@@ -139,11 +239,13 @@ class MessagingController(Controllers):
 
         print("processing sms outgoing message queues")
         if self.sms_queue.empty():
-            print("No SMS Messages")
+            print("no sms messages to send")
             return
-        recipient, message = await self.sms_queue.get()
 
-        await self.sms_service.send_sms(recipient, message)
+        composed_sms: SMSCompose = await self.sms_queue.get()
+        response = await self.sms_service.send_sms(composed_sms=composed_sms)
+        # response will carry a response message from the api provider at this point
+        # TO
         self.sms_queue.task_done()
 
     async def process_whatsapp_queue(self):
@@ -178,10 +280,10 @@ class MessagingController(Controllers):
 
             # Incoming Message Queues
             print("Started Processing Incoming Messages")
-            await self.sms_service.retrieve_sms_service()
+            await self.sms_service.retrieve_sms_responses_service()
 
             # This Means the loop will run every 5 minutes
-            await asyncio.sleep(60*timer_multiplier)
+            await asyncio.sleep(60 * timer_multiplier)
 
             time_elapsed = time.time() - time_started
             display_time = await standard_time()

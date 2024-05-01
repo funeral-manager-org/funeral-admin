@@ -1,8 +1,10 @@
+from datetime import datetime
+
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
 from src.database.models.companies import EmployeeDetails
-from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose
+from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose, SMSInbox
 from src.database.models.covers import ClientPersonalInformation
 from src.authentication import login_required
 from src.database.models.users import User
@@ -60,9 +62,26 @@ async def update_whatsapp_settings(user: User):
 @messaging_route.get('/admin/administrator/messaging/inbox')
 @login_required
 async def get_inbox(user: User):
-    context = dict(user=user)
+    sms_inbox = await messaging_controller.get_sms_inbox(branch_id=user.branch_id)
+    context = dict(user=user, sms_inbox=sms_inbox)
     return render_template('admin/managers/messaging/inbox.html', **context)
 
+
+@messaging_route.get('/admin/administrator/messaging/read-sms')
+@login_required
+async def read_sms_message(user: User, message_id: str):
+    """
+
+    :param user:
+    :param message_id:
+    :return:
+    """
+    context = dict(user=user)
+    sms_inbox: list[SMSInbox] = await messaging_controller.get_sms_inbox(branch_id=user.branch_id)
+    for sms in sms_inbox:
+        if sms.message_id == message_id:
+            context.update(sms=sms)
+            return render_template("admin/managers/messaging/read_sms.html", **context)
 
 @messaging_route.get('/admin/administrator/messaging/sent')
 @login_required
@@ -123,7 +142,9 @@ async def send_sms_to_branch_policy_holders(composed_sms: SMSCompose):
     recipient_list = [contact.cell for contact in contact_list if contact.cell]
     # For Every Cell Number Send a Message - this will insert the message into the out message Queue
     for cell in recipient_list:
-        is_sent = await messaging_controller.send_sms(recipient=cell, message=composed_sms.message)
+        composed_sms.to_cell = cell
+        composed_sms.date_time_composed = date_time()
+        is_sent = await messaging_controller.send_sms(composed_sms=composed_sms)
         #TODO - we can start updating the local database showing the sms was sent
         # on the Queue after its delivered we can update the message delivered on the local database
 
@@ -150,7 +171,9 @@ async def send_sms_to_branch_employees(composed_sms: SMSCompose):
             employees_contact_numbers.append(contact.cell)
     # Send SMS to each employee's contact number
     for cell in employees_contact_numbers:
-        is_sent = await messaging_controller.send_sms(recipient=cell, message=composed_sms.message)
+        composed_sms.to_cell = cell
+        composed_sms.date_time_composed = date_time()
+        is_sent = await messaging_controller.send_sms(composed_sms=composed_sms)
         #TODO - we can start updating the local database showing the sms was sent
         # on the Queue after its delivered we can update the message delivered on the local database
 
@@ -175,7 +198,13 @@ async def send_sms_to_branch_lapsed_policy_holders(composed_sms: SMSCompose):
             policy_holder_contact_numbers.append(contact.cell)
 
     for cell in policy_holder_contact_numbers:
-        is_sent = await messaging_controller.send_sms(recipient=cell, message=composed_sms.message)
+        composed_sms.to_cell = cell
+        composed_sms.date_time_composed = date_time()
+        is_sent = await messaging_controller.send_sms(composed_sms=composed_sms)
+
+
+def date_time() -> str:
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 async def create_response(user: User):

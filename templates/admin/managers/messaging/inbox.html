@@ -50,11 +50,23 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                    {% for message in  sms_inbox %}
                                         <tr>
-                                            <td>+123456789</td>
-                                            <td>Hello, how are you?</td>
-                                            <td>2024-04-20</td>
+                                            <td>{{ message.from_cell }}</td>
+                                            <td>
+                                                {% if message.is_read %}
+                                                 <span class="font-weight-bold">
+                                                    {{ message.message }}
+                                                </span>
+                                                {% else %}
+                                                    <a href="{{ url_for('messaging.read_sms_message', message_id=message.message_id) }}" class="font-weight-bold text-info">
+                                                        {{ message.message }}
+                                                    </a>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ message.date_time_received }}</td>
                                         </tr>
+                                    {% endfor %}
                                         <!-- Add more rows for additional SMS messages -->
                                     </tbody>
                                 </table>

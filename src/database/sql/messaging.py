@@ -7,10 +7,12 @@ from src.database.sql import Base, engine
 class SMSInboxORM(Base):
     __tablename__ = "sms_inbox"
 
-    to_branch: str = Column(String(ID_LEN))
     message_id: str = Column(String(ID_LEN), primary_key=True)
+    to_branch: str = Column(String(ID_LEN))
+    parent_reference: str = Column(String(ID_LEN), nullable=True)
+    from_cell: str = Column(String(17))
     is_response: bool = Column(Boolean)
-    parent_messaged_id: str = Column(String(ID_LEN), nullable=True)
+    previous_history: str = Column(Text)
     message: str = Column(Text)
     date_time_received: str = Column(String(36))
     is_read: bool = Column(Boolean)
@@ -30,10 +32,12 @@ class SMSInboxORM(Base):
         Convert the object to a dictionary representation.
         """
         return {
+            "from_cell": self.from_cell,
+
             "to_branch": self.to_branch,
             "message_id": self.message_id,
             "is_response": self.is_response,
-            "parent_message_id": self.parent_messaged_id,
+            "parent_reference": self.parent_reference,
             "message": self.message,
             "date_time_received": self.date_time_received,
             "is_read": self.is_read
@@ -44,12 +48,16 @@ class SMSComposeORM(Base):
     __tablename__ = "sms_compose"
 
     message_id: str = Column(String(ID_LEN), primary_key=True)
+    reference: str = Column(String(ID_LEN))
     message: str = Column(Text)
+    from_cell: str = Column(String(17))
+    to_cell: str = Column(String(17))
     to_branch: str = Column(String(ID_LEN))
     recipient_type: str = Column(String(36))
     date_time_composed: str = Column(String(36))
     date_time_sent: str = Column(String(36))
     is_delivered: bool = Column(Boolean)
+    client_responded: bool = Column(Boolean)
 
     @classmethod
     def create_if_not_table(cls):
@@ -68,9 +76,13 @@ class SMSComposeORM(Base):
         return {
             "message_id": self.message_id,
             "message": self.message,
+            "reference": self.reference,
+            "from_cell":self.from_cell,
+            "to_cell": self.to_cell,
             "to_branch": self.to_branch,
             "recipient_type": self.recipient_type,
             "date_time_composed": self.date_time_composed,
             "date_time_sent": self.date_time_sent,
-            "is_delivered": self.is_delivered
+            "is_delivered": self.is_delivered,
+            "client_responded": self.client_responded
         }

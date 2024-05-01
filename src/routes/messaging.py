@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
-from database.models.companies import EmployeeDetails
+from src.database.models.companies import EmployeeDetails
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose
 from src.database.models.covers import ClientPersonalInformation
 from src.authentication import login_required

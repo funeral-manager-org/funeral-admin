@@ -97,9 +97,10 @@ async def get_employee_sent(user: User):
 @login_required
 async def get_employee_compose(user: User):
     recipient_list: list[str] = RecipientTypes.get_fields()
+    # Removing Sending SMS to Employees
+    recipient_list.pop(RecipientTypes.EMPLOYEES.value)
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     context = dict(user=user, company_branches=company_branches, recipient_list=recipient_list)
-
     return render_template('admin/managers/messaging/compose.html', **context)
 
 

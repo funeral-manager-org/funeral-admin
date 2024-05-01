@@ -1,4 +1,5 @@
 from datetime import datetime
+from random import randint
 
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
@@ -58,11 +59,43 @@ async def update_whatsapp_settings(user: User):
     flash(message="Successfully updated SMS Settings", category="success")
     return redirect(url_for('messaging.get_admin'))
 
+def create_fake_cell(length: int = 10) -> str:
+    """
+    Generate a fake cell number.
+
+    :param length: Length of the cell number (default is 10)
+    :return: Fake cell number
+    """
+    return ''.join([str(randint(0, 9)) for _ in range(length)])
+
+def create_fake_sms_data(to_branch: str, message: str, count: int = 10) -> list[SMSInbox]:
+    """
+    Generate fake SMSInbox data for testing.
+
+    :param to_branch: Branch ID
+    :param message: Message content
+    :param count: Number of SMSInbox instances to generate (default is 10)
+    :return: List of SMSInbox instances
+    """
+    sms_data = []
+    for _ in range(count):
+        sms_data.append(SMSInbox(
+            from_cell=create_fake_cell(),
+            to_branch=to_branch,
+            message=message,
+            is_read=bool(randint(0, 1)),  # Randomly set is_read to True or False
+        ))
+    return sms_data
+
 
 @messaging_route.get('/admin/administrator/messaging/inbox')
 @login_required
 async def get_inbox(user: User):
     sms_inbox = await messaging_controller.get_sms_inbox(branch_id=user.branch_id)
+    if not sms_inbox:
+        # Generate at least ten fake SMS records for testing
+        sms_inbox = create_fake_sms_data(to_branch="branch_id", message="Test message", count=10)
+
     context = dict(user=user, sms_inbox=sms_inbox)
     return render_template('admin/managers/messaging/inbox.html', **context)
 
@@ -82,6 +115,7 @@ async def read_sms_message(user: User, message_id: str):
         if sms.message_id == message_id:
             context.update(sms=sms)
             return render_template("admin/managers/messaging/read_sms.html", **context)
+
 
 @messaging_route.get('/admin/administrator/messaging/sent')
 @login_required

@@ -154,7 +154,7 @@ class SMSService(Controllers):
             message_orm = session.query(SMSComposeORM).filter_by(reference=reference).first()
             if isinstance(message_orm, SMSComposeORM):
                 sms_compose = SMSCompose(**message_orm.to_dict())
-                message_orm.client_responded =True
+                message_orm.client_responded = True
                 message_orm.is_delivered = True
 
                 sms_compose.is_delivered = True
@@ -201,7 +201,6 @@ class MessagingController(Controllers):
     async def get_sms_inbox(self, branch_id: str) -> list[SMSInbox]:
 
         return self.sms_service.inbox_queue.get(branch_id, [])
-
 
     def init_app(self, app: Flask):
         super().init_app(app=app)

@@ -41,3 +41,13 @@ class SMSInbox(BaseModel):
     message: str
     date_time_received: str
     is_read: bool
+
+
+class EmailCompose(BaseModel):
+    message_id: str = Field(default_factory=create_id)
+    from_email: str | None
+    to_email: str| None
+    subject: str
+    message: str
+    to_branch: str
+    recipient_type: str

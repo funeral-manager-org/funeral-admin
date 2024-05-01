@@ -5,7 +5,7 @@ import timeit
 from flask import Flask
 
 from src.controller import Controllers
-from src.database.models.messaging import SMSInbox
+from src.database.models.messaging import SMSInbox, EmailCompose
 from src.database.sql.messaging import SMSInboxORM
 
 
@@ -107,8 +107,13 @@ class MessagingController(Controllers):
         self.loop.create_task(self.start_app())
         print("Loop Initialized")
 
-    async def send_email(self, recipient: str, subject: str, body: str):
-        await self.email_queue.put((recipient, subject, body))
+    async def send_email(self, email: EmailCompose):
+        """
+            TODO When Actually sending the Email Consider
+        :param email:
+        :return:
+        """
+        await self.email_queue.put(email)
 
     async def send_sms(self, recipient: str, message: str):
         print(f"Putting Message to Queue : {message}")
@@ -156,8 +161,9 @@ class MessagingController(Controllers):
         print("Thread Started-------------------------------------------------")
         i = 0
         time_started = time.time()
+        timer_multiplier = 1
 
-        async def standard_time(time_elapsed: float) -> str:
+        async def standard_time() -> str:
             hours = int(time_elapsed // 3600)
             minutes = int((time_elapsed % 3600) // 60)
             seconds = int(time_elapsed % 60)
@@ -171,11 +177,12 @@ class MessagingController(Controllers):
             await self.process_whatsapp_queue()
 
             # Incoming Message Queues
+            print("Started Processing Incoming Messages")
             await self.sms_service.retrieve_sms_service()
 
             # This Means the loop will run every 5 minutes
-            await asyncio.sleep(60*5)
+            await asyncio.sleep(60*timer_multiplier)
 
             time_elapsed = time.time() - time_started
-            display_time = await standard_time(time_elapsed=time_elapsed)
+            display_time = await standard_time()
             print(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")

@@ -41,24 +41,9 @@
                         </div>
                         <div class="card-body">
                             <form action="{{ url_for('messaging.send_composed_sms_message') }}" method="post">
-                                <div class="form-group">
-                                    <label class="font-weight-bold" for="recipient_type">Recipient Type</label>
-                                    <select class="form-control" id="recipient_type" name="recipient_type">
-                                        <option value="" disabled selected> Select Recipient Type</option>
-                                        {% for recipient in recipient_list %}
-                                            <option value="{{ recipient }}">{{ recipient| title }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="font-weight-bold" for="to_branch">Recipients in Branch</label>
-                                    <select class="form-control" id="to_branch" name="to_branch">
-                                        <option value="" disabled selected>Select Branch</option>
-                                        {% for branch in company_branches %}
-                                            <option value="{{ branch.branch_id }}">{{ branch.branch_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+
+                                {% include 'admin/managers/messaging/includes/compose_selects.html' %}
+
                                 <div class="form-group">
                                     <label class="font-weight-bold text-info" for="message">Message:</label>
                                     <textarea class="col-12" rows="12" id="message" name="message"></textarea>
@@ -77,23 +62,8 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <form>
-                                <div class="form-group">
-                                    <label class="font-weight-bold" for="whatsappRecipientType">Recipient Type:</label>
-                                    <select class="form-control" id="whatsappRecipientType">
-                                        <option value="client">Clients</option>
-                                        <option value="employee">Employees</option>
-                                        <option value="lapsed">Clients with Lapsed Policies</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="font-weight-bold" for="whatsappBranch">Recipients in Branch</label>
-                                    <select class="form-control" id="whatsappBranch">
-                                        {% for branch in company_branches %}
-                                            <option value="{{ branch.branch_id }}">{{ branch.branch_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+                            <form action="{{ url_for('messaging.send_whatsapp_message') }}" method="POST">
+                                {% include 'admin/managers/messaging/includes/compose_selects.html' %}
                                 <div class="form-group">
                                     <label class="font-weight-bold text-info" for="whatsappMessage">Message:</label>
                                     <textarea class="col-12" id="whatsappMessage" rows="12"></textarea>
@@ -115,23 +85,9 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <form>
-                                <div class="form-group">
-                                    <label class="font-weight-bold" for="recipient_type">Recipient Type:</label>
-                                    <select class="form-control" id="recipient_type" name="recipient_type">
-                                        <option value="client">Clients</option>
-                                        <option value="employee">Employees</option>
-                                        <option value="lapsed">Clients with Lapsed Policies</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="font-weight-bold" for="to_branch">Recipients in Branch</label>
-                                    <select class="form-control" name="to_branch" id="to_branch">
-                                        {% for branch in company_branches %}
-                                            <option value="{{ branch.branch_id }}">{{ branch.branch_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+                            <form action="{{ url_for('messaging.send_email_message') }}" method="POST">
+                                {% include 'admin/managers/messaging/includes/compose_selects.html' %}
+
                                 <div class="form-group">
                                     <label class="font-weight-bold text-info" for="subject">Subject</label>
                                     <input type="text" class="form-control" id="subject" name="subject">

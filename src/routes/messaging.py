@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
-from src.database.models.messaging import SMSCompose, RecipientTypes
+from database.models.companies import EmployeeDetails
+from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose
 from src.database.models.covers import ClientPersonalInformation
 from src.authentication import login_required
 from src.database.models.users import User
@@ -197,9 +198,9 @@ async def send_composed_sms_message(user: User):
     try:
         composed_sms = SMSCompose(**request.form)
 
-        composed_sms.company_id = user.company_id
-        composed_sms.branch_id = user.branch_id
-        composed_sms.uid = user.uid
+        # composed_sms.company_id = user.company_id
+        # composed_sms.branch_id = user.branch_id
+        # composed_sms.uid = user.uid
 
     except ValidationError as e:
         print(str(e))
@@ -218,4 +219,70 @@ async def send_composed_sms_message(user: User):
         await send_sms_to_branch_lapsed_policy_holders(composed_sms)
 
     flash(message="Message Successfully sent", category="success")
+    return await create_response(user=user)
+
+
+@messaging_route.post('/admin/messaging/whatsapp/compose')
+@login_required
+async def send_whatsapp_message(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    flash(message="Successfully sent whatsapp message", category="success")
+    return await create_response(user=user)
+
+
+# Sending Email Messages Routes
+async def send_emails(composed_email: EmailCompose,
+                      persons_list: list[ClientPersonalInformation | EmployeeDetails]) -> bool:
+    for person in persons_list:
+        if person.contact_id:
+            contact = await company_controller.get_contact(contact_id=person.contact_id)
+            if contact.email:
+                composed_email.to_email = contact.email
+                is_sent = await messaging_controller.send_email(composed_email)
+
+    return True
+
+
+@messaging_route.post('/admin/messaging/email/compose')
+@login_required
+async def send_email_message(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+        composed_email = EmailCompose(**request.form)
+
+    except ValidationError as e:
+        print(str(e))
+        flash(message="Error sending SMS please ensure to fill in the form", category="danger")
+        return await create_response(user=user)
+
+    if composed_email.recipient_type == RecipientTypes.EMPLOYEES.value:
+
+        branch_employees: list[EmployeeDetails] = await company_controller.get_branch_employees(
+            branch_id=composed_email.to_branch)
+        await send_emails(composed_email=composed_email, persons_list=branch_employees)
+
+    elif composed_email.recipient_type == RecipientTypes.CLIENTS.value:
+
+        policy_holders: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
+            branch_id=composed_email.to_branch)
+        await send_emails(composed_email=composed_email, persons_list=policy_holders)
+
+    elif composed_email.recipient_type == RecipientTypes.LAPSED_POLICY.value:
+        # obtaining policyholders with lapsed policies
+        policy_holders = await company_controller.get_branch_policy_holders_with_lapsed_policies(
+            branch_id=composed_email.to_branch)
+        await send_emails(composed_email=composed_email, persons_list=policy_holders)
+    else:
+        flash(message="Could Not Send Email Message", category="success")
+        return await create_response(user=user)
+
+    flash(message="Successfully sent email message", category="success")
     return await create_response(user=user)

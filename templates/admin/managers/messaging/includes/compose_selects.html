@@ -1,0 +1,22 @@
+
+
+
+<div class="form-group">
+    <label class="font-weight-bold" for="recipient_type">Recipient Type</label>
+    <select class="form-control" id="recipient_type" name="recipient_type">
+        <option value="" disabled selected> Select Recipient Type</option>
+        {% for recipient in recipient_list %}
+            <option value="{{ recipient }}">{{ recipient| title }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-group">
+    <label class="font-weight-bold" for="to_branch">Recipients in Branch</label>
+    <select class="form-control" id="to_branch" name="to_branch">
+        <option value="" disabled selected>Select Branch</option>
+        {% for branch in company_branches %}
+            <option value="{{ branch.branch_id }}">{{ branch.branch_name }}</option>
+        {% endfor %}
+    </select>
+</div>

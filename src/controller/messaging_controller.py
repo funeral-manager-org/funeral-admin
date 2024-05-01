@@ -23,6 +23,7 @@ class EmailService:
 class SMSService:
     def __init__(self):
         pass
+
     async def send_sms(self, recipient: str, message: str):
         # Code to send SMS via SMS service API
         print(f"Sending SMS to {recipient} with message: {message}")
@@ -38,6 +39,7 @@ class SMSService:
 class WhatsAppService:
     def __init__(self):
         pass
+
     async def send_whatsapp_message(self, recipient: str, message: str):
         # Code to send WhatsApp message via WhatsApp service API
         print(f"Sending WhatsApp message to {recipient} with message: {message}")
@@ -120,7 +122,5 @@ class MessagingController(Controllers):
             await self.process_email_queue(),
             await self.process_sms_queue(),
             await self.process_whatsapp_queue()
-            await asyncio.sleep(15)
-            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-
-
+            await asyncio.sleep(60)
+            print("---------------------------")

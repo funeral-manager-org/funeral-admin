@@ -96,8 +96,10 @@ async def get_employee_sent(user: User):
 @messaging_route.get('/admin/employees/messaging/compose')
 @login_required
 async def get_employee_compose(user: User):
+    recipient_list: list[str] = RecipientTypes.get_fields()
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
-    context = dict(user=user, company_branches=company_branches)
+    context = dict(user=user, company_branches=company_branches, recipient_list=recipient_list)
+
     return render_template('admin/managers/messaging/compose.html', **context)
 
 

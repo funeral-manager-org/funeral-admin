@@ -196,6 +196,11 @@ async def send_composed_sms_message(user: User):
     """
     try:
         composed_sms = SMSCompose(**request.form)
+
+        composed_sms.company_id = user.company_id
+        composed_sms.branch_id = user.branch_id
+        composed_sms.uid = user.uid
+
     except ValidationError as e:
         print(str(e))
         flash(message="Error sending SMS please ensure to fill in the form", category="danger")

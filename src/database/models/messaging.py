@@ -22,6 +22,7 @@ class RecipientTypes(Enum):
 
 
 class SMSCompose(BaseModel):
+
     message_id: str = Field(default_factory=create_id)
     message: str
     to_branch: str
@@ -29,3 +30,14 @@ class SMSCompose(BaseModel):
     date_time_composed: str = Field(default_factory=date_time)
     date_time_sent: str | None
     is_delivered: bool = Field(default=False)
+
+
+class SMSInbox(BaseModel):
+
+    to_branch: str
+    message_id: str = Field(default_factory=create_id)
+    is_response: bool
+    parent_messaged_id: str | None
+    message: str
+    date_time_received: str
+    is_read: bool

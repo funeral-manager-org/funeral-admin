@@ -10,7 +10,6 @@ from src.database.sql.messaging import SMSInboxORM, SMSComposeORM
 
 
 def date_time() -> str:
-
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -264,7 +263,7 @@ class MessagingController(Controllers):
         print("Thread Started-------------------------------------------------")
         i = 0
         time_started = time.time()
-        timer_multiplier = 5
+        timer_multiplier = 10
 
         async def standard_time() -> str:
             hours = int(time_elapsed // 3600)
@@ -275,8 +274,8 @@ class MessagingController(Controllers):
         while True:
             # Out Going Message Queues
             i += 1
-            await self.process_email_queue(),
-            await self.process_sms_queue(),
+            await self.process_email_queue()
+            await self.process_sms_queue()
             await self.process_whatsapp_queue()
 
             # Incoming Message Queues

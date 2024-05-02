@@ -264,7 +264,7 @@ class MessagingController(Controllers):
         print("Thread Started-------------------------------------------------")
         i = 0
         time_started = time.time()
-        timer_multiplier = 1
+        timer_multiplier = 5
 
         async def standard_time() -> str:
             hours = int(time_elapsed // 3600)

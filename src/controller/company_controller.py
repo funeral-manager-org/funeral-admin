@@ -765,12 +765,12 @@ class CompanyController(Controllers):
     @error_handler
     async def search_policies_by_policy_holder_name(self, policy_holder_name: str) -> list[PolicyRegistrationData]:
         '''
-        Search for policies by policy holder name.
-        :param policy_holder_name: The name of the policy holder to search for.
-        :return: List of policies matching the policy holder name.
+        Search for policies by policyholders name.
+        :param policy_holder_name: The name of the policyholders to search for.
+        :return: List of policies matching the policyholders name.
         '''
         with self.get_session() as session:
-            # Perform a single query to fetch policies by policy holder name
+            # Perform a single query to fetch policies by policyholders name
             policies_orm = session.query(PolicyRegistrationDataORM) \
                 .join(ClientPersonalInformationORM,
                       ClientPersonalInformationORM.policy_number == PolicyRegistrationDataORM.policy_number) \

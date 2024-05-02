@@ -59,6 +59,7 @@ async def update_whatsapp_settings(user: User):
     flash(message="Successfully updated SMS Settings", category="success")
     return redirect(url_for('messaging.get_admin'))
 
+
 def create_fake_cell(length: int = 10) -> str:
     """
     Generate a fake cell number.
@@ -67,6 +68,7 @@ def create_fake_cell(length: int = 10) -> str:
     :return: Fake cell number
     """
     return ''.join([str(randint(0, 9)) for _ in range(length)])
+
 
 def create_fake_sms_data(to_branch: str, message: str, count: int = 10) -> list[SMSInbox]:
     """
@@ -260,10 +262,6 @@ async def send_composed_sms_message(user: User):
     """
     try:
         composed_sms = SMSCompose(**request.form)
-
-        # composed_sms.company_id = user.company_id
-        # composed_sms.branch_id = user.branch_id
-        # composed_sms.uid = user.uid
 
     except ValidationError as e:
         print(str(e))

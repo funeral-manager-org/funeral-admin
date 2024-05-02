@@ -26,8 +26,8 @@ class SMSCompose(BaseModel):
     message_id: str = Field(default_factory=create_id)
     reference: str | None
     message: str
-    from_cell: str
-    to_cell: str
+    from_cell: str | None
+    to_cell: str | None
     to_branch: str
     recipient_type: str
     date_time_composed: str = Field(default_factory=date_time)

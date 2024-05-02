@@ -181,6 +181,7 @@ async def send_sms_to_branch_policy_holders(composed_sms: SMSCompose):
         composed_sms.to_cell = cell
         composed_sms.date_time_composed = date_time()
         is_sent = await messaging_controller.send_sms(composed_sms=composed_sms)
+        print(f"is SMS Sent : {is_sent}")
         #TODO - we can start updating the local database showing the sms was sent
         # on the Queue after its delivered we can update the message delivered on the local database
 

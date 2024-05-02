@@ -1,6 +1,6 @@
 import asyncio
 import time
-import timeit
+from datetime import datetime
 
 from flask import Flask
 
@@ -10,6 +10,7 @@ from src.database.sql.messaging import SMSInboxORM, SMSComposeORM
 
 
 def date_time() -> str:
+
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -217,6 +218,7 @@ class MessagingController(Controllers):
 
     async def send_sms(self, composed_sms: SMSCompose):
         await self.sms_queue.put(composed_sms)
+        print(f"composed SMS in Queue : {composed_sms}")
 
         return True
 

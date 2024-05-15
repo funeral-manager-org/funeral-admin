@@ -10,10 +10,10 @@ def run_message_loop():
     message_controller.loop.run_forever()
 
 
-# Start the message loop in a separate thread
-message_thread = threading.Thread(target=run_message_loop, daemon=True)
-message_thread.start()
-
 if __name__ == '__main__':
     # Run the Flask app
+    # Start the message loop in a separate thread
+    message_thread = threading.Thread(target=run_message_loop, daemon=True)
+    message_thread.start()
+
     app.run(debug=True, port=8000)

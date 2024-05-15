@@ -1,13 +1,21 @@
 
 {% extends "layouts/page.html" %}
 {% block custom_css %}
-    <style>
-        .front-page-image {
-            height: 250px;
-            width: 250px;
+<style>
+    .front-page-image {
+        max-width: 100%;
+        height: 200px;
+        width: 350px; /* Default width */
+    }
 
+    @media only screen and (max-width: 600px) {
+        /* Adjust width for mobile devices */
+        .front-page-image {
+            width: 300px;
         }
-    </style>
+    }
+</style>
+
 {% endblock %}
 {% block content %}
 
@@ -27,7 +35,7 @@
             <div class="card col-md-6">
                 <div class="card-header font-weight-bold">
                     <h2 class="card-title font-weight-bold"><i class="fa fa-clipboard"></i> Policy Registration</h2>
-                    <img src="{{ url_for('static', filename='images/art/policy registration.png') }}" class="img-fluid"/>
+                    <img src="{{ url_for('static', filename='images/business_6') }}" class="front-page-image img-fluid"/>
                 </div>
 
                 <div class="card-body font-weight-bold text-black-50">
@@ -42,7 +50,7 @@
             <div class="card col-md-6">
                 <div class="card-header font-weight-bold">
                     <h2 class="card-title font-weight-bold"> <i class="fa fa-file"></i> Claims Processing</h2>
-                    <img src="{{ url_for('static', filename='images/art/claims.png') }}" class="img-fluid"/>
+                    <img src="{{ url_for('static', filename='images/business_7.jpg') }}" class="front-page-image img-fluid"/>
 
                 </div>
 
@@ -56,6 +64,7 @@
             <div class="card col-md-6">
                 <div class="card-header font-weight-bold">
                     <h2 class="card-title font-weight-bold"><i class="fa fa-handshake-o"></i> Funeral Arrangement Assistance</h2>
+                    <img src="{{ url_for('static', filename='images/business_1.jpg') }}" class="front-page-image img-fluid"/>
                 </div>
                 <div class="card-body">
                     <p>Gain access to a wealth of resources and support designed to assist you in navigating the complexities of arranging funeral services and ceremonies. Our platform is dedicated to providing comprehensive assistance every step of the way.</p>
@@ -66,6 +75,7 @@
             <div class="card col-md-6">
                 <div class="card-header font-weight-bold">
                     <h2 class="card-title font-weight-bold"> <i class="fa fa-cogs"></i>Policy Management</h2>
+                    <img src="{{ url_for('static', filename='images/business_8.jpg') }}" class="front-page-image img-fluid"/>
                 </div>
                 <div class="card-body">
                     <p>Empower your administrative capabilities with our robust policy management tools. Administrators can effortlessly oversee policies, premiums, and claims through a centralized dashboard, ensuring seamless operations and unparalleled efficiency.</p>
@@ -76,6 +86,7 @@
             <div class="card col-md-6">
                 <div class="card-header">
                     <h2 class="card-title font-weight-bold"><i class="fa fa-comments"></i> Client Communication</h2>
+                    <img src="{{ url_for('static', filename='images/business_2.jpg') }}" class="front-page-image img-fluid"/>
                 </div>
                 <div class="card-body">
                     <p>For clients, the Communications Module enables:</p>
@@ -92,6 +103,7 @@
             <div class="card col-md-6">
                 <div class="card-header">
                     <h2 class="card-title font-weight-bold"> <i class="fa fa-bullhorn"></i>Management Communication</h2>
+                    <img src="{{ url_for('static', filename='images/business_3.jpg') }}" class="front-page-image img-fluid"/>
                 </div>
                 <div class="card-body">
                     <p>For management, the Communications Module provides:</p>
@@ -108,6 +120,7 @@
             <div class="card col-md-6">
                 <div class="card-header">
                     <h2 class="card-title"><i class="fa fa-user-md"></i>Employee Dashboard</h2>
+                    <img src="{{ url_for('static', filename='images/business_4.jpg') }}" class="front-page-image img-fluid"/>
                 </div>
                 <div class="card-body">
                     <p>The Employee Dashboard provides essential tools and features for employees to efficiently manage day-to-day operations, including:</p>
@@ -124,6 +137,7 @@
             <div class="card col-md-6">
                 <div class="card-header">
                     <h2 class="card-title"><i class="fa fa-dashboard"></i> Managers Dashboard</h2>
+                    <img src="{{ url_for('static', filename='images/business_5.jpg') }}" class="front-page-image img-fluid"/>
                 </div>
                 <div class="card-body">
                     <p>The Manager Dashboard offers comprehensive oversight and strategic management capabilities, including:</p>

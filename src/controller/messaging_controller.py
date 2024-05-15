@@ -1,8 +1,8 @@
 import asyncio
 import time
 from datetime import datetime
-
 from flask import Flask
+
 
 from src.controller import Controllers
 from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose
@@ -283,8 +283,8 @@ class MessagingController(Controllers):
             await self.sms_service.retrieve_sms_responses_service()
 
             # This Means the loop will run every 5 minutes
-            await asyncio.sleep(60 * timer_multiplier)
 
             time_elapsed = time.time() - time_started
             display_time = await standard_time()
             print(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")
+            await asyncio.sleep(60 * timer_multiplier)

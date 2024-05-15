@@ -2,47 +2,10 @@
 {% extends "layouts/page.html" %}
 {% block custom_css %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        p {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #666;
-        }
-        .features {
-            margin-top: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .feature {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .feature h2 {
-            font-size: 18px;
-            color: #333;
-        }
-        .feature p {
-            font-size: 14px;
-            color: #666;
+        .front-page-image {
+            height: 250px;
+            width: 250px;
+
         }
     </style>
 {% endblock %}
@@ -53,33 +16,68 @@
     <div class="card">
         <div class="card-header">
             <h1 class="card-title font-weight-bold ">
-                <img src="{{ url_for('static', filename='images/logo.jpg') }}" class="img-fluid" width="60" height="30">
+                <img src="{{ url_for('static', filename='images/art/logo.png') }}" class="img-fluid" width="60" height="30">
                 Funeral Admin </h1>
         </div>
     </div>
-    <div class="container">
+    <div class="card">
         <p>The Funeral Admin Application is a sophisticated web-based platform meticulously designed to streamline funeral cover management and funeral home administration. It offers an array of meticulously crafted features, tailored to meet the diverse needs of both users, clients and administrators alike.</p>
+        <hr>
+        <div class="row">
+            <div class="card col-md-6">
+                <div class="card-header font-weight-bold">
+                    <h2 class="card-title font-weight-bold"><i class="fa fa-clipboard"></i> Policy Registration</h2>
+                    <img src="{{ url_for('static', filename='images/art/policy registration.png') }}" class="img-fluid"/>
+                </div>
 
-        <div class="features">
-            <div class="feature">
-                <h2><i class="fa fa-clipboard"></i> Policy Registration</h2>
-                <p>Embark on the journey of securing your funeral cover plans with unparalleled ease and convenience. Our platform provides a seamless registration process, allowing users to select from a wide range of options tailored to their unique requirements.</p>
-            </div>
-            <div class="feature">
-                <h2> <i class="fa fa-file"></i> Claims Processing</h2>
-                <p>Experience the epitome of efficiency with our streamlined claims processing system. Users can file claims effortlessly and monitor their progress with ease, ensuring timely and effective resolution of their requests.</p>
-            </div>
-            <div class="feature">
-                <h2><i class="fa fa-handshake-o"></i> Funeral Arrangement Assistance</h2>
-                <p>Gain access to a wealth of resources and support designed to assist you in navigating the complexities of arranging funeral services and ceremonies. Our platform is dedicated to providing comprehensive assistance every step of the way.</p>
-            </div>
-            <div class="feature">
-                <h2> <i class="fa fa-cogs"></i>Policy Management</h2>
-                <p>Empower your administrative capabilities with our robust policy management tools. Administrators can effortlessly oversee policies, premiums, and claims through a centralized dashboard, ensuring seamless operations and unparalleled efficiency.</p>
-            </div>
-            <div class="feature">
+                <div class="card-body font-weight-bold text-black-50">
+                    Embark on the journey of securing your funeral cover plans with
+                    unparalleled ease and convenience.
 
-                    <h2><i class="fa fa-comments"></i> Client Communication</h2>
+                    Our platform provides a seamless registration process, allowing users to select from a wide
+                    range of options tailored to their unique requirements.
+                </div>
+            </div>
+
+            <div class="card col-md-6">
+                <div class="card-header font-weight-bold">
+                    <h2 class="card-title font-weight-bold"> <i class="fa fa-file"></i> Claims Processing</h2>
+                    <img src="{{ url_for('static', filename='images/art/claims.png') }}" class="img-fluid"/>
+
+                </div>
+
+                <div class="card-body font-weight-bold">
+                    Experience the epitome of efficiency with our streamlined claims processing system.
+                    Users can file claims effortlessly and monitor their progress with ease,
+                    ensuring timely and effective resolution of their requests.
+                </div>
+            </div>
+
+            <div class="card col-md-6">
+                <div class="card-header font-weight-bold">
+                    <h2 class="card-title font-weight-bold"><i class="fa fa-handshake-o"></i> Funeral Arrangement Assistance</h2>
+                </div>
+                <div class="card-body">
+                    <p>Gain access to a wealth of resources and support designed to assist you in navigating the complexities of arranging funeral services and ceremonies. Our platform is dedicated to providing comprehensive assistance every step of the way.</p>
+                </div>
+            </div>
+
+
+            <div class="card col-md-6">
+                <div class="card-header font-weight-bold">
+                    <h2 class="card-title font-weight-bold"> <i class="fa fa-cogs"></i>Policy Management</h2>
+                </div>
+                <div class="card-body">
+                    <p>Empower your administrative capabilities with our robust policy management tools. Administrators can effortlessly oversee policies, premiums, and claims through a centralized dashboard, ensuring seamless operations and unparalleled efficiency.</p>
+                </div>
+            </div>
+
+
+            <div class="card col-md-6">
+                <div class="card-header">
+                    <h2 class="card-title font-weight-bold"><i class="fa fa-comments"></i> Client Communication</h2>
+                </div>
+                <div class="card-body">
                     <p>For clients, the Communications Module enables:</p>
                     <ul class="list-group">
                         <li class="font-weight-bold ">1. Policy Registration Confirmation: Automated emails confirming successful policy registration.</li>
@@ -87,9 +85,15 @@
                         <li class="font-weight-bold ">3. Claim Status Updates: Regular updates on the status of filed claims, ensuring clients are informed every step of the way.</li>
                         <li class="font-weight-bold ">4. Funeral Arrangement Guidance: Guidance and support via email or SMS to assist clients in arranging funeral services and ceremonies.</li>
                     </ul>
+                </div>
             </div>
-            <div class="feature">
-                    <h2> <i class="fa fa-bullhorn"></i>Management Communication</h2>
+
+
+            <div class="card col-md-6">
+                <div class="card-header">
+                    <h2 class="card-title font-weight-bold"> <i class="fa fa-bullhorn"></i>Management Communication</h2>
+                </div>
+                <div class="card-body">
                     <p>For management, the Communications Module provides:</p>
                     <ul class="list-group">
                         <li class="font-weight-bold ">1. New Policy Registrations: Immediate notifications of new policy registrations, allowing for prompt follow-up and processing.</li>
@@ -97,32 +101,44 @@
                         <li class="font-weight-bold ">3. Premium Payment Monitoring: Regular reports on premium payment status, ensuring proactive management of financial operations.</li>
                         <li class="font-weight-bold ">4. Performance Analytics: Comprehensive analytics and reports to track key performance indicators and inform strategic decision-making.</li>
                     </ul>
+                </div>
             </div>
-            <div class="feature">
 
-                <h2><i class="fa fa-user-md"></i>Employee Dashboard</h2>
-                <p>The Employee Dashboard provides essential tools and features for employees to efficiently manage day-to-day operations, including:</p>
-                <ul class="list-group">
-                    <li class="font-weight-bold ">1. Policy Management: Manage user accounts, policies, premiums, and claims.</li>
-                    <li  class="font-weight-bold ">2. Claims Processing: Verify and process claims, ensuring timely resolution.</li>
-                    <li  class="font-weight-bold ">3. Client Communication: Communicate with clients to address inquiries and provide support.</li>
-                    <li  class="font-weight-bold ">4. Reports and Analytics: Access reports and analytics to track performance and inform decision-making.</li>
-                </ul>
+
+            <div class="card col-md-6">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa fa-user-md"></i>Employee Dashboard</h2>
+                </div>
+                <div class="card-body">
+                    <p>The Employee Dashboard provides essential tools and features for employees to efficiently manage day-to-day operations, including:</p>
+                    <ul class="list-group">
+                        <li class="font-weight-bold ">1. Policy Management: Manage user accounts, policies, premiums, and claims.</li>
+                        <li  class="font-weight-bold ">2. Claims Processing: Verify and process claims, ensuring timely resolution.</li>
+                        <li  class="font-weight-bold ">3. Client Communication: Communicate with clients to address inquiries and provide support.</li>
+                        <li  class="font-weight-bold ">4. Reports and Analytics: Access reports and analytics to track performance and inform decision-making.</li>
+                    </ul>
+                </div>
             </div>
-            <div class="feature">
-                <h2><i class="fa fa-dashboard"></i> Managers Dashboard</h2>
-                <p>The Manager Dashboard offers comprehensive oversight and strategic management capabilities, including:</p>
-                <ul class="list-group">
-                    <li class="font-weight-bold ">1. Team Management: Manage employee accounts, roles, and permissions.</li>
-                    <li  class="font-weight-bold ">2. Policy Oversight: Monitor policy performance, trends, and compliance.</li>
-                    <li class="font-weight-bold ">3. Financial Management: Monitor premium payments, expenses, and revenue.</li>
-                    <li class="font-weight-bold ">4. Strategic Planning: Access advanced analytics and reports to inform strategic decision-making.</li>
-                </ul>
+
+
+            <div class="card col-md-6">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa fa-dashboard"></i> Managers Dashboard</h2>
+                </div>
+                <div class="card-body">
+                    <p>The Manager Dashboard offers comprehensive oversight and strategic management capabilities, including:</p>
+                    <ul class="list-group">
+                        <li class="font-weight-bold ">1. Team Management: Manage employee accounts, roles, and permissions.</li>
+                        <li  class="font-weight-bold ">2. Policy Oversight: Monitor policy performance, trends, and compliance.</li>
+                        <li class="font-weight-bold ">3. Financial Management: Monitor premium payments, expenses, and revenue.</li>
+                        <li class="font-weight-bold ">4. Strategic Planning: Access advanced analytics and reports to inform strategic decision-making.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="card">
+    <div class="card col-md-6">
         <div class="card-header">
             <h4 class="card-title font-weight-bold "><i class="ti ti-user"> </i> Login - Create Account</h4>
         </div>
@@ -157,7 +173,6 @@
 
 </section>
 {% endblock %}
-
 
 
 

@@ -1,29 +1,38 @@
 import asyncio
 import time
 from datetime import datetime
+
 from flask import Flask
 
-
+from src.config import Settings
 from src.controller import Controllers
 from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose
 from src.database.sql.messaging import SMSInboxORM, SMSComposeORM
+from src.emailer import EmailModel, SendMail
 
 
 def date_time() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-class EmailService:
+class EmailService(Controllers):
 
     def __init__(self):
-        pass
+        super().__init__()
+        self.from_ = None
+        self.email_sender = None
 
-    async def send_email(self, recipient: str, subject: str, body: str):
+    def init_app(self, app: Flask, settings: Settings, emailer: SendMail = None):
+        super().init_app(app=app)
+        self.email_sender = emailer
+        self.from_ = settings.EMAIL_SETTINGS.RESEND.from_
+
+    async def send_email(self, email: EmailModel):
         # Code to send email via email service API
-        print(f"Sending email to {recipient} with subject: {subject} and body: {body}")
-        # Simulate sending email asynchronously
-        # await asyncio.sleep(2)
-        print("Email sent successfully")
+        print(f"Sending email {email}")
+
+        await self.email_sender.send_mail_resend(email=email)
+        print(f"Email sent successfully : {email}")
 
     async def receive_email(self, sender: str, subject: str, body: str):
         # Code to receive email from email service API
@@ -165,8 +174,13 @@ class SMSService(Controllers):
             return None
 
 
-class WhatsAppService:
+class WhatsAppService(Controllers):
     def __init__(self):
+        super().__init__()
+        pass
+
+    def init_app(self, app: Flask):
+        super().init_app(app=app)
         pass
 
     async def send_whatsapp_message(self, recipient: str, message: str):
@@ -182,7 +196,7 @@ class WhatsAppService:
 
 
 class MessagingController(Controllers):
-    def __init__(self):
+    def __init__(self, ):
 
         super().__init__()
         self.email_service = EmailService()
@@ -196,24 +210,36 @@ class MessagingController(Controllers):
         self.loop = asyncio.get_event_loop()
 
     # ------------------------------------------------------------------------------------------------------------------
-    #----  Routes ---
 
     async def get_sms_inbox(self, branch_id: str) -> list[SMSInbox]:
 
         return self.sms_service.inbox_queue.get(branch_id, [])
 
-    def init_app(self, app: Flask):
+    def init_app(self, app: Flask, settings: Settings, emailer: SendMail):
+        """
+        :param app:
+        :param settings:
+        :param emailer:
+        :return:
+        """
         super().init_app(app=app)
+        # Initializing communication Services
+        self.email_service.init_app(app=app, settings=settings, emailer=emailer)
+        self.sms_service.init_app(app=app)
+        self.whatsapp_service.init_app(app=app)
+
         self.loop.create_task(self.start_app())
         print("Loop Initialized")
 
     async def send_email(self, email: EmailCompose):
         """
-            TODO When Actually sending the Email Consider
+            This only adds the outgoing email to the Queue
         :param email:
         :return:
         """
-        await self.email_queue.put(email)
+        # Convert Compose Email to Email Sending Model
+        email_model = EmailModel(to_=email.to_email, subject_=email.subject, html_=email.message)
+        await self.email_queue.put(email_model)
 
     async def send_sms(self, composed_sms: SMSCompose):
         await self.sms_queue.put(composed_sms)
@@ -231,8 +257,8 @@ class MessagingController(Controllers):
             print("No Email Messages")
             return
 
-        recipient, subject, body = await self.email_queue.get()
-        await self.email_service.send_email(recipient, subject, body)
+        email: EmailModel = await self.email_queue.get()
+        await self.email_service.send_email(email=email)
         self.email_queue.task_done()
 
     async def process_sms_queue(self):

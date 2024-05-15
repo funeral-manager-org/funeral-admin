@@ -79,6 +79,6 @@ def create_app(config):
         company_controller.init_app(app=app)
         paypal_controller.init_app(app=app, config_instance=config)
         chat_controller.init_app(app=app)
-        messaging_controller.init_app(app=app)
+        messaging_controller.init_app(app=app, settings=config, emailer=send_mail)
 
     return app, chat_io, messaging_controller

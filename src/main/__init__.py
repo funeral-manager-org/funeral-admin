@@ -81,5 +81,4 @@ def create_app(config):
         chat_controller.init_app(app=app)
         messaging_controller.init_app(app=app, settings=config, emailer=send_mail)
 
-
     return app, chat_io, messaging_controller

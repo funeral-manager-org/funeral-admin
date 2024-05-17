@@ -31,7 +31,7 @@ class EmailService(Controllers):
         # Code to send email via email service API
         print(f"Sending email {email}")
 
-        await self.email_sender.send_mail_resend(email=email)
+        response = await self.email_sender.send_mail_resend(email=email)
         print(f"Email sent successfully : {email}")
 
     async def receive_email(self, sender: str, subject: str, body: str):
@@ -289,7 +289,7 @@ class MessagingController(Controllers):
         print("Thread Started-------------------------------------------------")
         i = 0
         time_started = time.time()
-        timer_multiplier = 10
+        timer_multiplier = 1
 
         async def standard_time() -> str:
             hours = int(time_elapsed // 3600)

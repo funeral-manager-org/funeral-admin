@@ -29,4 +29,6 @@ class SendMail:
 
     async def send_mail_resend(self, email: EmailModel):
         params = {'from': self.from_ or email.from_, 'to': email.to_, 'subject': email.subject_, 'html': email.html_}
-        self._resend.Emails.send(params=params)
+        print(f"Params : {params}")
+        response = self._resend.Emails.send(params=params)
+        print(response)

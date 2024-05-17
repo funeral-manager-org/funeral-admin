@@ -17,7 +17,7 @@ class NotificationsController(Controllers):
     async def get_user_notifications(self, uid: str) -> NotificationsModel | None:
         """
 
-        :param user_id:
+        :param uid:
         :return:
         """
         with self.get_session() as session:

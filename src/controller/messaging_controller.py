@@ -33,8 +33,7 @@ class EmailService(Controllers):
 
     async def send_email(self, email: EmailModel):
         # Code to send email via email service API
-        self.logger.info(f"Sending email {email}")
-
+        # self.logger.info(f"Sending email {email}")
         response = await self.email_sender.send_mail_resend(email=email)
         self.logger.info(f"Email sent successfully : {email}")
 
@@ -256,7 +255,7 @@ class MessagingController(Controllers):
 
     async def send_sms(self, composed_sms: SMSCompose):
         await self.sms_queue.put(composed_sms)
-        self.logger.info(f"composed SMS in Queue : {composed_sms}")
+        self.logger.info(f"SMS in Queue : {composed_sms}")
 
         return True
 

@@ -24,6 +24,7 @@ class EmailService(Controllers):
         self.email_sender = None
 
     def init_app(self, app: Flask, settings: Settings, emailer: SendMail = None):
+        """"""
         super().init_app(app=app)
         self.email_sender = emailer
         self.from_ = settings.EMAIL_SETTINGS.RESEND.from_

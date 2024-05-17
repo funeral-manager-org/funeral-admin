@@ -12,6 +12,7 @@ from src.emailer import EmailModel, SendMail
 
 
 def date_time() -> str:
+    """"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 

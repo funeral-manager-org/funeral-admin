@@ -7,6 +7,7 @@ app, chat_io, message_controller = create_app(config=config_instance())
 
 
 def run_message_loop():
+    """running message loops"""
     message_controller.loop.run_forever()
 
 

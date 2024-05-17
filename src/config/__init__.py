@@ -66,6 +66,16 @@ class BrainTreeSettings(BaseSettings):
         env_file_encoding = 'utf-8'
 
 
+class TwilioSettings(BaseSettings):
+    TWILIO_SID: str = Field(..., env='TWILIO_ACCOUNT_SID')
+    TWILIO_TOKEN: str = Field(..., env='TWILIO_AUTH_TOKEN')
+    TWILIO_NUMBER: str = Field(..., env='TWILIO_NUMBER')
+
+    class Config:
+        env_file = '.env.development'
+        env_file_encoding = 'utf-8'
+
+
 class Settings(BaseSettings):
     APP_NAME: str = Field(default='Last Base')
     LOGO_URL: str = Field(default="https://last-shelter.vip/static/images/custom/logo.png")
@@ -84,6 +94,7 @@ class Settings(BaseSettings):
     PAYPAL_SETTINGS: PayPalSettings = PayPalSettings()
     ADMIN_EMAIL: str = "admin@last-shelter.vip"
     AUTH_CODE: str = "sdasdasdas"
+    TWILIO: TwilioSettings =TwilioSettings()
 
 
 

@@ -4,6 +4,7 @@ from datetime import datetime
 
 from flask import Flask
 
+from twilio.rest import Client
 from src.config import Settings
 from src.controller import Controllers
 from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose
@@ -23,6 +24,7 @@ class EmailService(Controllers):
         self.from_ = None
         self.email_sender = None
 
+    # noinspection PyMethodOverriding
     def init_app(self, app: Flask, settings: Settings, emailer: SendMail = None):
         """"""
         super().init_app(app=app)
@@ -31,34 +33,34 @@ class EmailService(Controllers):
 
     async def send_email(self, email: EmailModel):
         # Code to send email via email service API
-        print(f"Sending email {email}")
+        self.logger.info(f"Sending email {email}")
 
         response = await self.email_sender.send_mail_resend(email=email)
-        print(f"Email sent successfully : {email}")
+        self.logger.info(f"Email sent successfully : {email}")
 
     async def receive_email(self, sender: str, subject: str, body: str):
         # Code to receive email from email service API
-        print(f"Received email from {sender} with subject: {subject} and body: {body}")
+        self.logger.info(f"Received email from {sender} with subject: {subject} and body: {body}")
 
 
 class SMSService(Controllers):
     def __init__(self):
         super().__init__()
         self.sms_service_api = None
-
+        self.twilio_number = None
         # Inbox Messages
         self.inbox_queue: dict[str: list[SMSInbox]] = {}
-
         # Sent Messages
         self.sent_messages_queue: dict[str: list[SMSCompose]] = {}
-
         # a dict of reference or message_id from the api provider matched with the branch_id in the application
         self.sent_references: dict[str: list[str]] = {}
 
-    def init_app(self, app: Flask):
+    # noinspection PyMethodOverriding
+    def init_app(self, app: Flask, settings: Settings):
 
         super().init_app(app=app)
-        # TODO Initialize the SMS API
+        self.sms_service_api = Client(settings.TWILIO.TWILIO_SID, settings.TWILIO.TWILIO_TOKEN)
+        self.twilio_number = settings.TWILIO.TWILIO_NUMBER
 
     async def check_incoming_sms_api(self) -> list[SMSInbox]:
         """
@@ -82,12 +84,17 @@ class SMSService(Controllers):
         :return:
         """
         # Code to send SMS via SMS service API
-        print(f"Sending SMS to {composed_sms.to_cell} with message: {composed_sms.message}")
+        self.logger.info(f"Sending SMS to {composed_sms.to_cell} with message: {composed_sms.message}")
 
         if self.sms_service_api:
             # API is initialized do send message
-            # sent reference from the api call when sending the message
-            sent_reference = ""
+            # Sending SMS with Twilio
+            sent_reference = self.sms_service_api.messages.create(
+                to=composed_sms.to_cell,
+                from_=self.twilio_number,
+                body=composed_sms.message
+            )
+            self.logger.info(f"SID : {sent_reference}")
             composed_sms.reference = sent_reference
             sent_references = self.sent_references.get(composed_sms.to_branch, [])
             sent_references.append(sent_reference)
@@ -95,20 +102,20 @@ class SMSService(Controllers):
 
         composed_sms.date_time_sent = date_time()
 
-        # The Sent Messages will read from this Queue
+        # Sent Messages will read from this Queue
         composed_messages: list[SMSCompose] = self.sent_messages_queue.get(composed_sms.to_branch, [])
         composed_messages.append(composed_sms)
 
         self.sent_messages_queue[composed_sms.to_branch] = composed_messages
 
-        # Saving the Sent Messages to the Database
+        # Saving Sent Messages to the Database
         with self.get_session() as session:
             session.add(SMSComposeORM(**composed_sms.dict()))
             session.commit()
 
         # Simulate sending SMS asynchronously
         # await asyncio.sleep(1)
-        print("SMS sent successfully")
+        self.logger.info("SMS sent successfully")
 
     async def retrieve_sms_responses_service(self):
         """
@@ -179,22 +186,25 @@ class SMSService(Controllers):
 class WhatsAppService(Controllers):
     def __init__(self):
         super().__init__()
-        pass
+        self.whatsapp_api = None
+        self.twilio_number = None
 
-    def init_app(self, app: Flask):
+    # noinspection PyMethodOverriding
+    def init_app(self, app: Flask, settings: Settings):
         super().init_app(app=app)
-        pass
+        self.whatsapp_api = Client(settings.TWILIO.TWILIO_SID, settings.TWILIO.TWILIO_TOKEN)
+        self.twilio_number = settings.TWILIO.TWILIO_NUMBER
 
     async def send_whatsapp_message(self, recipient: str, message: str):
         # Code to send WhatsApp message via WhatsApp service API
-        print(f"Sending WhatsApp message to {recipient} with message: {message}")
+        self.logger.info(f"Sending WhatsApp message to {recipient} with message: {message}")
         # Simulate sending WhatsApp message asynchronously
         # await asyncio.sleep(3)
-        print("WhatsApp message sent successfully")
+        self.logger.info("WhatsApp message sent successfully")
 
     async def receive_whatsapp_message(self, sender: str, message: str):
         # Code to receive WhatsApp message from WhatsApp service API
-        print(f"Received WhatsApp message from {sender} with message: {message}")
+        self.logger.info(f"Received WhatsApp message from {sender} with message: {message}")
 
 
 class MessagingController(Controllers):
@@ -217,6 +227,7 @@ class MessagingController(Controllers):
 
         return self.sms_service.inbox_queue.get(branch_id, [])
 
+    # noinspection PyMethodOverriding
     def init_app(self, app: Flask, settings: Settings, emailer: SendMail):
         """
         :param app:
@@ -227,11 +238,11 @@ class MessagingController(Controllers):
         super().init_app(app=app)
         # Initializing communication Services
         self.email_service.init_app(app=app, settings=settings, emailer=emailer)
-        self.sms_service.init_app(app=app)
-        self.whatsapp_service.init_app(app=app)
+        self.sms_service.init_app(app=app, settings=settings)
+        self.whatsapp_service.init_app(app=app, settings=settings)
 
         self.loop.create_task(self.start_app())
-        print("Loop Initialized")
+        self.logger.info("Loop Initialized")
 
     async def send_email(self, email: EmailCompose):
         """
@@ -245,7 +256,7 @@ class MessagingController(Controllers):
 
     async def send_sms(self, composed_sms: SMSCompose):
         await self.sms_queue.put(composed_sms)
-        print(f"composed SMS in Queue : {composed_sms}")
+        self.logger.info(f"composed SMS in Queue : {composed_sms}")
 
         return True
 
@@ -254,9 +265,9 @@ class MessagingController(Controllers):
         return True
 
     async def process_email_queue(self):
-        print("Processing Email")
+        self.logger.info("Processing Email")
         if self.email_queue.empty():
-            print("No Email Messages")
+            self.logger.info("No Email Messages")
             return
 
         email: EmailModel = await self.email_queue.get()
@@ -265,9 +276,9 @@ class MessagingController(Controllers):
 
     async def process_sms_queue(self):
 
-        print("processing sms outgoing message queues")
+        self.logger.info("processing sms outgoing message queues")
         if self.sms_queue.empty():
-            print("no sms messages to send")
+            self.logger.info("no sms messages to send")
             return
 
         composed_sms: SMSCompose = await self.sms_queue.get()
@@ -278,9 +289,9 @@ class MessagingController(Controllers):
 
     async def process_whatsapp_queue(self):
 
-        print("processing whatsapp out going message queues")
+        self.logger.info("processing whatsapp out going message queues")
         if self.whatsapp_queue.empty():
-            print("No WhatsAPP Messages")
+            self.logger.info("No WhatsAPP Messages")
             return
 
         recipient, message = await self.whatsapp_queue.get()
@@ -288,7 +299,7 @@ class MessagingController(Controllers):
         self.whatsapp_queue.task_done()
 
     async def start_app(self):
-        print("Thread Started-------------------------------------------------")
+        self.logger.info("Thread Started-------------------------------------------------")
         i = 0
         time_started = time.time()
         timer_multiplier = 1
@@ -307,12 +318,12 @@ class MessagingController(Controllers):
             await self.process_whatsapp_queue()
 
             # Incoming Message Queues
-            print("Started Processing Incoming Messages")
+            self.logger.info("Started Processing Incoming Messages")
             await self.sms_service.retrieve_sms_responses_service()
 
             # This Means the loop will run every 5 minutes
 
             time_elapsed = time.time() - time_started
             display_time = await standard_time()
-            print(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")
+            self.logger.info(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")
             await asyncio.sleep(60 * timer_multiplier)

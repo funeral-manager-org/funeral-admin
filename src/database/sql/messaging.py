@@ -86,3 +86,46 @@ class SMSComposeORM(Base):
             "is_delivered": self.is_delivered,
             "client_responded": self.client_responded
         }
+
+
+class EmailComposeORM(Base):
+    __tablename__ = "email_compose"
+    message_id = Column(String(ID_LEN), primary_key=True)
+    to_branch = Column(String(NAME_LEN))
+    reference = Column(String(ID_LEN))
+    from_email = Column(String(255))
+    to_email = Column(String(255))
+    subject = Column(String(NAME_LEN))
+    message = Column(Text)
+    recipient_type = Column(String(NAME_LEN))
+    is_sent = Column(Boolean)
+    date_time_sent = Column(String(36))
+
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            Base.metadata.create_all(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            'message_id': self.message_id,
+            'reference': self.reference,
+            'from_email': self.from_email,
+            'to_email': self.to_email,
+            'subject': self.subject,
+            'message': self.message,
+            'to_branch': self.to_branch,
+            'recipient_type': self.recipient_type,
+            'is_sent': self.is_sent,
+            'date_time_sent': self.date_time_sent,
+        }

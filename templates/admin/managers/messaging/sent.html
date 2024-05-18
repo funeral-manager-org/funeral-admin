@@ -101,27 +101,43 @@
                                 <i class="fa fa-envelope"></i> Sent Email Messages
                             </h3>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>To</th>
-                                            <th>Subject</th>
-                                            <th>Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>recipient@example.com</td>
-                                            <td>Hello, how are you?</td>
-                                            <td>2024-04-20</td>
-                                        </tr>
-                                        <!-- Add more rows for additional sent email messages -->
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="container mt-4">
+                            {% for branch in company_branches %}
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Messages Sent from {{ branch.branch_name }} Branch</h4>
+                                        <p class="font-weight-bold">{{ branch.description }}</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            {% if branch.branch_id in branch_messages %}
+                                                <table class="table table-bordered table-hover">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <th>To</th>
+                                                            <th>Subject</th>
+                                                            <th>Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for message in branch_messages[branch.branch_id] %}
+                                                            <tr>
+                                                                <td>{{ message.to_email }}</td>
+                                                                <td>{{ message.subject }}</td>
+                                                                <td>{{ message.date_time_sent }}</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            {% else %}
+                                                <p>No sent messages for this branch.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
+
                     </div>
                 </div>
             </div>

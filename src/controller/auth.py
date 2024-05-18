@@ -282,7 +282,7 @@ class UserController(Controllers):
         email_html = render_template("email_templates/verification_email.html", user=user,
                                      verification_link=verification_link, password=password)
 
-        msg = EmailModel(subject_="last-shelter.vip Email Verification",
+        msg = EmailModel(subject_="funeral-manager.org Email Verification",
                          to_=user.email,
                          html_=email_html)
 

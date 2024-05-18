@@ -8,8 +8,9 @@ from twilio.rest import Client
 from src.config import Settings
 from src.controller import Controllers
 from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose
-from src.database.sql.messaging import SMSInboxORM, SMSComposeORM
+from src.database.sql.messaging import SMSInboxORM, SMSComposeORM, EmailComposeORM
 from src.emailer import EmailModel, SendMail
+from src.utils import create_id
 
 
 def date_time() -> str:
@@ -23,6 +24,7 @@ class EmailService(Controllers):
         super().__init__()
         self.from_ = None
         self.email_sender = None
+        self.sent_email_queue: dict[str, EmailModel] = {}
 
     # noinspection PyMethodOverriding
     def init_app(self, app: Flask, settings: Settings, emailer: SendMail = None):
@@ -31,15 +33,31 @@ class EmailService(Controllers):
         self.email_sender = emailer
         self.from_ = settings.EMAIL_SETTINGS.RESEND.from_
 
-    async def send_email(self, email: EmailModel):
+    async def send_email(self, email: EmailCompose):
         # Code to send email via email service API
         # self.logger.info(f"Sending email {email}")
-        response = await self.email_sender.send_mail_resend(email=email)
-        self.logger.info(f"Email sent successfully : {email}")
+        response, email_ = await self.email_sender.send_mail_resend(email=email)
+
+        self.logger.info(f"Sent Email Response : {response}")
+        self.logger.info(f"Email sent successfully : {email_}")
+
+        self.sent_email_queue[response.get('id', create_id())] = email_
+
+        with self.get_session() as session:
+            sent_email_orm = EmailComposeORM(**email_.dict())
+            session.add(sent_email_orm)
+            session.commit()
 
     async def receive_email(self, sender: str, subject: str, body: str):
         # Code to receive email from email service API
         self.logger.info(f"Received email from {sender} with subject: {subject} and body: {body}")
+
+    async def get_sent_messages(self, branch_id: str) -> list[EmailCompose]:
+        with self.get_session() as session:
+            email_messages_orm = session.query(EmailComposeORM).filter_by(to_branch=branch_id).all()
+            return [EmailCompose(**email.to_dict()) for email in email_messages_orm
+                    if isinstance(email, EmailComposeORM) ]
+
 
 
 class SMSService(Controllers):
@@ -250,8 +268,8 @@ class MessagingController(Controllers):
         :return:
         """
         # Convert Compose Email to Email Sending Model
-        email_model = EmailModel(to_=email.to_email, subject_=email.subject, html_=email.message)
-        await self.email_queue.put(email_model)
+        # email_model = EmailModel(to_=email.to_email, subject_=email.subject, html_=email.message)
+        await self.email_queue.put(email)
 
     async def send_sms(self, composed_sms: SMSCompose):
         await self.sms_queue.put(composed_sms)
@@ -269,7 +287,7 @@ class MessagingController(Controllers):
             self.logger.info("No Email Messages")
             return
 
-        email: EmailModel = await self.email_queue.get()
+        email: EmailCompose = await self.email_queue.get()
         await self.email_service.send_email(email=email)
         self.email_queue.task_done()
 

@@ -247,6 +247,8 @@ class SMSService(Controllers):
             if isinstance(sms_settings_orm, SMSSettingsORM):
                 return SMSSettings(**sms_settings_orm.to_dict())
             return None
+
+
 class WhatsAppService(Controllers):
     def __init__(self):
         super().__init__()

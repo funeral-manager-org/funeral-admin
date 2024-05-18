@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 from enum import Enum
 from pydantic import BaseModel, Field
 from src.utils import create_id, create_policy_number, create_claim_number
@@ -57,6 +57,54 @@ class PolicyRegistrationData(BaseModel):
 
     payment_method: str | None
     policy_active: bool = Field(default=False)
+
+    def can_send_payment_reminder(self) -> bool:
+        """
+        Check if the payment notification can be sent.
+        Notification can be sent if the current date is within 7 days before the payment_day.
+
+        :return: True if notification can be sent, otherwise False.
+        """
+        if self.payment_day is None:
+            return False
+
+        # Get the current day of the month
+        today = datetime.today().day
+
+        # Calculate the difference in days
+        day_difference = (self.payment_day - today) % 31
+
+        # Check if the difference is within the 7-day window
+        return 0 <= day_difference <= 7
+
+    def return_next_payment_date(self):
+        """
+        Return the next payment date as a tuple containing the day name and date.
+
+        :return: (day_name, date_str) where day_name is the name of the day and date_str is the date in YYYY-MM-DD format.
+        """
+        if self.payment_day is None:
+            return None
+
+        today = datetime.today()
+        current_month_days = (today.replace(day=28) + timedelta(days=4)).day
+
+        # Calculate the next payment date
+        if today.day <= self.payment_day:
+            next_payment_date = today.replace(day=self.payment_day)
+        else:
+            # Handle month wrap-around
+            next_month = today.month + 1 if today.month < 12 else 1
+            next_year = today.year if today.month < 12 else today.year + 1
+            if self.payment_day > current_month_days:
+                self.payment_day = current_month_days
+            next_payment_date = datetime(next_year, next_month, self.payment_day)
+
+        # Get the day name and formatted date string
+        day_name = next_payment_date.strftime('%A')
+        date_str = next_payment_date.strftime('%Y-%m-%d')
+
+        return day_name, date_str
 
 
 class InsuredParty(Enum):

@@ -36,11 +36,12 @@ class Subscriptions(BaseModel):
         return self.total_clients
 
     def is_expired(self) -> bool:
+        """Will return True if subscription is expired"""
         date_bought_dt = datetime.fromisoformat(self.date_subscribed)
         current_date = datetime.now()
         months_diff = (current_date.year - date_bought_dt.year) * 12 + current_date.month - date_bought_dt.month
 
-        return months_diff >= self.subscription_period
+        return months_diff > self.subscription_period
 
 
 class SMSPackage(BaseModel):

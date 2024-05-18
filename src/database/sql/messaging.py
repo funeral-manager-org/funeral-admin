@@ -127,3 +127,41 @@ class EmailComposeORM(Base):
             'is_sent': self.is_sent,
             'date_time_sent': self.date_time_sent,
         }
+
+
+class SMSSettingsORM(Base):
+    __tablename__ = "sms_settings"
+    company_id: str = Column(String(ID_LEN), primary_key=True)
+    enable_sms_notifications: bool = Column(Boolean)
+    enable_sms_campaigns: bool = Column(Boolean)
+    sms_signature: str = Column(String(255))
+    policy_lapsed_notifications: bool = Column(Boolean)
+    upcoming_payments_notifications: bool = Column(Boolean)
+    policy_paid_notifications: bool = Column(Boolean)
+    claims_notifications: bool = Column(Boolean)
+
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            Base.metadata.create_all(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            "company_id": self.company_id,
+            "enable_sms_notifications": self.enable_sms_notifications,
+            "enable_sms_campaigns": self.enable_sms_campaigns,
+            "sms_signature": self.sms_signature,
+            "policy_lapsed_notifications": self.policy_lapsed_notifications,
+            "upcoming_payments_notifications": self.upcoming_payments_notifications,
+            "policy_paid_notifications": self.policy_paid_notifications,
+            "claims_notifications": self.claims_notifications,
+        }

@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
 from src.database.models.companies import EmployeeDetails
-from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose, SMSInbox
+from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose, SMSInbox, SMSSettings
 from src.database.models.covers import ClientPersonalInformation
 from src.authentication import login_required
 from src.database.models.users import User
@@ -43,6 +43,15 @@ async def update_sms_settings(user: User):
     :param user:
     :return:
     """
+    try:
+        settings = SMSSettings(**request.form, company_id=user.company_id)
+    except ValidationError as e:
+        print(str(e))
+        flash(message="please provide all required sms settings", category="danger")
+        return redirect(url_for('messaging.get_admin'))
+
+    updated_settings = messaging_controller.sms_service.add_sms_settings(settings=settings)
+
     flash(message="Successfully updated SMS Settings", category="success")
     return redirect(url_for('messaging.get_admin'))
 

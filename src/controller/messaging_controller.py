@@ -7,8 +7,8 @@ from flask import Flask
 from twilio.rest import Client
 from src.config import Settings
 from src.controller import Controllers
-from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose
-from src.database.sql.messaging import SMSInboxORM, SMSComposeORM, EmailComposeORM
+from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose, SMSSettings
+from src.database.sql.messaging import SMSInboxORM, SMSComposeORM, EmailComposeORM, SMSSettingsORM
 from src.emailer import EmailModel, SendMail
 from src.utils import create_id
 
@@ -210,7 +210,43 @@ class SMSService(Controllers):
                 return sms_compose
             return None
 
+    async def add_sms_settings(self, settings: SMSSettings) -> SMSSettings:
+        """
 
+        :param settings:
+        :return:
+        """
+        with self.get_session() as session:
+            sms_settings_orm = session.query(SMSSettingsORM).filter_by(company_id=settings.company_id).first()
+            if isinstance(sms_settings_orm, SMSSettingsORM):
+                # Update the existing record
+                sms_settings_orm.enable_sms_notifications = settings.enable_sms_notifications
+                sms_settings_orm.enable_sms_campaigns = settings.enable_sms_campaigns
+                sms_settings_orm.sms_signature = settings.sms_signature
+                sms_settings_orm.policy_lapsed_notifications = settings.policy_lapsed_notifications
+                sms_settings_orm.upcoming_payments_notifications = settings.upcoming_payments_notifications
+                sms_settings_orm.policy_paid_notifications = settings.policy_paid_notifications
+                sms_settings_orm.claims_notifications = settings.claims_notifications
+            else:
+                # Create a new record
+                new_sms_settings = SMSSettingsORM(**settings.dict())
+                session.add(new_sms_settings)
+
+            session.commit()
+
+            return settings
+
+    async def get_sms_settings(self, company_id: str) -> SMSSettings | None:
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            sms_settings_orm = session.get(SMSSettingsORM).filter_ny(company_id=company_id).first()
+            if isinstance(sms_settings_orm, SMSSettingsORM):
+                return SMSSettings(**sms_settings_orm.to_dict())
+            return None
 class WhatsAppService(Controllers):
     def __init__(self):
         super().__init__()

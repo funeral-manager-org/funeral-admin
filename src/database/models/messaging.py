@@ -62,3 +62,14 @@ class EmailCompose(BaseModel):
     date_time_sent: str | None
 
 
+class SMSSettings(BaseModel):
+    company_id: str
+    enable_sms_notifications: bool = Field(default=False)
+    enable_sms_campaigns: bool = Field(default=False)
+    sms_signature: str
+    policy_lapsed_notifications: bool = Field(default=False)
+    upcoming_payments_notifications: bool = Field(default=False)
+    policy_paid_notifications: bool = Field(default=False)
+    claims_notifications: bool = Field(default=False)
+
+

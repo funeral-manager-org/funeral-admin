@@ -21,7 +21,7 @@ async def get_cloudflare(user: User):
     return render_template('admin/managers/messaging/cloudflare.html', **context)
 
 
-@messaging_route.get('/admin/administrator/messaging/topup')
+@messaging_route.get('/admin/administrator/messaging/top-up')
 @login_required
 async def get_topup(user: User):
     context = dict(user=user)
@@ -72,6 +72,7 @@ def create_fake_cell(length: int = 10) -> str:
 
 def create_fake_sms_data(to_branch: str, message: str, count: int = 10) -> list[SMSInbox]:
     """
+    **create_fake_sms_data**
     Generate fake SMSInbox data for testing.
 
     :param to_branch: Branch ID
@@ -173,7 +174,7 @@ async def get_employee_sent(user: User):
 
 @messaging_route.get('/admin/messaging/outbox/<string:message_id>')
 @login_required
-async def get_outbox_message(user: User, message_id: str):
+async def get_outbox_email_message(user: User, message_id: str):
     """
 
     :param user:

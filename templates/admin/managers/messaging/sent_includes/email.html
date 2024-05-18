@@ -24,7 +24,7 @@
                                 <tr>
                                     <td>{{ message.to_email }}</td>
                                     <td>
-                                        <a href="{{ url_for('messaging.get_outbox_message', message_id=message.message_id) }}" class="font-weight-bold text-info">
+                                        <a href="{{ url_for('messaging.get_outbox_email_message', message_id=message.message_id) }}" class="font-weight-bold text-info">
                                             {{ message.subject }}
                                         </a>
                                     </td>

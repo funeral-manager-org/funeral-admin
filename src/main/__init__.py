@@ -14,6 +14,7 @@ from src.controller.company_controller import CompanyController
 from src.controller.paypal_controller import PayPalController
 from src.controller.chat_controller import ChatController
 from src.controller.messaging_controller import MessagingController
+from src.controller.notifications_controller import NotificationsController
 
 # from src.firewall import Firewall
 
@@ -22,6 +23,7 @@ company_controller = CompanyController()
 paypal_controller = PayPalController()
 chat_controller = ChatController()
 messaging_controller = MessagingController()
+notifications_controller = NotificationsController()
 
 chat_io = SocketIO()
 
@@ -82,5 +84,6 @@ def create_app(config):
         paypal_controller.init_app(app=app, config_instance=config)
         chat_controller.init_app(app=app)
         messaging_controller.init_app(app=app, settings=config, emailer=send_mail)
+        notifications_controller.init_app(app=app, messaging_controller=messaging_controller, company_controller=company_controller)
 
-    return app, chat_io, messaging_controller
+    return app, chat_io, messaging_controller, notifications_controller

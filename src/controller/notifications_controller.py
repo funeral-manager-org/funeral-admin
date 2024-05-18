@@ -1,7 +1,10 @@
+import asyncio
+from datetime import datetime, timedelta
+
 from flask import Flask
 
-from database.models.contacts import Contacts
-from database.models.messaging import SMSCompose, RecipientTypes
+from src.database.models.contacts import Contacts
+from src.database.models.messaging import SMSCompose, RecipientTypes
 from src.controller import Controllers
 from src.controller.company_controller import CompanyController
 from src.controller.messaging_controller import MessagingController
@@ -18,6 +21,7 @@ class NotificationsController(Controllers):
         super().__init__()
         self.messaging_controller: MessagingController | None = None
         self.company_controller: CompanyController | None = None
+        self.loop = asyncio.get_event_loop()
 
     # noinspection PyMethodOverriding
     def init_app(self, app: Flask, messaging_controller: MessagingController, company_controller: CompanyController):
@@ -32,6 +36,7 @@ class NotificationsController(Controllers):
         super().init_app(app=app)
         self.messaging_controller = messaging_controller
         self.company_controller = company_controller
+        self.loop.create_task(self.daemon_runner())
 
     async def update_subscription(self, subscription: Subscriptions):
         """
@@ -77,55 +82,66 @@ class NotificationsController(Controllers):
         :return:
         """
         with self.get_session() as session:
+
             company_data = await self.company_controller.get_company_details(company_id=company_id)
-            subscriptions_orm_list = session.query(SubscriptionsORM).filter_by(company_id=company_id).all()
-            subscriptions_list: list[Subscriptions] = [Subscriptions(**sub_orm.to_dict()) for sub_orm in
-                                                       subscriptions_orm_list
-                                                       if isinstance(sub_orm, SubscriptionsORM)]
+            subscription_orm = session.query(SubscriptionsORM).filter_by(company_id=company_id).first()
 
-            for subscription in subscriptions_list:
-                if not subscription.is_expired():
-                    policy_holders: list[ClientPersonalInformation] = await self.company_controller.get_policy_holders(
-                        company_id=company_id)
-                    subscription: Subscriptions = await self.add_package_to_subscription(subscription=subscription,
-                                                                                         company_id=company_id)
-                    for holder in policy_holders:
-                        if holder.contact_id:
-                            policy_registration_data: PolicyRegistrationData = await self.company_controller.get_policy_with_policy_number(
-                                policy_number=holder.policy_number)
+            subscription = Subscriptions(**subscription_orm.to_dict())
 
-                            contact_data: Contacts = await self.company_controller.get_contact(
-                                contact_id=holder.contact_id)
+            if not subscription.is_expired():
+                policy_holders: list[ClientPersonalInformation] = await self.company_controller.get_policy_holders(
+                    company_id=company_id)
+                subscription: Subscriptions = await self.add_package_to_subscription(subscription=subscription,
+                                                                                     company_id=company_id)
+                for holder in policy_holders:
+                    if holder.contact_id:
+                        policy_registration_data: PolicyRegistrationData = await self.company_controller.get_policy_with_policy_number(
+                            policy_number=holder.policy_number)
 
-                            if policy_registration_data.can_send_payment_reminder() and contact_data.cell:
-                                # send SMS Notification
-                                day_name, date_str = policy_registration_data.return_next_payment_date()
-                                if subscription.take_sms_credit():
-                                    _message = f"""
-                                    {company_data.company_name}
-                                    
-                                    Premium Payment Reminder
-                                    Hello {holder.full_names} {holder.surname}
+                        contact_data: Contacts = await self.company_controller.get_contact(
+                            contact_id=holder.contact_id)
 
-                                    This is to remind you that your next premium payment date will be on 
-                                    
-                                    {day_name} {date_str}
-                                    
-                                    Please be sure to make payment on or before this date.
-                                    
-                                    Next Premium Amount : R {policy_registration_data.total_premiums}.00
-                                    
-                                    Thank You. 
-                                    """
-                                    sms_message: SMSCompose = SMSCompose(message=_message,
-                                                                         to_cell=contact_data.cell,
-                                                                         to_branch=holder.branch_id,
-                                                                         recipient_type=RecipientTypes.CLIENTS.value)
+                        if policy_registration_data.can_send_payment_reminder() and contact_data.cell:
+                            # send SMS Notification
+                            day_name, date_str = policy_registration_data.return_next_payment_date()
+                            if subscription.take_sms_credit():
+                                _message = f"""
+                                {company_data.company_name}
+                                
+                                Premium Payment Reminder
+                                Hello {holder.full_names} {holder.surname}
 
-                                    await self.messaging_controller.send_sms(composed_sms=sms_message)
+                                This is to remind you that your next premium payment date will be on 
+                                
+                                {day_name} {date_str}
+                                
+                                Please be sure to make payment on or before this date.
+                                
+                                Next Premium Amount : R {policy_registration_data.total_premiums}.00
+                                
+                                Thank You. 
+                                """
+                                sms_message: SMSCompose = SMSCompose(message=_message,
+                                                                     to_cell=contact_data.cell,
+                                                                     to_branch=holder.branch_id,
+                                                                     recipient_type=RecipientTypes.CLIENTS.value)
+
+                                await self.messaging_controller.send_sms(composed_sms=sms_message)
+                                log_message = f"""
+                                    Sent a Payment Reminder to 
+                                        Client : {holder.full_names} {holder.surname}  
+                                        Cell: {contact_data.cell}
+                                        """
+                                self.logger.info(log_message)
+                            else:
+                                pass
+                                # TODO - send notification to company manager that the SMS credit has been used up
 
                     await self.update_subscription(subscription=subscription)
-                    break
+
+                else:
+                    pass
+                    #   TODO - send a notification to company_manager that the subscription has expired
 
     async def send_payment_reminders(self):
         """
@@ -141,7 +157,36 @@ class NotificationsController(Controllers):
 
         for company in companies_list:
             sms_settings = await self.messaging_controller.sms_service.get_sms_settings(company_id=company.company_id)
-
-            if sms_settings.enable_sms_notifications and sms_settings.upcoming_payments_notifications:
-                self.logger.info(f"Sending Payment Reminders for company : {company.company_name}")
+            self.logger.info(f"Payment Reminders for Company : {company.company_name}")
+            if sms_settings and sms_settings.enable_sms_notifications and sms_settings.upcoming_payments_notifications:
+                self.logger.info(f"Reminders Ok to send for Company : {company.company_name}")
                 await self.do_send_upcoming_payment_reminders(company_id=company.company_id)
+
+    async def daemon_runner(self):
+        """
+        Daemon runner that checks if the day has changed,
+        sleeps until the next midnight, and then executes send_payment_reminders.
+
+        :return: None
+        """
+        one_hour = 1 * 60 * 60
+        last_day = datetime.today().date()
+        self.logger.info("started Notifications Daemon")
+
+        while True:
+            current_day = datetime.today().date()
+            self.logger.info(f"Current Day : {current_day}")
+
+            if current_day != last_day:
+                last_day = current_day
+                self.logger.info(f"Executing payment reminders on {last_day}")
+                await self.send_payment_reminders()
+
+                # Calculate the time to sleep until the next midnight
+                now = datetime.now()
+                next_midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+                sleep_duration = (next_midnight - now).total_seconds()
+                await asyncio.sleep(sleep_duration)
+            else:
+                # Sleep for a short duration if it's still the same day
+                await asyncio.sleep(one_hour)  # Sleep for 1 hour

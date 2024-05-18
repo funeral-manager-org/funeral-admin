@@ -90,6 +90,21 @@ def create_fake_sms_data(to_branch: str, message: str, count: int = 10) -> list[
     return sms_data
 
 
+async def method_get_sent(user):
+    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+    branch_email_messages = {}
+    branch_sms_messages = {}
+    for branch in company_branches:
+        sent_messages: list[EmailCompose] = await messaging_controller.email_service.get_sent_messages(
+            branch_id=branch.branch_id)
+        branch_email_messages[branch.branch_id] = sent_messages
+        sent_sms_messages: list[SMSCompose] = await messaging_controller.sms_service.get_sent_box_messages_from_database(branch_id=branch.branch_id)
+        branch_sms_messages[branch.branch_id] = sent_sms_messages
+
+    context = dict(user=user, branch_messages=branch_email_messages, branch_sms=branch_sms_messages, company_branches=company_branches)
+    return render_template('admin/managers/messaging/sent.html', **context)
+
+
 @messaging_route.get('/admin/administrator/messaging/inbox')
 @login_required
 async def get_inbox(user: User):
@@ -127,17 +142,6 @@ async def get_sent(user: User):
     return redirect(url_for('messaging.get_employee_sent'))
 
 
-async def method_get_sent(user):
-    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
-    branch_messages = {}
-    for branch in company_branches:
-        sent_messages: list[EmailCompose] = await messaging_controller.email_service.get_sent_messages(
-            branch_id=branch.branch_id)
-        branch_messages[branch.branch_id] = sent_messages
-    context = dict(user=user, branch_messages=branch_messages, company_branches=company_branches)
-    return render_template('admin/managers/messaging/sent.html', **context)
-
-
 @messaging_route.get('/admin/administrator/messaging/compose')
 @login_required
 async def get_compose(user: User):
@@ -159,8 +163,26 @@ async def get_employee_inbox(user: User):
 async def get_employee_sent(user: User):
     if user.is_employee:
         return await method_get_sent(user)
+
+    elif user.is_company_admin:
+        return redirect(url_for('messaging.get_sent'))
+
     flash(message="You are not authorized to access this methods", category="danger")
     return redirect(url_for('home.get_home'))
+
+
+@messaging_route.get('/admin/messaging/outbox/<string:message_id>')
+@login_required
+async def get_outbox_message(user: User, message_id: str):
+    """
+
+    :param user:
+    :param message_id:
+    :return:
+    """
+    sent_message: EmailCompose = await messaging_controller.email_service.get_sent_email(message_id=message_id)
+    context = dict(user=user, message=sent_message)
+    return render_template('admin/managers/messaging/message.html', **context)
 
 
 @messaging_route.get('/admin/employees/messaging/compose')

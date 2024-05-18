@@ -56,8 +56,19 @@ class EmailService(Controllers):
         with self.get_session() as session:
             email_messages_orm = session.query(EmailComposeORM).filter_by(to_branch=branch_id).all()
             return [EmailCompose(**email.to_dict()) for email in email_messages_orm
-                    if isinstance(email, EmailComposeORM) ]
+                    if isinstance(email, EmailComposeORM)]
 
+    async def get_sent_email(self, message_id: str) -> EmailCompose | None:
+        """
+
+        :param message_id:
+        :return:
+        """
+        with self.get_session() as session:
+            email_message_orm = session.query(EmailComposeORM).filter_by(message_id=message_id).first()
+            if isinstance(email_message_orm, EmailComposeORM):
+                return EmailCompose(**email_message_orm.to_dict())
+            return None
 
 
 class SMSService(Controllers):
@@ -181,7 +192,7 @@ class SMSService(Controllers):
 
     async def get_sent_box_messages_from_database(self, branch_id: str) -> list[SMSCompose]:
         with self.get_session() as session:
-            compose_orm_list = session.query(SMSComposeORM).filter_by(branch_id=branch_id).all()
+            compose_orm_list = session.query(SMSComposeORM).filter_by(to_branch=branch_id).all()
             return [SMSCompose(**sms.to_dict()) for sms in compose_orm_list if isinstance(sms, SMSComposeORM)]
 
     async def mark_message_as_responded(self, reference: str) -> SMSCompose | None:

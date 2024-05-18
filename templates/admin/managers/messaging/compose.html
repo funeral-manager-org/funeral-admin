@@ -13,13 +13,13 @@
                         </span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="whatsapp-tab" data-toggle="tab" href="#whatsapp" role="tab" aria-controls="whatsapp" aria-selected="false">
-                        <span class="font-weight-bold text-info">
-                            <i class="fa fa-whatsapp"></i> WhatsApp
-                        </span>
-                    </a>
-                </li>
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link" id="whatsapp-tab" data-toggle="tab" href="#whatsapp" role="tab" aria-controls="whatsapp" aria-selected="false">#}
+{#                        <span class="font-weight-bold text-info">#}
+{#                            <i class="fa fa-whatsapp"></i> WhatsApp#}
+{#                        </span>#}
+{#                    </a>#}
+{#                </li>#}
                 <li class="nav-item">
                     <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab" aria-controls="email" aria-selected="false">
                         <span class="font-weight-bold text-info">
@@ -53,29 +53,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="whatsapp" role="tabpanel" aria-labelledby="whatsapp-tab">
-                    <!-- Compose WhatsApp Message Form -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title font-weight-bold text-info">
-                                <i class="fa fa-pencil-alt"></i> Compose WhatsApp Message
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <form action="{{ url_for('messaging.send_whatsapp_message') }}" method="POST">
-                                {% include 'admin/managers/messaging/includes/compose_selects.html' %}
-                                <div class="form-group">
-                                    <label class="font-weight-bold text-info" for="whatsappMessage">Message:</label>
-                                    <textarea class="col-12" id="whatsappMessage" rows="12"></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa fa-whatsapp"> </i>
-                                    WhatsAPP
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+
                 <div class="tab-pane fade" id="email" role="tabpanel" aria-labelledby="email-tab">
                     <!-- Compose Email Message Form -->
                     <div class="card">

@@ -51,13 +51,14 @@ class SMSInbox(BaseModel):
 
 class EmailCompose(BaseModel):
     message_id: str = Field(default_factory=create_id)
+    reference: str | None
     from_email: str | None
-    to_email: str| None
+    to_email: str | None
     subject: str
     message: str
     to_branch: str
     recipient_type: str
     is_sent: bool = Field(default=False)
-    date_time_sent: str
+    date_time_sent: str | None
 
 

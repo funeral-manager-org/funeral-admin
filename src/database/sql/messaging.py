@@ -101,7 +101,6 @@ class EmailComposeORM(Base):
     is_sent = Column(Boolean)
     date_time_sent = Column(String(36))
 
-
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
@@ -111,7 +110,6 @@ class EmailComposeORM(Base):
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
             cls.__table__.drop(bind=engine)
-
 
     def to_dict(self):
         """

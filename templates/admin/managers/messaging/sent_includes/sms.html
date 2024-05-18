@@ -1,0 +1,38 @@
+
+{% for branch in company_branches %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="card-title font-weight-bold text-info">{{ branch.branch_name | title }} Branch <small>Outbox SMS Messages</small></h4>
+            <p class="font-weight-bold">{{ branch.description }}</p>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title font-weight-bold text-info"><small>SMS Messages</small></h5>
+            <div class="table-responsive">
+                {% if branch.branch_id in branch_sms %}
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>To</th>
+                                <th>Message</th>
+                                <th>Date Sent</th>
+                                <th>Delivered</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sms in branch_sms[branch.branch_id] %}
+                                <tr>
+                                    <td>{{ sms.to_cell }}</td>
+                                    <td>{{ sms.message }}</td>
+                                    <td>{{ sms.date_time_sent }}</td>
+                                    <td>{{ 'Yes' if sms.is_delivered else 'No' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No sent SMS messages for this branch.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endfor %}

@@ -5,6 +5,7 @@ import resend
 
 from src.database.models.messaging import EmailCompose
 from src.config import config_instance
+from src.utils import create_id
 
 settings = config_instance().EMAIL_SETTINGS
 
@@ -13,6 +14,7 @@ def date_time() -> str:
 
 
 class EmailModel(BaseModel):
+    reference: str | None
     from_: str | None
     to_: str | None
     subject_: str
@@ -45,5 +47,5 @@ class SendMail:
         print(f"Params : {params}")
 
         response: dict[str, str] = self._resend.Emails.send(params=params)
-
+        email.reference = response.get('id', create_id())
         return response, email

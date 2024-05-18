@@ -24,7 +24,7 @@
                                     class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
                                     <li><a href="{{ url_for('messaging.get_topup') }}"><i class="ti-credit-card"></i> TopUps</a></li>
-{#                                    <li><a href="{{ url_for('messaging.get_inbox') }}"><i class="fa fa-inbox"></i> Inbox</a></li>#}
+
                                     <li><a href="{{ url_for('messaging.get_sent') }}"><i class="fa fa-send"></i> Sent</a></li>
                                     <li><a href="{{ url_for('messaging.get_compose') }}"><i class="fa fa-send"></i> Compose</a></li>
                                     <li><a href="{{ url_for('messaging.get_admin') }}"><i class="fa fa-cogs"></i> Settings & Stats</a></li>
@@ -44,7 +44,6 @@
                             <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
                                     class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
-{#                                    <li><a href="{{ url_for('messaging.get_employee_inbox') }}"><i class="fa fa-inbox"></i> Inbox</a></li>#}
                                     <li><a href="{{ url_for('messaging.get_employee_sent') }}"><i class="fa fa-send"></i> Sent</a></li>
                                     <li><a href="{{ url_for('messaging.get_employee_compose') }}"><i class="fa fa-send"></i> Compose</a></li>
                                 </ul>

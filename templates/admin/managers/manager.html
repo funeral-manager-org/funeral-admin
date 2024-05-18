@@ -52,16 +52,18 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li><strong>CK/Reg Number:</strong>  <span class="font-weight-bold text-info">{{ company.reg_ck }}</span></li>
-                                <li><strong>VAT Number:</strong> <span class="font-weight-bold text-info">{% if company.vat_number %} {{ company.vat_number }} {% else %} N/A {% endif %}</span></li>
-                                <li><strong>Company Name:</strong> <span class="font-weight-bold text-info">{{ company.company_name }}</span></li>
-                                <li><strong>Company Description:</strong> <span class="font-weight-bold text-info">{{ company.company_description }}</span></li>
-                                <li><strong>Company Slogan:</strong> <span class="font-weight-bold text-info">{{ company.company_slogan }}</span></li>
-                                <li><strong>Date Registered:</strong> <span class="font-weight-bold text-info">{{ company.date_registered }}</span></li>
-                                <li><strong>Total Employees:</strong> <span class="font-weight-bold text-info">{{ company.total_users }}</span></li>
-                                <li><strong>Total Clients:</strong> <span class="font-weight-bold text-info">{{ company.total_clients }}</span></li>
-                            </ul>
+                            <ol class="m-t-10 font-weight-bold col-lg-6 col-md-6">
+                                <li><strong>Company Name:</strong> <span class="font-weight-bold text-info pull-right">{{ company.company_name| title }}</span></li>
+                                <li><strong>Company Description:</strong> <span class="font-weight-bold text-info pull-right">{{ company.company_description }}</span></li>
+                                <li><strong>Company Slogan:</strong> <span class="font-weight-bold text-info pull-right">{{ company.company_slogan }}</span></li>
+                                <li> <hr> </li>
+                                <li><strong>CK/Reg Number:</strong>  <span class="font-weight-bold text-info pull-right">{{ company.reg_ck }}</span></li>
+                                <li><strong>VAT Number:</strong> <span class="font-weight-bold text-info pull-right">{% if company.vat_number %} {{ company.vat_number }} {% else %} N/A {% endif %}</span></li>
+                                <li> <hr> </li>
+                                <li><strong>Date Registered:</strong> <span class="font-weight-bold text-info pull-right">{{ company.date_registered| time }}</span></li>
+                                <li><strong>Total Employees:</strong> <span class="font-weight-bold text-info pull-right">{{ company.total_users }}</span></li>
+                                <li><strong>Total Clients:</strong> <span class="font-weight-bold text-info pull-right">{{ company.total_clients }}</span></li>
+                            </ol>
                         </div>
                     </div>
                 </div>

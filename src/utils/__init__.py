@@ -77,6 +77,7 @@ def format_payment_method(value):
         return "Unknown"
 
 
+
 def friendlytimestamp(value):
     # Convert the string timestamp to a datetime object
     timestamp_dt = datetime.strptime(value, '%Y-%m-%d %H:%M:%S.%f')

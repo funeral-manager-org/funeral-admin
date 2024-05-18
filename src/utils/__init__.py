@@ -80,11 +80,26 @@ def format_payment_method(value):
 
 def friendlytimestamp(value):
     # Convert the string timestamp to a datetime object
-    timestamp_dt = datetime.strptime(value, '%Y-%m-%d %H:%M:%S.%f')
+    formats = [
+        '%Y-%m-%d %H:%M:%S.%f',
+        '%Y-%m-%d %H:%M:%S',
+        '%Y-%m-%d'
+    ]
+
+    # Try to convert the string timestamp to a datetime object using different formats
+    timestamp_dt = None
+    for fmt in formats:
+        try:
+            timestamp_dt = datetime.strptime(value, fmt)
+            break
+        except ValueError:
+            continue
+
+    if not timestamp_dt:
+        raise ValueError(f"Time data '{value}' does not match any of the formats.")
 
     # Get the current date and time
     current_dt = datetime.now()
-
     # Calculate the difference between the timestamps
     time_difference = current_dt - timestamp_dt
 

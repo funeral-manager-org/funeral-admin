@@ -23,6 +23,35 @@ class NotificationsController(Controllers):
         self.company_controller: CompanyController | None = None
         self.loop = asyncio.get_event_loop()
 
+    @staticmethod
+    async def template_message(company_data, date_str, day_name, holder, policy_registration_data):
+        """
+            template message for payment reminder
+        :param company_data:
+        :param date_str:
+        :param day_name:
+        :param holder:
+        :param policy_registration_data:
+        :return:
+        """
+        _message = f"""
+                                {company_data.company_name}
+
+                                Premium Payment Reminder
+                                Hello {holder.full_names} {holder.surname}
+
+                                This is to remind you that your next premium payment date will be on 
+
+                                {day_name} {date_str}
+
+                                Please be sure to make payment on or before this date.
+
+                                Next Premium Amount : R {policy_registration_data.total_premiums}.00
+
+                                Thank You. 
+                                """
+        return _message
+
     # noinspection PyMethodOverriding
     def init_app(self, app: Flask, messaging_controller: MessagingController, company_controller: CompanyController):
         """
@@ -105,22 +134,11 @@ class NotificationsController(Controllers):
                             # send SMS Notification
                             day_name, date_str = policy_registration_data.return_next_payment_date()
                             if subscription.take_sms_credit():
-                                _message = f"""
-                                {company_data.company_name}
-                                
-                                Premium Payment Reminder
-                                Hello {holder.full_names} {holder.surname}
 
-                                This is to remind you that your next premium payment date will be on 
-                                
-                                {day_name} {date_str}
-                                
-                                Please be sure to make payment on or before this date.
-                                
-                                Next Premium Amount : R {policy_registration_data.total_premiums}.00
-                                
-                                Thank You. 
-                                """
+                                _message = await self.template_message(
+                                    company_data=company_data, date_str=date_str, day_name=day_name, holder=holder,
+                                    policy_registration_data=policy_registration_data)
+
                                 sms_message: SMSCompose = SMSCompose(message=_message,
                                                                      to_cell=contact_data.cell,
                                                                      to_branch=holder.branch_id,

@@ -88,7 +88,7 @@ class NotificationsController(Controllers):
         :param company_data:
         :return:
         """
-        self.logger.info(
+        self.logger.error(
             f"Subscription for company : {company_data.company_name} ID: {company_data.company_id} Has Expired")
 
         subject = "Funeral Manager - Subscription Expired"
@@ -104,6 +104,7 @@ class NotificationsController(Controllers):
         :param company_data:
         :return:
         """
+        self.logger.error(f"Company : {company_data.company_name} Not Subscribed")
         subject = "Funeral Manager - Subscription Not Active"
         context = dict(company_data=company_data)
         email_template = render_template('email_templates/subscription_not_active.html', **context)
@@ -169,7 +170,7 @@ class NotificationsController(Controllers):
             if subscription_orm:
                 subscription = Subscriptions(**subscription_orm.to_dict())
             else:
-                self.logger.info(f"Company Not Subscribed: {company_data.company_name}")
+                self.logger.error(f"Company Not Subscribed: {company_data.company_name}")
                 await self.send_notice_to_subscribe(company_data=company_data)
                 return False
 

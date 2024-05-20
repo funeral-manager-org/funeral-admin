@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template
 
 from src.database.models.users import User
-from src.emailer import EmailModel
-from src.main import send_mail
+from src.emailer import EmailModel, SendMail
+
 from src.controller import Controllers, error_handler
 from src.controller.auth import UserController
 from src.controller.company_controller import CompanyController
@@ -34,6 +34,7 @@ class NotificationsController(Controllers):
         self.messaging_controller: MessagingController | None = None
         self.company_controller: CompanyController | None = None
         self.user_controller: UserController | None = None
+        self.emailer: SendMail| None = None
         self.loop = asyncio.get_event_loop()
 
     @staticmethod
@@ -67,7 +68,7 @@ class NotificationsController(Controllers):
 
     # noinspection PyMethodOverriding
     def init_app(self, app: Flask, messaging_controller: MessagingController, company_controller: CompanyController,
-                 user_controller: UserController):
+                 user_controller: UserController, emailer: SendMail):
         """
         **init_app**
 
@@ -81,6 +82,7 @@ class NotificationsController(Controllers):
         self.messaging_controller = messaging_controller
         self.company_controller = company_controller
         self.user_controller = user_controller
+        self.emailer = emailer
         self.loop.create_task(self.daemon_runner())
 
     async def update_subscription(self, subscription: Subscriptions):
@@ -240,7 +242,7 @@ class NotificationsController(Controllers):
             if account.is_company_admin and account.account_verified:
                 template = await self.create_email_template(account=account)
                 email = EmailModel(to_=account.email, subject_="Funeral Manager - SMS Credit Exhausted", html_=template)
-                send_mail.send_mail_resend(email=email)
+                await self.emailer.send_mail_resend(email=email)
 
     async def execute_payment_reminders(self):
         """

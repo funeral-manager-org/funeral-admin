@@ -243,7 +243,7 @@ class SMSService(Controllers):
         :return:
         """
         with self.get_session() as session:
-            sms_settings_orm = session.get(SMSSettingsORM).filter_ny(company_id=company_id).first()
+            sms_settings_orm = session.query(SMSSettingsORM).filter_by(company_id=company_id).first()
             if isinstance(sms_settings_orm, SMSSettingsORM):
                 return SMSSettings(**sms_settings_orm.to_dict())
             return None

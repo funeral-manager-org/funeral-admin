@@ -22,5 +22,5 @@ if __name__ == '__main__':
     loop_threads = threading.Thread(target=run_loops, daemon=True)
 
     loop_threads.start()
-fdsdfsdfsdf
+
     app.run(debug=True, port=8000)

@@ -307,7 +307,7 @@ class MessagingController(Controllers):
         self.sms_service.init_app(app=app, settings=settings)
         self.whatsapp_service.init_app(app=app, settings=settings)
 
-        self.loop.create_task(self.start_app())
+        self.loop.create_task(self.messaging_daemon())
         self.logger.info("Loop Initialized")
 
     async def send_email(self, email: EmailCompose):
@@ -364,7 +364,7 @@ class MessagingController(Controllers):
         await self.whatsapp_service.send_whatsapp_message(recipient, message)
         self.whatsapp_queue.task_done()
 
-    async def start_app(self):
+    async def messaging_daemon(self):
         self.logger.info("Thread Started-------------------------------------------------")
         i = 0
         time_started = time.time()

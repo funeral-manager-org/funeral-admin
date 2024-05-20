@@ -1,15 +1,19 @@
 import asyncio
 from datetime import datetime, timedelta
 
-from flask import Flask
+from flask import Flask, render_template
 
-from src.database.models.contacts import Contacts
-from src.database.models.messaging import SMSCompose, RecipientTypes
+from database.models.users import User
+from emailer import EmailModel
+from main import send_mail
 from src.controller import Controllers, error_handler
+from src.controller.auth import UserController
 from src.controller.company_controller import CompanyController
 from src.controller.messaging_controller import MessagingController
 from src.database.models.companies import Company
-from src.database.models.covers import PolicyRegistrationData, ClientPersonalInformation
+from src.database.models.contacts import Contacts
+from src.database.models.covers import ClientPersonalInformation
+from src.database.models.messaging import SMSCompose, RecipientTypes
 from src.database.models.subscriptions import Subscriptions
 from src.database.sql.companies import CompanyORM
 from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM
@@ -29,6 +33,7 @@ class NotificationsController(Controllers):
         super().__init__()
         self.messaging_controller: MessagingController | None = None
         self.company_controller: CompanyController | None = None
+        self.user_controller: UserController | None = None
         self.loop = asyncio.get_event_loop()
 
     @staticmethod
@@ -61,10 +66,12 @@ class NotificationsController(Controllers):
         return _message
 
     # noinspection PyMethodOverriding
-    def init_app(self, app: Flask, messaging_controller: MessagingController, company_controller: CompanyController):
+    def init_app(self, app: Flask, messaging_controller: MessagingController, company_controller: CompanyController,
+                 user_controller: UserController):
         """
         **init_app**
 
+            :param user_controller:
             :param company_controller:
             :param messaging_controller:
             :param app:
@@ -73,6 +80,7 @@ class NotificationsController(Controllers):
         super().init_app(app=app)
         self.messaging_controller = messaging_controller
         self.company_controller = company_controller
+        self.user_controller = user_controller
         self.loop.create_task(self.daemon_runner())
 
     async def update_subscription(self, subscription: Subscriptions):
@@ -167,7 +175,7 @@ class NotificationsController(Controllers):
             await self.messaging_controller.send_sms(composed_sms=sms_message)
             self.logger.info("Sent payment reminder: {}".format(message))
         else:
-            self.handle_insufficient_sms_credit()
+            await self.handle_insufficient_sms_credit(company_data=company_data)
 
     @error_handler
     async def get_subscription_orm(self, company_id: str):
@@ -209,14 +217,30 @@ class NotificationsController(Controllers):
             recipient_type=RecipientTypes.CLIENTS.value
         )
 
-    def handle_insufficient_sms_credit(self):
+    async def create_email_template(self, account: User) -> str:
         """
-        Handle insufficient SMS credit scenario.
+        Will recreate an email template
+        :param account:
+        :return:
+        """
+        employee_record = await self.company_controller.get_employee_by_uid(uid=account.uid)
+        return render_template('email_templates/sms_credits_exhausted.html',
+                               employee_record=employee_record)
 
-        :return: None
+    async def handle_insufficient_sms_credit(self, company_data: Company):
         """
-        # TODO: Send notification to company manager that SMS credits are insufficient.
-        pass
+        **handle_insufficient_sms_credit**
+            Handle insufficient SMS credit scenario.
+
+            :return: None
+        """
+        company_accounts: list[User] = await self.user_controller.get_company_accounts(
+            company_id=company_data.company_id)
+        for account in company_accounts:
+            if account.is_company_admin and account.account_verified:
+                template = await self.create_email_template(account=account)
+                email = EmailModel(to_=account.email, subject_="Funeral Manager - SMS Credit Exhausted", html_=template)
+                send_mail.send_mail_resend(email=email)
 
     async def execute_payment_reminders(self):
         """

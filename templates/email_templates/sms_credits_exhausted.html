@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funeral Manager SMS Balance Exhausted</title>
+    <style>
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 20px;
+            padding: 20px;
+            max-width: 600px;
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+        }
+        .card-header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px 5px 0 0;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .card-title {
+            margin: 0;
+            font-size: 24px;
+        }
+        p {
+            margin: 10px 0;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Funeral Manager SMS Balance Exhausted</h3>
+        </div>
+        <div class="card-body">
+            <p>Hi {{ employee_record.full_names|title }},</p>
+            <p>We would like to inform you that your account SMS Credit has been exhausted.</p>
+            <p>In order for our system to continue sending payment reminders to your clients,</p>
+                <p>please consider purchasing an additional SMS Package.</p>
+
+            <p>Thank you,</p>
+            <p>Funeral Manager</p>
+            <p><a href="https://funeral-manager.org">https://funeral-manager.org</a></p>
+        </div>
+    </div>
+</body>
+</html>

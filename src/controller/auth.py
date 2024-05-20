@@ -332,3 +332,10 @@ class UserController(Controllers):
         random_chars = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
         # Convert all letters to uppercase
         return random_chars.lower()
+
+    @error_handler
+    async def get_company_accounts(self, company_id: str) -> list[User]:
+
+        with self.get_session() as session:
+            user_orm_list = session.query(UserORM).filter_by(company_id=company_id).all()
+            return [User(**user_orm.to_dict()) for user_orm in user_orm_list if isinstance(user_orm, UserORM)]

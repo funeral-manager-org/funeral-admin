@@ -331,9 +331,9 @@ class MessagingController(Controllers):
         return True
 
     async def process_email_queue(self):
-        self.logger.info("Processing Email")
+        # self.logger.info("Processing Email")
         if self.email_queue.empty():
-            self.logger.info("No Email Messages")
+            # self.logger.info("No Email Messages")
             return
 
         email: EmailCompose = await self.email_queue.get()
@@ -342,9 +342,9 @@ class MessagingController(Controllers):
 
     async def process_sms_queue(self):
 
-        self.logger.info("processing sms outgoing message queues")
+        # self.logger.info("processing sms outgoing message queues")
         if self.sms_queue.empty():
-            self.logger.info("no sms messages to send")
+            # self.logger.info("no sms messages to send")
             return
 
         composed_sms: SMSCompose = await self.sms_queue.get()
@@ -355,9 +355,9 @@ class MessagingController(Controllers):
 
     async def process_whatsapp_queue(self):
 
-        self.logger.info("processing whatsapp out going message queues")
+        # self.logger.info("processing whatsapp out going message queues")
         if self.whatsapp_queue.empty():
-            self.logger.info("No WhatsAPP Messages")
+            # self.logger.info("No WhatsAPP Messages")
             return
 
         recipient, message = await self.whatsapp_queue.get()

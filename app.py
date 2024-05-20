@@ -15,7 +15,7 @@ def run_loops():
     for loop in loops:
         loop.run_forever()
 
-
+...
 if __name__ == '__main__':
     # Run the Flask app
     # Start the message loop in a separate thread

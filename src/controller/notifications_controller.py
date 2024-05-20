@@ -3,9 +3,6 @@ from datetime import datetime, timedelta
 
 from flask import Flask, render_template
 
-from src.database.models.users import User
-from src.emailer import EmailModel, SendMail
-
 from src.controller import Controllers, error_handler
 from src.controller.auth import UserController
 from src.controller.company_controller import CompanyController
@@ -15,6 +12,7 @@ from src.database.models.contacts import Contacts
 from src.database.models.covers import ClientPersonalInformation
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose
 from src.database.models.subscriptions import Subscriptions
+from src.database.models.users import User
 from src.database.sql.companies import CompanyORM
 from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM
 
@@ -71,7 +69,6 @@ class NotificationsController(Controllers):
         """
         **init_app**
 
-            :param emailer:
             :param user_controller:
             :param company_controller:
             :param messaging_controller:

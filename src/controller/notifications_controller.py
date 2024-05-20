@@ -13,7 +13,7 @@ from src.controller.messaging_controller import MessagingController
 from src.database.models.companies import Company
 from src.database.models.contacts import Contacts
 from src.database.models.covers import ClientPersonalInformation
-from src.database.models.messaging import SMSCompose, RecipientTypes
+from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose
 from src.database.models.subscriptions import Subscriptions
 from src.database.sql.companies import CompanyORM
 from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM
@@ -34,7 +34,6 @@ class NotificationsController(Controllers):
         self.messaging_controller: MessagingController | None = None
         self.company_controller: CompanyController | None = None
         self.user_controller: UserController | None = None
-        self.emailer: SendMail | None = None
         self.loop = asyncio.get_event_loop()
 
     @staticmethod
@@ -68,7 +67,7 @@ class NotificationsController(Controllers):
 
     # noinspection PyMethodOverriding
     def init_app(self, app: Flask, messaging_controller: MessagingController, company_controller: CompanyController,
-                 user_controller: UserController, emailer: SendMail):
+                 user_controller: UserController):
         """
         **init_app**
 
@@ -83,7 +82,6 @@ class NotificationsController(Controllers):
         self.messaging_controller = messaging_controller
         self.company_controller = company_controller
         self.user_controller = user_controller
-        self.emailer = emailer
         self.loop.create_task(self.daemon_runner())
 
     async def subscription_has_expired(self, company_data: Company, subscription: Subscriptions):
@@ -93,20 +91,21 @@ class NotificationsController(Controllers):
         :param company_data:
         :return:
         """
-        branches_list = await self.company_controller.get_company_branches(company_id=company_data.company_id)
-        contact_cell = set()
-        for branch in branches_list:
-            contact = await self.company_controller.get_contact(contact_id=branch.contact_id)
-            if contact and contact.cell:
-                contact_cell.add(contact.cell)
+        self.logger.info(
+            f"Subscription for company : {company_data.company_name} ID: {company_data.company_id} Has Expired")
 
-        self.logger.info(f"Subscription for company : {company_data.company_name} ID: {company_data.company_id} Has Expired")
+        subject = "Funeral Manager - Subscription Expired"
         context = dict(subscription=subscription, company_data=company_data)
         email_template = render_template('email_templates/subscription_expired.html', **context)
-        subject = "Funeral Manager - Subscription Expired"
-        email_messages = [EmailModel(to_=cell, subject_=subject, html_=email_template) for cell in contact_cell]
-        for email in email_messages:
-            await self.emailer.send_mail_resend(email=email)
+
+        company_accounts: list[User] = await self.user_controller.get_company_accounts(company_id=company_data.company_id)
+        for account in company_accounts:
+            if account.is_company_admin and account.account_verified:
+                await self.messaging_controller.send_email(email=EmailCompose(to_email=account.email,
+                                                                              subject=subject,
+                                                                              message=email_template,
+                                                                              to_branch=account.branch_id,
+                                                                              recipient_type=RecipientTypes.EMPLOYEES.value))
 
     async def update_subscription(self, subscription: Subscriptions):
         """
@@ -267,11 +266,14 @@ class NotificationsController(Controllers):
         """
         company_accounts: list[User] = await self.user_controller.get_company_accounts(
             company_id=company_data.company_id)
+        subject = "Funeral Manager - SMS Credit Exhausted"
         for account in company_accounts:
             if account.is_company_admin and account.account_verified:
                 template = await self.create_email_template(account=account)
-                email = EmailModel(to_=account.email, subject_="Funeral Manager - SMS Credit Exhausted", html_=template)
-                await self.emailer.send_mail_resend(email=email)
+                email = EmailCompose(to_email=account.email, subject=subject, message=template,
+                                     to_branch=account.branch_id, recipient_type=RecipientTypes.EMPLOYEES.value)
+
+                await self.messaging_controller.send_email(email=email)
 
     async def do_send_lapsed_policy_notifications(self, company_data: Company):
         """
@@ -317,7 +319,7 @@ class NotificationsController(Controllers):
                         else:
                             insufficient_credit = True
                             break
-            # Update Subscription so that the credit used is substracted
+            # Update Subscription so that the credit used is subtracted
             await self.update_subscription(subscription=subscription)
 
             if insufficient_credit:
@@ -338,9 +340,13 @@ class NotificationsController(Controllers):
             sms_settings = await self.messaging_controller.sms_service.get_sms_settings(company_id=company.company_id)
             self.logger.info(f"Payment Reminders for Company : {company.company_name}")
             if sms_settings and sms_settings.enable_sms_notifications:
+
+                #     Payment Notifications Reminders
                 if sms_settings.upcoming_payments_notifications:
                     self.logger.info(f"Reminders Ok to send for Company : {company.company_name}")
                     await self.do_send_upcoming_payment_reminders(company_data=company)
+
+                #     Lapsed Policy Reminders
                 if sms_settings.policy_lapsed_notifications:
                     self.logger.info(
                         f"Will Attempt sending Policy Lapsed Notifications for Company: {company.company_name}")

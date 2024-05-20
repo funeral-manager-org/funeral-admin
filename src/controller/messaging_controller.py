@@ -286,6 +286,7 @@ class MessagingController(Controllers):
         self.whatsapp_queue = asyncio.Queue()
 
         self.loop = asyncio.get_event_loop()
+        self.burst_delay = 2
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -335,10 +336,11 @@ class MessagingController(Controllers):
         if self.email_queue.empty():
             # self.logger.info("No Email Messages")
             return
-
-        email: EmailCompose = await self.email_queue.get()
-        await self.email_service.send_email(email=email)
-        self.email_queue.task_done()
+        while not self.email_queue.empty():
+            email: EmailCompose = await self.email_queue.get()
+            await self.email_service.send_email(email=email)
+            await asyncio.sleep(delay=self.burst_delay)
+            self.email_queue.task_done()
 
     async def process_sms_queue(self):
 
@@ -347,11 +349,13 @@ class MessagingController(Controllers):
             # self.logger.info("no sms messages to send")
             return
 
-        composed_sms: SMSCompose = await self.sms_queue.get()
-        response = await self.sms_service.send_sms(composed_sms=composed_sms)
-        # response will carry a response message from the api provider at this point
-        # TO
-        self.sms_queue.task_done()
+        while not self.sms_queue.empty():
+            composed_sms: SMSCompose = await self.sms_queue.get()
+            response = await self.sms_service.send_sms(composed_sms=composed_sms)
+            await asyncio.sleep(delay=self.burst_delay)  # sleep for
+            # response will carry a response message from the api provider at this point
+            # TO
+            self.sms_queue.task_done()
 
     async def process_whatsapp_queue(self):
 
@@ -359,10 +363,13 @@ class MessagingController(Controllers):
         if self.whatsapp_queue.empty():
             # self.logger.info("No WhatsAPP Messages")
             return
+        while not self.whatsapp_queue.empty():
+            recipient, message = await self.whatsapp_queue.get()
 
-        recipient, message = await self.whatsapp_queue.get()
-        await self.whatsapp_service.send_whatsapp_message(recipient, message)
-        self.whatsapp_queue.task_done()
+            await self.whatsapp_service.send_whatsapp_message(recipient, message)
+            await asyncio.sleep(delay=self.burst_delay)
+
+            self.whatsapp_queue.task_done()
 
     async def messaging_daemon(self):
         self.logger.info("Thread Started-------------------------------------------------")

@@ -74,8 +74,8 @@ class PolicyRegistrationData(BaseModel):
         # Calculate the difference in days
         day_difference = (self.payment_day - today) % 31
 
-        # Check if the difference is within the 7-day window
-        return 0 <= day_difference <= 7
+        # Check if the difference is within the 5 to 7-day window
+        return 5 <= day_difference <= 7
 
     def return_next_payment_date(self):
         """

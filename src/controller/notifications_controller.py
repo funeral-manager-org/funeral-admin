@@ -5,7 +5,7 @@ from flask import Flask
 
 from src.database.models.contacts import Contacts
 from src.database.models.messaging import SMSCompose, RecipientTypes
-from src.controller import Controllers
+from src.controller import Controllers, error_handler
 from src.controller.company_controller import CompanyController
 from src.controller.messaging_controller import MessagingController
 from src.database.models.companies import Company
@@ -13,6 +13,14 @@ from src.database.models.covers import PolicyRegistrationData, ClientPersonalInf
 from src.database.models.subscriptions import Subscriptions
 from src.database.sql.companies import CompanyORM
 from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM
+
+
+class SubscriptionExpiredException(Exception):
+    """Exception raised when a subscription is expired."""
+
+    def __init__(self, message="Subscription is expired."):
+        self.message = message
+        super().__init__(self.message)
 
 
 class NotificationsController(Controllers):
@@ -102,69 +110,116 @@ class NotificationsController(Controllers):
 
     async def do_send_upcoming_payment_reminders(self, company_id: str):
         """
-            TODO -
-                check if there is enough sms credits
-                open the cover record and get client details
-                send sms reminder
+        Send upcoming payment reminders to clients.
 
-        :param company_id:
-        :return:
+        :param company_id: The ID of the company.
+        :return: None
         """
-        with self.get_session() as session:
-
-            company_data = await self.company_controller.get_company_details(company_id=company_id)
-            subscription_orm = session.query(SubscriptionsORM).filter_by(company_id=company_id).first()
-
+        try:
+            # Retrieve company details and subscription information
+            company_data: Company = await self.company_controller.get_company_details(company_id=company_id)
+            subscription_orm: SubscriptionsORM = await self.get_subscription_orm(company_id)
             subscription = Subscriptions(**subscription_orm.to_dict())
 
-            if not subscription.is_expired():
-                policy_holders: list[ClientPersonalInformation] = await self.company_controller.get_policy_holders(
-                    company_id=company_id)
-                subscription: Subscriptions = await self.add_package_to_subscription(subscription=subscription,
-                                                                                     company_id=company_id)
-                for holder in policy_holders:
-                    if holder.contact_id:
-                        policy_registration_data: PolicyRegistrationData = await self.company_controller.get_policy_with_policy_number(
-                            policy_number=holder.policy_number)
+            if subscription.is_expired():
+                raise SubscriptionExpiredException("Subscription is expired.")
 
-                        contact_data: Contacts = await self.company_controller.get_contact(
-                            contact_id=holder.contact_id)
+            # Retrieve policy holders for the company
+            policy_holders = await self.company_controller.get_policy_holders(company_id=company_id)
 
-                        if policy_registration_data.can_send_payment_reminder() and contact_data.cell:
-                            # send SMS Notification
-                            day_name, date_str = policy_registration_data.return_next_payment_date()
-                            if subscription.take_sms_credit():
+            # Add a package to the subscription if needed
+            subscription = await self.add_package_to_subscription(subscription=subscription, company_id=company_id)
 
-                                _message = await self.template_message(
-                                    company_data=company_data, date_str=date_str, day_name=day_name, holder=holder,
-                                    policy_registration_data=policy_registration_data)
+            for holder in policy_holders:
+                if holder.contact_id:
+                    await self.send_payment_reminder(holder, subscription, company_data)
 
-                                sms_message: SMSCompose = SMSCompose(message=_message,
-                                                                     to_cell=contact_data.cell,
-                                                                     to_branch=holder.branch_id,
-                                                                     recipient_type=RecipientTypes.CLIENTS.value)
+            await self.update_subscription(subscription=subscription)
+        except Exception as e:
+            self.logger.error(f"Error in sending payment reminders: {str(e)}")
 
-                                await self.messaging_controller.send_sms(composed_sms=sms_message)
-                                log_message = f"""
-                                    Sent a Payment Reminder to 
-                                        Client : {holder.full_names} {holder.surname}  
-                                        Cell: {contact_data.cell}
-                                        """
-                                self.logger.info(log_message)
-                            else:
-                                pass
-                                # TODO - send notification to company manager that the SMS credit has been used up
-
-                    await self.update_subscription(subscription=subscription)
-
-                else:
-                    pass
-                    #   TODO - send a notification to company_manager that the subscription has expired
-
-    async def send_payment_reminders(self):
+    async def send_payment_reminder(self, holder: ClientPersonalInformation, subscription: Subscriptions,
+                                    company_data: Company):
         """
-        TODO - this method needs to be scheduled to run once every week
+        Send a payment reminder to a client.
 
+        :param holder: The policy holder.
+        :param subscription: The subscription.
+        :param company_data: The company data.
+        :return: None
+        """
+        policy_registration_data = await self.company_controller.get_policy_with_policy_number(
+            policy_number=holder.policy_number)
+        contact_data = await self.company_controller.get_contact(contact_id=holder.contact_id)
+
+        if not (policy_registration_data.can_send_payment_reminder() and contact_data.cell):
+            return
+
+        if subscription.take_sms_credit():
+            message = await self.construct_message(company_data=company_data,
+                                                   holder=holder,
+                                                   policy_registration_data=policy_registration_data)
+
+            sms_message = self.create_sms_message(message=message,
+                                                  contact_data=contact_data,
+                                                  branch_id=holder.branch_id)
+
+            await self.messaging_controller.send_sms(composed_sms=sms_message)
+            self.logger.info("Sent payment reminder: {}".format(message))
+        else:
+            self.handle_insufficient_sms_credit()
+
+    @error_handler
+    async def get_subscription_orm(self, company_id: str):
+        """
+        Retrieve subscription ORM for a company.
+
+        :param company_id: The ID of the company.
+        :return: SubscriptionORM
+        """
+        with self.get_session() as session:
+            return session.query(SubscriptionsORM).filter_by(company_id=company_id).first()
+
+    async def construct_message(self, company_data, holder, policy_registration_data):
+        """
+        Construct the message for the payment reminder.
+
+        :param company_data: The company data.
+        :param holder: The policy holder.
+        :param policy_registration_data: The policy registration data.
+        :return: str
+        """
+        day_name, date_str = policy_registration_data.return_next_payment_date()
+        return await self.template_message(company_data, date_str, day_name, holder, policy_registration_data)
+
+    @staticmethod
+    def create_sms_message(message: str, contact_data: Contacts, branch_id: str):
+        """
+        Create an SMS message.
+
+        :param message: The message content.
+        :param contact_data: The contact data.
+        :param branch_id: The branch ID.
+        :return: SMSCompose
+        """
+        return SMSCompose(
+            message=message,
+            to_cell=contact_data.cell,
+            to_branch=branch_id,
+            recipient_type=RecipientTypes.CLIENTS.value
+        )
+
+    def handle_insufficient_sms_credit(self):
+        """
+        Handle insufficient SMS credit scenario.
+
+        :return: None
+        """
+        # TODO: Send notification to company manager that SMS credits are insufficient.
+        pass
+
+    async def execute_payment_reminders(self):
+        """
             This Method will go through all the covers and all clients
             then send payment reminders to every client
         :return:
@@ -182,29 +237,25 @@ class NotificationsController(Controllers):
 
     async def daemon_runner(self):
         """
-        Daemon runner that checks if the day has changed,
-        sleeps until the next midnight, and then executes send_payment_reminders.
+        Daemon runner that checks if it's time to execute send_payment_reminders,
+        sleeps until the next execution time, and then executes the reminders.
 
         :return: None
         """
-        one_hour = 1 * 60 * 60
-        last_day = datetime.today().date()
-        self.logger.info("started Notifications Daemon")
+        self.logger.info("Started Notifications Daemon")
 
         while True:
-            current_day = datetime.today().date()
-            self.logger.info(f"Current Day : {current_day}")
+            # Get the current time
+            now = datetime.now()
 
-            if current_day != last_day:
-                last_day = current_day
-                self.logger.info(f"Executing payment reminders on {last_day}")
-                await self.send_payment_reminders()
+            # Calculate the time until the next execution time (e.g., 9:00 AM)
+            next_execution_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
+            if now >= next_execution_time:
+                next_execution_time += timedelta(days=1)  # Move to the next day if already past execution time
+            sleep_duration = (next_execution_time - now).total_seconds()
 
-                # Calculate the time to sleep until the next midnight
-                now = datetime.now()
-                next_midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-                sleep_duration = (next_midnight - now).total_seconds()
-                await asyncio.sleep(sleep_duration)
-            else:
-                # Sleep for a short duration if it's still the same day
-                await asyncio.sleep(one_hour)  # Sleep for 1 hour
+            # Schedule the payment reminders task to run at the next execution time
+            await self.execute_payment_reminders()
+
+            # Sleep until the next execution time
+            await asyncio.sleep(sleep_duration)

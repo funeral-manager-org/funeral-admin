@@ -34,7 +34,7 @@ class NotificationsController(Controllers):
         self.messaging_controller: MessagingController | None = None
         self.company_controller: CompanyController | None = None
         self.user_controller: UserController | None = None
-        self.emailer: SendMail| None = None
+        self.emailer: SendMail | None = None
         self.loop = asyncio.get_event_loop()
 
     @staticmethod
@@ -72,6 +72,7 @@ class NotificationsController(Controllers):
         """
         **init_app**
 
+            :param emailer:
             :param user_controller:
             :param company_controller:
             :param messaging_controller:
@@ -84,6 +85,28 @@ class NotificationsController(Controllers):
         self.user_controller = user_controller
         self.emailer = emailer
         self.loop.create_task(self.daemon_runner())
+
+    async def subscription_has_expired(self, company_data: Company, subscription: Subscriptions):
+        """
+
+        :param subscription:
+        :param company_data:
+        :return:
+        """
+        branches_list = await self.company_controller.get_company_branches(company_id=company_data.company_id)
+        contact_cell = set()
+        for branch in branches_list:
+            contact = await self.company_controller.get_contact(contact_id=branch.contact_id)
+            if contact and contact.cell:
+                contact_cell.add(contact.cell)
+
+        self.logger.info(f"Subscription for company : {company_data.company_name} ID: {company_data.company_id} Has Expired")
+        context = dict(subscription=subscription, company_data=company_data)
+        email_template = render_template('email_templates/subscription_expired.html', **context)
+        subject = "Funeral Manager - Subscription Expired"
+        email_messages = [EmailModel(to_=cell, subject_=subject, html_=email_template) for cell in contact_cell]
+        for email in email_messages:
+            await self.emailer.send_mail_resend(email=email)
 
     async def update_subscription(self, subscription: Subscriptions):
         """
@@ -118,31 +141,35 @@ class NotificationsController(Controllers):
             session.commit()
             return subscription
 
-    async def do_send_upcoming_payment_reminders(self, company_id: str):
+    async def do_send_upcoming_payment_reminders(self, company_data: Company):
         """
         Send upcoming payment reminders to clients.
 
-        :param company_id: The ID of the company.
+        :param company_data:
         :return: None
         """
         try:
             # Retrieve company details and subscription information
-            company_data: Company = await self.company_controller.get_company_details(company_id=company_id)
-            subscription_orm: SubscriptionsORM = await self.get_subscription_orm(company_id)
+
+            subscription_orm: SubscriptionsORM = await self.get_subscription_orm(company_id=company_data.company_id)
             subscription = Subscriptions(**subscription_orm.to_dict())
 
             if subscription.is_expired():
-                raise SubscriptionExpiredException("Subscription is expired.")
+                await self.subscription_has_expired(company_data=company_data, subscription=subscription)
+                return None
 
             # Retrieve policy holders for the company
-            policy_holders = await self.company_controller.get_policy_holders(company_id=company_id)
+            policy_holders = await self.company_controller.get_policy_holders(company_id=company_data.company_id)
 
             # Add a package to the subscription if needed
-            subscription = await self.add_package_to_subscription(subscription=subscription, company_id=company_id)
+            subscription = await self.add_package_to_subscription(subscription=subscription,
+                                                                  company_id=company_data.company_id)
 
             for holder in policy_holders:
                 if holder.contact_id:
-                    await self.send_payment_reminder(holder, subscription, company_data)
+                    is_sent = await self.send_payment_reminder(holder, subscription, company_data)
+                    if not is_sent:
+                        break
 
             await self.update_subscription(subscription=subscription)
         except Exception as e:
@@ -176,8 +203,10 @@ class NotificationsController(Controllers):
 
             await self.messaging_controller.send_sms(composed_sms=sms_message)
             self.logger.info("Sent payment reminder: {}".format(message))
+            return True
         else:
             await self.handle_insufficient_sms_credit(company_data=company_data)
+            return False
 
     @error_handler
     async def get_subscription_orm(self, company_id: str):
@@ -244,7 +273,56 @@ class NotificationsController(Controllers):
                 email = EmailModel(to_=account.email, subject_="Funeral Manager - SMS Credit Exhausted", html_=template)
                 await self.emailer.send_mail_resend(email=email)
 
-    async def execute_payment_reminders(self):
+    async def do_send_lapsed_policy_notifications(self, company_data: Company):
+        """
+
+        :param company_data:
+        :return:
+        """
+        subscription_orm: SubscriptionsORM = await self.get_subscription_orm(company_id=company_data.company_id)
+        subscription = Subscriptions(**subscription_orm.to_dict())
+        insufficient_credit = False
+        if subscription.is_expired():
+            await self.subscription_has_expired(company_data=company_data, subscription=subscription)
+            return None
+
+        branches_list = await self.company_controller.get_company_branches(company_id=company_data.company_id)
+
+        for branch in branches_list:
+            branch_contact = await self.company_controller.get_contact(contact_id=branch.contact_id)
+            policy_holders = await self.company_controller.get_branch_policy_holders_with_lapsed_policies(
+                branch_id=branch.branch_id)
+            for policy_holder in policy_holders:
+                if policy_holder.contact_id:
+                    contact_detail = await self.company_controller.get_contact(contact_id=policy_holder.contact_id)
+                    if contact_detail and contact_detail.cell:
+                        sms = f"""
+                        Company Name: {company_data.company_name}
+                        
+                        We would like to inform you that your funeral policy
+                        with policy number : {policy_holder.policy_number} , has lapsed
+                        please make payment as soon as possible to avoid problems.
+                        
+                        for arrangements please contact us at  Cell : {branch_contact.cell}
+                        
+                        Thank You 
+                        {company_data.company_name}
+                        {branch_contact.cell}                        
+                        """
+                        if subscription.take_sms_credit():
+                            sms = self.create_sms_message(message=sms, contact_data=contact_detail,
+                                                          branch_id=branch.branch_id)
+                            await self.messaging_controller.send_sms(composed_sms=sms)
+
+                        else:
+                            insufficient_credit = True
+                            break
+
+            if insufficient_credit:
+                await self.handle_insufficient_sms_credit(company_data=company_data)
+                break
+
+    async def execute_reminders(self):
         """
             This Method will go through all the covers and all clients
             then send payment reminders to every client
@@ -257,9 +335,14 @@ class NotificationsController(Controllers):
         for company in companies_list:
             sms_settings = await self.messaging_controller.sms_service.get_sms_settings(company_id=company.company_id)
             self.logger.info(f"Payment Reminders for Company : {company.company_name}")
-            if sms_settings and sms_settings.enable_sms_notifications and sms_settings.upcoming_payments_notifications:
-                self.logger.info(f"Reminders Ok to send for Company : {company.company_name}")
-                await self.do_send_upcoming_payment_reminders(company_id=company.company_id)
+            if sms_settings and sms_settings.enable_sms_notifications:
+                if sms_settings.upcoming_payments_notifications:
+                    self.logger.info(f"Reminders Ok to send for Company : {company.company_name}")
+                    await self.do_send_upcoming_payment_reminders(company_data=company)
+                if sms_settings.policy_lapsed_notifications:
+                    self.logger.info(
+                        f"Will Attempt sending Policy Lapsed Notifications for Company: {company.company_name}")
+                    await self.do_send_lapsed_policy_notifications(company_data=company)
 
     async def daemon_runner(self):
         """
@@ -281,7 +364,7 @@ class NotificationsController(Controllers):
             sleep_duration = (next_execution_time - now).total_seconds()
 
             # Schedule the payment reminders task to run at the next execution time
-            await self.execute_payment_reminders()
+            await self.execute_reminders()
 
             # Sleep until the next execution time
             await asyncio.sleep(sleep_duration)

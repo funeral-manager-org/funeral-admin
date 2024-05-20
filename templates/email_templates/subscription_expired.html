@@ -1,0 +1,29 @@
+{% extends "email_templates/email_page.html" %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Funeral Manager Account Subscription Has Expired</h3>
+        </div>
+        <div class="card-body">
+
+            <p>Dear {{ company_data.company_name| title }},</p>
+            <p>We regret to inform you that your subscription to Funeral Manager has expired.</p>
+            <p>Your subscription details:</p>
+            <ul>
+                <li><strong>Plan Name:</strong> {{ subscription.plan_name| title }}</li>
+                <li><strong>Total SMS:</strong> {{ subscription.total_sms| number }}</li>
+                <li><strong>Total Emails:</strong> {{ subscription.total_emails| number }}</li>
+                <li><strong>Total Clients:</strong> {{ subscription.total_clients| number }}</li>
+                <li><strong>Date Subscribed:</strong> {{ subscription.date_subscribed| time }}</li>
+                <li><strong>Subscription Amount:</strong>R {{ subscription.subscription_amount| number }}.00</li>
+                <li><strong>Subscription Period:</strong> {{ subscription.subscription_period| number }} months</li>
+            </ul>
+            <p>Please consider renewing your subscription to continue enjoying the benefits of Funeral Manager.</p>
+            <p>Thank you for choosing Funeral Manager.</p>
+            <p>Sincerely,</p>
+            <p>The Funeral Manager Team</p>
+            <p><a class="text-info font-weight-bold" href="https://funeral-manager.org">Funeral-Manager.org</a> </p>
+        </div>
+    </div>
+{% endblock %}

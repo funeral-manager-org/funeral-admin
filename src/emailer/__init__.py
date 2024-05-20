@@ -9,6 +9,7 @@ from src.utils import create_id
 
 settings = config_instance().EMAIL_SETTINGS
 
+
 def date_time() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -43,7 +44,7 @@ class SendMail:
             email.date_time_sent = date_time()
             email.is_sent = True
         else:
-            params = {'from': self.from_, 'to': email.to_, 'subject':email.subject_, 'html': email.html_}
+            params = {'from': self.from_, 'to': email.to_, 'subject': email.subject_, 'html': email.html_}
         print(f"Params : {params}")
 
         response: dict[str, str] = self._resend.Emails.send(params=params)

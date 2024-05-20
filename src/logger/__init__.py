@@ -31,7 +31,7 @@ class AppLogger:
     def _add_sentry_handler(self):
         sentry_logging = LoggingIntegration(
             level=logging.INFO,  # Capture info and above as breadcrumbs
-            event_level=logging.INFO  # Send INFO as events
+            event_level=logging.ERROR  # Send ERROR as events
         )
         sentry_sdk.init(
             dsn=config_instance().SENTRY_DSN,

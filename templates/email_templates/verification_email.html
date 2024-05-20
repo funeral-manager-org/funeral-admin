@@ -1,11 +1,16 @@
+{% extends "email_templates/email_page.html" %}
+
+{% block content %}
+
+
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Funeral Admin Email Verification</h3>
+        <h3 class="card-title">Funeral Manager Email Verification</h3>
     </div>
     <div class="card-body">
         <p>
             Hello,<br><br>
-            Thank you for signing up Funeral Admin.<br>
+            Thank you for signing up Funeral Manager.<br>
             To complete your registration, please click on the link below to verify your email address:<br>
 
             Also Note that your Unique Password to Login is : {{ password }}<br>
@@ -19,5 +24,10 @@
         <p>
             If you are not an employee of an organization using our web application please ignore this email
         </p>
+
+        <h4>Thank you</h4>
+        <h4>Funeral Manager</h4>
+        <span class="font-weight-bold text-info"><a href="https://funeral-manager.org">funeral-manager.org</a> </span>
     </div>
 </div>
+{% endblock %}

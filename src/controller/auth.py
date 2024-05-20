@@ -142,30 +142,15 @@ class UserController(Controllers):
         :param email: The email address to send the password reset email to.
         :return: A dictionary containing the result of the email sending operation, or None if an error occurred.
         """
-        # TODO please complete the method to send the password reset email
-        password_reset_subject: str = "last-shelter.vip Password Reset Request"
+        password_reset_subject: str = "Password Reset Request - Funeral-Manager.org"
         # Assuming you have a function to generate the password reset link
-        password_reset_link: str = self.generate_password_reset_link(email)
+        context = dict(password_reset_link=self.generate_password_reset_link(email))
+        html = render_template('email_templates/password_reset.html', **context)
 
-        html = f"""
-        <html>
-        <body>
-            <h2>Funeral Manager - funeral.org</h2>
-            <p>Hello,</p>
-            <p>We received a password reset request for your https://funeral-manager.org account. 
-            Please click the link below to reset your password:</p>
-            <a href="{password_reset_link}">{password_reset_link}</a>
-            <p>If you didn't request a password reset, you can ignore this email.</p>
-            <p>Thank you,</p>
-            <p>The Rental Manager Team</p>
-        </body>
-        </html>
-        """
+        email_dict = dict(to_=email, subject_=password_reset_subject, html_=html)
+        await send_mail.send_mail_resend(email=EmailModel(**email_dict))
 
-        email_template = dict(to_=email, subject_=password_reset_subject, html_=html)
-        await send_mail.send_mail_resend(email=EmailModel(**email_template))
-
-        return email_template
+        return email_dict
 
     def generate_password_reset_link(self, email: str) -> str:
         """

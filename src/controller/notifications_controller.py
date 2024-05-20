@@ -317,6 +317,8 @@ class NotificationsController(Controllers):
                         else:
                             insufficient_credit = True
                             break
+            # Update Subscription so that the credit used is substracted
+            await self.update_subscription(subscription=subscription)
 
             if insufficient_credit:
                 await self.handle_insufficient_sms_credit(company_data=company_data)

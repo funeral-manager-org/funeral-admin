@@ -95,6 +95,7 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = "admin@last-shelter.vip"
     AUTH_CODE: str = "sdasdasdas"
     TWILIO: TwilioSettings =TwilioSettings()
+    SENTRY_DSN: str = Field(..., env="SENTRY_DSN")
 
 
 

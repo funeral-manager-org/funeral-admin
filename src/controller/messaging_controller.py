@@ -336,11 +336,13 @@ class MessagingController(Controllers):
         if self.email_queue.empty():
             # self.logger.info("No Email Messages")
             return
+        self.logger.info("Started Processing Email Queue")
         while not self.email_queue.empty():
             email: EmailCompose = await self.email_queue.get()
             await self.email_service.send_email(email=email)
             await asyncio.sleep(delay=self.burst_delay)
             self.email_queue.task_done()
+        self.logger.info("Processing Email Queue Done")
 
     async def process_sms_queue(self):
 
@@ -348,7 +350,7 @@ class MessagingController(Controllers):
         if self.sms_queue.empty():
             # self.logger.info("no sms messages to send")
             return
-
+        self.logger.info("started processing SMS Queue")
         while not self.sms_queue.empty():
             composed_sms: SMSCompose = await self.sms_queue.get()
             response = await self.sms_service.send_sms(composed_sms=composed_sms)
@@ -356,6 +358,7 @@ class MessagingController(Controllers):
             # response will carry a response message from the api provider at this point
             # TO
             self.sms_queue.task_done()
+        self.logger.info("Processing SMS Queue: Completed")
 
     async def process_whatsapp_queue(self):
 

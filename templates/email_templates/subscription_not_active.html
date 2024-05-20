@@ -1,0 +1,20 @@
+{% extends "email_templates/email_page.html" %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Funeral Manager Account Subscription Not Active</h3>
+        </div>
+        <div class="card-body">
+
+            <p>Dear {{ company_data.company_name| title }},</p>
+            <p>We regret to inform you that your subscription to Funeral Manager has not been activated.</p>
+            <p>Please subscribe and activate your subscription</p>
+
+            <p>Thank you for choosing Funeral Manager.</p>
+            <p>Sincerely,</p>
+            <p>The Funeral Manager Team</p>
+            <p><a class="text-info font-weight-bold" href="https://funeral-manager.org">Funeral-Manager.org</a> </p>
+        </div>
+    </div>
+{% endblock %}

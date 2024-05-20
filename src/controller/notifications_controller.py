@@ -95,7 +95,25 @@ class NotificationsController(Controllers):
         context = dict(subscription=subscription, company_data=company_data)
         email_template = render_template('email_templates/subscription_expired.html', **context)
 
-        company_accounts: list[User] = await self.user_controller.get_company_accounts(company_id=company_data.company_id)
+        await self.send_email_to_company_admins(company_data=company_data, email_template=email_template,
+                                                subject=subject)
+
+    async def send_notice_to_subscribe(self, company_data: Company):
+        """
+
+        :param company_data:
+        :return:
+        """
+        subject = "Funeral Manager - Subscription Not Active"
+        context = dict(company_data=company_data)
+        email_template = render_template('email_templates/subscription_not_active.html', **context)
+
+        await self.send_email_to_company_admins(company_data=company_data, email_template=email_template,
+                                                subject=subject)
+
+    async def send_email_to_company_admins(self, company_data, email_template, subject):
+        company_accounts: list[User] = await self.user_controller.get_company_accounts(
+            company_id=company_data.company_id)
         for account in company_accounts:
             if account.is_company_admin and account.account_verified:
                 await self.messaging_controller.send_email(email=EmailCompose(to_email=account.email,
@@ -148,11 +166,16 @@ class NotificationsController(Controllers):
             # Retrieve company details and subscription information
 
             subscription_orm: SubscriptionsORM = await self.get_subscription_orm(company_id=company_data.company_id)
-            subscription = Subscriptions(**subscription_orm.to_dict())
+            if subscription_orm:
+                subscription = Subscriptions(**subscription_orm.to_dict())
+            else:
+                self.logger.info(f"Company Not Subscribed: {company_data.company_name}")
+                await self.send_notice_to_subscribe(company_data=company_data)
+                return False
 
             if subscription.is_expired():
                 await self.subscription_has_expired(company_data=company_data, subscription=subscription)
-                return None
+                return False
 
             # Retrieve policy holders for the company
             policy_holders = await self.company_controller.get_policy_holders(company_id=company_data.company_id)
@@ -168,8 +191,10 @@ class NotificationsController(Controllers):
                         break
 
             await self.update_subscription(subscription=subscription)
+            return True
         except Exception as e:
             self.logger.error(f"Error in sending payment reminders: {str(e)}")
+            return False
 
     async def send_payment_reminder(self, holder: ClientPersonalInformation, subscription: Subscriptions,
                                     company_data: Company):
@@ -279,11 +304,16 @@ class NotificationsController(Controllers):
         :return:
         """
         subscription_orm: SubscriptionsORM = await self.get_subscription_orm(company_id=company_data.company_id)
+        if not subscription_orm:
+            await self.send_notice_to_subscribe(company_data=company_data)
+            return False
+
         subscription = Subscriptions(**subscription_orm.to_dict())
         insufficient_credit = False
+
         if subscription.is_expired():
             await self.subscription_has_expired(company_data=company_data, subscription=subscription)
-            return None
+            return False
 
         branches_list = await self.company_controller.get_company_branches(company_id=company_data.company_id)
 
@@ -322,6 +352,7 @@ class NotificationsController(Controllers):
             if insufficient_credit:
                 await self.handle_insufficient_sms_credit(company_data=company_data)
                 break
+        return True
 
     async def execute_reminders(self):
         """
@@ -336,15 +367,16 @@ class NotificationsController(Controllers):
         for company in companies_list:
             sms_settings = await self.messaging_controller.sms_service.get_sms_settings(company_id=company.company_id)
             self.logger.info(f"Payment Reminders for Company : {company.company_name}")
+            self.logger.info(f"SMS Settings : {sms_settings}")
             if sms_settings and sms_settings.enable_sms_notifications:
-
+                is_ok = False
                 #     Payment Notifications Reminders
                 if sms_settings.upcoming_payments_notifications:
                     self.logger.info(f"Reminders Ok to send for Company : {company.company_name}")
-                    await self.do_send_upcoming_payment_reminders(company_data=company)
+                    is_ok = await self.do_send_upcoming_payment_reminders(company_data=company)
 
-                #     Lapsed Policy Reminders
-                if sms_settings.policy_lapsed_notifications:
+                #  is_ok prevents lapsed notifications from running if payment reminders did not succeed Lapsed Policy Reminders
+                if is_ok and sms_settings.policy_lapsed_notifications:
                     self.logger.info(
                         f"Will Attempt sending Policy Lapsed Notifications for Company: {company.company_name}")
                     await self.do_send_lapsed_policy_notifications(company_data=company)

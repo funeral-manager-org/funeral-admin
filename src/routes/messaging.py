@@ -50,7 +50,7 @@ async def update_sms_settings(user: User):
         flash(message="please provide all required sms settings", category="danger")
         return redirect(url_for('messaging.get_admin'))
 
-    updated_settings = messaging_controller.sms_service.add_sms_settings(settings=settings)
+    updated_settings = await messaging_controller.sms_service.add_sms_settings(settings=settings)
 
     flash(message="Successfully updated SMS Settings", category="success")
     return redirect(url_for('messaging.get_admin'))

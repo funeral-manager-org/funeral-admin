@@ -366,6 +366,7 @@ class MessagingController(Controllers):
         if self.whatsapp_queue.empty():
             # self.logger.info("No WhatsAPP Messages")
             return
+
         while not self.whatsapp_queue.empty():
             recipient, message = await self.whatsapp_queue.get()
 

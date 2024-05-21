@@ -342,6 +342,7 @@ class CompanyController(Controllers):
             _id_number = employee.id_number
             employee_orm = session.query(EmployeeORM).filter_by(id_number=_id_number).first()
             if isinstance(employee_orm, EmployeeORM):
+
                 if employee.full_names:
                     employee_orm.full_names = employee.full_names
                 if employee.last_name:
@@ -400,22 +401,6 @@ class CompanyController(Controllers):
             clients_orm_list = session.query(ClientPersonalInformationORM).filter_by(branch_id=branch_id).all()
             return [ClientPersonalInformation(**client.to_dict()) for client in clients_orm_list]
 
-    # async def get_branch_policy_holders_with_lapsed_policies(self, branch_id: str) -> list[ClientPersonalInformation]:
-    #     """
-    #
-    #     :param branch_id:
-    #     :return:
-    #     """
-    #     with self.get_session() as session:
-    #         lapsed_policies = session.query(PolicyRegistrationDataORM).filter_by(policy_active=False).all()
-    #         policy_holders_policy_numbers = [policy.policy_number in for policy in lapsed_policies]
-    #         policy_holders = []
-    #         for policy_number in policy_holders_policy_numbers:
-    #             policy_holder = session.query(ClientPersonalInformationORM).filter_by(policy_number=policy_number).first()
-    #             policy_holders.append(ClientPersonalInformation(**policy_holder.to_dict()))
-    #
-    #         return policy_holders
-    #
 
     async def get_branch_policy_holders_with_lapsed_policies(self, branch_id: str) -> list[ClientPersonalInformation]:
         """

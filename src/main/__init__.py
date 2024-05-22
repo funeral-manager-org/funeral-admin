@@ -89,12 +89,12 @@ def create_app(config):
 
         # application engines
         messaging_controller.init_app(app=app, settings=config, emailer=send_mail)
-        notifications_controller.init_app(app=app,
-                                          messaging_controller=messaging_controller,
-                                          company_controller=company_controller,
-                                          user_controller=user_controller)
-        subscriptions_controller.init_app(app=app, messaging_controller=messaging_controller,
-                                          company_controller=company_controller,
-                                          user_controller=user_controller)
-
-    return app, chat_io, messaging_controller, notifications_controller, subscriptions_controller
+        # notifications_controller.init_app(app=app,
+        #                                   messaging_controller=messaging_controller,
+        #                                   company_controller=company_controller,
+        #                                   user_controller=user_controller)
+        # subscriptions_controller.init_app(app=app, messaging_controller=messaging_controller,
+        #                                   company_controller=company_controller,
+        #                                   user_controller=user_controller)
+    return app, chat_io, messaging_controller
+    # return app, chat_io, messaging_controller, notifications_controller, subscriptions_controller

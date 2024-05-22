@@ -1,6 +1,7 @@
 from datetime import date
 
 from sqlalchemy import Column, String, inspect, Integer, Boolean, Text, Date
+from sqlalchemy.orm import relationship
 
 from src.database.constants import ID_LEN, NAME_LEN
 from src.database.sql import Base, engine
@@ -17,6 +18,7 @@ class SubscriptionsORM(Base):
     date_subscribed: date = Column(Date)
     subscription_amount: int = Column(Integer)
     subscription_period: int = Column(Integer)
+    payments = relationship('PaymentORM', backref="subscription")
 
     @classmethod
     def create_if_not_table(cls):
@@ -53,7 +55,7 @@ class SubscriptionsORM(Base):
 
 
 class SMSPackageORM(Base):
-    __tablename__ = "sms_package"
+    __tablename__ = "sms_packages"
     package_id: str = Column(String(ID_LEN), primary_key=True)
     company_id: str = Column(String(ID_LEN))
     package_name: str = Column(String(NAME_LEN))
@@ -61,6 +63,7 @@ class SMSPackageORM(Base):
     is_paid: bool = Column(Boolean)
     is_added: bool = Column(Boolean)
     date_bought: str = Column(String(36))
+    payments = relationship('PaymentORM', backref="sms_packages")
 
     @classmethod
     def create_if_not_table(cls):

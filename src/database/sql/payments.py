@@ -8,11 +8,11 @@ Base = declarative_base()
 
 
 class PaymentORM(Base):
-    __tablename__ = 'payments'
+    __tablename__ = 'payments_orm'
 
     transaction_id = Column(String(ID_LEN), primary_key=True)
     subscription_id = Column(String(ID_LEN), ForeignKey('subscriptions.subscription_id'))
-    package_id = Column(String(ID_LEN), ForeignKey('sms_package.package_id'))
+    package_id = Column(String(ID_LEN), ForeignKey('sms_packages.package_id'))
     invoice_number = Column(Integer, Sequence('invoice_number_seq'), autoincrement=True)
     amount_paid = Column(Integer)
     date_paid = Column(Date)

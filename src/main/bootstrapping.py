@@ -11,14 +11,14 @@ def bootstrapper():
     from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
     from src.database.sql.covers import ClientPersonalInformationORM, ClaimsORM, PolicyRegistrationDataORM
     from src.database.sql.messaging import SMSComposeORM, SMSInboxORM, EmailComposeORM
-    from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM
     from src.database.sql.payments import PaymentORM
+    from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM
 
     classes_to_create = [UserORM, PayPalORM, CompanyORM, EmployeeORM, CompanyBranchesORM, CoverPlanDetailsORM,
                          BankAccountORM, AddressORM, PostalAddressORM, ContactsORM, ClientPersonalInformationORM,
                          ClaimsORM, PolicyRegistrationDataORM, SMSComposeORM, SMSInboxORM, EmailComposeORM,
                          SubscriptionsORM, SMSPackageORM, PaymentORM]
-
+    classes_to_create.reverse()
     for cls in classes_to_create:
         try:
             cls.create_if_not_table()
@@ -27,5 +27,5 @@ def bootstrapper():
 
         time.sleep(1)
 
-    SubscriptionsORM.payments = relationship('PaymentORM', backref="subscription")
-    SMSPackageORM.payments = relationship('PaymentORM', backref="sms_package")
+    # SubscriptionsORM.payments = relationship('PaymentORM', backref="subscription")
+    # SMSPackageORM.payments = relationship('PaymentORM', backref="sms_packages")

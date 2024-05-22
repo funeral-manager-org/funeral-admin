@@ -17,7 +17,7 @@ class ChatUserORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):
@@ -42,7 +42,7 @@ class ChatMessageORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):

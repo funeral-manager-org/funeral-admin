@@ -11,8 +11,7 @@ from src.database.models.messaging import RecipientTypes, EmailCompose
 from src.database.models.payments import Payment
 from src.database.models.subscriptions import Subscriptions
 from src.database.models.users import User
-from src.database.sql.payments import PaymentORM
-from src.database.sql.subscriptions import SubscriptionsORM
+from src.database.sql.subscriptions import SubscriptionsORM, PaymentORM
 
 
 class SubscriptionsController(Controllers):

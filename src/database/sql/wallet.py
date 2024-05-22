@@ -19,7 +19,7 @@ class WalletTransactionORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     def to_dict(self) -> dict:
         """
@@ -63,7 +63,7 @@ class WalletORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):
@@ -91,7 +91,7 @@ class WithdrawalRequestsORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):

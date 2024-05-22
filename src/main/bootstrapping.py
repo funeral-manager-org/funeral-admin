@@ -11,8 +11,7 @@ def bootstrapper():
     from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
     from src.database.sql.covers import ClientPersonalInformationORM, ClaimsORM, PolicyRegistrationDataORM
     from src.database.sql.messaging import SMSComposeORM, SMSInboxORM, EmailComposeORM
-    from src.database.sql.payments import PaymentORM
-    from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM
+    from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM, PaymentORM
 
     classes_to_create = [UserORM, PayPalORM, CompanyORM, EmployeeORM, CompanyBranchesORM, CoverPlanDetailsORM,
                          BankAccountORM, AddressORM, PostalAddressORM, ContactsORM, ClientPersonalInformationORM,
@@ -26,6 +25,3 @@ def bootstrapper():
             print(str(e))
 
         time.sleep(1)
-
-    # SubscriptionsORM.payments = relationship('PaymentORM', backref="subscription")
-    # SMSPackageORM.payments = relationship('PaymentORM', backref="sms_packages")

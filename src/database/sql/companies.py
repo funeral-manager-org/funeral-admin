@@ -21,7 +21,7 @@ class CompanyORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):
@@ -63,7 +63,7 @@ class CompanyBranchesORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):
@@ -111,7 +111,7 @@ class CoverPlanDetailsORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):
@@ -165,7 +165,7 @@ class EmployeeORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):
@@ -211,7 +211,7 @@ class SalaryORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):
@@ -243,7 +243,7 @@ class SalaryPaymentORM(Base):
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
-            Base.metadata.create_all(bind=engine)
+            cls.__table__.create(bind=engine)
 
     @classmethod
     def delete_table(cls):

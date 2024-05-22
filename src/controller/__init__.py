@@ -15,7 +15,7 @@ class Controllers:
         **Controllers**
             registers controllers
     """
-    session_limit: int = 5
+    session_limit: int = 25
 
     def __init__(self, session_maker=Session):
         self.sessions = [session_maker() for _ in range(self.session_limit)]
@@ -27,6 +27,7 @@ class Controllers:
         self.sessions = [Session() for _ in range(self.session_limit)]
         return self.get_session()
 
+    # noinspection PyMethodMayBeStatic
     def setup_error_handler(self, app: Flask):
         @app.errorhandler(404)
         def page_not_found(error):

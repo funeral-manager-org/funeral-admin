@@ -402,7 +402,10 @@ class NotificationsController(Controllers):
             sleep_duration = (next_execution_time - now).total_seconds()
 
             # Schedule the payment reminders task to run at the next execution time
-            await self.execute_reminders()
+            try:
+                await self.execute_reminders()
+            except Exception:
+                await asyncio.sleep(sleep_duration * 100)
 
             # Sleep until the next execution time
             await asyncio.sleep(sleep_duration)

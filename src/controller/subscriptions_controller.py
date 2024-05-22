@@ -150,5 +150,8 @@ class SubscriptionsController(Controllers):
 
         while True:
             self.logger.info("Subscriptions Daemon started")
-            await self.check_if_subscriptions_are_paid()
+            try:
+                await self.check_if_subscriptions_are_paid()
+            except Exception:
+                pass
             await asyncio.sleep(delay=seven_days)

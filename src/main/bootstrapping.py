@@ -1,3 +1,8 @@
+import time
+
+from sqlalchemy import exc
+from sqlalchemy.orm import relationship
+
 
 def bootstrapper():
     from src.database.sql.user import UserORM,  PayPalORM
@@ -7,11 +12,20 @@ def bootstrapper():
     from src.database.sql.covers import ClientPersonalInformationORM, ClaimsORM, PolicyRegistrationDataORM
     from src.database.sql.messaging import SMSComposeORM, SMSInboxORM, EmailComposeORM
     from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM
+    from src.database.sql.payments import PaymentORM
 
     classes_to_create = [UserORM, PayPalORM, CompanyORM, EmployeeORM, CompanyBranchesORM, CoverPlanDetailsORM,
                          BankAccountORM, AddressORM, PostalAddressORM, ContactsORM, ClientPersonalInformationORM,
                          ClaimsORM, PolicyRegistrationDataORM, SMSComposeORM, SMSInboxORM, EmailComposeORM,
-                         SubscriptionsORM, SMSPackageORM]
+                         SubscriptionsORM, SMSPackageORM, PaymentORM]
 
     for cls in classes_to_create:
-        cls.create_if_not_table()
+        try:
+            cls.create_if_not_table()
+        except Exception as e:
+            print(str(e))
+
+        time.sleep(1)
+
+    SubscriptionsORM.payments = relationship('PaymentORM', backref="subscription")
+    SMSPackageORM.payments = relationship('PaymentORM', backref="sms_package")

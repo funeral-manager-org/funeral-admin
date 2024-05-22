@@ -1,4 +1,6 @@
-from sqlalchemy import Column, String, inspect, Integer, Boolean, Text
+from datetime import date
+
+from sqlalchemy import Column, String, inspect, Integer, Boolean, Text, Date
 
 from src.database.constants import ID_LEN, NAME_LEN
 from src.database.sql import Base, engine
@@ -6,12 +8,13 @@ from src.database.sql import Base, engine
 
 class SubscriptionsORM(Base):
     __tablename__ = "subscriptions"
-    company_id: str = Column(String(ID_LEN), primary_key=True)
+    subscription_id: str = Column(String(ID_LEN), primary_key=True)
+    company_id: str = Column(String(ID_LEN), index=True)
     plan_name: str = Column(String(NAME_LEN))
     total_sms: int = Column(Integer)
     total_emails: int = Column(Integer)
     total_clients: int = Column(Integer)
-    date_subscribed: str = Column(Integer)
+    date_subscribed: date = Column(Date)
     subscription_amount: int = Column(Integer)
     subscription_period: int = Column(Integer)
 
@@ -29,8 +32,9 @@ class SubscriptionsORM(Base):
         """
         Convert the object to a dictionary representation.
         """
-        return {
+        _dict = {
             "company_id": self.company_id,
+            "subscription_id": self.subscription_id,
             "plan_name": self.plan_name,
             "total_sms": self.total_sms,
             "total_emails": self.total_emails,
@@ -39,6 +43,13 @@ class SubscriptionsORM(Base):
             "subscription_amount": self.subscription_amount,
             "subscription_period": self.subscription_period
         }
+        try:
+            if self.payments:
+                _dict.update(payments=self.payments)
+        except Exception:
+            pass
+
+        return _dict
 
 
 class SMSPackageORM(Base):
@@ -73,12 +84,21 @@ class SMSPackageORM(Base):
         """
         Convert the object to a dictionary representation.
         """
-        return {
+        _dict = {
             'package_id': self.package_id,
             'company_id': self.company_id,
             'package_name': self.package_name,
             'total_sms': self.total_sms,
             'is_paid': self.is_paid,
             'is_added': self.is_added,
-            'date_bought': self.date_bought
+            'date_bought': self.date_bought,
+
         }
+
+        try:
+            if self.payments:
+                _dict.update(payments=self.payments)
+        except Exception:
+            pass
+
+        return _dict

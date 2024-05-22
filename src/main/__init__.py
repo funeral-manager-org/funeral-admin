@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_socketio import SocketIO
+
+
 from src.controller.encryptor import Encryptor
 
 from src.emailer import SendMail
@@ -15,7 +17,7 @@ from src.controller.paypal_controller import PayPalController
 from src.controller.chat_controller import ChatController
 from src.controller.messaging_controller import MessagingController
 from src.controller.notifications_controller import NotificationsController
-
+from src.controller.subscriptions_controller import SubscriptionsController
 # from src.firewall import Firewall
 
 user_controller = UserController()
@@ -24,6 +26,7 @@ paypal_controller = PayPalController()
 chat_controller = ChatController()
 messaging_controller = MessagingController()
 notifications_controller = NotificationsController()
+subscriptions_controller = SubscriptionsController()
 
 chat_io = SocketIO()
 
@@ -90,5 +93,8 @@ def create_app(config):
                                           messaging_controller=messaging_controller,
                                           company_controller=company_controller,
                                           user_controller=user_controller)
+        subscriptions_controller.init_app(app=app, messaging_controller=messaging_controller,
+                                          company_controller=company_controller,
+                                          user_controller=user_controller)
 
-    return app, chat_io, messaging_controller, notifications_controller
+    return app, chat_io, messaging_controller, notifications_controller, subscriptions_controller

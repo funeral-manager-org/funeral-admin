@@ -3,6 +3,7 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from datetime import datetime
 
+from src.database.models.payments import Payment
 from src.utils import create_id
 
 
@@ -12,6 +13,7 @@ def date_time() -> str:
 
 class Subscriptions(BaseModel):
     company_id: str
+    subscription_id: str = Field(default_factory=create_id)
     plan_name: str
     total_sms: int
     total_emails: int
@@ -19,6 +21,7 @@ class Subscriptions(BaseModel):
     date_subscribed: str
     subscription_amount: int
     subscription_period: int
+    payments: list[Payment] = []
 
     def take_sms_credit(self):
         if self.total_sms:
@@ -43,8 +46,23 @@ class Subscriptions(BaseModel):
 
         return months_diff > self.subscription_period
 
+    def is_paid_for_current_month(self) -> bool:
+        """Checks if the subscription has been paid for the current month"""
+        current_date = datetime.now()
+        current_month = current_date.month
+        current_year = current_date.year
+
+        for payment in self.payments:
+            payment_date = payment.date_paid
+            if payment.is_successful and payment_date.month == current_month and payment_date.year == current_year:
+                return True
+
+        return False
+
 
 class SMSPackage(BaseModel):
+
+
     package_id: str = Field(default_factory=create_id)
     company_id: str
     package_name: str

@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field, validator, PositiveInt
+from sqlalchemy.orm import relationship
 
 from src.database.tools import create_transaction_id
 
@@ -14,6 +15,8 @@ class Payment(BaseModel):
     Represents a payment transaction.
    """
     transaction_id: str
+    subscription_id: str | None
+    package_id: str | None
     invoice_number: int
     amount_paid: PositiveInt
     date_paid: date

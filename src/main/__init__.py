@@ -75,7 +75,7 @@ def create_app(config):
 
     with app.app_context():
         from src.main.bootstrapping import bootstrapper
-        bootstrapper()
+        # bootstrapper()
         # firewall.init_app(app=app)
 
         _add_blue_prints(app)

@@ -23,6 +23,10 @@ class Subscriptions(BaseModel):
     subscription_period: int
     payments: list[Payment] = []
 
+    @property
+    def subscribed_date(self):
+        return datetime.strptime(self.date_subscribed, '%Y-%m-%d')
+
     def take_sms_credit(self):
         if self.total_sms:
             self.total_sms -= 1

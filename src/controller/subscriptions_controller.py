@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 
 from flask import Flask, render_template
 
@@ -142,6 +143,9 @@ class SubscriptionsController(Controllers):
 
     async def check_if_subscriptions_are_paid(self):
         """
+        **check_if_subscriptions_are_paid*8
+        this method looks up upaid subscriptions and then once it finds them it notifies the company admin
+        of this so payment can be made
             should check if
         :return:
         """
@@ -151,21 +155,45 @@ class SubscriptionsController(Controllers):
 
         await self.notify_managers_to_pay_their_subscriptions(un_paid_subs=un_paid_subscriptions)
 
+    async def remove_old_unpaid_subscriptions(self):
+        """
+        Removes unpaid subscriptions older than 30 days
+        """
+        subscriptions = await self.get_subscriptions()
+        self.logger.info(f"Checking for Unpaid Subscriptions: {subscriptions}")
+        un_paid_subscriptions: list[Subscriptions] = [sub for sub in subscriptions if not sub.is_paid_for_current_month()]
+
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+
+        for subscription in un_paid_subscriptions:
+            if subscription.subscribed_date < thirty_days_ago:
+                await self.remove_subscription(subscription)
+                self.logger.info(f"Removed unpaid subscription: {subscription}")
+
+    async def remove_subscription(self, subscription):
+        # Placeholder for the actual removal logic
+        with self.get_session() as session:
+            subscription_orm = session.query(SubscriptionsORM).filter_by(subscription_id=subscription.subscription_id).first()
+            if subscription_orm:
+                session.delete(subscription_orm)
+                session.commit()
+
     async def daemon_util(self):
         """
             **daemon_util**
-            runs continously to check if subscriptions are paid
+            runs continuously to check if subscriptions are paid
 
         :return:
         """
 
-        one_hour = 60 * 60 * 1
+        twelve_hours = 60 * 60 * 12
 
         while True:
             self.logger.info("Subscriptions Daemon started")
             try:
+                await self.remove_old_unpaid_subscriptions()
                 await self.check_if_subscriptions_are_paid()
             except Exception as e:
                 self.logger.error(f"Error : {str(e)}")
 
-            await asyncio.sleep(delay=one_hour)
+            await asyncio.sleep(delay=twelve_hours)

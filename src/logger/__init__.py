@@ -14,7 +14,7 @@ class AppLogger:
         self.logger.setLevel(log_level)
 
         self._add_stream_or_file_handler(is_file_logger)
-        # self._add_sentry_handler()
+        self._add_sentry_handler()
 
     def _add_stream_or_file_handler(self, is_file_logger: bool):
         if is_file_logger:
@@ -28,18 +28,18 @@ class AppLogger:
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
-
-    # def _add_sentry_handler(self):
-    #     sentry_logging = LoggingIntegration(
-    #         level=logging.INFO,  # Capture info and above as breadcrumbs
-    #         event_level=logging.ERROR  # Send ERROR as events
-    #     )
-    #     sentry_sdk.init(
-    #         dsn=config_instance().SENTRY_DSN,
-    #         traces_sample_rate=1.0,
-    #         profiles_sample_rate=1.0,
-    #         integrations=[sentry_logging]
-    #     )
+    @staticmethod
+    def _add_sentry_handler():
+        sentry_logging = LoggingIntegration(
+            level=logging.INFO,  # Capture info and above as breadcrumbs
+            event_level=logging.ERROR  # Send ERROR as events
+        )
+        sentry_sdk.init(
+            dsn=config_instance().SENTRY_DSN,
+            traces_sample_rate=1.0,
+            profiles_sample_rate=1.0,
+            integrations=[sentry_logging]
+        )
 
         # Sentry SDK does not use a traditional handler,
         # it's configured globally when initialized
@@ -54,8 +54,7 @@ def init_logger(name: str = "eod-stock-api"):
     :return: Logger instance.
     """
     is_development = socket.gethostname() == config_instance().DEVELOPMENT_SERVER_NAME
-    logger = AppLogger(name=name, is_file_logger=not is_development, log_level=logging.INFO).logger
-    return logger
+    return AppLogger(name=name, is_file_logger=not is_development, log_level=logging.INFO).logger
 
 
 # Example usage

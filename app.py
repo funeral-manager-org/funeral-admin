@@ -17,12 +17,12 @@ def run_loops():
     for loop in loops:
         loop.run_forever()
 
-
+asdasdasd
 if __name__ == '__main__':
     # Run the Flask app
     # Start the message loop in a separate thread
     loop_threads = threading.Thread(target=run_loops, daemon=True)
-
+asdasd
     loop_threads.start()
 
     app.run(debug=True, port=8000)

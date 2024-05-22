@@ -1,8 +1,5 @@
 import time
 
-from sqlalchemy import exc
-from sqlalchemy.orm import relationship
-
 
 def bootstrapper():
     from src.database.sql.user import UserORM,  PayPalORM

@@ -21,18 +21,23 @@ class SubscriptionsController(Controllers):
 
     def __init__(self):
         super().__init__()
-        self.company_controller: CompanyController| None = None
+        self.company_controller: CompanyController | None = None
         self.messaging_controller: MessagingController | None = None
         self.user_controller: UserController | None = None
         self.loop = asyncio.get_event_loop()
 
-    def init_app(self, app: Flask, company_controller: CompanyController, messaging_controller: MessagingController, user_controller: UserController):
+    # noinspection PyMethodOverriding
+    def init_app(self, app: Flask,
+                 company_controller: CompanyController,
+                 messaging_controller: MessagingController,
+                 user_controller: UserController):
         super().init_app(app=app)
         self.company_controller = company_controller
         self.messaging_controller = messaging_controller
         self.user_controller = user_controller
         self.loop.create_task(self.daemon_util())
         pass
+
     @error_handler
     async def add_update_company_subscription(self, subscription: Subscriptions) -> Subscriptions:
         """
@@ -83,11 +88,11 @@ class SubscriptionsController(Controllers):
         :return:
         """
         with self.get_session() as session:
-
             session.add(PaymentORM(**payment.dict()))
             session.commit(payment)
             return payment
 
+    # noinspection DuplicatedCode
     async def send_email_to_company_admins(self, company_data, email_template, subject):
         company_accounts: list[User] = await self.user_controller.get_company_accounts(
             company_id=company_data.company_id)
@@ -126,31 +131,41 @@ class SubscriptionsController(Controllers):
             company_data = await self.company_controller.get_company_details(company_id=subscription.company_id)
             await self.subscription_has_expired(company_data=company_data, subscription=subscription)
 
+    @error_handler
+    async def get_subscriptions(self) -> list[Subscriptions]:
+        """
+        :return:
+        """
+        with self.get_session() as session:
+            subscriptions_orm_list = session.query(SubscriptionsORM).all()
+            return [Subscriptions(**sub_orm.to_dict()) for sub_orm in subscriptions_orm_list]
+
     async def check_if_subscriptions_are_paid(self):
         """
             should check if
         :return:
         """
-        with self.get_session() as session:
-            subscriptions_orm_list = session.query(SubscriptionsORM).all()
-            subscriptions = [Subscriptions(**sub_orm.to_dict()) for sub_orm in subscriptions_orm_list]
-            un_paid_subscriptions = [sub for sub in subscriptions if not sub.is_paid_for_current_month()]
+        subscriptions = await self.get_subscriptions()
+        self.logger.info(f"Checking for Unpaid Subscription : {subscriptions}")
+        un_paid_subscriptions = [sub for sub in subscriptions if not sub.is_paid_for_current_month()]
 
-            await self.notify_managers_to_pay_their_subscriptions(un_paid_subs=un_paid_subscriptions)
+        await self.notify_managers_to_pay_their_subscriptions(un_paid_subs=un_paid_subscriptions)
 
     async def daemon_util(self):
         """
             **daemon_util**
+            runs continously to check if subscriptions are paid
 
         :return:
         """
 
-        seven_days = 60*60*24*7
+        one_hour = 60 * 60 * 1
 
         while True:
             self.logger.info("Subscriptions Daemon started")
             try:
                 await self.check_if_subscriptions_are_paid()
-            except Exception:
-                pass
-            await asyncio.sleep(delay=seven_days)
+            except Exception as e:
+                self.logger.error(f"Error : {str(e)}")
+
+            await asyncio.sleep(delay=one_hour)

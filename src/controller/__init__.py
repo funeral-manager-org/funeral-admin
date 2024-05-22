@@ -1,6 +1,6 @@
 import functools
 
-from flask import redirect, url_for, flash, Flask
+from flask import redirect, url_for, flash, Flask, render_template
 from pydantic import ValidationError
 from sqlalchemy.exc import OperationalError, ProgrammingError, IntegrityError
 
@@ -28,8 +28,15 @@ class Controllers:
         return self.get_session()
 
     def setup_error_handler(self, app: Flask):
-        # app.add_url_rule("")
-        pass
+        @app.errorhandler(404)
+        def page_not_found(error):
+            flash(message="we where unable to find the resource you where looking for", category="danger")
+            return render_template('index.html'), 404
+
+        @app.errorhandler(500)
+        def internal_server_error(error):
+            flash(message="Internal Server Error Please try again later", category="danger")
+            return render_template('index.html'), 500
 
     def init_app(self, app: Flask):
         """
@@ -51,6 +58,7 @@ class UnauthorizedError(Exception):
         self.description = description
         self.code = code
         super().__init__(self.description)
+        error_logger.error(self.description)
 
 
 def error_handler(view_func):

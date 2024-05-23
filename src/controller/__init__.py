@@ -31,11 +31,13 @@ class Controllers:
     def setup_error_handler(self, app: Flask):
         @app.errorhandler(404)
         def page_not_found(error):
+            self.logger.error(str(error))
             flash(message="we where unable to find the resource you where looking for", category="danger")
             return render_template('index.html'), 404
 
         @app.errorhandler(500)
         def internal_server_error(error):
+            self.logger.error(str(error))
             flash(message="Internal Server Error Please try again later", category="danger")
             return render_template('index.html'), 500
 

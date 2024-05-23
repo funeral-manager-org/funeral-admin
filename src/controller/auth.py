@@ -131,8 +131,11 @@ class UserController(Controllers):
 
         with self.get_session() as session:
             user_data: UserORM = session.query(UserORM).filter(UserORM.email == email.casefold()).first()
-
-            return User(**user_data.to_dict()) if user_data else None
+            user = User(**user_data.to_dict()) if user_data else None
+            if user:
+                self.logger.info(f"Found User by Email : {user}")
+            self.logger.error(f"User Not Found : {email}")
+            return user
 
     @error_handler
     async def send_password_reset(self, email: str) -> dict[str, str] | None:
@@ -148,8 +151,9 @@ class UserController(Controllers):
         html = render_template('email_templates/password_reset.html', **context)
 
         email_dict = dict(to_=email, subject_=password_reset_subject, html_=html)
-        await send_mail.send_mail_resend(email=EmailModel(**email_dict))
-
+        response, email = await send_mail.send_mail_resend(email=EmailModel(**email_dict))
+        self.logger.info(f"Password Reset Email Sent Response: {response}")
+        self.logger.info(f"Password Reset Email Sent Email: {email}")
         return email_dict
 
     def generate_password_reset_link(self, email: str) -> str:
@@ -182,6 +186,7 @@ class UserController(Controllers):
             new_user_dict = new_user.to_dict()
             session.commit()
             _user_data = User(**new_user_dict) if isinstance(new_user, UserORM) else None
+            self.logger.info(f"Created New User : {_user_data}")
             self.users[_user_data.uid] = _user_data
             return _user_data
 
@@ -198,15 +203,16 @@ class UserController(Controllers):
                     setattr(user_data, field, getattr(user, field))
 
             # Save the updated user_data back to the session
-            session.add(user_data)
+            # session.add(user_data)
             session.commit()
+            self.logger.info(f"User Updated : {user_data}")
             self.users[user_data.uid] = User(**user_data.to_dict())
             return user_data.to_dict()
 
     @error_handler
     async def login(self, email: str, password: str) -> User | None:
         with self.get_session() as session:
-            print(f"Email : {email}")
+            self.logger.info(f"Login User with Email : {email}")
             user_data: UserORM = session.query(UserORM).filter(UserORM.email == email).first()
             try:
                 if user_data:
@@ -215,7 +221,9 @@ class UserController(Controllers):
                     return None
             except ValidationError as e:
                 raise UnauthorizedError(description="Cannot Login User please check your login details")
-            return user if user.is_login(password=password) else None
+            is_login = user if user.is_login(password=password) else None
+            self.logger.info(f"User Login : {is_login}")
+            return is_login
 
     async def add_employee(self, user: User) -> User | None:
         """
@@ -239,12 +247,13 @@ class UserController(Controllers):
                 user_data.is_company_admin = user.is_company_admin
                 user_data.is_employee = user.is_employee
                 user_data.is_client = user.is_client
+                self.logger.info(f"When Adding New Employee a record was found then we updated: {user}")
 
             else:
                 # Create new user if user does not exist
                 new_user = UserORM(**user.dict(exclude_unset=True))  # Exclude unset fields
                 session.add(new_user)
-
+                self.logger.info(f"Created a New Employee : {user}")
             try:
                 session.commit()
                 return user
@@ -254,10 +263,11 @@ class UserController(Controllers):
                 return None
 
     @error_handler
-    async def send_verification_email(self, user: User, password: str) -> None:
+    async def send_verification_email(self, user: User, password: str) -> EmailModel:
         """
         Sends a verification email to the specified user.
 
+        :param password:
         :param user: The user to send the verification email to.
         """
         token = str(uuid.uuid4())  # Assuming you have a function to generate a verification token
@@ -271,7 +281,9 @@ class UserController(Controllers):
                          to_=user.email,
                          html_=email_html)
 
-        await send_mail.send_mail_resend(email=msg)
+        response, email = await send_mail.send_mail_resend(email=msg)
+        self.logger.info(f"Sent Account Verification Email : {email}")
+        return email
 
     @error_handler
     async def verify_email(self, email: str, token: str) -> bool:
@@ -298,14 +310,18 @@ class UserController(Controllers):
     async def get_all_accounts(self) -> list[User]:
         with self.get_session() as session:
             accounts_list = session.query(UserORM).all()
-            return [User(**account.to_dict()) for account in accounts_list if account]
+            accounts = [User(**account.to_dict()) for account in accounts_list if account]
+            self.logger.info(f"returning all accounts : {accounts}")
+            return accounts
 
     @error_handler
     async def get_account_by_uid(self, uid: str) -> User | None:
         with self.get_session() as session:
             account_orm = session.query(UserORM).filter(UserORM.uid == uid).first()
             if isinstance(account_orm, UserORM):
-                return User(**account_orm.to_dict())
+                account = User(**account_orm.to_dict())
+                self.logger.info(f"Found Account by Uid: {account}")
+                return account
             return None
 
     @staticmethod

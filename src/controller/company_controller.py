@@ -46,11 +46,13 @@ class CompanyController(Controllers):
             company_name = company.company_name.strip().lower()
             company_list = session.query(CompanyORM).filter_by(company_name=company_name).all()
             if company_list:
+                self.logger.warning(f"Company with a similar name exists: {company}")
                 return None
+
             company_orm = CompanyORM(**company.dict())
             session.add(company_orm)
             session.commit()
-
+            self.logger.info(f"company Created : {company}")
             return company
 
     @error_handler
@@ -58,7 +60,10 @@ class CompanyController(Controllers):
         with self.get_session() as session:
             company_orm = session.query(CompanyORM).filter_by(company_id=company_id).first()
             if isinstance(company_orm, CompanyORM):
-                return Company(**company_orm.to_dict())
+                company_detail = Company(**company_orm.to_dict())
+                self.logger.info(f"Found Company Details : {company_detail}")
+                return company_detail
+            self.logger.info(f"Company Not found: {company_id}")
             return None
 
     @error_handler
@@ -71,11 +76,15 @@ class CompanyController(Controllers):
 
         with self.get_session() as session:
             _branch_name = company_branch.branch_name.lower().strip()
+            self.logger.info(f"Adding company branch: {_branch_name}")
             company_branches_orm = session.query(CompanyBranchesORM).filter_by(
                 branch_name=_branch_name.casefold()).first()
             if isinstance(company_branches_orm, CompanyBranchesORM):
+                self.logger.warning(f"Company Branch Name Already Exists : {company_branch}")
                 return None
-            session.add(CompanyBranchesORM(**company_branch.dict()))
+            company_branch_orm = CompanyBranchesORM(**company_branch.dict())
+            self.logger.info(f"company branch added : {company_branch}")
+            session.add(company_branch_orm)
             session.commit()
             return company_branch
 
@@ -151,6 +160,7 @@ class CompanyController(Controllers):
         """
         return EmployeeRoles.get_all_roles()
 
+    # noinspection DuplicatedCode
     @error_handler
     async def add_update_address(self, address: Address) -> Address | None:
         """
@@ -188,6 +198,7 @@ class CompanyController(Controllers):
                 return Address(**branch_address.to_dict())
             return None
 
+    # noinspection DuplicatedCode
     @error_handler
     async def add_postal_address(self, postal_address: PostalAddress) -> PostalAddress | None:
         """
@@ -231,6 +242,7 @@ class CompanyController(Controllers):
                 return PostalAddress(**postal_address_orm.to_dict())
             return None
 
+    # noinspection DuplicatedCode
     @error_handler
     async def add_contacts(self, contact: Contacts) -> Contacts | None:
         """
@@ -281,6 +293,7 @@ class CompanyController(Controllers):
 
             return None
 
+    # noinspection DuplicatedCode
     @error_handler
     async def add_bank_account(self, bank_account: BankAccount) -> BankAccount | None:
         """
@@ -331,6 +344,7 @@ class CompanyController(Controllers):
                 return BankAccount(**bank_account_orm.to_dict())
             return None
 
+    # noinspection DuplicatedCode
     @error_handler
     async def add_employee(self, employee: EmployeeDetails) -> tuple[bool, EmployeeDetails | None]:
         """
@@ -401,7 +415,6 @@ class CompanyController(Controllers):
             clients_orm_list = session.query(ClientPersonalInformationORM).filter_by(branch_id=branch_id).all()
             return [ClientPersonalInformation(**client.to_dict()) for client in clients_orm_list]
 
-
     async def get_branch_policy_holders_with_lapsed_policies(self, branch_id: str) -> list[ClientPersonalInformation]:
         """
         Get policy holders with lapsed policies for a given branch.
@@ -440,7 +453,7 @@ class CompanyController(Controllers):
                 return EmployeeDetails(**employee_orm.to_dict())
             return None
 
-    async def get_employee_by_uid(self, uid: str) -> EmployeeDetails:
+    async def get_employee_by_uid(self, uid: str) -> EmployeeDetails | None:
         """
 
         :param uid:
@@ -451,7 +464,6 @@ class CompanyController(Controllers):
             if isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict())
             return None
-
 
     @error_handler
     async def get_company_employees(self, company_id: str) -> list[EmployeeDetails]:
@@ -599,6 +611,7 @@ class CompanyController(Controllers):
     async def get_payment_methods(self) -> list[str]:
         return PaymentMethods.get_payment_methods()
 
+    # noinspection DuplicatedCode
     @error_handler
     async def add_policy_holder(self, policy_holder: ClientPersonalInformation) -> ClientPersonalInformation:
         """

@@ -36,6 +36,7 @@ async def do_subscribe(user: User, option: str):
     failure_url: str = url_for('subscriptions.payment_failure')
 
     payment, is_created = await paypal_controller.create_payment(subscription_details=subscription_details,
+                                                                 user=user,
                                                                  success_url=success_url,
                                                                  failure_url=failure_url)
 

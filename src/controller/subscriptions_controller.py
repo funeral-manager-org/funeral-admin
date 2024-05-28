@@ -178,6 +178,11 @@ class SubscriptionsController(Controllers):
                 session.delete(subscription_orm)
                 session.commit()
 
+    async def get_company_subscription(self, company_id: str) -> Subscriptions:
+        with self.get_session() as session:
+            subscription_orm = session.query(SubscriptionsORM).filter_by(company_id=company_id).first()
+            return Subscriptions(**subscription_orm.to_dict())
+
     async def daemon_util(self):
         """
             **daemon_util**

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field, validator, PositiveInt
 from sqlalchemy.orm import relationship
 
 from src.database.tools import create_transaction_id
+from src.utils import create_id
 
 
 def create_date_paid() -> date:
@@ -14,12 +15,12 @@ class Payment(BaseModel):
     """
     Represents a payment transaction.
    """
-    transaction_id: str
+    transaction_id: str = Field(default_factory=create_id)
     subscription_id: str | None
     package_id: str | None
-    invoice_number: int
+    invoice_number: int | None
     amount_paid: PositiveInt
-    date_paid: date
+    date_paid: date = Field(default_factory=create_date_paid)
     payment_method: str
     is_successful: bool
     month: PositiveInt

@@ -56,6 +56,7 @@ class PayPalSettings(BaseSettings):
         env_file = '.env.development'
         env_file_encoding = 'utf-8'
 
+
 class BrainTreeSettings(BaseSettings):
     MERCHANT_ID: str = Field(..., env='BRAIN_TREE_MERCHANT_ID')
     PUBLIC_KEY: str = Field(..., env='BRAIN_TREE_PUBLIC_KEY')
@@ -94,10 +95,8 @@ class Settings(BaseSettings):
     PAYPAL_SETTINGS: PayPalSettings = PayPalSettings()
     ADMIN_EMAIL: str = "admin@last-shelter.vip"
     AUTH_CODE: str = "sdasdasdas"
-    TWILIO: TwilioSettings =TwilioSettings()
+    TWILIO: TwilioSettings = TwilioSettings()
     SENTRY_DSN: str = Field(..., env="SENTRY_DSN")
-
-
 
     class Config:
         env_file = '.env.development'

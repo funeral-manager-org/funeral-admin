@@ -1,8 +1,10 @@
 import hashlib
 import hmac
-
+import requests
 from flask import Flask, url_for
 from paypalrestsdk import configure, Api, Payment
+
+from src.database.models.subscriptions import SubscriptionDetails
 from src.config import Settings
 from src.controller import Controllers
 from src.database.models.users import User, PayPal
@@ -28,16 +30,36 @@ class PayPalController(Controllers):
         # })
         super().init_app(app=app)
 
-    async def create_payment(self, amount: int, user: User, paypal: PayPal,
+    def get_exchange_rate(self, from_currency: str, to_currency: str) -> float:
+        """
+        Get the exchange rate from one currency to another using an external API.
+
+        :param from_currency: The source currency code.
+        :param to_currency: The target currency code.
+        :return: The exchange rate from the source currency to the target currency.
+        """
+        api_url = f"https://api.exchangerate-api.com/v4/latest/{from_currency}"
+        response = requests.get(api_url)
+        data = response.json()
+        return data["rates"][to_currency]
+
+    def convert_to_usd(self, zar: int) -> float:
+        """
+        Convert ZAR (South African Rand) to USD (United States Dollar).
+
+        :param zar: The amount in ZAR.
+        :return: The equivalent amount in USD.
+        """
+        exchange_rate = self.get_exchange_rate("ZAR", "USD")
+        return zar * exchange_rate
+
+    async def create_payment(self, subscription_details: SubscriptionDetails, user: User,
                              success_url: str, failure_url: str) -> tuple[Payment, bool]:
         """
+        :param subscription_details:
         :param failure_url:
         :param success_url:
-        :param paypal:
         :param user:
-        :param amount: The amount of the payment
-        :param customer_info: Information about the customer
-        :param uid: User ID to be included
         :return: A tuple containing the Payment object and a boolean indicating success or failure
         """
 
@@ -53,7 +75,7 @@ class PayPalController(Controllers):
             },
             "transactions": [{
                 "amount": {
-                    "total": amount,
+                    "total": self.convert_to_usd(zar=subscription_details.subscription_amount),
                     "currency": "USD"
                 },
                 "description": f"Deposit to wallet : {user.uid}"

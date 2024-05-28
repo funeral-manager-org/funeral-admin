@@ -11,6 +11,59 @@ def date_time() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
+class PlanNames(Enum):
+    FREE = "free"
+    BUSINESS = "business"
+    PREMIUM = "PREMIUM"
+
+    def plan_names(self):
+        return [self.FREE.value, self.BUSINESS.value, self.PREMIUM.value]
+
+
+class SubscriptionDetails(BaseModel):
+    plan_name: str = ""
+    total_sms: int = Field(default=20)
+    total_email: int = Field(default=50)
+    total_clients: int = Field(default=250)
+    subscription_amount: int = Field(default=0)
+    subscription_period: int = Field(default=1)
+
+    def create_plan(self, plan_name: str):
+        self.plan_name = plan_name
+        if plan_name == PlanNames.FREE.value:
+            self.total_sms = 20
+            self.total_email = 50
+            self.total_clients = 250
+            self.subscription_amount = 0
+            self.subscription_period = 1
+            self.additional_clients = 10
+        elif plan_name == PlanNames.BUSINESS.value:
+            self.total_sms = 500
+            self.total_email = 500
+            self.total_clients = 500
+            self.subscription_amount = 1500
+            self.subscription_period = 1
+            self.additional_clients = 10
+        elif plan_name == PlanNames.PREMIUM.value:
+            self.total_sms = 2000
+            self.total_email = 1000
+            self.total_clients = 1000
+            self.subscription_amount = 3000
+            self.subscription_period = 1
+            self.additional_clients = 5
+        else:
+            self.total_sms = 20
+            self.total_email = 50
+            self.total_clients = 250
+            self.subscription_amount = 0
+            self.subscription_period = 1
+            self.additional_clients = 10
+
+        return self
+
+
+
+
 class Subscriptions(BaseModel):
     company_id: str
     subscription_id: str = Field(default_factory=create_id)
@@ -18,7 +71,7 @@ class Subscriptions(BaseModel):
     total_sms: int
     total_emails: int
     total_clients: int
-    date_subscribed: str
+    date_subscribed: str = Field(default_factory=date_time)
     subscription_amount: int
     subscription_period: int
     payments: list[Payment] = []
@@ -65,8 +118,6 @@ class Subscriptions(BaseModel):
 
 
 class SMSPackage(BaseModel):
-
-
     package_id: str = Field(default_factory=create_id)
     company_id: str
     package_name: str

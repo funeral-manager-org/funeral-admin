@@ -1,11 +1,8 @@
 from flask import Flask
 from flask_socketio import SocketIO
 
-
 from src.controller.encryptor import Encryptor
-
 from src.emailer import SendMail
-
 from src.utils import format_with_grouping, friendlytimestamp
 
 encryptor = Encryptor()
@@ -46,9 +43,10 @@ def _add_blue_prints(app: Flask):
     from src.routes.clients import clients_route
     from src.routes.policies import policy_route
     from src.routes.messaging import messaging_route
+    from src.routes.subscriptions import subscriptions_route
 
     routes = [auth_route, home_route, company_route, employee_route, covers_route, clients_route, policy_route,
-              messaging_route]
+              messaging_route, subscriptions_route]
 
     for route in routes:
         app.register_blueprint(route)

@@ -1,13 +1,8 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
-from pydantic import ValidationError
 
-from src.database.models.bank_accounts import BankAccount
-from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.authentication import login_required
-from src.database.models.companies import Company, CompanyBranches, EmployeeDetails, CoverPlanDetails
 from src.database.models.users import User
-from src.main import company_controller, user_controller, encryptor
-from src.utils import create_id
+from src.main import company_controller
 
 policy_route = Blueprint('policy', __name__)
 

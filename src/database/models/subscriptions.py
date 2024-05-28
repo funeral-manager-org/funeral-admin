@@ -16,8 +16,9 @@ class PlanNames(Enum):
     BUSINESS = "business"
     PREMIUM = "PREMIUM"
 
-    def plan_names(self):
-        return [self.FREE.value, self.BUSINESS.value, self.PREMIUM.value]
+    @classmethod
+    def plan_names(cls):
+        return [cls.FREE.value, cls.BUSINESS.value, cls.PREMIUM.value]
 
 
 class SubscriptionDetails(BaseModel):

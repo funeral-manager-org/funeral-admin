@@ -28,6 +28,7 @@ class SubscriptionDetails(BaseModel):
     total_clients: int = Field(default=250)
     subscription_amount: int = Field(default=0)
     subscription_period: int = Field(default=1)
+    additional_clients: int = Field(default=0)
 
     def create_plan(self, plan_name: str):
         self.plan_name = plan_name

@@ -12,8 +12,8 @@ def date_time() -> str:
 
 
 class PlanNames(Enum):
-    FREE = "free"
-    BUSINESS = "business"
+    FREE = "FREE"
+    BUSINESS = "BUSINESS"
     PREMIUM = "PREMIUM"
 
     @classmethod

@@ -20,7 +20,7 @@
                         <li class="font-weight-bold text-info">Cancel anytime</li>
                         <li class="font-weight-bold text-success">If Not cancelled the plan will be converted to a Monthly Subscription</li>
                     </ul>
-                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="free") }}">
+                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="FREE") }}">
 
                         <button type="submit" class="btn btn-lg btn-block btn-outline-primary">
                             <i class="fa fa-credit-card"> </i>
@@ -45,7 +45,7 @@
                         <li class="font-weight-bold text-info">Upto 500 Clients there after ZAR 10.00 per client</li>
                         <li class="font-weight-bold text-info">24/7 priority customer support</li>
                     </ul>
-                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="business") }}">
+                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="BUSINESS") }}">
                         <button type="submit" class="btn btn-lg btn-block btn-primary">
                             <i class="fa fa-credit-card-alt"> </i>
                             Subscribe
@@ -67,7 +67,7 @@
                         <li class="font-weight-bold text-info">Upto 1000 Clients or Covers there after ZAR 5.00 per client</li>
                         <li class="font-weight-bold text-info">24/7 priority customer support</li>
                     </ul>
-                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="premium") }}">
+                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="PREMIUM") }}">
 
                         <button type="submit" class="btn btn-lg btn-block btn-primary">
                             <i class="fa fa-credit-card-alt"> </i>

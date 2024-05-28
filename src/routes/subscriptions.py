@@ -26,7 +26,7 @@ async def do_subscribe(user: User, option: str):
 
     if option not in PlanNames.plan_names():
         flash(message="Please select a valid subscription plan", category="danger")
-        return redirect('company.get_admin')
+        return redirect(url_for('company.get_admin'))
 
     company_detail = await company_controller.get_company_details(company_id=user.company_id)
 

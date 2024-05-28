@@ -2,6 +2,7 @@ import json
 
 from flask import Blueprint, url_for, flash, redirect, request
 
+from src.database.models.companies import Company
 from src.database.models.payments import Payment
 from src.authentication import login_required
 from src.database.models.subscriptions import PlanNames, SubscriptionDetails, Subscriptions
@@ -28,7 +29,7 @@ async def do_subscribe(user: User, option: str):
         flash(message="Please select a valid subscription plan", category="danger")
         return redirect(url_for('company.get_admin'))
 
-    company_detail = await company_controller.get_company_details(company_id=user.company_id)
+    company_detail: Company = await company_controller.get_company_details(company_id=user.company_id)
 
     subscription_details: SubscriptionDetails = SubscriptionDetails().create_plan(plan_name=option)
 

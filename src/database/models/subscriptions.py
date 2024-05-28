@@ -62,8 +62,6 @@ class SubscriptionDetails(BaseModel):
         return self
 
 
-
-
 class Subscriptions(BaseModel):
     company_id: str
     subscription_id: str = Field(default_factory=create_id)

@@ -24,7 +24,7 @@ class PlanNames(Enum):
 class SubscriptionDetails(BaseModel):
     plan_name: str = ""
     total_sms: int = Field(default=20)
-    total_email: int = Field(default=50)
+    total_emails: int = Field(default=50)
     total_clients: int = Field(default=250)
     subscription_amount: int = Field(default=0)
     subscription_period: int = Field(default=1)
@@ -34,28 +34,28 @@ class SubscriptionDetails(BaseModel):
         self.plan_name = plan_name
         if plan_name == PlanNames.FREE.value:
             self.total_sms = 20
-            self.total_email = 50
+            self.total_emails = 50
             self.total_clients = 250
             self.subscription_amount = 0
             self.subscription_period = 1
             self.additional_clients = 10
         elif plan_name == PlanNames.BUSINESS.value:
             self.total_sms = 500
-            self.total_email = 500
+            self.total_emails = 500
             self.total_clients = 500
             self.subscription_amount = 1500
             self.subscription_period = 1
             self.additional_clients = 10
         elif plan_name == PlanNames.PREMIUM.value:
             self.total_sms = 2000
-            self.total_email = 1000
+            self.total_emails = 1000
             self.total_clients = 1000
             self.subscription_amount = 3000
             self.subscription_period = 1
             self.additional_clients = 5
         else:
             self.total_sms = 20
-            self.total_email = 50
+            self.total_emails = 50
             self.total_clients = 250
             self.subscription_amount = 0
             self.subscription_period = 1

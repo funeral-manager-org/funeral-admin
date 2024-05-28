@@ -32,8 +32,8 @@ async def do_subscribe(user: User, option: str):
 
     subscription_details: SubscriptionDetails = SubscriptionDetails().create_plan(plan_name=option)
 
-    success_url: str = url_for('subscriptions.get_success_url')
-    failure_url: str = url_for('subscriptions.get_failure_url')
+    success_url: str = url_for('subscriptions.payment_successful')
+    failure_url: str = url_for('subscriptions.payment_failure')
 
     payment, is_created = await paypal_controller.create_payment(subscription_details=subscription_details,
                                                                  success_url=success_url,
@@ -97,4 +97,5 @@ async def payment_successful(user: User):
 @subscriptions_route.get('/subscriptions/payment/failure')
 @login_required
 async def payment_failure():
-    pass
+    flash(message=f"Payment was not successful please try again later", category="danger")
+    return redirect(url_for('company.get_admin'))

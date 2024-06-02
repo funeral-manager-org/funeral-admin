@@ -78,7 +78,15 @@ class Subscriptions(BaseModel):
 
     @property
     def subscribed_date(self):
-        return datetime.strptime(self.date_subscribed, '%Y-%m-%d')
+        try:
+            if self.date_subscribed:
+                return datetime.strptime(self.date_subscribed, '%Y-%m-%d')
+            else:
+                self.date_subscribed = date_time()
+                return datetime.strptime(self.date_subscribed, '%Y-%m-%d')
+        except ValueError:
+            # Handle error, possibly log it and return None or a default datetime
+            return None
 
     def take_sms_credit(self):
         if self.total_sms:

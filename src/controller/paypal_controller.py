@@ -1,13 +1,14 @@
 import hashlib
 import hmac
-import requests
-from flask import Flask, url_for
-from paypalrestsdk import configure, Api, Payment
 
-from src.database.models.subscriptions import SubscriptionDetails
+import requests
+from flask import Flask
+from paypalrestsdk import configure, Payment
+
 from src.config import Settings
 from src.controller import Controllers
-from src.database.models.users import User, PayPal
+from src.database.models.subscriptions import SubscriptionDetails
+from src.database.models.users import User
 
 
 class PayPalController(Controllers):
@@ -43,7 +44,7 @@ class PayPalController(Controllers):
         data = response.json()
         return data["rates"][to_currency]
 
-    def convert_to_usd(self, zar: int) -> float:
+    def convert_to_usd(self, zar: int) -> int:
         """
         Convert ZAR (South African Rand) to USD (United States Dollar).
 
@@ -51,7 +52,9 @@ class PayPalController(Controllers):
         :return: The equivalent amount in USD.
         """
         exchange_rate = self.get_exchange_rate("ZAR", "USD")
-        return zar * exchange_rate
+        self.logger.info(f"EXCHANGE RATE : {exchange_rate}")
+
+        return int(round(zar * exchange_rate))
 
     async def create_payment(self, subscription_details: SubscriptionDetails, user: User,
                              success_url: str, failure_url: str) -> tuple[Payment, bool]:
@@ -62,7 +65,8 @@ class PayPalController(Controllers):
         :param user:
         :return: A tuple containing the Payment object and a boolean indicating success or failure
         """
-
+        total_amount = self.convert_to_usd(zar=subscription_details.subscription_amount)
+        self.logger.info(f"Total Amount: {str(total_amount)}")
         # Include customer information and UID
         payment = Payment({
             "intent": "sale",
@@ -75,10 +79,10 @@ class PayPalController(Controllers):
             },
             "transactions": [{
                 "amount": {
-                    "total": self.convert_to_usd(zar=subscription_details.subscription_amount),
+                    "total": total_amount,
                     "currency": "USD"
                 },
-                "description": f"Deposit to wallet : {user.uid}"
+                "description": f"Funeral-Manager.org,  {subscription_details.plan_name} Subscription"
             }],
         })
 
@@ -87,6 +91,7 @@ class PayPalController(Controllers):
     async def verify_signature(self, payload: str, signature: str) -> bool:
         """
 
+        :param payload:
         :param signature:
         :return:
         """

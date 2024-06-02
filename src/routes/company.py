@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
+from src.logger import init_logger
 from src.database.models.bank_accounts import BankAccount
 from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.authentication import login_required
@@ -10,6 +11,7 @@ from src.main import company_controller, user_controller, encryptor
 from src.utils import create_id
 
 company_route = Blueprint('company', __name__)
+error_logger = init_logger('company_logger')
 
 
 @company_route.get('/admin')

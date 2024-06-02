@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
 from asyncio import gather
+
+from src.logger import init_logger
 from src.authentication import login_required
 from src.database.models.bank_accounts import BankAccount
 from src.database.models.contacts import Address, PostalAddress, Contacts
@@ -9,6 +11,7 @@ from src.database.models.users import User
 from src.main import company_controller
 
 clients_route = Blueprint('clients', __name__)
+error_logger = init_logger('clients')
 
 
 @clients_route.get('/admin/employees/client/<string:uid>')
@@ -84,48 +87,6 @@ async def get_clients(user: User):
     return render_template('admin/clients/clients.html', **context)
 
 
-#
-# @clients_route.get('/admin/employees/client/<string:uid>')
-# @login_required
-# async def get_client(user: User, uid: str):
-#     """
-#
-#     :param user:
-#     :param uid:
-#     :return:
-#     """
-#     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
-#     policy_holder = await company_controller.get_policy_holder(uid=uid)
-#     beneficiaries = await company_controller.get_beneficiaries(policy_number=policy_holder.policy_number)
-#
-#     plan_covers = await company_controller.get_company_covers(company_id=user.company_id)
-#     countries = await company_controller.get_countries()
-#     policy_data = await company_controller.get_policy_data(uid=policy_holder.uid)
-#
-#     payment_methods = await company_controller.get_payment_methods()
-#
-#     context = dict(user=user, company_branches=company_branches, plan_covers=plan_covers,
-#                    policy_holder=policy_holder, policy_data=policy_data, countries=countries,
-#                    payment_methods=payment_methods, beneficiaries=beneficiaries)
-#
-#     if policy_holder.bank_account_id:
-#         bank_account = await company_controller.get_bank_account(bank_account_id=policy_holder.bank_account_id)
-#         context.update(bank_account=bank_account)
-#
-#     if policy_holder.address_id:
-#         address = await company_controller.get_address(address_id=policy_holder.address_id)
-#         context.update(address=address)
-#
-#     if policy_holder.postal_id:
-#         postal_address = await  company_controller.get_postal_address(postal_id=policy_holder.postal_id)
-#         context.update(postal_address=postal_address)
-#
-#     if policy_holder.contact_id:
-#         contact = await  company_controller.get_contact(contact_id=policy_holder.contact_id)
-#         context.update(contact=contact)
-#
-#     return render_template('admin/clients/client_editor.html', **context)
-
 
 @clients_route.post('/admin/employees/clients/new-clients')
 @login_required
@@ -137,10 +98,9 @@ async def add_client(user: User):
     """
     try:
         policy_holder: ClientPersonalInformation = ClientPersonalInformation(**request.form)
-        print(policy_holder)
         policy_holder.insured_party = str(InsuredParty.POLICY_HOLDER.value)
     except ValidationError as e:
-        print(str(e))
+        error_logger.error(str(e))
         flash(message="Unable to create or update client please provide all required details", category="danger")
         return redirect(url_for('clients.get_clients'))
 
@@ -176,11 +136,9 @@ async def edit_policy_details(user: User):
         print("inside editor")
 
         policy_data = PolicyRegistrationData(**request.form)
-        print("Will print policy data")
-        # print(policy_data)
         uid = policy_data.uid
     except ValidationError as e:
-        print(str(e))
+        error_logger.error(str(e))
         flash(message="there was an error trying to edit policy data", category="danger")
         return redirect(url_for("clients.get_clients"))
 
@@ -203,10 +161,9 @@ async def add_beneficiary_dependent(user: User, policy_number: str):
     try:
         policy_data = await company_controller.get_policy_with_policy_number(policy_number=policy_number)
         beneficiary_data = ClientPersonalInformation(**request.form)
-        print(beneficiary_data)
 
     except ValidationError as e:
-        print(str(e))
+        error_logger.error(str(e))
         flash(message="Error adding beneficiary", category="danger")
         return redirect(url_for('clients.get_clients'))
 
@@ -227,7 +184,7 @@ async def add_bank_account(user: User, uid: str):
     try:
         client_bank_account = BankAccount(**request.form)
     except ValidationError as e:
-        print(str(e))
+        error_logger.error(str(e))
         flash(message="Error adding Bank Account please provide all details", category="danger")
         return url_for('clients.get_client', uid=uid)
 
@@ -256,9 +213,10 @@ async def add_address(user: User, uid: str):
     try:
         client_address = Address(**request.form)
     except ValidationError as e:
-        print(str(e))
+        error_logger.error(str(e))
         flash(message="Error adding Address please provide all details", category="danger")
         return url_for('clients.get_client', uid=uid)
+
     stored_address = await company_controller.add_update_address(address=client_address)
     if stored_address.address_id:
         client_personal_data = await company_controller.get_policy_holder(uid=uid)
@@ -284,7 +242,7 @@ async def add_postal_address(user: User, uid: str):
     try:
         client_postal_address = PostalAddress(**request.form)
     except ValidationError as e:
-        print(str(e))
+        error_logger.error(str(e))
         flash(message="Error adding Address please provide all details", category="danger")
         return url_for('clients.get_client', uid=uid)
 
@@ -313,7 +271,7 @@ async def add_contacts(user: User, uid: str):
     try:
         client_contacts = Contacts(**request.form)
     except ValidationError as e:
-        print(str(e))
+        error_logger.error(str(e))
         flash(message="Error adding Address Contact Details", category="danger")
         return url_for('clients.get_client', uid=uid)
 

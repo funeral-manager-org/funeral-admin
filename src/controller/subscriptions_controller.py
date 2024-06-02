@@ -55,7 +55,7 @@ class SubscriptionsController(Controllers):
                     subscription_orm.total_sms = subscription.total_sms
                     subscription_orm.total_emails = subscription.total_emails
                     subscription_orm.total_clients = subscription.total_clients
-                    subscription_orm.date_subscribed = subscription.date_subscribed
+                    subscription_orm.date_subscribed = subscription.subscribed_date
                     subscription_orm.subscription_amount = subscription.subscription_amount
                     subscription_orm.subscription_period = subscription.subscription_period
 
@@ -68,7 +68,7 @@ class SubscriptionsController(Controllers):
                     subscription_orm.total_sms = subscription.total_sms
                     subscription_orm.total_emails = subscription.total_emails
                     subscription_orm.total_clients = subscription.total_clients
-                    subscription_orm.date_subscribed = subscription.date_subscribed
+                    subscription_orm.date_subscribed = subscription.subscribed_date
                     subscription_orm.subscription_amount = subscription.subscription_amount
                     subscription_orm.subscription_period = subscription.subscription_period
 

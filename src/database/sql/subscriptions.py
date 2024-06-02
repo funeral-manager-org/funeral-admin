@@ -80,7 +80,7 @@ class SubscriptionsORM(Base):
             "total_sms": self.total_sms,
             "total_emails": self.total_emails,
             "total_clients": self.total_clients,
-            "date_subscribed": self.date_subscribed,
+            "date_subscribed": self.date_subscribed.strftime('%Y-%m-%d') if self.date_subscribed else None,
             "subscription_amount": self.subscription_amount,
             "subscription_period": self.subscription_period
         }

@@ -15,6 +15,7 @@ from src.controller.chat_controller import ChatController
 from src.controller.messaging_controller import MessagingController
 from src.controller.notifications_controller import NotificationsController
 from src.controller.subscriptions_controller import SubscriptionsController
+from src.controller.system_controller import SystemController
 # from src.firewall import Firewall
 
 user_controller = UserController()
@@ -24,6 +25,7 @@ chat_controller = ChatController()
 messaging_controller = MessagingController()
 notifications_controller = NotificationsController()
 subscriptions_controller = SubscriptionsController()
+system_controller = SystemController()
 
 chat_io = SocketIO()
 
@@ -44,9 +46,10 @@ def _add_blue_prints(app: Flask):
     from src.routes.policies import policy_route
     from src.routes.messaging import messaging_route
     from src.routes.subscriptions import subscriptions_route
+    from src.routes.system import system_route
 
     routes = [auth_route, home_route, company_route, employee_route, covers_route, clients_route, policy_route,
-              messaging_route, subscriptions_route]
+              messaging_route, subscriptions_route, system_route]
 
     for route in routes:
         app.register_blueprint(route)
@@ -84,6 +87,7 @@ def create_app(config):
         company_controller.init_app(app=app)
         paypal_controller.init_app(app=app, config_instance=config)
         chat_controller.init_app(app=app)
+        system_controller.init_app(app=app)
 
         # application engines
         messaging_controller.init_app(app=app, settings=config, emailer=send_mail)

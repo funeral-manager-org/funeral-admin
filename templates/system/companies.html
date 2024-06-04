@@ -1,0 +1,41 @@
+
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title font-weight-bold text-info"> Registered Companies</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr class="font-weight-bold text-info">
+                        <td>Company Name</td>
+                        <td>Description</td>
+                        <td>Date</td>
+                        <td>Users</td>
+                        <td>Clients</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company in company_list %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('system.get_company_details', company_id=company.company_id) }}" class="text-info font-weight-bold"> {{ company.company_name }} </a>
+                            </td>
+                            <td>{{ company.company_description }}</td>
+                            <td>{{ company.date_registered }}</td>
+                            <td>{{ company.total_users }}</td>
+                            <td>{{ company.total_clients }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}

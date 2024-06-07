@@ -98,5 +98,6 @@ def create_app(config):
         subscriptions_controller.init_app(app=app, messaging_controller=messaging_controller,
                                           company_controller=company_controller,
                                           user_controller=user_controller)
+
     # return app, chat_io, messaging_controller
     return app, chat_io, messaging_controller, notifications_controller, subscriptions_controller

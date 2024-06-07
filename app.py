@@ -20,6 +20,15 @@ def run_loops():
         loop.run_forever()
 
 
+# Define the after_request handler
+@app.after_request
+async def after_request(response):
+    response.headers['X-Processed-By'] = 'Funeral-Manager Server'
+    await message_controller.cancel_sleep()
+    # Ensure the response object is awaited if async operations are needed
+    return response
+
+
 if __name__ == '__main__':
     # Run the Flask app
     # Start the message loop in a separate thread

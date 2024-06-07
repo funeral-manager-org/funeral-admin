@@ -287,6 +287,9 @@ class MessagingController(Controllers):
 
         self.loop = asyncio.get_event_loop()
         self.burst_delay = 2
+        self.timer_multiplier = 60
+        self.event_triggered_time = 0
+        self.stop_event = asyncio.Event()
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -320,15 +323,18 @@ class MessagingController(Controllers):
         # Convert Compose Email to Email Sending Model
         # email_model = EmailModel(to_=email.to_email, subject_=email.subject, html_=email.message)
         await self.email_queue.put(email)
+        await self.cancel_sleep()
 
     async def send_sms(self, composed_sms: SMSCompose):
         await self.sms_queue.put(composed_sms)
         self.logger.info(f"SMS in Queue : {composed_sms}")
+        await self.cancel_sleep()
 
         return True
 
     async def send_whatsapp_message(self, recipient: str, message: str):
         await self.whatsapp_queue.put((recipient, message))
+        await self.cancel_sleep()
         return True
 
     async def process_email_queue(self):
@@ -375,11 +381,25 @@ class MessagingController(Controllers):
 
             self.whatsapp_queue.task_done()
 
+    async def cancel_sleep(self):
+        """External method to cancel the sleep."""
+        time_now = time.time_ns()
+        self.timer_multiplier = 1
+        # Calculate the elapsed time since the last event trigger
+        elapsed_time = (time_now - self.event_triggered_time) / 1e9  # Convert nanoseconds to seconds
+
+        if elapsed_time >= 300:  # 300 seconds is 5 minutes
+            self.event_triggered_time = time_now
+            self.stop_event.set()
+            self.logger.info('triggered cancel sleep event')
+        else:
+            pass
+            # self.logger.info('cancel sleep event not triggered: too soon')
+
     async def messaging_daemon(self):
         self.logger.info("Thread Started-------------------------------------------------")
         i = 0
         time_started = time.time()
-        timer_multiplier = 1
 
         async def standard_time() -> str:
             hours = int(time_elapsed // 3600)
@@ -389,6 +409,7 @@ class MessagingController(Controllers):
 
         while True:
             # Out Going Message Queues
+            self.logger.info("Loop restarted................................")
             i += 1
             await self.process_email_queue()
             await self.process_sms_queue()
@@ -403,4 +424,17 @@ class MessagingController(Controllers):
             time_elapsed = time.time() - time_started
             display_time = await standard_time()
             self.logger.info(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")
-            await asyncio.sleep(60 * timer_multiplier)
+            # await asyncio.sleep(60 * timer_multiplier)
+
+            try:
+                await asyncio.wait_for(self.stop_event.wait(), timeout=60 * self.timer_multiplier)
+                if self.stop_event.is_set():
+                    self.logger.info("continue with execution as stop event is triggered")
+
+                    self.stop_event.clear()  # Reset the event
+                else:
+                    self.timer_multiplier += 1
+
+            except asyncio.TimeoutError:
+                # If the timeout happens without the event being set, we just continue
+                pass

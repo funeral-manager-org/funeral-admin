@@ -70,7 +70,22 @@ async def get_company_details(user: User, company_id: str):
             'bank_account': bank_account
         }
 
-    context = dict(company_data=company_data, branches=branch_details)
+    context = dict(user=user, company_data=company_data, branches=branch_details)
 
     return render_template('system/company_details.html', **context)
 
+
+@system_route.get('/_system-admin/company/subscription/<string:company_id>')
+@system_login
+async def get_company_subscription(user: User, company_id: str):
+    """
+
+    :param user:
+    :param company_id:
+    :return:
+    """
+    company_data = await company_controller.get_company_details(company_id=company_id)
+    subscription_list = await system_controller.get_subscriptions(company_id=company_id)
+    context = dict(user=user, company_data=company_data, subscription_list=subscription_list)
+
+    return render_template('system/subscriptions/subscription.html', **context)

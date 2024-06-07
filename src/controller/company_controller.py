@@ -348,6 +348,7 @@ class CompanyController(Controllers):
     @error_handler
     async def add_employee(self, employee: EmployeeDetails) -> tuple[bool, EmployeeDetails | None]:
         """
+        **add_employee**
 
         :param employee:
         :return:

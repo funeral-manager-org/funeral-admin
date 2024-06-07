@@ -37,7 +37,7 @@ def login_required(route_function):
             except TypeError as e:
                 print(str(e))
                 _mess = f'Error making request please try again later {str(e)}'
-                flash(message= _mess, category="danger")
+                flash(message=_mess, category="danger")
                 return redirect(url_for('home.get_home'))
         return redirect(url_for('auth.get_auth'))  # Redirect to login page if not logged in
 
@@ -83,6 +83,7 @@ def system_login(route_function):
 
     return decorated_function
 
+
 def user_details(route_function):
     @wraps(route_function)
     async def decorated_function(*args, **kwargs):
@@ -91,5 +92,3 @@ def user_details(route_function):
         return await route_function(user, *args, **kwargs)
 
     return decorated_function
-
-

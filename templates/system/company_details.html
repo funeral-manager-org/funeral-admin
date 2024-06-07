@@ -68,7 +68,7 @@
                           <li class="list-group-item font-weight-bold">Total Employees: <span class="text-info pull-right">{{ branch_details.branch.total_employees }}</span></li>
                       </ul>
                       {% if branch_details.contact %}
-                        <h5 class="card-title mt-3">Contact Information</h5>
+                        <h5 class="card-title mt-3 font-weight-bold">Contact Information</h5>
                         <ul class="list-group col-9">
                           <li class="list-group-item">
                               <span class="font-weight-bold">
@@ -81,7 +81,7 @@
                         </ul>
                       {% endif %}
                       {% if branch_details.postal_address %}
-                        <h5 class="card-title mt-3">Postal Address</h5>
+                        <h5 class="card-title mt-3 font-weight-bold">Postal Address</h5>
                         <ul class="list-group col-9">
                           <li class="list-group-item font-weight-bold">{{ branch_details.postal_address.address_line_1 }}</li>
                           <li class="list-group-item font-weight-bold">{{ branch_details.postal_address.town_city }}, {{ branch_details.postal_address.province }}</li>
@@ -89,7 +89,7 @@
                         </ul>
                       {% endif %}
                       {% if branch_details.physical_address %}
-                        <h5 class="card-title mt-3">Physical Address</h5>
+                        <h5 class="card-title mt-3 font-weight-bold">Physical Address</h5>
                         <ul class="list-group col-9">
                           <li class="list-group-item">{{ branch_details.physical_address.street }}</li>
                           <li class="list-group-item">{{ branch_details.physical_address.city }}, {{ branch_details.physical_address.state_province }}</li>
@@ -97,7 +97,7 @@
                         </ul>
                       {% endif %}
                       {% if branch_details.bank_account %}
-                        <h5 class="card-title mt-3">Bank Account Details</h5>
+                        <h5 class="card-title mt-3 font-weight-bold">Bank Account Details</h5>
                         <ul class="list-group col-9">
                             <li class="list-group-item font-weight-bold">Account Holder: <span class="text-info pull-right"> {{ branch_details.bank_account.account_holder }}</span></li>
                             <li class="list-group-item font-weight-bold">Account Number: <span class="text-info pull-right">{{ branch_details.bank_account.account_number }}</span></li>
@@ -126,7 +126,7 @@
                 <i class="fa fa-envelope"> </i>
                 Send Email
             </a>
-            <a class="btn btn-default btn-rounded text-white font-weight-bold pull-right" href="#">
+            <a class="btn btn-default btn-rounded text-white font-weight-bold pull-right" href="{{ url_for('system.get_company_subscription', company_id=company_data.company_id) }}">
                 <i class="fa fa-shopping-basket"> </i>
                 Subscriptions
             </a>

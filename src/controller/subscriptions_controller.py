@@ -151,7 +151,7 @@ class SubscriptionsController(Controllers):
         """
         subscriptions = await self.get_subscriptions()
         self.logger.info(f"Checking for Unpaid Subscription : {subscriptions}")
-        un_paid_subscriptions = [sub for sub in subscriptions if not sub.is_paid_for_current_month()]
+        un_paid_subscriptions = [sub for sub in subscriptions if not sub.is_paid_for_current_month]
 
         await self.notify_managers_to_pay_their_subscriptions(un_paid_subs=un_paid_subscriptions)
 
@@ -161,7 +161,7 @@ class SubscriptionsController(Controllers):
         """
         subscriptions = await self.get_subscriptions()
         self.logger.info(f"Checking for Unpaid Subscriptions: {subscriptions}")
-        un_paid_subscriptions: list[Subscriptions] = [sub for sub in subscriptions if not sub.is_paid_for_current_month()]
+        un_paid_subscriptions: list[Subscriptions] = [sub for sub in subscriptions if not sub.is_paid_for_current_month]
 
         thirty_days_ago = datetime.now() - timedelta(days=30)
 

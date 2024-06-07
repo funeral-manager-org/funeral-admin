@@ -88,6 +88,20 @@ class Subscriptions(BaseModel):
             # Handle error, possibly log it and return None or a default datetime
             return None
 
+    @property
+    def is_paid_for_current_month(self) -> bool:
+        """Checks if the subscription has been paid for the current month"""
+        current_date = datetime.now()
+        current_month = current_date.month
+        current_year = current_date.year
+
+        for payment in self.payments:
+            payment_date = payment.date_paid
+            if payment.is_successful and payment_date.month == current_month and payment_date.year == current_year:
+                return True
+
+        return False
+
     def take_sms_credit(self):
         if self.total_sms:
             self.total_sms -= 1
@@ -110,20 +124,6 @@ class Subscriptions(BaseModel):
         months_diff = (current_date.year - date_bought_dt.year) * 12 + current_date.month - date_bought_dt.month
 
         return months_diff > self.subscription_period
-
-    def is_paid_for_current_month(self) -> bool:
-        """Checks if the subscription has been paid for the current month"""
-        current_date = datetime.now()
-        current_month = current_date.month
-        current_year = current_date.year
-
-        for payment in self.payments:
-            payment_date = payment.date_paid
-            if payment.is_successful and payment_date.month == current_month and payment_date.year == current_year:
-                return True
-
-        return False
-
 
 class SMSPackage(BaseModel):
     package_id: str = Field(default_factory=create_id)

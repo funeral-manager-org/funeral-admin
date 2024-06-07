@@ -2,6 +2,7 @@ import json
 
 from flask import Blueprint, url_for, flash, redirect, request, render_template
 
+from src.logger import init_logger
 from src.database.models.companies import Company
 from src.database.models.payments import Payment
 from src.authentication import login_required, admin_login, system_login
@@ -10,7 +11,7 @@ from src.database.models.users import User
 from src.main import system_controller, company_controller
 
 system_route = Blueprint('system', __name__)
-
+error_logger = init_logger('System Router')
 
 @system_route.get('/_system-admin/companies')
 @system_login
@@ -86,6 +87,7 @@ async def get_company_subscription(user: User, company_id: str):
     """
     company_data = await company_controller.get_company_details(company_id=company_id)
     subscription_list = await system_controller.get_subscriptions(company_id=company_id)
+    error_logger.info(f"SUBSCRIPTION PAID : {subscription_list[-1].is_paid_for_current_month}")
     context = dict(user=user, company_data=company_data, subscription_list=subscription_list)
 
     return render_template('system/subscriptions/subscription.html', **context)

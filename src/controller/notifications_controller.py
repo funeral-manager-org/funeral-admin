@@ -174,7 +174,7 @@ class NotificationsController(Controllers):
                 await self.send_notice_to_subscribe(company_data=company_data)
                 return False
 
-            if subscription.is_expired() or (not subscription.is_paid_for_current_month()):
+            if subscription.is_expired() or (not subscription.is_paid_for_current_month):
                 await self.subscription_has_expired(company_data=company_data, subscription=subscription)
                 return False
 
@@ -312,7 +312,7 @@ class NotificationsController(Controllers):
         subscription = Subscriptions(**subscription_orm.to_dict())
         insufficient_credit = False
 
-        if subscription.is_expired() or (not subscription.is_paid_for_current_month()):
+        if subscription.is_expired() or (not subscription.is_paid_for_current_month):
             await self.subscription_has_expired(company_data=company_data, subscription=subscription)
             return False
 

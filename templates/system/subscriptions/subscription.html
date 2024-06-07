@@ -30,6 +30,7 @@
                         <td>Emails</td>
                         <td>Clients</td>
                         <td>Amount</td>
+                        <td>Is Paid</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,6 +42,13 @@
                             <td>{{ subscription.total_emails| number }}</td>
                             <td>{{ subscription.total_clients| number }}</td>
                             <td>R {{ subscription.subscription_amount| number }}.00</td>
+                            <td>
+                                {% if subscription.is_paid_for_current_month %}
+                                    <span class="font-weight-bold text-success">YES</span>
+                                {% else %}
+                                    <span class="font-weight-bold text-danger">No</span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

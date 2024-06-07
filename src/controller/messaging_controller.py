@@ -2,6 +2,7 @@ import asyncio
 import time
 from datetime import datetime
 
+import requests
 from flask import Flask
 
 from twilio.rest import Client
@@ -22,6 +23,7 @@ class EmailService(Controllers):
 
     def __init__(self):
         super().__init__()
+        self.cool_down_on_error = 20
         self.from_ = None
         self.email_sender = None
         self.sent_email_queue: dict[str, EmailModel] = {}
@@ -34,24 +36,39 @@ class EmailService(Controllers):
         self.from_ = settings.EMAIL_SETTINGS.RESEND.from_
 
     async def send_email(self, email: EmailCompose):
-        # Code to send email via email service API
-        # self.logger.info(f"Sending email {email}")
-        response, email_ = await self.email_sender.send_mail_resend(email=email)
+        """
+            Email Will be Sent to Resend.com API
+        :param email:
+        :return:
+        """
+        try:
+            response, email_ = await self.email_sender.send_mail_resend(email=email)
 
-        self.logger.info(f"Sent Email Response : {response}")
+            self.logger.info(f"Sent Email Response : {response}")
 
-        self.sent_email_queue[response.get('id', create_id())] = email_
+            self.sent_email_queue[response.get('id', create_id())] = email_
 
-        with self.get_session() as session:
-            sent_email_orm = EmailComposeORM(**email_.dict())
-            session.add(sent_email_orm)
-            session.commit()
+            # Saving Sent Message to the Database
+            with self.get_session() as session:
+                sent_email_orm = EmailComposeORM(**email_.dict())
+                session.add(sent_email_orm)
+                session.commit()
+
+        except requests.exceptions.ConnectTimeout:
+            self.logger.error("Resend Connection TimeOut")
+            await asyncio.sleep(delay=self.cool_down_on_error)
+            await self.send_email(email=email)
 
     async def receive_email(self, sender: str, subject: str, body: str):
         # Code to receive email from email service API
         self.logger.info(f"Received email from {sender} with subject: {subject} and body: {body}")
 
     async def get_sent_messages(self, branch_id: str) -> list[EmailCompose]:
+        """
+            get all Sent Messages for a specific Branch
+        :param branch_id:
+        :return:
+        """
         with self.get_session() as session:
             email_messages_orm = session.query(EmailComposeORM).filter_by(to_branch=branch_id).all()
             return [EmailCompose(**email.to_dict()) for email in email_messages_orm
@@ -59,7 +76,7 @@ class EmailService(Controllers):
 
     async def get_sent_email(self, message_id: str) -> EmailCompose | None:
         """
-
+            Get a Specific Sent Email from the database
         :param message_id:
         :return:
         """

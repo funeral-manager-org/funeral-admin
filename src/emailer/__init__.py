@@ -45,7 +45,7 @@ class SendMail:
             email.is_sent = True
         else:
             params = {'from': self.from_, 'to': email.to_, 'subject': email.subject_, 'html': email.html_}
-        print(f"Params : {params}")
+        # print(f"Params : {params}")
 
         response: dict[str, str] = self._resend.Emails.send(params=params)
         email.reference = response.get('id', create_id())

@@ -17,6 +17,7 @@ class PayPalController(Controllers):
         self.mode = "live"
         self._client_secret = ""
 
+    # noinspection PyMethodOverriding
     def init_app(self, app: Flask, config_instance: Settings):
         self._client_secret = config_instance.PAYPAL_SETTINGS.SECRET_KEY
         configure({

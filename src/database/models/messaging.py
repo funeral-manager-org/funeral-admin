@@ -50,6 +50,9 @@ class SMSInbox(BaseModel):
 
 
 class EmailCompose(BaseModel):
+    """
+        email compose
+    """
     message_id: str = Field(default_factory=create_id)
     reference: str | None
     from_email: str | None
@@ -71,5 +74,3 @@ class SMSSettings(BaseModel):
     upcoming_payments_notifications: bool = Field(default=False)
     policy_paid_notifications: bool = Field(default=False)
     claims_notifications: bool = Field(default=False)
-
-

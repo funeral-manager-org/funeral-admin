@@ -39,7 +39,6 @@ class EmailService(Controllers):
         response, email_ = await self.email_sender.send_mail_resend(email=email)
 
         self.logger.info(f"Sent Email Response : {response}")
-        self.logger.info(f"Email sent successfully : {email_}")
 
         self.sent_email_queue[response.get('id', create_id())] = email_
 
@@ -344,12 +343,14 @@ class MessagingController(Controllers):
             # self.logger.info("No Email Messages")
             return
         self.logger.info("Started Processing Email Queue")
+        total_emails_sent = 0
         while not self.email_queue.empty():
             email: EmailCompose = await self.email_queue.get()
             await self.email_service.send_email(email=email)
             await asyncio.sleep(delay=self.burst_delay)
             self.email_queue.task_done()
-        self.logger.info("Processing Email Queue Done")
+            total_emails_sent += 1
+        self.logger.info(f"Sent {str(total_emails_sent)} Email Messages")
 
     async def process_sms_queue(self):
 

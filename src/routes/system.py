@@ -13,6 +13,7 @@ from src.main import system_controller, company_controller
 system_route = Blueprint('system', __name__)
 error_logger = init_logger('System Router')
 
+
 @system_route.get('/_system-admin/companies')
 @system_login
 async def get_companies(user: User):
@@ -86,11 +87,11 @@ async def get_company_subscription(user: User, company_id: str):
     :return:
     """
     company_data: Company = await company_controller.get_company_details(company_id=company_id)
-
     subscription_list: list[Subscriptions] = await system_controller.get_subscriptions(company_id=company_id)
     context = dict(user=user, company_data=company_data, subscription_list=subscription_list)
 
-    return render_template('system/subscriptions/subscription.html', **context)
+    return render_template('system/subscriptions/subscription_list.html', **context)
+
 
 @system_route.get('/_system-admin/subscription/<string:subscription_id>')
 @system_login
@@ -103,4 +104,4 @@ async def edit_subscription(user: User, subscription_id: str):
     """
     subscription: Subscriptions = await system_controller.get_subscription(subscription_id=subscription_id)
     context = dict(user=user, subscription=subscription)
-    return render_template('system/subscriptions')
+    return render_template('system/subscriptions/subscription.html', **context)

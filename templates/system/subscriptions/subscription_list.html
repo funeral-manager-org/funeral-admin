@@ -1,0 +1,59 @@
+
+
+
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title font-weight-bold text-info"> Subscriptions </h2>
+        </div>
+
+        <div class="card-body">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold text-info">{{ company_data.company_name }}</h3>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold">Subscriptions list</h3>
+            </div>
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr class="font-weight-bold text-info">
+                        <td>Plan Name</td>
+                        <td>Date</td>
+                        <td>SMS</td>
+                        <td>Emails</td>
+                        <td>Clients</td>
+                        <td>Amount</td>
+                        <td>Is Paid</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subscription in subscription_list %}
+                        <tr>
+                            <td class="font-weight-bold text-info">{{ subscription.plan_name }}</td>
+                            <td>{{ subscription.date_subscribed }}</td>
+                            <td>{{ subscription.total_sms| number }}</td>
+                            <td>{{ subscription.total_emails| number }}</td>
+                            <td>{{ subscription.total_clients| number }}</td>
+                            <td>R {{ subscription.subscription_amount| number }}.00</td>
+                            <td>
+                                {% if subscription.is_paid_for_current_month %}
+                                    <span class="font-weight-bold text-success">YES</span>
+                                {% else %}
+                                    <span class="font-weight-bold text-danger">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -288,6 +288,7 @@ class MessagingController(Controllers):
         self.loop = asyncio.get_event_loop()
         self.burst_delay = 2
         self.timer_multiplier = 60
+        self.timer_limit = 60
         self.event_triggered_time = 0
         self.stop_event = asyncio.Event()
 
@@ -428,11 +429,14 @@ class MessagingController(Controllers):
 
             try:
                 await asyncio.wait_for(self.stop_event.wait(), timeout=60 * self.timer_multiplier)
+
                 if self.stop_event.is_set():
                     self.logger.info("continue with execution as stop event is triggered")
 
                     self.stop_event.clear()  # Reset the event
-                else:
+
+                # This Ensures that the timer will keep increasing until its one hour long
+                if self.timer_multiplier < self.timer_limit:
                     self.timer_multiplier += 1
 
             except asyncio.TimeoutError:

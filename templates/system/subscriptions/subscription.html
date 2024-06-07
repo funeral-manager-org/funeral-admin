@@ -1,1 +1,54 @@
+{% extends "layouts/page.html" %}
 
+{% block content %}
+    <section id="main-content">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title font-weight-bold text-info">Edit Subscriptions</h2>
+            </div>
+            <div class="card-body">
+                <form id="subscription-form" method="post" action="{{ url_for('system.update_subscription', subscription_id=subscription.subscription_id) }}">
+                    <div class="form-group">
+                        <label for="plan_name">Plan Name</label>
+                        <select class="form-control" id="plan_name" name="plan_name">
+                            {% for plan_name in plan_names %}
+                                <option value="{{ plan_name }}" {% if plan_name == subscription.plan_name %}selected{% endif %}>{{ plan_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subscription-id">Subscription ID</label>
+                        <input type="text" class="form-control" id="subscription-id" name="subscription_id" value="{{ subscription.subscription_id }}" required disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="activate-subscription">Activate/Deactivate Subscription</label>
+                        <select class="form-control" id="activate-subscription" name="activate_subscription">
+                            <option value="activate">Activate</option>
+                            <option value="deactivate">Deactivate</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="payment-method">Payment Method</label>
+                        <select class="form-control" id="payment-method" name="payment_method">
+                            <option value="paypal">PayPal</option>
+                            <option value="cash">Cash</option>
+                            <option value="bank-transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-amount">Payment Amount</label>
+                        <input type="number" class="form-control" id="payment-amount" name="payment_amount" value="{{ subscription.subscription_amount }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="verify-payment">Verify Payment</label>
+                        <input type="checkbox" id="verify-payment" name="verify_payment">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}

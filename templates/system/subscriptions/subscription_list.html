@@ -36,12 +36,19 @@
                 <tbody>
                     {% for subscription in subscription_list %}
                         <tr>
-                            <td class="font-weight-bold text-info">{{ subscription.plan_name }}</td>
+
+                            <td class="font-weight-bold text-info">
+                                <a href="{{ url_for('system.edit_subscription', subscription_id=subscription.subscription_id) }}">
+                                    {{ subscription.plan_name }}
+                                </a>
+                            </td>
+
                             <td>{{ subscription.date_subscribed }}</td>
                             <td>{{ subscription.total_sms| number }}</td>
                             <td>{{ subscription.total_emails| number }}</td>
                             <td>{{ subscription.total_clients| number }}</td>
                             <td>R {{ subscription.subscription_amount| number }}.00</td>
+
                             <td>
                                 {% if subscription.is_paid_for_current_month %}
                                     <span class="font-weight-bold text-success">YES</span>
@@ -49,6 +56,7 @@
                                     <span class="font-weight-bold text-danger">No</span>
                                 {% endif %}
                             </td>
+
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -102,6 +102,20 @@ async def edit_subscription(user: User, subscription_id: str):
     :param subscription_id:
     :return:
     """
+    plan_names = PlanNames.plan_names()
     subscription: Subscriptions = await system_controller.get_subscription(subscription_id=subscription_id)
-    context = dict(user=user, subscription=subscription)
+    context = dict(user=user, subscription=subscription, plan_names=plan_names)
     return render_template('system/subscriptions/subscription.html', **context)
+
+
+@system_route.post('/_system-admin/subscription/<string:subscription_id>')
+@system_login
+async def update_subscription(user: User, subscription_id: str):
+    """
+
+    :param user:
+    :param subscription_id:
+    :return:
+    """
+    pass
+

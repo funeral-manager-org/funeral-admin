@@ -30,10 +30,12 @@ class UserController(Controllers):
     def init_app(self, app: Flask):
         super().init_app(app=app)
 
+    @error_handler
     async def manage_users_dict(self, new_user: User):
         # Check if the user instance already exists in the dictionary
         self.users[new_user.uid] = new_user
 
+    @error_handler
     async def manage_profiles(self, new_profile: Profile):
         self.profiles[new_profile.uid] = new_profile
 
@@ -94,7 +96,7 @@ class UserController(Controllers):
         :return: True if the token is valid, False otherwise.
         """
         if token in set(self._verification_tokens.keys()):
-            timestamp: int = self._verification_tokens[token]
+            timestamp: int = self._verification_tokens.get(token, 0)
             current_time: int = int(time.time())
             elapsed_time = current_time - timestamp
             return elapsed_time < self._time_limit
@@ -156,6 +158,7 @@ class UserController(Controllers):
         self.logger.info(f"Password Reset Email Sent Email: {email}")
         return email_dict
 
+    @error_handler
     def generate_password_reset_link(self, email: str) -> str:
         """
         Generates a password reset link for the specified email.
@@ -169,6 +172,7 @@ class UserController(Controllers):
 
         return password_reset_link
 
+    @error_handler
     async def post(self, user: CreateUser) -> User | None:
         """
 
@@ -225,6 +229,7 @@ class UserController(Controllers):
             self.logger.info(f"User Login : {is_login}")
             return is_login
 
+    @error_handler
     async def add_employee(self, user: User) -> User | None:
         """
         Add or update a user in the database.

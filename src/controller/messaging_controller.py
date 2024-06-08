@@ -420,11 +420,12 @@ class MessagingController(Controllers):
         i = 0
         time_started = time.time()
 
-        async def standard_time() -> str:
+        async def standard_time(start_time) -> str:
+            time_elapsed = time.time() - start_time
             hours = int(time_elapsed // 3600)
             minutes = int((time_elapsed % 3600) // 60)
             seconds = int(time_elapsed % 60)
-            return f"{hours} hours, {minutes} minutes, {seconds}"
+            return f"{hours} hours, {minutes} minutes, {seconds} seconds"
 
         while True:
             # Out Going Message Queues
@@ -439,9 +440,7 @@ class MessagingController(Controllers):
             await self.sms_service.retrieve_sms_responses_service()
 
             # This Means the loop will run every 5 minutes
-
-            time_elapsed = time.time() - time_started
-            display_time = await standard_time()
+            display_time = await standard_time(time_started)
             self.logger.info(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")
             # await asyncio.sleep(60 * timer_multiplier)
 
@@ -455,7 +454,7 @@ class MessagingController(Controllers):
 
                 # This Ensures that the timer will keep increasing until its one hour long
                 if self.timer_multiplier < self.timer_limit:
-                    self.timer_multiplier += 1
+                    self.timer_multiplier += 2
 
             except asyncio.TimeoutError:
                 # If the timeout happens without the event being set, we just continue

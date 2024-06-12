@@ -1,6 +1,7 @@
 {% extends "layouts/page.html" %}
 
 {% block content %}
+{% if message %}
 <section id="main-content">
 
         <div class="card">
@@ -8,7 +9,7 @@
                 <h4 class="text-white font-weight-bold">Sent Message Details</h4>
             </div>
             <div class="card-body">
-                {% if message %}
+
                     <div class="card-content">
                         <h5 class="card-title">From:</h5>
                         <p class="card-text font-weight-bold">{{ message.from_email }}</p>
@@ -27,13 +28,16 @@
                     </div>
                     <div class="card-content">
                         <h5 class="card-title">Message:</h5>
-                        <p class="card-text  font-weight-bold">{{ message.message | safe }}</p>
+                        <p class="card-text  font-weight-bold"></p>
                     </div>
-                {% else %}
-                    <p class="text-danger">No message details available.</p>
-                {% endif %}
             </div>
         </div>
-    
+
 </section>
+
+{{ message.message | safe }}
+{% else %}
+    <p class="text-danger">No message details available.</p>
+{% endif %}
+
 {% endblock %}

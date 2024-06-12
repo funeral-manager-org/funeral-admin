@@ -35,13 +35,14 @@ async def get_admin(user: User):
     context.update(company=company_data, company_branches=company_branches)
 
     if user.is_system_admin:
-        return render_template('admin/admin.html', **context)
+        return render_template('admin/managers/manager.html', **context)
     elif user.is_company_admin:
         return render_template('admin/managers/manager.html', **context)
     elif user.is_employee:
         return render_template('admin/employees/employee.html', **context)
     elif user.is_client:
         return render_template('admin/clients/clients.html', **context)
+
     message = """If you want to register your funeral company please click on register company below
     If you are an employee of a funeral company that uses this system please inform your administrator so they can register you
     on their company"""

@@ -2,30 +2,30 @@
 
 {% block content %}
 <section id="main-content">
-    <div class="container mt-4">
+    <div class="container mt-12">
         <div class="card">
             <div class="card-header bg-primary">
                 <h4 class="text-white font-weight-bold">Sent Message Details</h4>
             </div>
             <div class="card-body">
                 {% if message %}
-                    <div class="mb-3">
+                    <div class="card-content">
                         <h5 class="card-title">From:</h5>
                         <p class="card-text font-weight-bold">{{ message.from_email }}</p>
                     </div>
-                    <div class="mb-3">
+                    <div class="card-content">
                         <h5 class="card-title">To:</h5>
                         <p class="card-text font-weight-bold">{{ message.to_email }}</p>
                     </div>
-                    <div class="mb-3">
+                    <div class="card-content">
                         <h5 class="card-title">Subject:</h5>
                         <p class="card-text  font-weight-bold">{{ message.subject }}</p>
                     </div>
-                    <div class="mb-3">
+                    <div class="card-content">
                         <h5 class="card-title">Date Sent:</h5>
                         <p class="card-text  font-weight-bold">{{ message.date_time_sent }}</p>
                     </div>
-                    <div class="mb-3">
+                    <div class="card-content">
                         <h5 class="card-title">Message:</h5>
                         <p class="card-text  font-weight-bold">{{ message.message | safe }}</p>
                     </div>

@@ -1,13 +1,12 @@
-import json
+from flask import Blueprint, render_template
 
-from flask import Blueprint, url_for, flash, redirect, request, render_template
+from flask import Blueprint, render_template
 
-from src.logger import init_logger
+from src.authentication import system_login
 from src.database.models.companies import Company
-from src.database.models.payments import Payment
-from src.authentication import login_required, admin_login, system_login
-from src.database.models.subscriptions import PlanNames, SubscriptionDetails, Subscriptions
+from src.database.models.subscriptions import PlanNames, Subscriptions
 from src.database.models.users import User
+from src.logger import init_logger
 from src.main import system_controller, company_controller
 
 system_route = Blueprint('system', __name__)
@@ -102,7 +101,7 @@ async def edit_subscription(user: User, subscription_id: str):
     :param subscription_id:
     :return:
     """
-    plan_names = PlanNames.plan_names()
+    plan_names: list[str] = PlanNames.plan_names()
     subscription: Subscriptions = await system_controller.get_subscription(subscription_id=subscription_id)
     context = dict(user=user, subscription=subscription, plan_names=plan_names)
     return render_template('system/subscriptions/subscription.html', **context)

@@ -4,11 +4,11 @@
 <style>
     /* styles.css */
     textarea.custom-textarea {
-        width: calc(60ch + 2px);  /* 3 columns */
-        height: calc(3 * 1.5em + 2px); /* 12 rows */
+        width: auto;  /* 3 columns */
+        height: auto; /* 12 rows */
         padding: 0.5em; /* Optional: padding for better visual */
         box-sizing: border-box; /* Include padding in size */
-        resize: none; /* Disable manual resizing if needed */
+        resize: vertical; /* Disable manual resizing if needed */
         font-family: inherit; /* Use the same font as the rest of the page */
     }
 
@@ -24,7 +24,7 @@
                 Company Registration
             </h2>
         </div>
-        <div class="card-body">
+        <div class="card-body m-t-4">
             <form action="{{ url_for('company.do_register') }}" method="POST">
                 <div class="form-group">
                     <label class="font-weight-bold text-info" for="reg_ck">Reg CK:<span class="font-weight-bold text-danger">*</span></label>
@@ -48,7 +48,8 @@
                 <div class="form-group">
                     <label class="font-weight-bold text-info" for="company_description">Company Description:<span class="font-weight-bold text-danger">*</span></label>
                 <div class="form-group">
-                    <textarea id="company_description" name="company_description" class="custom-textarea" required>
+                    <textarea id="company_description" name="company_description" class="form-control"
+                              rows="6" cols="12" required>
                         {% if company_details %}{{ company_details.company_description }}{% endif %}
                     </textarea>
                 </div>

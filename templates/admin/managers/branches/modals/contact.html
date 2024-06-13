@@ -37,21 +37,37 @@
                         <div class="tab-pane active" id="viewContact" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Display contact details here -->
-                                    <p class="font-weight-bold text-info">{{ branch.branch_name }} {{ branch.branch_description }} Contact Information </p>
-                                    <p class="font-weight-bold">Cell: <span class="font-weight-bold text-info">{{ contact.cell }}</span></p>
+                            <ul class="list-group">
+
+                                <li class="list-group-item font-weight-bold text-info">{{ branch.branch_name| title }} {{ branch.branch_description| title }} Contact Information </li>
+                                <li class="list-group-item font-weight-bold">
+                                    <i class="fa fa-mobile-phone"> </i>
+                                    Cell: <a href="tel:{{ contact.cell }}" class="font-weight-bold text-info pull-right">{{ contact.cell }}</a></li>
+
                                 {% if contact.tel %}
-                                    <p  class="font-weight-bold">Tel: <span class="font-weight-bold text-info">{{ contact.tel }}</span></p>
+                                    <li  class="list-group-item font-weight-bold">
+                                        <i class="fa fa-phone-square"> </i>
+                                        Tel: <a href="tel:{{ contact.tel }}" class="font-weight-bold text-success pull-right">{{ contact.tel }}</a></li>
                                 {% endif %}
-                                    <p  class="font-weight-bold">Email: <span class="font-weight-bold text-info">{{ contact.email }}</span></p>
+                                    <li  class="list-group-item font-weight-bold">
+                                        <i class="fa fa-envelope-square"> </i>
+                                        Email: <a href="email:{{ contact.email }}" class="font-weight-bold text-success pull-right">{{ contact.email }}</a></li>
                                 {% if contact.facebook %}
-                                    <p  class="font-weight-bold">Facebook: <span class="font-weight-bold text-info">{{ contact.facebook }}</span></p>
+                                    <li  class="list-group-item font-weight-bold">
+                                        <i class="fa fa-facebook-official"> </i>
+                                        Facebook: <a href="https://facebook.com/{{ contact.facebook }}" target="_blank" class="font-weight-bold text-info pull-right">{{ contact.facebook }}</a></li>
                                 {% endif %}
                                 {% if contact.twitter %}
-                                    <p  class="font-weight-bold">Twitter: <span class="font-weight-bold text-info">{{ contact.twitter }}</span></p>
+                                    <li  class="list-group-item font-weight-bold">
+                                        <i class="fa fa-twitter-square"> </i>
+                                        Twitter: <a href="https://x.com/{{ contact.twitter }}" target="_blank" class="font-weight-bold text-info pull-right">{{ contact.twitter }}</a></li>
                                 {% endif %}
                                 {% if contact.whatsapp %}
-                                    <p  class="font-weight-bold">WhatsApp: <span class="font-weight-bold text-info">{{ contact.whatsapp }}</span></p>
+                                    <li  class="list-group-item font-weight-bold">
+                                        <i class="fa fa-whatsapp"> </i>
+                                        WhatsApp: <a href="https://wa.me/{{ contact.whatsapp }}" target="_blank" class="font-weight-bold text-info pull-right">{{ contact.whatsapp }}</a></li>
                                 {% endif %}
+                            </ul>
                             </div>
                         </div>
                         <!-- Edit Contact Tab -->

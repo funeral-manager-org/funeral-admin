@@ -2,7 +2,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="addressLabel" class="card-title"> <i class="fa fa-address-book"></i> Address </h2>
+                <h2 id="addressLabel" class="card-title font-weight-bold"> <i class="fa fa-address-book"></i> Physical Address </h2>
             </div>
 
             <div class="modal-body">
@@ -10,14 +10,29 @@
                 <ul class="nav nav-tabs" role="tablist">
                     {% if  address %}
                     <li class="nav-item">
-                        <a class="nav-link active" data-toggle="tab" href="#viewAddress" role="tab">Branch Address</a>
+                        <a class="nav-link active" data-toggle="tab" href="#viewAddress" role="tab">
+                            <span class="font-weight-bold">
+                                <i class="fa fa-map-pin"> </i>
+                                Branch Address
+                            </span>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#editAddress" role="tab">Edit Address</a>
+                        <a class="nav-link" data-toggle="tab" href="#editAddress" role="tab">
+                            <span class="font-weight-bold">
+                                <i class="fa fa-pencil"> </i>
+                                Edit Address
+                            </span>
+                        </a>
                     </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#addAddress" role="tab">Add Address</a>
+                            <a class="nav-link active" data-toggle="tab" href="#addAddress" role="tab">
+                                <span class="font-weight-bold">
+                                    <i class="fa fa-map-marker"> </i>
+                                    Add Address
+                                </span>
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -29,13 +44,15 @@
                         <div class="card-footer">
                             {% if address %}
                                 <!-- Display address details here -->
-                                <p class="font-weight-bold text-info">{{ branch.branch_name }} {{ branch.branch_description }}</p>
-                                <p class="font-weight-bold">Street: <span class="font-weight-bold text-info">{{ address.street }}</span></p>
-                                <p class="font-weight-bold">City: <span class="font-weight-bold text-info">{{ address.city }}</span></p>
-                                <p class="font-weight-bold">State: <span class="font-weight-bold text-info">{{ address.state_province }}</span></p>
-                                <p class="font-weight-bold">Postal Code: <span class="font-weight-bold text-info">{{ address.postal_code }}</span></p>
-                                <p class="font-weight-bold">Country: <span class="font-weight-bold text-info">{{ address.country }}</span></p>
-                                <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-print"> </i> Print </a>
+                                <ul class="list-group">
+                                    <li class="list-group-item font-weight-bold text-info">{{ branch.branch_name| title }} {{ branch.branch_description| title }}</li>
+                                    <li class="list-group-item font-weight-bold">Address Line 1: <span class="font-weight-bold text-info pull-right">{{ address.street }}</span></li>
+                                    <li class="list-group-item font-weight-bold">City: <span class="font-weight-bold text-info pull-right">{{ address.city }}</span></li>
+                                    <li class="list-group-item font-weight-bold">State: <span class="font-weight-bold text-info pull-right">{{ address.state_province }}</span></li>
+                                    <li class="list-group-item font-weight-bold">Country: <span class="font-weight-bold text-info pull-right">{{ address.country }}</span></li>
+                                    <li class="list-group-item font-weight-bold">Postal Code: <span class="font-weight-bold text-info pull-right">{{ address.postal_code }}</span></li>
+                                </ul>
+
                             {% else %}
                                 <p>Address not available please create new address</p>
                             {% endif %}
@@ -45,32 +62,32 @@
                     <!-- Edit Address Tab -->
                     <div class="tab-pane" id="editAddress" role="tabpanel">
                         <div class="card-footer">
-                            <span class="font-weight-bold text-info">{{ branch.branch_name }} <span class="font-weight-light text-dark">Branch Address</span></span>
+                            <span class="font-weight-bold text-info">{{ branch.branch_name| title }} <span class="font-weight-light text-dark">Branch Address</span></span>
                             <hr/>
                             <form action="{{ url_for('company.add_branch_address', branch_id=branch.branch_id) }}" method="POST">
                                 <input type="hidden" name="address_id" value="{{ address.address_id }}" />
                                 <div class="form-group">
-                                    <label for="street">Street</label>
+                                    <label class="font-weight-bold text-info" for="street">Street</label>
                                     <input type="text" name="street" id="street" class="form-control" value="{{ address.street }}" />
                                 </div>
                                 <div class="form-group">
-                                    <label for="city">City</label>
+                                    <label class="font-weight-bold text-info" for="city">City</label>
                                     <input type="text" name="city" id="city" class="form-control"  value="{{ address.city }}"/>
                                 </div>
                                 <div class="form-group">
-                                    <label for="state_province">Province</label>
+                                    <label class="font-weight-bold text-info" for="state_province">Province</label>
                                     <input type="text" name="state_province" id="state_province" class="form-control" value="{{ address.state_province }}"/>
                                 </div>
                                 <div class="form-group">
-                                    <label for="postal_code">Postal Code</label>
+                                    <label class="font-weight-bold text-info" for="postal_code">Postal Code</label>
                                     <input type="text" name="postal_code" id="postal_code" class="form-control" value="{{ address.postal_code }}"/>
                                 </div>
                                 <div class="form-group">
-                                    <label for="country">Country</label>
+                                    <label class="font-weight-bold text-info" for="country">Country</label>
                                     <input type="text" name="country" id="country" class="form-control" value="{{ address.country }}"/>
                                 </div>
                                 <div class="form-group">
-                                        <button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-address-card-o"> </i> Edit Address</button>
+                                        <button type="submit" class="btn btn-rounded btn-outline-success btn-sm btn-primary"><i class="fa fa-save"> </i> Update Physical Address</button>
                                 </div>
                             </form>
                         </div>

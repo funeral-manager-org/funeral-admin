@@ -43,12 +43,13 @@
                         <!-- View Bank Account Tab -->
                         <div class="tab-pane active" id="viewAccount" role="tabpanel">
                             <div class="card-footer">
-                                <p class="font-weight-bold text-info">{{ employee_detail.full_names }} Bank Account</p>
-                                <p class="font-weight-bold">Account Holder: <span class="text-info">{{ bank_account.account_holder }}</span></p>
-                                <p class="font-weight-bold">Account Number: <span class="text-info">{{ bank_account.account_number }}</span></p>
-                                <p class="font-weight-bold">Bank Name: <span class="text-info">{{ bank_account.bank_name }}</span></p>
-                                <p class="font-weight-bold">Branch: <span class="text-info">{{ bank_account.branch }}</span></p>
-                                <p class="font-weight-bold">Account Type: <span class="text-info">{{ bank_account.account_type }}</span></p>
+                                <ul class="list-group">
+                                <li class="list-group-item font-weight-bold">Account Holder: <span class="text-info pull-right">{{ bank_account.account_holder| title }}</span></li>
+                                <li class="list-group-item font-weight-bold">Account Number: <span class="text-info pull-right">{{ bank_account.account_number }}</span></li>
+                                <li class="list-group-item font-weight-bold">Bank Name: <span class="text-info pull-right">{{ bank_account.bank_name }}</span></li>
+                                <li class="list-group-item font-weight-bold">Branch: <span class="text-info pull-right">{{ bank_account.branch| title }}</span></li>
+                                <li class="list-group-item font-weight-bold">Account Type: <span class="text-info pull-right">{{ bank_account.account_type| title }}</span></li>
+                                </ul>
                             </div>
                         </div>
                         <!-- Edit Bank Account Tab -->

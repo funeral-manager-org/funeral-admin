@@ -2,7 +2,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="contactLabel" class="card-title"> <i class="fa fa-envelope"></i> Contact </h2>
+                <h2 id="contactLabel" class="card-title font-weight-bold"> <i class="fa fa-envelope"></i> Contact </h2>
             </div>
             <div class="modal-body">
                 <!-- Nav tabs -->
@@ -10,7 +10,7 @@
                     {% if contact %}
                         <li class="nav-item">
                             <a class="nav-link active" data-toggle="tab" href="#viewContact" role="tab">
-                                <span class="font-weight-bold"><i class="fa fa-phone"> </i> Contact Details</span>
+                                <span class="font-weight-bold"><i class="fa fa-mobile-phone"> </i> Contact Details</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -34,21 +34,45 @@
                         <div class="tab-pane active" id="viewContact" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Display contact details here -->
-                                <p class="font-weight-bold text-info">{{ employee_detail.full_names }} {{ employee_detail.last_name }} Contact Information </p>
-                                <p>Cell: <span class="font-weight-bold text-info">{{ contact.cell }}</span></p>
+                            <ul class="list-group">
+                                <li class="list-group-item font-weight-bold">
+                                    <i class="fa fa-user"> </i>
+                                    Employee Names
+                                    <span class="text-info pull-right">
+                                    {{ employee_detail.full_names| title }} {{ employee_detail.last_name| title }} </span></li>
+                                <li class="list-group-item font-weight-bold">
+                                    <i class="fa fa-mobile-phone"> </i>
+                                    Cell: <a href="tel:{{ contact.cell }}" class="font-weight-bold text-info pull-right">{{ contact.cell }}</a></li>
                                 {% if contact.tel %}
-                                    <p>Tel: <span class="font-weight-bold text-info">{{ contact.tel }}</span></p>
+                                    <li class="list-group-item font-weight-bold">
+                                        <i class="fa fa-phone-square"> </i>
+                                        Tel: <a href="tel:{{ contact.tel  }}" class="font-weight-bold text-success pull-right">{{ contact.tel }}</a></li>
                                 {% endif %}
-                                <p>Email: <span class="font-weight-bold text-info">{{ contact.email }}</span></p>
+                                <li class="list-group-item font-weight-bold">
+                                    <i class="fa fa-envelope-square"> </i>
+                                    Email: <a href="email:{{ contact.email }}" class="font-weight-bold text-success pull-right">{{ contact.email }}</a></li>
                                 {% if contact.facebook %}
-                                <p>Facebook: <span class="font-weight-bold text-info">{{ contact.facebook }}</span></p>
+                                <li class="list-group-item font-weight-bold">
+                                    <i class="fa fa-facebook-official"> </i>
+                                    Facebook: <a href="https://facebook.com/{{ contact.facebook }}" class="font-weight-bold text-info pull-right"
+                                                                         target="_blank">{{ contact.facebook }}</a></li>
                                 {% endif %}
                                 {% if contact.twitter %}
-                                <p>Twitter: <span class="font-weight-bold text-info">{{ contact.twitter }}</span></p>
+                                    <li class="list-group-item font-weight-bold">
+                                        <i class="fa fa-twitter-square"> </i>
+                                        Twitter: <a href="https://x.com/{{ contact.twitter }}"
+                                                                            class="font-weight-bold text-info pull-right"
+                                                                            target="_blank">{{ contact.twitter }}
+                                    </a></li>
                                 {% endif %}
                                 {% if contact.whatsapp %}
-                                <p>WhatsApp: <span class="font-weight-bold text-info">{{ contact.whatsapp }}</span></p>
+                                <li class="list-group-item font-weight-bold">
+                                <i class="fa  fa-whatsapp"> </i>
+                                    WhatsApp: <a href="https://wa.me/{{ contact.whatsapp }}"
+                                                                         class="font-weight-bold text-info pull-right"
+                                                                         target="_blank">{{ contact.whatsapp }}</a></li>
                                 {% endif %}
+                            </ul>
                             </div>
                         </div>
                         <!-- Edit Contact Tab -->

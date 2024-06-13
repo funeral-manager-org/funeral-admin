@@ -24,15 +24,15 @@
                     </span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="clients-tab" data-toggle="tab" href="#clients" role="tab" aria-controls="clients" aria-selected="false">
-                        <span class="font-weight-bold text-info">
-                            <i class="fa fa-users"> </i>
-                            Clients
-                        </span>
-                    </a>
-                </li>
-
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link" id="clients-tab" data-toggle="tab" href="#clients" role="tab" aria-controls="clients" aria-selected="false">#}
+{#                        <span class="font-weight-bold text-info">#}
+{#                            <i class="fa fa-users"> </i>#}
+{#                            Clients#}
+{#                        </span>#}
+{#                    </a>#}
+{#                </li>#}
+{##}
             </ul>
         </div>
         <div class="card-body">
@@ -45,34 +45,34 @@
                         </div>
                         <div class="card-body">
                             <ul class="list-group col-9">
-                                <li class="list-group-item font-weight-bold">Branch Name: <span class="font-weight-bold text-info pull-right">{{ branch.branch_name }}</span></li>
-                                <li class="list-group-item font-weight-bold">Branch Description: <span class="font-weight-bold text-info pull-right">{{ branch.branch_description }}</span></li>
+                                <li class="list-group-item font-weight-bold">Branch Name: <span class="font-weight-bold text-info pull-right">{{ branch.branch_name| title }}</span></li>
+                                <li class="list-group-item font-weight-bold">Branch Description: <span class="font-weight-bold text-info pull-right">{{ branch.branch_description| title }}</span></li>
                                 <li class="list-group-item font-weight-bold">Date Registered: <span class="font-weight-bold text-info pull-right">{{ branch.date_registered }}</span></li>
-                                <li class="list-group-item font-weight-bold">Total Clients: <span class="font-weight-bold text-info pull-right">{{ branch.total_clients }}</span></li>
-                                <li class="list-group-item font-weight-bold">Total Employees: <span class="font-weight-bold text-info pull-right">{{ branch.total_employees }}</span></li>
+                                <li class="list-group-item font-weight-bold">Total Clients: <span class="font-weight-bold text-info pull-right">{{ branch.total_clients| number }}</span></li>
+                                <li class="list-group-item font-weight-bold">Total Employees: <span class="font-weight-bold text-info pull-right">{{ branch.total_employees| number }}</span></li>
                                 <!-- Add more details if needed -->
                             </ul>
                         </div>
 
                         <div class="card-footer">
 
-                            <a href="#" class="btn btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#addressID">
+                            <a href="#" class="btn btn-outline-success btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#addressID">
                                 <i class="fa fa-address-book"> </i> Address
                             </a>
-                            <a href="#" class="btn btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#postalID">
+                            <a href="#" class="btn btn-outline-success btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#postalID">
                                 <i class="fa fa-address-card-o"> </i> Postal Address
                             </a>
-                            <a href="#" class="btn btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#contactID">
+                            <a href="#" class="btn btn-outline-success btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#contactID">
                                 <i class="fa fa-envelope-o"> </i> Contact Details
                             </a>
-                            <a href="#" class="btn btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#accountID">
+                            <a href="#" class="btn btn-outline-success btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#accountID">
                                 <i class="fa fa-credit-card"> </i> Bank Account
                             </a>
 
 {#                            <button class="btn btn-warning btn-rounded btn-sm m-l-9 font-weight-bold"><i class="fa fa-print"> </i> Print Report</button>#}
 
-                            <a href="{{ url_for('company.get_admin') }}" class="btn btn-sm btn-danger btn-rounded mr-2 mr-md-12 mb-2 mb-md-0 pull-right">
-                                <i class="fa fa-folder"> </i> Company Details
+                            <a href="{{ url_for('company.get_admin') }}" class="btn btn-outline-success btn-sm btn-danger btn-rounded mr-2 mr-md-12 mb-2 mb-md-0 pull-right">
+                                <i class="fa fa-backward"> </i> Company Details
                             </a>
 
                         </div>
@@ -117,10 +117,10 @@
                                     <tr>
                                         <td class="font-weight-bold">
                                             <a href="{{ url_for('company.get_employee', employee_id=employee.employee_id, branch_id=branch.branch_id) }}" class="text-info" title="Manage Employee">
-                                                {{ employee.full_names }}
+                                                {{ employee.full_names| title }}
                                             </a>
                                         </td>
-                                        <td class="font-weight-bold">{{ employee.last_name }}</td>
+                                        <td class="font-weight-bold">{{ employee.last_name| title }}</td>
 
                                         <td class="font-weight-bold">{{ employee.email }}</td>
                                         <td class="font-weight-bold">{{ employee.contact_number }}</td>

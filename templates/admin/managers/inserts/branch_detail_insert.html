@@ -23,12 +23,12 @@
                 <tr>
                     <td>
                         <a href="{{ url_for('company.get_branch', branch_id=branch.branch_id) }}" class="font-weight-bold text-info">
-                            {{ branch.branch_name }}
+                            {{ branch.branch_name| title }}
                         </a>
                     </td>
                     <td>{{ branch.branch_description }}</td>
-                    <td>{{ branch.total_employees }}</td>
-                    <td>{{ branch.total_clients }}</td>
+                    <td>{{ branch.total_employees| number }}</td>
+                    <td>{{ branch.total_clients| number }}</td>
                 </tr>
             {% endfor %}
         </tbody>

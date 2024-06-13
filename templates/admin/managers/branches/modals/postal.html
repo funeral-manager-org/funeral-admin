@@ -4,21 +4,36 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="postalLabel" class="card-title"> <i class="fa fa-address-card"></i> Postal Address </h2>
+                <h2 id="postalLabel" class="card-title font-weight-bold"> <i class="fa fa-address-card"></i> Postal Address </h2>
             </div>
             <div class="modal-body">
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs" role="tablist">
                     {% if postal_address %}
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#viewPostal" role="tab">Postal Address</a>
+                            <a class="nav-link active" data-toggle="tab" href="#viewPostal" role="tab">
+                                <span class="font-weight-bold">
+                                    <i class="fa fa-address-card"> </i>
+                                    Postal Address
+                                </span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#editPostal" role="tab">Edit Postal Address</a>
+                            <a class="nav-link" data-toggle="tab" href="#editPostal" role="tab">
+                                <span class="font-weight-bold">
+                                    <i class="fa fa-pencil"> </i>
+                                    Edit Postal Address
+                                </span>
+                            </a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#addPostal" role="tab">Postal Address</a>
+                            <a class="nav-link active" data-toggle="tab" href="#addPostal" role="tab">
+                                <span class="font-weight-bold">
+                                    <i class="fa fa-address-card-o"> </i>
+                                    Postal Address
+                                </span>
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -29,12 +44,14 @@
                         <div class="tab-pane active" id="viewPostal" role="tabpanel">
                             <div class="card-footer">
                                 <!-- Display postal address details here -->
-                                <p class="font-weight-bold text-info">{{ branch.branch_name }} {{ branch.branch_description }}</p>
-                                <p class="font-weight-bold">Address Line 1: <span class="font-weight-bold text-info">{{ postal_address.address_line_1 }}</span></p>
-                                <p class="font-weight-bold">Town/City: <span class="font-weight-bold text-info">{{ postal_address.town_city }}</span></p>
-                                <p class="font-weight-bold">Province: <span class="font-weight-bold text-info">{{ postal_address.province }}</span></p>
-                                <p class="font-weight-bold">Country: <span class="font-weight-bold text-info">{{ postal_address.country }}</span></p>
-                                <p class="font-weight-bold">Postal Code: <span class="font-weight-bold text-info">{{ postal_address.postal_code }}</span></p>
+                                <ul class="list-group">
+                                    <li class="list-group-item font-weight-bold text-info">{{ branch.branch_name| title }} {{ branch.branch_description| title }}</li>
+                                    <li class="list-group-item font-weight-bold">Address Line 1: <span class="font-weight-bold text-info pull-right">{{ postal_address.address_line_1 }}</span></li>
+                                    <li class="list-group-item font-weight-bold">Town/City: <span class="font-weight-bold text-info pull-right">{{ postal_address.town_city }}</span></li>
+                                    <li class="list-group-item font-weight-bold">Province: <span class="font-weight-bold text-info pull-right">{{ postal_address.province }}</span></li>
+                                    <li class="list-group-item font-weight-bold">Country: <span class="font-weight-bold text-info pull-right">{{ postal_address.country }}</span></li>
+                                    <li class="list-group-item font-weight-bold">Postal Code: <span class="font-weight-bold text-info pull-right">{{ postal_address.postal_code }}</span></li>
+                                </ul>
                             </div>
                         </div>
                         <!-- Edit Postal Address Tab -->

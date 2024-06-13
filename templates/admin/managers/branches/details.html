@@ -39,38 +39,42 @@
             <div class="tab-content" id="companyTabsContent">
                 <div class="tab-pane fade show active" id="branchDetails" role="tabpanel" aria-labelledby="branchDetails-tab">
                     <!-- Company Details Tab Content -->
-                    <div class="card">
+                    <div class="card flex-column flex-row">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fa fa-folder-open"> </i> Branch Details</h3>
+                            <h3 class="card-title text-info font-weight-bold"><i class="fa fa-folder-open"> </i> Branch Details</h3>
                         </div>
                         <div class="card-body">
-
-                            <ul class="list-group">
-                                <li class="list-group-item">Branch Name: <span class="font-weight-bold text-info">{{ branch.branch_name }}</span></li>
-                                <li class="list-group-item">Branch Description: <span class="font-weight-bold text-info">{{ branch.branch_description }}</span></li>
-                                <li class="list-group-item">Date Registered: <span class="font-weight-bold text-info">{{ branch.date_registered }}</span></li>
-                                <li class="list-group-item">Total Clients: <span class="font-weight-bold text-info">{{ branch.total_clients }}</span></li>
-                                <li class="list-group-item">Total Employees: <span class="font-weight-bold text-info">{{ branch.total_employees }}</span></li>
+                            <ul class="list-group col-9">
+                                <li class="list-group-item font-weight-bold">Branch Name: <span class="font-weight-bold text-info pull-right">{{ branch.branch_name }}</span></li>
+                                <li class="list-group-item font-weight-bold">Branch Description: <span class="font-weight-bold text-info pull-right">{{ branch.branch_description }}</span></li>
+                                <li class="list-group-item font-weight-bold">Date Registered: <span class="font-weight-bold text-info pull-right">{{ branch.date_registered }}</span></li>
+                                <li class="list-group-item font-weight-bold">Total Clients: <span class="font-weight-bold text-info pull-right">{{ branch.total_clients }}</span></li>
+                                <li class="list-group-item font-weight-bold">Total Employees: <span class="font-weight-bold text-info pull-right">{{ branch.total_employees }}</span></li>
                                 <!-- Add more details if needed -->
                             </ul>
-
                         </div>
+
                         <div class="card-footer">
 
-                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#addressID">
+                            <a href="#" class="btn btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#addressID">
                                 <i class="fa fa-address-book"> </i> Address
                             </a>
-                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#postalID">
+                            <a href="#" class="btn btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#postalID">
                                 <i class="fa fa-address-card-o"> </i> Postal Address
                             </a>
-                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#contactID">
+                            <a href="#" class="btn btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#contactID">
                                 <i class="fa fa-envelope-o"> </i> Contact Details
                             </a>
-                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#accountID">
+                            <a href="#" class="btn btn-sm btn-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#accountID">
                                 <i class="fa fa-credit-card"> </i> Bank Account
                             </a>
 
-                            <button class="btn btn-warning btn-sm m-l-9 font-weight-bold"><i class="fa fa-print"> </i> Print Report</button>
+{#                            <button class="btn btn-warning btn-rounded btn-sm m-l-9 font-weight-bold"><i class="fa fa-print"> </i> Print Report</button>#}
+
+                            <a href="{{ url_for('company.get_admin') }}" class="btn btn-sm btn-danger btn-rounded mr-2 mr-md-12 mb-2 mb-md-0 pull-right">
+                                <i class="fa fa-folder"> </i> Company Details
+                            </a>
+
                         </div>
                     </div>
                 </div>
@@ -78,7 +82,7 @@
                     <!-- Add Company Branch Tab Content -->
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title font-weight-bold"><i class="fa fa-users"></i> {{ branch.branch_name }} Employees</h3>
+                            <h3 class="card-title font-weight-bold text-info"><i class="fa fa-users"></i> {{ branch.branch_name }} Branch -  Employees</h3>
                         </div>
 
                         <div class="card-body">
@@ -134,14 +138,10 @@
                                 </ul>
                                 <hr/>
                             </div>
-                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeeID">
-                                <i class="ti ti-agenda"> </i>
-                                New Employee
+                            <a href="#" class="btn btn-sm btn-rounded btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeeID">
+                                <i class="ti ti-user"> </i>
+                                Add Employee
                             </a>
-                            <button class="btn btn-warning btn-sm">
-                                <i class="fa fa-print"> </i>
-                                Print Details
-                            </button>
                         </div>
 
                     </div>

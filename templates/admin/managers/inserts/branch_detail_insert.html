@@ -1,0 +1,43 @@
+
+
+
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title font-weight-bold text-info">
+            <i class="fa fa-folder-open"> </i>
+            Company Branches
+        </h3>
+    </div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <td class="font-weight-bold text-info">Name</td>
+                <td class="font-weight-bold text-info">Description</td>
+                <td class="font-weight-bold text-info">Employees</td>
+                <td class="font-weight-bold text-info">Clients</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for branch in company_branches %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('company.get_branch', branch_id=branch.branch_id) }}" class="font-weight-bold text-info">
+                            {{ branch.branch_name }}
+                        </a>
+                    </td>
+                    <td>{{ branch.branch_description }}</td>
+                    <td>{{ branch.total_employees }}</td>
+                    <td>{{ branch.total_clients }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="card-footer">
+        <a href="#" class="btn btn-sm btn-rounded btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#addBranchID">
+            <i class="fa fa-file">{{ " " }}</i>
+            Add Branch
+        </a>
+    </div>
+</div>
+

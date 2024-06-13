@@ -32,7 +32,7 @@
                     <a class="nav-link" id="editEmployee-tab" data-toggle="tab" href="#editEmployee" role="tab"
                        aria-controls="editEmployee" aria-selected="false">
                         <span class="font-weight-bold text-info">
-                            <i class="fa fa-user"> </i>
+                            <i class="fa fa-pencil"> </i>
                             Edit Employee
                         </span>
                     </a>
@@ -96,37 +96,38 @@
                                 Update Employee Details
                             </h4>
                         </div>
-                            <form action="{{ url_for('company.add_employee', branch_id=branch.branch_id) }}" method="post">
-                                <div class="form-group">
-                                    <label for="full_names" class="font-weight-bold">Full Name</label>
+                            <form class="form-horizontal col-9" action="{{ url_for('company.add_employee', branch_id=branch.branch_id) }}" method="post">
+                                <div class="form-group m-t-16">
+                                    <label for="full_names" class="font-weight-bold text-info">Full Names: </label>
                                     <input type="text" class="form-control" id="full_names" name="full_names" value="{{ employee_detail.full_names| title }}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="last_name"  class="font-weight-bold">Last Name</label>
+                                    <label for="last_name"  class="font-weight-bold text-info">Surname:</label>
                                     <input type="text" class="form-control" id="last_name" name="last_name" value="{{ employee_detail.last_name| title }}">
                                 </div>
-                                <div class="form-group">
-                                    <label for="id_number"  class="font-weight-bold">ID Number</label>
+
+                                <div class="form-group m-t-12">
+                                    <label for="id_number"  class="font-weight-bold text-info">ID Number</label>
                                     <input type="text" class="form-control" id="id_number" name="id_number" value="{{ employee_detail.id_number }}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="date_of_birth"  class="font-weight-bold">Date Of Birth</label>
+                                    <label for="date_of_birth"  class="font-weight-bold text-info">Date Of Birth</label>
                                     <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ employee_detail.date_of_birth }}">
                                 </div>
-                                <div class="form-group">
-                                    <label for="email" class="font-weight-bold">Email</label>
+                                <div class="form-group m-t-12">
+                                    <label for="email" class="font-weight-bold text-info">Email</label>
                                     <input type="email" class="form-control" id="email" name="email" value="{{ employee_detail.email }}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="contact_number" class="font-weight-bold">Contact Number</label>
+                                    <label for="contact_number" class="font-weight-bold text-info">Contact Number</label>
                                     <input type="tel" class="form-control" id="contact_number" name="contact_number" value="{{ employee_detail.contact_number }}">
                                 </div>
-                                <div class="form-group">
-                                    <label for="position"  class="font-weight-bold">Position</label>
+                                <div class="form-group m-t-12">
+                                    <label for="position"  class="font-weight-bold text-info">Position</label>
                                     <input type="text" class="form-control" id="position" name="position" value="{{ employee_detail.position }}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="role" class="font-weight-bold">Role</label>
+                                    <label for="role" class="font-weight-bold text-info">Role</label>
                                     <select class="form-control" name="role" id="role">
                                         <option value="{{ employee_detail.role }}" selected>{{ employee_detail.role }}</option>
                                         {% for role in employee_roles %}
@@ -134,12 +135,12 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label for="salary" class="font-weight-bold">Salary(ZAR)</label>
+                                <div class="form-group m-t-12">
+                                    <label for="salary" class="font-weight-bold  text-info">Salary(ZAR)</label>
                                     <input type="number" class="form-control" id="salary" name="salary" value="{{ employee_detail.salary}}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="is_active" class="font-weight-bold">Is Active</label>
+                                    <label for="is_active" class="font-weight-bold  text-info">Is Active</label>
                                     <select id="is_active" name="is_active" class="form-control">
                                         {% if employee_detail.is_active == True %}
                                             <option value="True" selected>True</option>
@@ -153,7 +154,7 @@
                                 <!-- Add more fields as needed -->
                                 <button type="submit" class="btn btn-rounded btn-primary btn-sm">
                                     <i class="fa fa-save"> </i>
-                                    Save Changes
+                                    Update Employee Details
                                 </button>
                             </form>
                     </div>

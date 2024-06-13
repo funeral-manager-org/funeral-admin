@@ -51,27 +51,31 @@
                                 Employee Details
                             </h4>
                         </div>
-                        <ul class="list-unstyled col-6">
-                            <li class="font-weight-bold">Employee Number: <span class="text-info pull-right">{{ employee_detail.employee_id }}</span></li>
-                            <li class="font-weight-bold">Full Names: <span class="text-info pull-right">{{ employee_detail.full_names }}</span></li>
-                            <li class="font-weight-bold">Surname: <span class="text-info pull-right">{{ employee_detail.last_name }}</span></li>
-                            <li class="font-weight-bold">Date Of Birth: <span class="text-info pull-right">{{ employee_detail.date_of_birth }}</span></li>
-                            <li class="font-weight-bold">ID Number: <span class="text-info pull-right">{{ employee_detail.id_number }}</span></li>
-                            <li class="font-weight-bold">Email: <span class="text-info pull-right">{{ employee_detail.email }}</span></li>
-                            <li class="font-weight-bold">Role: <span class="text-info pull-right">{{ employee_detail.role }}</span></li>
-                            <li class="font-weight-bold">Salary: <span class="text-info pull-right">R {{ employee_detail.salary| number }}.00</span></li>
+                        <ul class="list-group col-9">
+                            <li class="list-group-item font-weight-bold text-danger"><i class="fa fa-info-circle"> </i> Employee Number: <span class="text-info pull-right">{{ employee_detail.employee_id }}</span></li>
+                            <li class="list-group-item font-weight-bold m-t-8"><i class="fa fa-user-circle"> </i> Full Names: <span class="text-info pull-right">{{ employee_detail.full_names| title }}</span></li>
+                            <li class="list-group-item font-weight-bold"><i class="fa fa-user-circle"> </i> Surname: <span class="text-info pull-right">{{ employee_detail.last_name| title }}</span></li>
+                            <li class="list-group-item font-weight-bold m-t-8"><i class="fa fa-calendar-plus-o"> </i> Date Of Birth: <span class="text-info pull-right">{{ employee_detail.date_of_birth }}</span></li>
+                            <li class="list-group-item font-weight-bold"><i class="fa fa-id-card"> </i> ID Number: <span class="text-info pull-right">{{ employee_detail.id_number }}</span></li>
+
+                            <li class="list-group-item font-weight-bold m-t-8"><i class="fa fa-empire"> </i> Role: <span class="text-info pull-right">{{ employee_detail.role }}</span></li>
+                            <li class="list-group-item font-weight-bold"><i class="fa fa-money"> </i> Salary: <span class="text-info pull-right">R {{ employee_detail.salary| number }}.00</span></li>
+
+                            <li class="list-group-item font-weight-bold m-t-12"><i class="fa fa-mobile-phone"> </i> Contact Number: <a href="tel:{{ employee_detail.contact_number }}" class="text-success pull-right">{{ employee_detail.contact_number }}</a></li>
+                            <li class="list-group-item font-weight-bold"><i class="fa fa-envelope-square"> </i> Email: <a href="email:{{ employee_detail.email }}" class="text-success pull-right">{{ employee_detail.email }}</a></li>
+
                         </ul>
                         <div class="card-footer">
-                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeeAddressID">
+                            <a href="#" class="btn btn-sm btn-rounded btn-outline-success btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeeAddressID">
                                 <i class="fa fa-address-book"> </i> Address
                             </a>
-                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeePostalID">
+                            <a href="#" class="btn btn-sm btn-rounded btn-outline-success btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeePostalID">
                                 <i class="fa fa-address-card-o"> </i> Postal Address
                             </a>
-                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeeContactID">
+                            <a href="#" class="btn btn-sm btn-rounded btn-outline-success btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeeContactID">
                                 <i class="fa fa-envelope-o"> </i> Contact Details
                             </a>
-                            <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeeAccountID">
+                            <a href="#" class="btn btn-sm btn-rounded btn-outline-success btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#employeeAccountID">
                                 <i class="fa fa-credit-card"> </i> Bank Account
                             </a>
 
@@ -84,17 +88,17 @@
                         <div class="card-header">
                             <h4 class="card-title font-weight-bold text-info">
                                 <i class="fa fa-file-text"> </i>
-                                Edit Employee Details
+                                Update Employee Details
                             </h4>
                         </div>
                             <form action="{{ url_for('company.add_employee', branch_id=branch.branch_id) }}" method="post">
                                 <div class="form-group">
                                     <label for="full_names" class="font-weight-bold">Full Name</label>
-                                    <input type="text" class="form-control" id="full_names" name="full_names" value="{{ employee_detail.full_names }}">
+                                    <input type="text" class="form-control" id="full_names" name="full_names" value="{{ employee_detail.full_names| title }}">
                                 </div>
                                 <div class="form-group">
                                     <label for="last_name"  class="font-weight-bold">Last Name</label>
-                                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ employee_detail.last_name }}">
+                                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ employee_detail.last_name| title }}">
                                 </div>
                                 <div class="form-group">
                                     <label for="id_number"  class="font-weight-bold">ID Number</label>
@@ -142,7 +146,10 @@
                                     </select>
                                 </div>
                                 <!-- Add more fields as needed -->
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="submit" class="btn btn-rounded btn-primary btn-sm">
+                                    <i class="fa fa-save"> </i>
+                                    Save Changes
+                                </button>
                             </form>
                     </div>
                 </div>
@@ -150,7 +157,41 @@
                 <div class="tab-pane fade" id="admin" role="tabpanel" aria-labelledby="adminTasksLabel-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Admin Tasks</h3>
+                            <h3 class="card-title font-weight-bold text-info">
+                                <i class="fa fa-dashcube"> </i>
+                                Admin Tasks
+                            </h3>
+                        </div>
+
+                        <div class="card-body m-t-8">
+                            <ul class="list-group col-9">
+                                <li class="list-group font-weight-bold text-info m-t-20">Employee Details</li>
+                                <li class="list-group-item font-weight-bold m-t-16 text-danger"><i class="fa fa-info-circle"> </i> Employee Number: <span class="text-info pull-right">{{ employee_detail.employee_id }}</span></li>
+                                <li class="list-group-item font-weight-bold m-t-10"><i class="fa fa-user"> </i> Names: <span class="font-italic text-info pull-right">{{ employee_detail.full_names| title }}</span></li>
+                                <li class="list-group-item font-weight-bold"><i class="fa fa-user"> </i> Surname: <span class="font-italic text-info pull-right">{{ employee_detail.last_name| title  }}</span></li>
+                                <li class="list-group-item font-weight-bold m-t-12"><i class="fa fa-mobile-phone"> </i> Cell: <a href="tel:{{ employee_detail.contact_number }}" class="font-italic text-info pull-right">{{ employee_detail.contact_number }}</a></li>
+                                <li class="list-group-item font-weight-bold"><i class="fa fa-envelope"> </i> Email: <a href="email:{{ employee_detail.email }}" class="font-italic text-info pull-right">{{ employee_detail.email }}</a></li>
+                            </ul>
+                            <form class="form-horizontal m-t-8" action="">
+                                <div class="form-group">
+
+                                    <button class="btn btn-rounded btn-default btn-outline-success btn-sm">
+                                        <i class="fa fa-file"> </i>
+                                        Create Payslip
+                                    </button>
+
+                                    <button class="btn btn-rounded btn-default btn-outline-success btn-sm">
+                                        <i class="fa fa-file"> </i>
+                                        Set Annual Leave
+                                    </button>
+
+                                    <button class="btn btn-rounded btn-default btn-outline-success btn-sm">
+                                        <i class="fa fa-file"> </i>
+                                        Set Sick Leave
+                                    </button>
+
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>

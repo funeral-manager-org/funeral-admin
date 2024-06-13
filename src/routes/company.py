@@ -25,7 +25,7 @@ async def get_admin(user: User):
     print(f"User : {user}")
     print(f"Company ID: {user.company_id}")
     if user.company_id:
-        company_data = await company_controller.get_company_details(company_id=user.company_id)
+        company_data: Company = await company_controller.get_company_details(company_id=user.company_id)
         company_branches = await company_controller.get_company_branches(company_id=user.company_id)
         print(f" company : {company_data}")
         print(f"branches : {company_branches}")
@@ -61,6 +61,9 @@ async def get_register(user: User):
     :return:
     """
     context = dict(user=user)
+    if user.company_id:
+        company_details = await company_controller.get_company_details(company_id=user.company_id)
+        context.update(company_details=company_details)
     return render_template('admin/tasks/company/register.html', **context)
 
 

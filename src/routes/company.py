@@ -49,7 +49,7 @@ async def get_admin(user: User):
 
     flash(message=message, category='success')
 
-    return redirect(url_for('home.get_home'))
+    return render_template('admin/managers/manager.html', **context)
 
 
 @company_route.get('/admin/company/register')

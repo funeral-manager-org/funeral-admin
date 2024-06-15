@@ -9,3 +9,4 @@ cloudflare~=2.19.2
 paypalrestsdk~=1.13.3
 twilio~=9.0.5
 aiocache~=0.12.2
+redis~=5.0.6

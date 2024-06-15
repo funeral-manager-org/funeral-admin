@@ -3,6 +3,8 @@ from datetime import datetime
 from flask import Flask
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import joinedload
+
+from src.cache.cache import cached_ttl
 from src.controller import Controllers, error_handler
 from src.database.models.bank_accounts import BankAccount
 from src.database.models.companies import Company, CompanyBranches, EmployeeRoles, EmployeeDetails, CoverPlanDetails
@@ -55,6 +57,7 @@ class CompanyController(Controllers):
             self.logger.info(f"company Created : {company}")
             return company
 
+    @cached_ttl()
     @error_handler
     async def get_company_details(self, company_id: str) -> Company | None:
         with self.get_session() as session:
@@ -125,6 +128,7 @@ class CompanyController(Controllers):
                 return company_branch
             return None
 
+    @cached_ttl()
     @error_handler
     async def get_company_branches(self, company_id: str) -> list[CompanyBranches]:
         """
@@ -137,6 +141,7 @@ class CompanyController(Controllers):
             return [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
                     if isinstance(branch_orm, CompanyBranchesORM)]
 
+    @cached_ttl()
     @error_handler
     async def get_branch_by_id(self, branch_id: str) -> CompanyBranches | None:
         """
@@ -151,6 +156,7 @@ class CompanyController(Controllers):
                 return None
             return CompanyBranches(**branch_orm.to_dict())
 
+    @cached_ttl()
     @error_handler
     async def get_employee_roles(self, company_id: str) -> list[str]:
         """
@@ -161,6 +167,7 @@ class CompanyController(Controllers):
         return EmployeeRoles.get_all_roles()
 
     # noinspection DuplicatedCode
+    @cached_ttl()
     @error_handler
     async def add_update_address(self, address: Address) -> Address | None:
         """
@@ -190,6 +197,7 @@ class CompanyController(Controllers):
                 print(str(e))
                 return None
 
+    @cached_ttl()
     @error_handler
     async def get_address(self, address_id: str) -> Address | None:
         with self.get_session() as session:
@@ -199,6 +207,7 @@ class CompanyController(Controllers):
             return None
 
     # noinspection DuplicatedCode
+    @cached_ttl()
     @error_handler
     async def add_postal_address(self, postal_address: PostalAddress) -> PostalAddress | None:
         """
@@ -229,6 +238,7 @@ class CompanyController(Controllers):
             session.commit()
             return postal_address
 
+    @cached_ttl()
     @error_handler
     async def get_postal_address(self, postal_id: str) -> PostalAddress | None:
         """
@@ -243,6 +253,7 @@ class CompanyController(Controllers):
             return None
 
     # noinspection DuplicatedCode
+    @cached_ttl()
     @error_handler
     async def add_contacts(self, contact: Contacts) -> Contacts | None:
         """
@@ -274,6 +285,7 @@ class CompanyController(Controllers):
             session.commit()
             return contact
 
+    @cached_ttl()
     @error_handler
     async def get_contact(self, contact_id: str) -> Contacts | None:
         """
@@ -294,6 +306,7 @@ class CompanyController(Controllers):
             return None
 
     # noinspection DuplicatedCode
+    @cached_ttl()
     @error_handler
     async def add_bank_account(self, bank_account: BankAccount) -> BankAccount | None:
         """
@@ -330,6 +343,7 @@ class CompanyController(Controllers):
                 session.rollback()
                 return None
 
+    @cached_ttl()
     @error_handler
     async def get_bank_account(self, bank_account_id: str) -> BankAccount | None:
         """
@@ -345,6 +359,7 @@ class CompanyController(Controllers):
             return None
 
     # noinspection DuplicatedCode
+    @cached_ttl()
     @error_handler
     async def add_employee(self, employee: EmployeeDetails) -> tuple[bool, EmployeeDetails | None]:
         """
@@ -399,6 +414,7 @@ class CompanyController(Controllers):
                 return False, None
             return True, employee
 
+    @cached_ttl()
     @error_handler
     async def get_branch_employees(self, branch_id: str) -> list[EmployeeDetails]:
         """
@@ -411,11 +427,15 @@ class CompanyController(Controllers):
             return [EmployeeDetails(**employee.to_dict()) for employee in employees_orm if
                     isinstance(employee, EmployeeORM)]
 
+    @cached_ttl()
+    @error_handler
     async def get_branch_policy_holders(self, branch_id: str) -> list[ClientPersonalInformation]:
         with self.get_session() as session:
             clients_orm_list = session.query(ClientPersonalInformationORM).filter_by(branch_id=branch_id).all()
             return [ClientPersonalInformation(**client.to_dict()) for client in clients_orm_list]
 
+    @cached_ttl()
+    @error_handler
     async def get_branch_policy_holders_with_lapsed_policies(self, branch_id: str) -> list[ClientPersonalInformation]:
         """
         Get policy holders with lapsed policies for a given branch.
@@ -441,6 +461,7 @@ class CompanyController(Controllers):
             # Convert ClientPersonalInformationORM objects to ClientPersonalInformation objects
             return [ClientPersonalInformation(**policy_holder.to_dict()) for policy_holder in policy_holders]
 
+    @cached_ttl()
     @error_handler
     async def get_employee(self, employee_id: str) -> EmployeeDetails | None:
         """
@@ -454,6 +475,9 @@ class CompanyController(Controllers):
                 return EmployeeDetails(**employee_orm.to_dict())
             return None
 
+
+    @cached_ttl()
+    @error_handler
     async def get_employee_by_uid(self, uid: str) -> EmployeeDetails | None:
         """
 
@@ -525,6 +549,7 @@ class CompanyController(Controllers):
             session.commit()
             return plan_cover
 
+    @cached_ttl()
     @error_handler
     async def get_company_covers(self, company_id: str) -> list[CoverPlanDetails]:
         """
@@ -537,6 +562,7 @@ class CompanyController(Controllers):
             return [CoverPlanDetails(**plan.to_dict()) for plan in cover_details_list
                     if isinstance(plan, CoverPlanDetailsORM)]
 
+    @cached_ttl()
     @error_handler
     async def get_plan_cover(self, company_id: str, plan_number: str) -> CoverPlanDetails | None:
         """
@@ -552,6 +578,7 @@ class CompanyController(Controllers):
                 return CoverPlanDetails(**plan_cover_orm.to_dict())
             return None
 
+    @cached_ttl()
     @error_handler
     async def get_plan_subscribers(self, plan_number: str) -> list[PolicyRegistrationData]:
         """
@@ -564,6 +591,7 @@ class CompanyController(Controllers):
             return [PolicyRegistrationData(**subscriber.to_dict()) for subscriber in plan_subscribers
                     if isinstance(subscriber, PolicyRegistrationDataORM)]
 
+    @cached_ttl(ttl=60)
     @error_handler
     async def get_policy_holders(self, company_id: str) -> list[ClientPersonalInformation]:
         """
@@ -580,6 +608,7 @@ class CompanyController(Controllers):
 
             return [ClientPersonalInformation(**holder.to_dict()) for holder in policy_holders_list]
 
+    @cached_ttl()
     @error_handler
     async def get_policy_holder(self, uid: str) -> ClientPersonalInformation | None:
         with self.get_session() as session:
@@ -588,6 +617,7 @@ class CompanyController(Controllers):
                 return ClientPersonalInformation(**policy_holder_orm.to_dict())
             return None
 
+    @cached_ttl()
     @error_handler
     async def get_policy_data(self, uid: str):
         with self.get_session() as session:
@@ -596,6 +626,7 @@ class CompanyController(Controllers):
                 return PolicyRegistrationData(**policy_data_orm.to_dict())
             return None
 
+    @cached_ttl()
     @error_handler
     async def get_beneficiaries(self, policy_number: str):
         """
@@ -608,6 +639,7 @@ class CompanyController(Controllers):
                 policy_number=policy_number).all()
             return [ClientPersonalInformation(**client.to_dict()) for client in beneficiaries_list_orm]
 
+    @cached_ttl()
     @error_handler
     async def get_payment_methods(self) -> list[str]:
         return PaymentMethods.get_payment_methods()
@@ -727,10 +759,12 @@ class CompanyController(Controllers):
 
             return policy_data
 
+    @cached_ttl()
     @error_handler
     async def get_countries(self):
         return self.countries
 
+    @cached_ttl()
     @error_handler
     async def get_policy_with_policy_number(self, policy_number: str) -> PolicyRegistrationData | None:
         """
@@ -744,6 +778,7 @@ class CompanyController(Controllers):
                 return PolicyRegistrationData(**policy_data_orm.to_dict())
             return None
 
+    @cached_ttl()
     @error_handler
     async def search_policies_by_id_number(self, id_number: str) -> list[PolicyRegistrationData]:
         """
@@ -792,6 +827,7 @@ class CompanyController(Controllers):
             # Convert ORM objects to PolicyRegistrationData objects
             return [PolicyRegistrationData(**policy_orm.to_dict()) for policy_orm in policies_orm]
 
+    @cached_ttl()
     @error_handler
     async def return_all_active_company_policies(self) -> list[PolicyRegistrationData]:
         """
@@ -802,6 +838,7 @@ class CompanyController(Controllers):
             policies_orm_list = session.query(PolicyRegistrationDataORM).filter_by(policy_active=True).all()
             return [PolicyRegistrationData(**policy.to_dict()) for policy in policies_orm_list]
 
+    @cached_ttl()
     @error_handler
     async def return_all_outstanding_company_policies(self) -> list[PolicyRegistrationData]:
         """

@@ -2,6 +2,7 @@ import uuid, random, string
 from enum import Enum
 from os import path
 from datetime import datetime, timedelta
+import re
 
 
 # TODO create a class to contain this enum types for the entire project
@@ -155,3 +156,8 @@ def create_employee_id():
 
 def string_today():
     return str(datetime.today().date())
+
+
+def camel_to_snake(name: str) -> str:
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()

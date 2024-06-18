@@ -12,6 +12,7 @@ from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose, SM
 from src.database.sql.messaging import SMSInboxORM, SMSComposeORM, EmailComposeORM, SMSSettingsORM
 from src.emailer import EmailModel, SendMail
 from src.utils import create_id
+from src.cache.cache import cached_ttl, mem_cache
 
 
 def date_time() -> str:
@@ -59,6 +60,7 @@ class EmailService(Controllers):
             else:
                 self.logger.error(f"Email not sent : {str(email)}")
 
+            await mem_cache.clear_mem_cache()
         except requests.exceptions.ConnectTimeout:
             self.logger.error("Resend Connection TimeOut")
             await asyncio.sleep(delay=self.cool_down_on_error)
@@ -66,6 +68,7 @@ class EmailService(Controllers):
 
     @error_handler
     async def store_sent_email_to_database(self, email_: EmailCompose):
+        await mem_cache.clear_mem_cache()
         with self.get_session() as session:
             sent_email_orm = EmailComposeORM(**email_.dict())
             session.add(sent_email_orm)
@@ -74,6 +77,8 @@ class EmailService(Controllers):
         # Code to receive email from email service API
         self.logger.info(f"Received email from {sender} with subject: {subject} and body: {body}")
 
+    @cached_ttl()
+    @error_handler
     async def get_sent_messages(self, branch_id: str) -> list[EmailCompose]:
         """
             get all Sent Messages for a specific Branch
@@ -85,6 +90,8 @@ class EmailService(Controllers):
             return [EmailCompose(**email.to_dict()) for email in email_messages_orm
                     if isinstance(email, EmailComposeORM)]
 
+    @cached_ttl()
+    @error_handler
     async def get_sent_email(self, message_id: str) -> EmailCompose | None:
         """
             Get a Specific Sent Email from the database
@@ -205,25 +212,33 @@ class SMSService(Controllers):
                 # Storing the Message to Database
                 await self.store_sms_to_database_inbox(sms_message=message)
 
+    @error_handler
     async def store_sms_to_database_inbox(self, sms_message: SMSInbox) -> SMSInbox:
         with self.get_session() as session:
             session.add(SMSInboxORM(**sms_message.dict()))
-
+            await mem_cache.clear_mem_cache()
             return sms_message
 
+    @cached_ttl()
+    @error_handler
     async def get_inbox_messages_from_database(self, branch_id: str) -> list[SMSInbox]:
         with self.get_session() as session:
             inbox_list = session.query(SMSInboxORM).filter_by(to_branch=branch_id).all()
             return [SMSInbox(**inbox.to_dict()) for inbox in inbox_list if isinstance(inbox, SMSInboxORM)]
 
+    @cached_ttl()
+    @error_handler
     async def get_sent_box_messages_from_database(self, branch_id: str) -> list[SMSCompose]:
         with self.get_session() as session:
             compose_orm_list = session.query(SMSComposeORM).filter_by(to_branch=branch_id).all()
             return [SMSCompose(**sms.to_dict()) for sms in compose_orm_list if isinstance(sms, SMSComposeORM)]
 
+    @error_handler
     async def mark_message_as_responded(self, reference: str) -> SMSCompose | None:
         with self.get_session() as session:
             message_orm = session.query(SMSComposeORM).filter_by(reference=reference).first()
+            await mem_cache.clear_mem_cache()
+
             if isinstance(message_orm, SMSComposeORM):
                 sms_compose = SMSCompose(**message_orm.to_dict())
                 message_orm.client_responded = True
@@ -235,6 +250,7 @@ class SMSService(Controllers):
                 return sms_compose
             return None
 
+    @error_handler
     async def add_sms_settings(self, settings: SMSSettings) -> SMSSettings:
         """
 
@@ -243,6 +259,7 @@ class SMSService(Controllers):
         """
         with self.get_session() as session:
             sms_settings_orm = session.query(SMSSettingsORM).filter_by(company_id=settings.company_id).first()
+            await mem_cache.clear_mem_cache()
             if isinstance(sms_settings_orm, SMSSettingsORM):
                 # Update the existing record
                 sms_settings_orm.enable_sms_notifications = settings.enable_sms_notifications
@@ -259,6 +276,8 @@ class SMSService(Controllers):
 
             return settings
 
+    @cached_ttl()
+    @error_handler
     async def get_sms_settings(self, company_id: str) -> SMSSettings | None:
         """
 

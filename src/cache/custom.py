@@ -90,7 +90,7 @@ class Cache:
         self._cache_lock = threading.Lock()
 
         self._logger = init_logger(camel_to_snake(self.__class__.__name__))
-
+        # TODO rewrite cache implementation integrate it with the controller on init app of each controller
         if self.redis_errors.use_redis:
             redis_host = config_instance().REDIS_CACHE.CACHE_REDIS_HOST
             redis_port = config_instance().REDIS_CACHE.CACHE_REDIS_PORT

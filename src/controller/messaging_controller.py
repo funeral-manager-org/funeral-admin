@@ -20,12 +20,23 @@ def date_time() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-async def standard_time(start_time) -> str:
-    time_elapsed = time.time() - start_time
-    hours = int(time_elapsed // 3600)
-    minutes = int((time_elapsed % 3600) // 60)
-    seconds = int(time_elapsed % 60)
-    return f"{hours} hours, {minutes} minutes, {seconds} seconds"
+async def standard_time(start_time: float) -> str:
+    """
+    Calculate and return the elapsed time since the given start time in hours, minutes, and seconds.
+
+    :param start_time: The start time in seconds since the epoch (e.g., as returned by `time.time()`).
+    :return: A string representing the elapsed time in the format "X hours, Y minutes, Z seconds".
+    """
+    # Calculate the total elapsed time in seconds
+    elapsed_seconds = time.time() - start_time
+
+    # Calculate hours, minutes, and seconds
+    hours = elapsed_seconds // 3600  # Number of complete hours
+    minutes = (elapsed_seconds % 3600) // 60  # Number of complete minutes remaining
+    seconds = elapsed_seconds % 60  # Number of remaining seconds
+
+    # Return the formatted time as a string
+    return f"{int(hours)} hours, {int(minutes)} minutes, {int(seconds)} seconds"
 
 
 class EmailService(Controllers):

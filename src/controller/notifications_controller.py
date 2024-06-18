@@ -123,8 +123,6 @@ class NotificationsController(Controllers):
             if isinstance(notice_interval_orm, PaymentNoticeIntervalORM):
                 notice_interval_orm.last_payment_notice_sent_date = datetime.today().date()
 
-                notice_interval = PaymentNoticeInterval(**notice_interval_orm.to_dict())
-
     @error_handler
     async def is_expired_notice_sent_for_this_company(self, company_id: str):
         """
@@ -138,6 +136,17 @@ class NotificationsController(Controllers):
                 notice_interval = PaymentNoticeInterval(**notice_interval_orm.to_dict())
                 return notice_interval.payment_expired_notice_sent_within_three_days()
             return False
+    @error_handler
+    async def expired_notice_sent_recently_for_this_company(self, company_id: str):
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            notice_interval_orm = session.query(PaymentNoticeIntervalORM).filter_by(company_id=company_id).first()
+            if isinstance(notice_interval_orm, PaymentNoticeIntervalORM):
+                notice_interval_orm.last_expired_notice_sent_date = datetime.today().date()
 
     @error_handler
     async def send_notice_to_subscribe(self, company_data: Company):

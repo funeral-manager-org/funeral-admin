@@ -17,6 +17,3 @@ class Encryptor:
 
     def compare_hashes(self, hash: str, password: str):
         return self._bcrypt.check_password_hash(pw_hash=hash, password=password)
-
-
-

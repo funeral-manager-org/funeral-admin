@@ -22,12 +22,6 @@ class Controllers:
         self.sessions = [session_maker() for _ in range(self.session_limit)]
         self.logger = init_logger(self.__class__.__name__)
 
-    # def get_session(self) -> Session:
-    #     if self.sessions:
-    #         return self.sessions.pop()
-    #     self.sessions = [Session() for _ in range(self.session_limit)]
-    #     return self.get_session()
-
     @contextmanager
     def get_session(self):
         """
@@ -43,7 +37,7 @@ class Controllers:
             self.logger.debug(f"Session acquired: {session}")
             yield session
 
-            if session.dirty or session.deleted:
+            if session.dirty or session.new or session.deleted:
                 session.commit()
                 self.logger.debug("Session changes committed")
 

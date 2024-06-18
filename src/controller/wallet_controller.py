@@ -12,7 +12,6 @@ class WalletController(Controllers):
         super().__init__()
         self.wallets: dict[str, Wallet] = {}
 
-
     def load_and_build_wallets(self):
         wallets_by_uid = {}
         with self.get_session() as session:
@@ -89,7 +88,7 @@ class WalletController(Controllers):
         with self.get_session() as session:
             transaction_orm = WalletTransactionORM(**transaction.dict())
             session.add(transaction_orm)
-            session.commit()
+            
             return True
 
     @error_handler
@@ -97,7 +96,7 @@ class WalletController(Controllers):
         with self.get_session() as session:
             withdrawal_orm = WithdrawalRequestsORM(**withdrawal.dict())
             session.add(withdrawal_orm)
-            session.commit()
+            
             return withdrawal
 
 

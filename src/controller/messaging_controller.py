@@ -52,7 +52,6 @@ class EmailService(Controllers):
             with self.get_session() as session:
                 sent_email_orm = EmailComposeORM(**email_.dict())
                 session.add(sent_email_orm)
-                session.commit()
 
         except requests.exceptions.ConnectTimeout:
             self.logger.error("Resend Connection TimeOut")
@@ -155,7 +154,6 @@ class SMSService(Controllers):
         # Saving Sent Messages to the Database
         with self.get_session() as session:
             session.add(SMSComposeORM(**composed_sms.dict()))
-            session.commit()
 
         # Simulate sending SMS asynchronously
         # await asyncio.sleep(1)
@@ -198,7 +196,7 @@ class SMSService(Controllers):
     async def store_sms_to_database_inbox(self, sms_message: SMSInbox) -> SMSInbox:
         with self.get_session() as session:
             session.add(SMSInboxORM(**sms_message.dict()))
-            session.commit()
+
             return sms_message
 
     async def get_inbox_messages_from_database(self, branch_id: str) -> list[SMSInbox]:
@@ -221,7 +219,6 @@ class SMSService(Controllers):
 
                 sms_compose.is_delivered = True
                 sms_compose.client_responded = True
-                session.commit()
 
                 return sms_compose
             return None
@@ -247,8 +244,6 @@ class SMSService(Controllers):
                 # Create a new record
                 new_sms_settings = SMSSettingsORM(**settings.dict())
                 session.add(new_sms_settings)
-
-            session.commit()
 
             return settings
 

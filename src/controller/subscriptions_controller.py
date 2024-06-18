@@ -2,7 +2,9 @@ import asyncio
 from datetime import datetime, timedelta
 
 from flask import Flask, render_template
+from sqlalchemy.orm import joinedload
 
+from src.cache.cache import cached_ttl
 from src.controller import Controllers, error_handler
 from src.controller.auth import UserController
 from src.controller.company_controller import CompanyController
@@ -10,9 +12,9 @@ from src.controller.messaging_controller import MessagingController
 from src.database.models.companies import Company
 from src.database.models.messaging import RecipientTypes, EmailCompose
 from src.database.models.payments import Payment
-from src.database.models.subscriptions import Subscriptions
+from src.database.models.subscriptions import Subscriptions, SubscriptionStatus
 from src.database.models.users import User
-from src.database.sql.subscriptions import SubscriptionsORM, PaymentORM
+from src.database.sql.subscriptions import SubscriptionsORM, PaymentORM, SubscriptionStatusORM
 
 
 class SubscriptionsController(Controllers):
@@ -79,9 +81,9 @@ class SubscriptionsController(Controllers):
                 new_subscription_orm = SubscriptionsORM(**subscription.dict())
                 session.add(new_subscription_orm)
 
-            session.commit()
-            return subscription
+        return subscription
 
+    @error_handler
     async def add_company_payment(self, payment: Payment):
         """
 
@@ -91,9 +93,10 @@ class SubscriptionsController(Controllers):
         with self.get_session() as session:
             session.add(PaymentORM(**payment.dict()))
             session.commit(payment)
+
             return payment
 
-    # noinspection DuplicatedCode
+    @error_handler
     async def send_email_to_company_admins(self, company_data, email_template, subject):
         company_accounts: list[User] = await self.user_controller.get_company_accounts(
             company_id=company_data.company_id)
@@ -105,6 +108,7 @@ class SubscriptionsController(Controllers):
                                                                               to_branch=account.branch_id,
                                                                               recipient_type=RecipientTypes.EMPLOYEES.value))
 
+    @error_handler
     async def subscription_has_expired(self, company_data: Company, subscription: Subscriptions):
         """
 
@@ -122,6 +126,7 @@ class SubscriptionsController(Controllers):
         await self.send_email_to_company_admins(company_data=company_data, email_template=email_template,
                                                 subject=subject)
 
+    @error_handler
     async def notify_managers_to_pay_their_subscriptions(self, un_paid_subs: list[Subscriptions]):
         """
 
@@ -138,9 +143,13 @@ class SubscriptionsController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            subscriptions_orm_list = session.query(SubscriptionsORM).all()
-            return [Subscriptions(**sub_orm.to_dict()) for sub_orm in subscriptions_orm_list]
+            subscriptions_orm_list = session.query(SubscriptionsORM).options(
+                joinedload(SubscriptionsORM.payments)).all()
+            subscriptions_list = [Subscriptions(**sub_orm.to_dict()) for sub_orm in subscriptions_orm_list]
 
+            return subscriptions_list
+
+    @error_handler
     async def check_if_subscriptions_are_paid(self):
         """
         **check_if_subscriptions_are_paid*8
@@ -155,6 +164,7 @@ class SubscriptionsController(Controllers):
 
         await self.notify_managers_to_pay_their_subscriptions(un_paid_subs=un_paid_subscriptions)
 
+    @error_handler
     async def remove_old_unpaid_subscriptions(self):
         """
         Removes unpaid subscriptions older than 30 days
@@ -170,18 +180,54 @@ class SubscriptionsController(Controllers):
                 await self.remove_subscription(subscription)
                 self.logger.info(f"Removed unpaid subscription: {subscription}")
 
+    @error_handler
     async def remove_subscription(self, subscription):
         # Placeholder for the actual removal logic
         with self.get_session() as session:
-            subscription_orm = session.query(SubscriptionsORM).filter_by(subscription_id=subscription.subscription_id).first()
+            subscription_orm = session.query(SubscriptionsORM).filter_by(
+                subscription_id=subscription.subscription_id).first()
             if subscription_orm:
                 session.delete(subscription_orm)
-                session.commit()
 
+    @cached_ttl(60 * 30)
+    @error_handler
     async def get_company_subscription(self, company_id: str) -> Subscriptions:
         with self.get_session() as session:
             subscription_orm = session.query(SubscriptionsORM).filter_by(company_id=company_id).first()
+
             return Subscriptions(**subscription_orm.to_dict())
+
+    @error_handler
+    async def check_and_set_subscription_status(self) -> bool:
+        """
+        will return true if subscription status has not been checked this week
+        :return:
+        """
+        with self.get_session() as session:
+            subscription_status_orm = session.query(SubscriptionStatusORM).first()
+            if isinstance(subscription_status_orm, SubscriptionStatusORM):
+                subscription_status = SubscriptionStatus(**subscription_status_orm.to_dict())
+                return subscription_status.subscription_checked_for_the_week()
+            else:
+                subscription_status = SubscriptionStatus()
+                session.add(SubscriptionStatusORM(**subscription_status.dict()))
+
+            return False
+
+    @error_handler
+    async def set_subscription_status(self):
+        """
+            will set that subscription status has been checked for this week
+        :return:
+        """
+        with self.get_session() as session:
+            subscription_status_orm = session.query(SubscriptionStatusORM).first()
+            if isinstance(subscription_status_orm, SubscriptionStatusORM):
+                subscription_status_orm.last_checked = datetime.today().date()
+
+            else:
+                subscription_status = SubscriptionStatus()
+                session.add(SubscriptionStatusORM(**subscription_status.dict()))
 
     async def daemon_util(self):
         """
@@ -196,9 +242,21 @@ class SubscriptionsController(Controllers):
         while True:
             self.logger.info("Subscriptions Daemon started")
             try:
+
                 await self.remove_old_unpaid_subscriptions()
-                await self.check_if_subscriptions_are_paid()
+
+                # this checks if subscription status has been checked for this week
+                is_checked_this_week = await self.check_and_set_subscription_status()
+
+                if not is_checked_this_week:
+                    # this check will run once a week
+                    await self.check_if_subscriptions_are_paid()
+                    # this sets the status that everything was checked this week
+                    await self.set_subscription_status()
+                else:
+                    self.logger.info("We Already checked subscription status this week and sent notifications")
+
             except Exception as e:
-                self.logger.error(f"Error : {str(e)}")
+                self.logger.error(f"Subscription Controller Error : {str(e)}")
 
             await asyncio.sleep(delay=twelve_hours)

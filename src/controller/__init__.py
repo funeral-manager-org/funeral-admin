@@ -1,9 +1,9 @@
 import functools
-
+from sqlalchemy.exc import SQLAlchemyError
 from flask import redirect, url_for, flash, Flask, render_template
 from pydantic import ValidationError
 from sqlalchemy.exc import OperationalError, ProgrammingError, IntegrityError
-
+from contextlib import contextmanager
 from src.database.sql import Session
 from src.logger import init_logger
 
@@ -18,14 +18,52 @@ class Controllers:
     session_limit: int = 25
 
     def __init__(self, session_maker=Session):
+        self.session_maker = session_maker
         self.sessions = [session_maker() for _ in range(self.session_limit)]
         self.logger = init_logger(self.__class__.__name__)
 
-    def get_session(self) -> Session:
-        if self.sessions:
-            return self.sessions.pop()
-        self.sessions = [Session() for _ in range(self.session_limit)]
-        return self.get_session()
+    # def get_session(self) -> Session:
+    #     if self.sessions:
+    #         return self.sessions.pop()
+    #     self.sessions = [Session() for _ in range(self.session_limit)]
+    #     return self.get_session()
+
+    @contextmanager
+    def get_session(self):
+        """
+        Generator-based context manager for managing sessions.
+        Ensures that sessions are properly released after use.
+        """
+        session = None
+        try:
+            if not self.sessions:
+                self.sessions = [self.session_maker() for _ in range(self.session_limit)]
+
+            session = self.sessions.pop()
+            self.logger.debug(f"Session acquired: {session}")
+            yield session
+
+            if session.dirty or session.deleted:
+                session.commit()
+                self.logger.debug("Session changes committed")
+
+        except SQLAlchemyError as e:
+            self.logger.error(f"Error while using session: {e}")
+            if session:
+                session.rollback()  # Rollback any uncommitted changes on error
+            raise
+        finally:
+            if session:
+                session.close()
+                self.logger.debug(f"Session released: {session}")
+            else:
+                self.sessions.append(self.session_maker())
+                self.logger.debug("Session pool replenished")
+
+    def __del__(self):
+        for session in self.sessions:
+            session.close()
+            self.logger.debug(f"Session closed on delete: {session}")
 
     # noinspection PyMethodMayBeStatic
     def setup_error_handler(self, app: Flask):

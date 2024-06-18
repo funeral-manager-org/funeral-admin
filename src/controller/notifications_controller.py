@@ -2,7 +2,9 @@ import asyncio
 from datetime import datetime, timedelta
 
 from flask import Flask, render_template
+from sqlalchemy.orm import joinedload
 
+from src.cache.cache import cached_ttl
 from src.controller import Controllers, error_handler
 from src.controller.auth import UserController
 from src.controller.company_controller import CompanyController
@@ -11,10 +13,11 @@ from src.database.models.companies import Company
 from src.database.models.contacts import Contacts
 from src.database.models.covers import ClientPersonalInformation
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose
-from src.database.models.subscriptions import Subscriptions
+from src.database.models.subscriptions import Subscriptions, PaymentNoticeInterval
 from src.database.models.users import User
 from src.database.sql.companies import CompanyORM
-from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM
+from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM, SubscriptionStatusORM, \
+    PaymentNoticeIntervalORM
 
 
 class SubscriptionExpiredException(Exception):
@@ -81,7 +84,8 @@ class NotificationsController(Controllers):
         self.user_controller = user_controller
         self.loop.create_task(self.daemon_runner())
 
-    async def subscription_has_expired(self, company_data: Company, subscription: Subscriptions):
+    @error_handler
+    async def send_subscription_has_expired_notice(self, company_data: Company, subscription: Subscriptions):
         """
 
         :param subscription:
@@ -98,6 +102,44 @@ class NotificationsController(Controllers):
         await self.send_email_to_company_admins(company_data=company_data, email_template=email_template,
                                                 subject=subject)
 
+    @error_handler
+    async def is_subscription_notice_sent_for_this_company(self, company_id: str):
+        """
+            ** will check if company_a has a payment notice already sent in the last three days
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            notice_interval_orm = session.query(PaymentNoticeIntervalORM).filter_by(company_id=company_id).first()
+            if isinstance(notice_interval_orm, PaymentNoticeIntervalORM):
+                notice_interval = PaymentNoticeInterval(**notice_interval_orm.to_dict())
+                return notice_interval.payment_notice_sent_within_three_days()
+            return False
+
+    @error_handler
+    async def subscription_notice_sent_for_company(self, company_id: str):
+        with self.get_session() as session:
+            notice_interval_orm = session.query(PaymentNoticeIntervalORM).filter_by(company_id=company_id).first()
+            if isinstance(notice_interval_orm, PaymentNoticeIntervalORM):
+                notice_interval_orm.last_payment_notice_sent_date = datetime.today().date()
+
+                notice_interval = PaymentNoticeInterval(**notice_interval_orm.to_dict())
+
+    @error_handler
+    async def is_expired_notice_sent_for_this_company(self, company_id: str):
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            notice_interval_orm = session.query(PaymentNoticeIntervalORM).filter_by(company_id=company_id).first()
+            if isinstance(notice_interval_orm, PaymentNoticeIntervalORM):
+                notice_interval = PaymentNoticeInterval(**notice_interval_orm.to_dict())
+                return notice_interval.payment_expired_notice_sent_within_three_days()
+            return False
+
+    @error_handler
     async def send_notice_to_subscribe(self, company_data: Company):
         """
 
@@ -112,17 +154,20 @@ class NotificationsController(Controllers):
         await self.send_email_to_company_admins(company_data=company_data, email_template=email_template,
                                                 subject=subject)
 
+    @error_handler
     async def send_email_to_company_admins(self, company_data, email_template, subject):
         company_accounts: list[User] = await self.user_controller.get_company_accounts(
             company_id=company_data.company_id)
         for account in company_accounts:
             if account.is_company_admin and account.account_verified:
+                recipient_type = RecipientTypes.EMPLOYEES.value
                 await self.messaging_controller.send_email(email=EmailCompose(to_email=account.email,
                                                                               subject=subject,
                                                                               message=email_template,
                                                                               to_branch=account.branch_id,
-                                                                              recipient_type=RecipientTypes.EMPLOYEES.value))
+                                                                              recipient_type=recipient_type))
 
+    @error_handler
     async def update_subscription(self, subscription: Subscriptions):
         """
 
@@ -140,9 +185,7 @@ class NotificationsController(Controllers):
                 subscription_orm.subscription_amount = subscription.subscription_amount
                 subscription_orm.subscription_period = subscription.subscription_period
 
-                session.commit()
-        pass
-
+    @error_handler
     async def add_package_to_subscription(self, subscription: Subscriptions, company_id: str):
         """
 
@@ -153,9 +196,10 @@ class NotificationsController(Controllers):
 
             for package in sms_packages_orm_list:
                 subscription.total_sms += package.use_package()
-            session.commit()
+
             return subscription
 
+    @error_handler
     async def do_send_upcoming_payment_reminders(self, company_data: Company):
         """
         Send upcoming payment reminders to clients.
@@ -163,40 +207,53 @@ class NotificationsController(Controllers):
         :param company_data:
         :return: None
         """
-        try:
-            # Retrieve company details and subscription information
 
-            subscription_orm: SubscriptionsORM = await self.get_subscription_orm(company_id=company_data.company_id)
-            if subscription_orm:
-                subscription = Subscriptions(**subscription_orm.to_dict())
-            else:
-                self.logger.error(f"Company Not Subscribed: {company_data.company_name}")
+        subscription_orm: SubscriptionsORM = await self.get_subscription_orm(company_id=company_data.company_id)
+        if subscription_orm:
+            subscription = Subscriptions(**subscription_orm.to_dict())
+        else:
+            self.logger.error(f"Company Not Subscribed: {company_data.company_name}")
+
+            notice_to_subscribe_sent_recently = await self.is_subscription_notice_sent_for_this_company(
+                company_id=company_data.company_id)
+
+            if not notice_to_subscribe_sent_recently:
+                # will only send notice to subscribe in cases where the notice has not been sent recently
                 await self.send_notice_to_subscribe(company_data=company_data)
-                return False
 
-            if subscription.is_expired() or (not subscription.is_paid_for_current_month):
-                await self.subscription_has_expired(company_data=company_data, subscription=subscription)
-                return False
+                # indicate that for this company subscription notice has already been sent
+                await self.subscription_notice_sent_for_company(company_id=company_data.company_id)
 
-            # Retrieve policy holders for the company
-            policy_holders = await self.company_controller.get_policy_holders(company_id=company_data.company_id)
-
-            # Add a package to the subscription if needed
-            subscription = await self.add_package_to_subscription(subscription=subscription,
-                                                                  company_id=company_data.company_id)
-
-            for holder in policy_holders:
-                if holder.contact_id:
-                    is_sent = await self.send_payment_reminder(holder, subscription, company_data)
-                    if not is_sent:
-                        break
-
-            await self.update_subscription(subscription=subscription)
-            return True
-        except Exception as e:
-            self.logger.error(f"Error in sending payment reminders: {str(e)}")
             return False
 
+        if subscription.is_expired() or (not subscription.is_paid_for_current_month):
+
+            subscription_expired_notice_already_sent = await self.is_expired_notice_sent_for_this_company(
+                company_id=company_data.company_id)
+
+            if not subscription_expired_notice_already_sent:
+                # send subscription has expired notice if it has not been sent recently
+                await self.send_subscription_has_expired_notice(company_data=company_data, subscription=subscription)
+
+            return False
+
+        # Retrieve policy holders for the company
+        policy_holders = await self.company_controller.get_policy_holders(company_id=company_data.company_id)
+
+        # Add a package to the subscription if needed
+        subscription = await self.add_package_to_subscription(subscription=subscription,
+                                                              company_id=company_data.company_id)
+
+        for holder in policy_holders:
+            if holder.contact_id:
+                is_sent = await self.send_payment_reminder(holder, subscription, company_data)
+                if not is_sent:
+                    break
+
+        await self.update_subscription(subscription=subscription)
+        return True
+
+    @error_handler
     async def send_payment_reminder(self, holder: ClientPersonalInformation, subscription: Subscriptions,
                                     company_data: Company):
         """
@@ -233,14 +290,18 @@ class NotificationsController(Controllers):
     @error_handler
     async def get_subscription_orm(self, company_id: str):
         """
-        Retrieve subscription ORM for a company.
+        Retrieve subscription ORM for a company, including related payments.
 
         :param company_id: The ID of the company.
         :return: SubscriptionORM
         """
         with self.get_session() as session:
-            return session.query(SubscriptionsORM).filter_by(company_id=company_id).first()
+            return session.query(SubscriptionsORM) \
+                .options(joinedload(SubscriptionsORM.payments)) \
+                .filter_by(company_id=company_id) \
+                .first()
 
+    @error_handler
     async def construct_message(self, company_data, holder, policy_registration_data):
         """
         Construct the message for the payment reminder.
@@ -280,6 +341,7 @@ class NotificationsController(Controllers):
         return render_template('email_templates/sms_credits_exhausted.html',
                                employee_record=employee_record)
 
+    @error_handler
     async def handle_insufficient_sms_credit(self, company_data: Company):
         """
         **handle_insufficient_sms_credit**
@@ -298,6 +360,7 @@ class NotificationsController(Controllers):
 
                 await self.messaging_controller.send_email(email=email)
 
+    @error_handler
     async def do_send_lapsed_policy_notifications(self, company_data: Company):
         """
 
@@ -313,7 +376,7 @@ class NotificationsController(Controllers):
         insufficient_credit = False
 
         if subscription.is_expired() or (not subscription.is_paid_for_current_month):
-            await self.subscription_has_expired(company_data=company_data, subscription=subscription)
+            await self.send_subscription_has_expired_notice(company_data=company_data, subscription=subscription)
             return False
 
         branches_list = await self.company_controller.get_company_branches(company_id=company_data.company_id)
@@ -355,6 +418,7 @@ class NotificationsController(Controllers):
                 break
         return True
 
+    @error_handler
     async def execute_reminders(self):
         """
             This Method will go through all the covers and all clients

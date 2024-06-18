@@ -53,7 +53,8 @@ class CompanyController(Controllers):
 
             company_orm = CompanyORM(**company.dict())
             session.add(company_orm)
-            session.commit()
+
+            session.close()
             self.logger.info(f"company Created : {company}")
             return company
 
@@ -65,8 +66,10 @@ class CompanyController(Controllers):
             if isinstance(company_orm, CompanyORM):
                 company_detail = Company(**company_orm.to_dict())
                 self.logger.info(f"Found Company Details : {company_detail}")
+                session.close()
                 return company_detail
             self.logger.info(f"Company Not found: {company_id}")
+            session.close()
             return None
 
     @error_handler
@@ -84,11 +87,13 @@ class CompanyController(Controllers):
                 branch_name=_branch_name.casefold()).first()
             if isinstance(company_branches_orm, CompanyBranchesORM):
                 self.logger.warning(f"Company Branch Name Already Exists : {company_branch}")
+                session.close()
                 return None
             company_branch_orm = CompanyBranchesORM(**company_branch.dict())
             self.logger.info(f"company branch added : {company_branch}")
             session.add(company_branch_orm)
-            session.commit()
+
+            session.close()
             return company_branch
 
     # noinspection DuplicatedCode
@@ -124,8 +129,9 @@ class CompanyController(Controllers):
                 if company_branch.bank_account_id:
                     branch_orm.bank_account_id = company_branch.bank_account_id
 
-                session.commit()
+                session.close()
                 return company_branch
+            session.close()
             return None
 
     @cached_ttl()
@@ -138,8 +144,10 @@ class CompanyController(Controllers):
         """
         with self.get_session() as session:
             company_branches_orm = session.query(CompanyBranchesORM).filter_by(company_id=company_id).all()
-            return [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
-                    if isinstance(branch_orm, CompanyBranchesORM)]
+            company_branches = [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
+                                if isinstance(branch_orm, CompanyBranchesORM)]
+            session.close()
+            return company_branches
 
     @cached_ttl()
     @error_handler
@@ -154,7 +162,9 @@ class CompanyController(Controllers):
 
             if not isinstance(branch_orm, CompanyBranchesORM):
                 return None
-            return CompanyBranches(**branch_orm.to_dict())
+            company_branches = CompanyBranches(**branch_orm.to_dict())
+            session.close()
+            return company_branches
 
     @cached_ttl()
     @error_handler
@@ -187,11 +197,11 @@ class CompanyController(Controllers):
                     branch_address_orm.state_province = address.state_province
                 if address.postal_code:
                     branch_address_orm.postal_code = address.postal_code
-                session.commit()
+
                 return address
             try:
                 session.add(AddressORM(**address.dict()))
-                session.commit()
+
                 return address
             except OperationalError as e:
                 print(str(e))
@@ -231,11 +241,11 @@ class CompanyController(Controllers):
                     branch_postal_orm.country = postal_address.country
                 if postal_address.postal_code:
                     branch_postal_orm.postal_code = postal_address.postal_code
-                session.commit()
+
                 return postal_address
 
             session.add(PostalAddressORM(**postal_address.dict()))
-            session.commit()
+
             return postal_address
 
     @cached_ttl()
@@ -278,11 +288,11 @@ class CompanyController(Controllers):
                     contact_orm.twitter = contact.twitter
                 if contact.whatsapp:
                     contact_orm.whatsapp = contact.whatsapp
-                session.commit()
+
                 return contact
             # Add new contact details
             session.add(ContactsORM(**contact.dict()))
-            session.commit()
+
             return contact
 
     @cached_ttl()
@@ -331,12 +341,12 @@ class CompanyController(Controllers):
                     bank_account_orm.branch = bank_account.branch
                 if bank_account.account_type:
                     bank_account_orm.account_type = bank_account.account_type
-                session.commit()
+
                 return bank_account
             try:
                 # If the bank account does not exist, add it to the database
                 session.add(BankAccountORM(**bank_account.dict()))
-                session.commit()
+
                 return bank_account
             except OperationalError as e:
                 print(str(e))
@@ -404,11 +414,10 @@ class CompanyController(Controllers):
                 if employee.contact_id:
                     employee_orm.contact_id = employee.contact_id
 
-                session.commit()
                 return False, employee
             try:
                 session.add(EmployeeORM(**employee.dict()))
-                session.commit()
+
             except OperationalError as e:
                 session.rollback()
                 return False, None
@@ -474,7 +483,6 @@ class CompanyController(Controllers):
             if isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict())
             return None
-
 
     @cached_ttl()
     @error_handler
@@ -546,7 +554,6 @@ class CompanyController(Controllers):
                 cover_plan_orm = CoverPlanDetailsORM(**plan_cover.dict())
                 session.add(cover_plan_orm)
 
-            session.commit()
             return plan_cover
 
     @cached_ttl()
@@ -695,7 +702,7 @@ class CompanyController(Controllers):
                 session.add(policy_holder_orm)
 
             # Commit changes to the database
-            session.commit()
+
             return policy_holder
 
     # noinspection DuplicatedCode
@@ -755,7 +762,6 @@ class CompanyController(Controllers):
                 policy_data_orm = PolicyRegistrationDataORM(**policy_data.dict())
 
             session.add(policy_data_orm)
-            session.commit()
 
             return policy_data
 

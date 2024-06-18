@@ -1,6 +1,7 @@
+import datetime
 from datetime import date
 
-from sqlalchemy import Column, String, inspect, Integer, Boolean, Text, Date, ForeignKey, Sequence
+from sqlalchemy import Column, String, inspect, Integer, Boolean, Text, Date, ForeignKey, Sequence, DateTime
 from sqlalchemy.orm import relationship
 
 from src.database.constants import ID_LEN, NAME_LEN
@@ -84,11 +85,7 @@ class SubscriptionsORM(Base):
             "subscription_amount": self.subscription_amount,
             "subscription_period": self.subscription_period
         }
-        try:
-            if self.payments:
-                _dict.update(payments=self.payments)
-        except Exception:
-            pass
+        _dict.update(payments=self.payments)
 
         return _dict
 
@@ -137,10 +134,50 @@ class SMSPackageORM(Base):
 
         }
 
-        try:
-            if self.payments:
-                _dict.update(payments=self.payments)
-        except Exception:
-            pass
+        _dict.update(payments=self.payments)
 
         return _dict
+
+
+class SubscriptionStatusORM(Base):
+    __tablename__ = 'subscription_status'
+    id = Column(String(ID_LEN), primary_key=True)
+    last_checked: date = Column(Date, nullable=True)
+
+    def to_dict(self) -> dict[str, date]:
+        return {"last_checked": self.last_checked, 'id': self.id}
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+
+class PaymentNoticeIntervalORM(Base):
+    """
+        payment notifications may be sent in an upredictable fashion this will prevent this
+    """
+    __tablename__ = "payment_notice_intervals"
+    company_id: str = Column(String(ID_LEN), primary_key=True)
+    last_payment_notice_sent_date: date = Column(Date)
+    last_expired_notice_sent_date: date = Column(Date)
+
+    def to_dict(self) -> dict[str, date]:
+        return {"last_payment_notice_sent_date": self.last_payment_notice_sent_date,
+                "last_expired_notice_sent_date": self.last_expired_notice_sent_date,
+                'company_id': self.company_id}
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)

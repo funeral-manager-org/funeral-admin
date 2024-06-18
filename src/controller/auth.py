@@ -9,12 +9,11 @@ from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 
 from src.controller import error_handler, UnauthorizedError, Controllers
-from src.database.models.profile import Profile, ProfileUpdate
-from src.database.models.users import User, CreateUser, UserUpdate, PayPal
+from src.database.models.profile import Profile
+from src.database.models.users import User, CreateUser, PayPal
 from src.database.sql.user import UserORM, PayPalORM
 from src.emailer import EmailModel
 from src.main import send_mail
-import requests
 
 
 class UserController(Controllers):
@@ -58,7 +57,7 @@ class UserController(Controllers):
                     paypal_account.paypal_email = paypal_email
                     paypal_account.uid = user.uid
                     session.merge(paypal_account)
-                    session.commit()
+                    
                     return PayPal(**paypal_account.to_dict())
                 else:
                     return None
@@ -68,24 +67,22 @@ class UserController(Controllers):
                 paypal_account.paypal_email = paypal_email
                 paypal_account_ = PayPal(**paypal_account.to_dict())
                 session.merge(paypal_account_)
-                session.commit()
 
                 return paypal_account_
 
             paypal_orm = PayPalORM(paypal_email=paypal_email, uid=user.uid)
             paypal_account_ = PayPal(**paypal_orm.to_dict())
             session.add(paypal_orm)
-            session.commit()
             return paypal_account_
 
     @error_handler
     async def get_paypal_account(self, uid: str) -> PayPal | None:
         with self.get_session() as session:
             paypal_account: PayPalORM = session.query(PayPalORM).filter(PayPalORM.uid == uid).first()
-            print("PAYPAL ACCOUNT")
-            print(paypal_account)
+
             if isinstance(paypal_account, PayPalORM):
                 return PayPal(**paypal_account.to_dict())
+
             return None
 
     async def is_token_valid(self, token: str) -> bool:
@@ -116,6 +113,7 @@ class UserController(Controllers):
 
         with self.get_session() as session:
             user_data: UserORM = session.query(UserORM).filter(UserORM.uid == uid).first()
+
             return user_data.to_dict()
 
     @error_handler
@@ -127,9 +125,6 @@ class UserController(Controllers):
         """
         if not email:
             return None
-        # for user in self.users.values():
-        #     if user.email.casefold() == email.casefold():
-        #         return user
 
         with self.get_session() as session:
             user_data: UserORM = session.query(UserORM).filter(UserORM.email == email.casefold()).first()
@@ -188,10 +183,11 @@ class UserController(Controllers):
             new_user: UserORM = UserORM(**user.to_dict())
             session.add(new_user)
             new_user_dict = new_user.to_dict()
-            session.commit()
+            
             _user_data = User(**new_user_dict) if isinstance(new_user, UserORM) else None
             self.logger.info(f"Created New User : {_user_data}")
             self.users[_user_data.uid] = _user_data
+
             return _user_data
 
     @error_handler
@@ -208,9 +204,10 @@ class UserController(Controllers):
 
             # Save the updated user_data back to the session
             # session.add(user_data)
-            session.commit()
+            
             self.logger.info(f"User Updated : {user_data}")
             self.users[user_data.uid] = User(**user_data.to_dict())
+
             return user_data.to_dict()
 
     @error_handler
@@ -260,7 +257,7 @@ class UserController(Controllers):
                 session.add(new_user)
                 self.logger.info(f"Created a New Employee : {user}")
             try:
-                session.commit()
+                
                 return user
             except IntegrityError:
                 # Handle integrity error (e.g., duplicate email)

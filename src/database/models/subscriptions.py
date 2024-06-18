@@ -1,7 +1,7 @@
 from enum import Enum
 
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 from src.database.models.payments import Payment
 from src.utils import create_id
@@ -125,6 +125,7 @@ class Subscriptions(BaseModel):
 
         return months_diff > self.subscription_period
 
+
 class SMSPackage(BaseModel):
     package_id: str = Field(default_factory=create_id)
     company_id: str
@@ -140,3 +141,51 @@ class SMSPackage(BaseModel):
             self.total_sms = 0
             return remaining
         return 0
+
+
+def this_day() -> datetime:
+    """
+    :return:
+    """
+    return datetime.today()
+
+
+class SubscriptionStatus(BaseModel):
+    id: str = Field(default_factory=create_id)
+    last_checked: date = Field(default_factory=this_day)
+
+    def subscription_checked_for_the_week(self) -> bool:
+        """Check if the subscription has been checked for the current week."""
+        if not self.last_checked:
+            return False
+
+        now = datetime.now().date()
+        start_of_week = now - timedelta(days=now.weekday())
+        return self.last_checked >= start_of_week
+
+
+class PaymentNoticeInterval(BaseModel):
+    """
+        this keeps track of payment notices sent for each company and when they where sent
+    """
+    company_id: str
+    last_payment_notice_sent_date: date | None
+    last_expired_notice_sent_date: date | None
+
+    def payment_notice_sent_within_three_days(self) -> bool:
+        """Check if a payment notice was sent within the last three days."""
+        if not self.last_payment_notice_sent_date:
+            return False
+
+        three_days_ago = date.today() - timedelta(days=3)
+        return self.last_payment_notice_sent_date >= three_days_ago
+
+    def payment_expired_notice_sent_within_three_days(self) -> bool:
+        """
+
+        :return:
+        """
+        if not self.last_expired_notice_sent_date:
+            return False
+        three_days_ago = date.today() - timedelta(days=3)
+        return self.last_expired_notice_sent_date >= three_days_ago

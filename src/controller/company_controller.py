@@ -143,10 +143,8 @@ class CompanyController(Controllers):
         """
         with self.get_session() as session:
             company_branches_orm = session.query(CompanyBranchesORM).filter_by(company_id=company_id).all()
-            company_branches = [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
-                                if isinstance(branch_orm, CompanyBranchesORM)]
-
-            return company_branches
+            return [CompanyBranches(**branch_orm.to_dict()) for branch_orm in company_branches_orm
+                    if isinstance(branch_orm, CompanyBranchesORM)]
 
     @cached_ttl()
     @error_handler
@@ -161,9 +159,7 @@ class CompanyController(Controllers):
 
             if not isinstance(branch_orm, CompanyBranchesORM):
                 return None
-            company_branches = CompanyBranches(**branch_orm.to_dict())
-
-            return company_branches
+            return CompanyBranches(**branch_orm.to_dict())
 
     @cached_ttl()
     @error_handler
@@ -198,13 +194,9 @@ class CompanyController(Controllers):
                     branch_address_orm.postal_code = address.postal_code
 
                 return address
-            try:
-                session.add(AddressORM(**address.dict()))
 
-                return address
-            except OperationalError as e:
-                print(str(e))
-                return None
+            session.add(AddressORM(**address.dict()))
+            return address
 
     @cached_ttl()
     @error_handler
@@ -220,9 +212,8 @@ class CompanyController(Controllers):
     @error_handler
     async def add_postal_address(self, postal_address: PostalAddress) -> PostalAddress | None:
         """
-
-        :param postal_address:
-        :return:
+            :param postal_address:
+            :return:
         """
         with self.get_session() as session:
 
@@ -310,9 +301,7 @@ class CompanyController(Controllers):
 
             if isinstance(branch_contact_orm, ContactsORM):
                 # If contact details exist, create a Contacts instance from the retrieved data
-                branch_contact = Contacts(**branch_contact_orm.to_dict())
-                return branch_contact
-
+                return Contacts(**branch_contact_orm.to_dict())
             return None
 
     # noinspection DuplicatedCode
@@ -343,15 +332,11 @@ class CompanyController(Controllers):
                     bank_account_orm.account_type = bank_account.account_type
 
                 return bank_account
-            try:
-                # If the bank account does not exist, add it to the database
-                session.add(BankAccountORM(**bank_account.dict()))
 
-                return bank_account
-            except OperationalError as e:
-                print(str(e))
-                session.rollback()
-                return None
+            # If the bank account does not exist, add it to the database
+            session.add(BankAccountORM(**bank_account.dict()))
+
+            return bank_account
 
     @cached_ttl()
     @error_handler
@@ -416,12 +401,8 @@ class CompanyController(Controllers):
                     employee_orm.contact_id = employee.contact_id
 
                 return False, employee
-            try:
-                session.add(EmployeeORM(**employee.dict()))
 
-            except OperationalError as e:
-                session.rollback()
-                return False, None
+            session.add(EmployeeORM(**employee.dict()))
             return True, employee
 
     @cached_ttl()

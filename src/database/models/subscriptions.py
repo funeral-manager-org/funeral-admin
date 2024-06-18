@@ -154,14 +154,14 @@ class SubscriptionStatus(BaseModel):
     id: str = Field(default_factory=create_id)
     last_checked: date = Field(default_factory=this_day)
 
-    def subscription_checked_for_the_week(self) -> bool:
+    def subscription_checked_recently(self) -> bool:
         """Check if the subscription has been checked for the current week."""
         if not self.last_checked:
             return False
 
         now = datetime.now().date()
-        start_of_week = now - timedelta(days=now.weekday())
-        return self.last_checked >= start_of_week
+        three_days_ago = date.today() - timedelta(days=3)
+        return self.last_checked >= three_days_ago
 
 
 class PaymentNoticeInterval(BaseModel):

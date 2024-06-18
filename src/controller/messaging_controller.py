@@ -7,7 +7,7 @@ from flask import Flask
 
 from twilio.rest import Client
 from src.config import Settings
-from src.controller import Controllers
+from src.controller import Controllers, error_handler
 from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose, SMSSettings
 from src.database.sql.messaging import SMSInboxORM, SMSComposeORM, EmailComposeORM, SMSSettingsORM
 from src.emailer import EmailModel, SendMail
@@ -17,6 +17,14 @@ from src.utils import create_id
 def date_time() -> str:
     """"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+async def standard_time(start_time) -> str:
+    time_elapsed = time.time() - start_time
+    hours = int(time_elapsed // 3600)
+    minutes = int((time_elapsed % 3600) // 60)
+    seconds = int(time_elapsed % 60)
+    return f"{hours} hours, {minutes} minutes, {seconds} seconds"
 
 
 class EmailService(Controllers):
@@ -43,20 +51,24 @@ class EmailService(Controllers):
         """
         try:
             response, email_ = await self.email_sender.send_mail_resend(email=email)
-
-            self.logger.info(f"Sent Email Response : {response}")
-
-            self.sent_email_queue[response.get('id', create_id())] = email_
-
-            # Saving Sent Message to the Database
-            with self.get_session() as session:
-                sent_email_orm = EmailComposeORM(**email_.dict())
-                session.add(sent_email_orm)
+            if response:
+                self.logger.info(f"Sent Email Response : {response}")
+                self.sent_email_queue[response.get('id', create_id())] = email_
+                # Saving Sent Message to the Database
+                await self.store_sent_email_to_database(email_)
+            else:
+                self.logger.error(f"Email not sent : {str(email)}")
 
         except requests.exceptions.ConnectTimeout:
             self.logger.error("Resend Connection TimeOut")
             await asyncio.sleep(delay=self.cool_down_on_error)
             await self.send_email(email=email)
+
+    @error_handler
+    async def store_sent_email_to_database(self, email_: EmailCompose):
+        with self.get_session() as session:
+            sent_email_orm = EmailComposeORM(**email_.dict())
+            session.add(sent_email_orm)
 
     async def receive_email(self, sender: str, subject: str, body: str):
         # Code to receive email from email service API
@@ -299,7 +311,7 @@ class MessagingController(Controllers):
         self.loop = asyncio.get_event_loop()
         self.burst_delay = 2
         self.timer_multiplier = 60
-        self.timer_limit = 60
+        self.timer_limit = 60 * 60 * 1
         self.event_triggered_time = 0
         self.stop_event = asyncio.Event()
 
@@ -415,13 +427,6 @@ class MessagingController(Controllers):
         i = 0
         time_started = time.time()
 
-        async def standard_time(start_time) -> str:
-            time_elapsed = time.time() - start_time
-            hours = int(time_elapsed // 3600)
-            minutes = int((time_elapsed % 3600) // 60)
-            seconds = int(time_elapsed % 60)
-            return f"{hours} hours, {minutes} minutes, {seconds} seconds"
-
         while True:
             # Out Going Message Queues
             self.logger.info("Loop restarted................................")
@@ -430,21 +435,21 @@ class MessagingController(Controllers):
             await self.process_sms_queue()
             await self.process_whatsapp_queue()
 
-            # Incoming Message Queues
             self.logger.info("Started Processing Incoming Messages")
             await self.sms_service.retrieve_sms_responses_service()
 
             # This Means the loop will run every 5 minutes
-            display_time = await standard_time(time_started)
+            display_time = await standard_time(start_time=time_started)
             self.logger.info(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")
             # await asyncio.sleep(60 * timer_multiplier)
 
             try:
-                await asyncio.wait_for(self.stop_event.wait(), timeout=60 * self.timer_multiplier)
+                multiplier = 60 * self.timer_multiplier
+                await asyncio.wait_for(self.stop_event.wait(), timeout=multiplier)
 
                 if self.stop_event.is_set():
                     self.logger.info("continue with execution as stop event is triggered")
-
+                    # Incoming Message Queues
                     self.stop_event.clear()  # Reset the event
 
                 # This Ensures that the timer will keep increasing until its one hour long
@@ -453,4 +458,6 @@ class MessagingController(Controllers):
 
             except asyncio.TimeoutError:
                 # If the timeout happens without the event being set, we just continue
+                # Incoming Message Queues
+
                 pass

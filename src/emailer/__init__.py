@@ -3,9 +3,10 @@ from datetime import datetime
 from pydantic import BaseModel
 import resend
 
+from src.logger import init_logger
 from src.database.models.messaging import EmailCompose
 from src.config import config_instance
-from src.utils import create_id
+from src.utils import create_id,camel_to_snake
 
 settings = config_instance().EMAIL_SETTINGS
 
@@ -31,6 +32,7 @@ class SendMail:
         self._resend = resend
         self._resend.api_key = settings.RESEND.API_KEY
         self.from_: str | None = settings.RESEND.from_
+        self.logger = init_logger(camel_to_snake(self.__class__.__name__))
 
     def init_app(self, app: Flask):
         pass
@@ -46,7 +48,10 @@ class SendMail:
         else:
             params = {'from': self.from_, 'to': email.to_, 'subject': email.subject_, 'html': email.html_}
         # print(f"Params : {params}")
-
-        response: dict[str, str] = self._resend.Emails.send(params=params)
-        email.reference = response.get('id', create_id())
-        return response, email
+        try:
+            response: dict[str, str] = self._resend.Emails.send(params=params)
+            email.reference = response.get('id', create_id())
+            return response, email
+        except Exception as e:
+            self.logger.error(f"Error Resend API Not Working : Sending Email : {str(e)}")
+        return None, None

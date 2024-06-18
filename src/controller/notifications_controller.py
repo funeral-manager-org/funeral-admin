@@ -28,6 +28,16 @@ class SubscriptionExpiredException(Exception):
         super().__init__(self.message)
 
 
+async def create_sleep_duration():
+    now = datetime.now()
+    # Calculate the time until the next execution time (e.g., 9:00 AM)
+    next_execution_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    if now >= next_execution_time:
+        next_execution_time += timedelta(days=1)  # Move to the next day if already past execution time
+    sleep_duration = (next_execution_time - now).total_seconds()
+    return sleep_duration
+
+
 class NotificationsController(Controllers):
 
     def __init__(self):
@@ -463,20 +473,9 @@ class NotificationsController(Controllers):
         self.logger.info("Started Notifications Daemon")
 
         while True:
-            # Get the current time
-            now = datetime.now()
-
-            # Calculate the time until the next execution time (e.g., 9:00 AM)
-            next_execution_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
-            if now >= next_execution_time:
-                next_execution_time += timedelta(days=1)  # Move to the next day if already past execution time
-            sleep_duration = (next_execution_time - now).total_seconds()
 
             # Schedule the payment reminders task to run at the next execution time
-            try:
-                await self.execute_reminders()
-            except Exception:
-                await asyncio.sleep(sleep_duration * 100)
-
+            await self.execute_reminders()
             # Sleep until the next execution time
+            sleep_duration = await create_sleep_duration()
             await asyncio.sleep(sleep_duration)

@@ -189,7 +189,6 @@ class SubscriptionsController(Controllers):
             if subscription_orm:
                 session.delete(subscription_orm)
 
-    @cached_ttl(60 * 30)
     @error_handler
     async def get_company_subscription(self, company_id: str) -> Subscriptions:
         with self.get_session() as session:
@@ -207,7 +206,7 @@ class SubscriptionsController(Controllers):
             subscription_status_orm = session.query(SubscriptionStatusORM).first()
             if isinstance(subscription_status_orm, SubscriptionStatusORM):
                 subscription_status = SubscriptionStatus(**subscription_status_orm.to_dict())
-                return subscription_status.subscription_checked_for_the_week()
+                return subscription_status.subscription_checked_recently()
             else:
                 subscription_status = SubscriptionStatus()
                 session.add(SubscriptionStatusORM(**subscription_status.dict()))
@@ -224,7 +223,6 @@ class SubscriptionsController(Controllers):
             subscription_status_orm = session.query(SubscriptionStatusORM).first()
             if isinstance(subscription_status_orm, SubscriptionStatusORM):
                 subscription_status_orm.last_checked = datetime.today().date()
-
             else:
                 subscription_status = SubscriptionStatus()
                 session.add(SubscriptionStatusORM(**subscription_status.dict()))
@@ -236,27 +234,19 @@ class SubscriptionsController(Controllers):
 
         :return:
         """
-
         twelve_hours = 60 * 60 * 12
-
         while True:
             self.logger.info("Subscriptions Daemon started")
-            try:
 
-                await self.remove_old_unpaid_subscriptions()
-
-                # this checks if subscription status has been checked for this week
-                is_checked_this_week = await self.check_and_set_subscription_status()
-
-                if not is_checked_this_week:
-                    # this check will run once a week
-                    await self.check_if_subscriptions_are_paid()
-                    # this sets the status that everything was checked this week
-                    await self.set_subscription_status()
-                else:
-                    self.logger.info("We Already checked subscription status this week and sent notifications")
-
-            except Exception as e:
-                self.logger.error(f"Subscription Controller Error : {str(e)}")
+            await self.remove_old_unpaid_subscriptions()
+            # this checks if subscription status has been checked for this week
+            is_checked_this_week = await self.check_and_set_subscription_status()
+            if not is_checked_this_week:
+                # this check will run once a week
+                await self.check_if_subscriptions_are_paid()
+                # this sets the status that everything was checked this week
+                await self.set_subscription_status()
+            else:
+                self.logger.info("We Already checked subscription status this week and sent notifications")
 
             await asyncio.sleep(delay=twelve_hours)

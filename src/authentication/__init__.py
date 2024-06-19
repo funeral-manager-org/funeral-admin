@@ -1,17 +1,17 @@
 from functools import wraps
 
-from flask import Flask, request, redirect, url_for, flash
+from flask import request, redirect, url_for, flash
 
-from src.cache.cache import cached_ttl
 from src.database.models.users import User
 from src.database.sql import Session
 from src.database.sql.user import UserORM
+from src.main import system_cache
 
-app = Flask(__name__)
+cached_ttl = system_cache.cached_ttl
 
 
 # Your route handlers go here
-@cached_ttl(ttl=3600)
+@cached_ttl(ttl=60 * 30)
 async def get_user_details(uid: str) -> User:
     """Get the details for a user by their ID."""
 
@@ -44,7 +44,10 @@ def login_required(route_function):
     return decorated_function
 
 
+# noinspection DuplicatedCode
 def admin_login(route_function):
+    """used to authenticate company admins only """
+
     @wraps(route_function)
     async def decorated_function(*args, **kwargs):
         auth_cookie = request.cookies.get('auth')
@@ -64,7 +67,10 @@ def admin_login(route_function):
     return decorated_function
 
 
+# noinspection DuplicatedCode
 def system_login(route_function):
+    """used to authenticate system admin"""
+
     @wraps(route_function)
     async def decorated_function(*args, **kwargs):
         auth_cookie = request.cookies.get('auth')

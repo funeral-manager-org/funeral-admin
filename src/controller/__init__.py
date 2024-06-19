@@ -22,6 +22,20 @@ class Controllers:
         self.sessions = [session_maker() for _ in range(self.session_limit)]
         self.logger = init_logger(self.__class__.__name__)
 
+    def init_app(self, app: Flask):
+        """
+            **init_app**
+        :param app:
+        :return:
+        """
+        self.setup_error_handler(app=app)
+
+        session_maker = app.config.get('session_maker')
+        session_limit = app.config.get('session_limit')
+
+        if session_maker and session_limit:
+            self.sessions = [session_maker() for _ in range(session_limit)]
+
     @contextmanager
     def get_session(self):
         """
@@ -72,20 +86,6 @@ class Controllers:
             self.logger.error(str(error))
             flash(message="Internal Server Error Please try again later", category="danger")
             return render_template('index.html'), 500
-
-    def init_app(self, app: Flask):
-        """
-            **init_app**
-        :param app:
-        :return:
-        """
-        self.setup_error_handler(app=app)
-
-        session_maker = app.config.get('session_maker')
-        session_limit = app.config.get('session_limit')
-
-        if session_maker and session_limit:
-            self.sessions = [session_maker() for _ in range(session_limit)]
 
 
 class UnauthorizedError(Exception):

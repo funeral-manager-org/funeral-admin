@@ -1,9 +1,11 @@
 from flask import Flask
 
+from src.cache.caching import Caching
 from src.controller.encryptor import Encryptor
 from src.emailer import SendMail
 from src.utils import format_with_grouping, friendlytimestamp
 
+system_cache = Caching()
 encryptor = Encryptor()
 send_mail = SendMail()
 
@@ -15,6 +17,7 @@ from src.controller.messaging_controller import MessagingController
 from src.controller.notifications_controller import NotificationsController
 from src.controller.subscriptions_controller import SubscriptionsController
 from src.controller.system_controller import SystemController
+
 # from src.firewall import Firewall
 
 user_controller = UserController()
@@ -80,6 +83,7 @@ def create_app(config):
 
         _add_blue_prints(app)
         _add_filters(app)
+        system_cache.init_app(app=app)
         encryptor.init_app(app=app)
         # chat_io.init_app(app)
         user_controller.init_app(app=app)

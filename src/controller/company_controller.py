@@ -1,10 +1,7 @@
 from datetime import datetime
 
 from flask import Flask
-from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import joinedload
-
-from src.cache.cache import cached_ttl, mem_cache
 
 from src.controller import Controllers, error_handler
 from src.database.models.bank_accounts import BankAccount
@@ -15,6 +12,9 @@ from src.database.sql.bank_account import BankAccountORM
 from src.database.sql.companies import CompanyORM, CompanyBranchesORM, EmployeeORM, CoverPlanDetailsORM
 from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
 from src.database.sql.covers import PolicyRegistrationDataORM, ClientPersonalInformationORM
+from src.main import system_cache
+
+cached_ttl = system_cache.cached_ttl
 
 
 class CompanyController(Controllers):
@@ -92,7 +92,7 @@ class CompanyController(Controllers):
             company_branch_orm = CompanyBranchesORM(**company_branch.dict())
             self.logger.info(f"company branch added : {company_branch}")
             session.add(company_branch_orm)
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             return company_branch
 
     # noinspection DuplicatedCode
@@ -105,7 +105,7 @@ class CompanyController(Controllers):
         """
         with self.get_session() as session:
             branch_orm = session.query(CompanyBranchesORM).filter_by(branch_id=company_branch.branch_id).first()
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if branch_orm:
                 # Update the attributes of the retrieved branch record
                 if company_branch.branch_name:
@@ -182,7 +182,7 @@ class CompanyController(Controllers):
         """
         with self.get_session() as session:
             branch_address_orm = session.query(AddressORM).filter_by(address_id=address.address_id).first()
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if isinstance(branch_address_orm, AddressORM):
                 if address.street:
                     branch_address_orm.street = address.street
@@ -219,7 +219,7 @@ class CompanyController(Controllers):
 
             _postal_id = postal_address.postal_id
             branch_postal_orm = session.query(PostalAddressORM).filter_by(postal_id=_postal_id).first()
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if isinstance(branch_postal_orm, PostalAddressORM):
                 if postal_address.address_line_1:
                     branch_postal_orm.address_line_1 = postal_address.address_line_1
@@ -264,7 +264,7 @@ class CompanyController(Controllers):
         """
         with self.get_session() as session:
             contact_orm = session.query(ContactsORM).filter_by(contact_id=contact.contact_id).first()
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if isinstance(contact_orm, ContactsORM):
                 # Update existing contact details
                 if contact.cell:
@@ -317,7 +317,7 @@ class CompanyController(Controllers):
         with self.get_session() as session:
             bank_account_orm = session.query(BankAccountORM).filter_by(
                 bank_account_id=bank_account.bank_account_id).first()
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if isinstance(bank_account_orm, BankAccountORM):
                 # If the bank account already exists, update its details
                 if bank_account.account_holder:
@@ -366,7 +366,7 @@ class CompanyController(Controllers):
         with self.get_session() as session:
             _id_number = employee.id_number
             employee_orm = session.query(EmployeeORM).filter_by(id_number=_id_number).first()
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if isinstance(employee_orm, EmployeeORM):
 
                 if employee.full_names:
@@ -508,7 +508,7 @@ class CompanyController(Controllers):
             cover_plan_orm = session.query(CoverPlanDetailsORM).filter_by(plan_name=_plan_name,
                                                                           company_id=company_id).first()
 
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if cover_plan_orm:  # If cover plan exists, update its fields
                 if plan_cover.company_id:
                     cover_plan_orm.company_id = plan_cover.company_id
@@ -650,7 +650,7 @@ class CompanyController(Controllers):
             policy_holder_orm = session.query(ClientPersonalInformationORM).filter_by(
                 uid=uid).first()
 
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if policy_holder_orm:
                 # Update the existing policy holder
                 if policy_holder.branch_id:
@@ -707,7 +707,7 @@ class CompanyController(Controllers):
             # Query the database to check if the policy data already exists
             policy_data_orm = session.query(PolicyRegistrationDataORM).filter_by(
                 uid=uid, company_id=company_id).first()
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if policy_data_orm:
                 # Update all fields for the existing policy data
                 if branch_id:

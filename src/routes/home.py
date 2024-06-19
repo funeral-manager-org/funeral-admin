@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, url_for
 
-from src.cache.cache import cached_ttl
 from src.authentication import user_details
 from src.database.models.users import User
 

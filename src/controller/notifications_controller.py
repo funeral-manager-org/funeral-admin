@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template
 from sqlalchemy.orm import joinedload
 
-from src.cache.cache import cached_ttl
 from src.controller import Controllers, error_handler
 from src.controller.auth import UserController
 from src.controller.company_controller import CompanyController

@@ -10,3 +10,4 @@ paypalrestsdk~=1.13.3
 twilio~=9.0.5
 aiocache~=0.12.2
 redis~=5.0.6
+colorama~=0.4.6

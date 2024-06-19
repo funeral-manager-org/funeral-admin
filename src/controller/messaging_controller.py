@@ -3,16 +3,21 @@ import time
 from datetime import datetime
 
 import requests
+from colorama import Fore
 from flask import Flask
 
 from twilio.rest import Client
+
+from src.logger import init_logger
 from src.config import Settings
 from src.controller import Controllers, error_handler
 from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose, SMSSettings
 from src.database.sql.messaging import SMSInboxORM, SMSComposeORM, EmailComposeORM, SMSSettingsORM
 from src.emailer import EmailModel, SendMail
 from src.utils import create_id
-from src.cache.cache import cached_ttl, mem_cache
+from src.main import system_cache
+
+cached_ttl = system_cache.cached_ttl
 
 
 def date_time() -> str:
@@ -71,7 +76,7 @@ class EmailService(Controllers):
             else:
                 self.logger.error(f"Email not sent : {str(email)}")
 
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
         except requests.exceptions.ConnectTimeout:
             self.logger.error("Resend Connection TimeOut")
             await asyncio.sleep(delay=self.cool_down_on_error)
@@ -79,7 +84,7 @@ class EmailService(Controllers):
 
     @error_handler
     async def store_sent_email_to_database(self, email_: EmailCompose):
-        await mem_cache.clear_mem_cache()
+        await system_cache.clear_mem_cache()
         with self.get_session() as session:
             sent_email_orm = EmailComposeORM(**email_.dict())
             session.add(sent_email_orm)
@@ -227,7 +232,7 @@ class SMSService(Controllers):
     async def store_sms_to_database_inbox(self, sms_message: SMSInbox) -> SMSInbox:
         with self.get_session() as session:
             session.add(SMSInboxORM(**sms_message.dict()))
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             return sms_message
 
     @cached_ttl()
@@ -248,7 +253,7 @@ class SMSService(Controllers):
     async def mark_message_as_responded(self, reference: str) -> SMSCompose | None:
         with self.get_session() as session:
             message_orm = session.query(SMSComposeORM).filter_by(reference=reference).first()
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
 
             if isinstance(message_orm, SMSComposeORM):
                 sms_compose = SMSCompose(**message_orm.to_dict())
@@ -270,7 +275,7 @@ class SMSService(Controllers):
         """
         with self.get_session() as session:
             sms_settings_orm = session.query(SMSSettingsORM).filter_by(company_id=settings.company_id).first()
-            await mem_cache.clear_mem_cache()
+            await system_cache.clear_mem_cache()
             if isinstance(sms_settings_orm, SMSSettingsORM):
                 # Update the existing record
                 sms_settings_orm.enable_sms_notifications = settings.enable_sms_notifications
@@ -327,7 +332,7 @@ class WhatsAppService(Controllers):
 
 
 class MessagingController(Controllers):
-    def __init__(self, ):
+    def __init__(self):
 
         super().__init__()
         self.email_service = EmailService()
@@ -344,8 +349,6 @@ class MessagingController(Controllers):
         self.timer_limit = 60 * 60 * 1
         self.event_triggered_time = 0
         self.stop_event = asyncio.Event()
-
-    # ------------------------------------------------------------------------------------------------------------------
 
     async def get_sms_inbox(self, branch_id: str) -> list[SMSInbox]:
 
@@ -364,7 +367,6 @@ class MessagingController(Controllers):
         self.email_service.init_app(app=app, settings=settings, emailer=emailer)
         self.sms_service.init_app(app=app, settings=settings)
         self.whatsapp_service.init_app(app=app, settings=settings)
-
         self.loop.create_task(self.messaging_daemon())
         self.logger.info("Loop Initialized")
 

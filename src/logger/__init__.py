@@ -19,7 +19,8 @@ LOGGER_COLORS = {
     "SubscriptionsController": Fore.LIGHTGREEN_EX,
     "CompanyController": Fore.LIGHTRED_EX,
     "EmailService": Fore.LIGHTBLUE_EX,
-    "caching": Fore.LIGHTYELLOW_EX
+    "caching": Fore.LIGHTYELLOW_EX,
+    "subscriptions_route_logger": Fore.LIGHTCYAN_EX
     # Add more loggers and colors as needed
 }
 

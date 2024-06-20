@@ -11,9 +11,9 @@ from src.controller.messaging_controller import MessagingController
 from src.database.models.companies import Company
 from src.database.models.messaging import RecipientTypes, EmailCompose
 from src.database.models.payments import Payment
-from src.database.models.subscriptions import Subscriptions, SubscriptionStatus
+from src.database.models.subscriptions import Subscriptions, SubscriptionStatus, TopUpPacks, TopUpTypes, SMSPackage
 from src.database.models.users import User
-from src.database.sql.subscriptions import SubscriptionsORM, PaymentORM, SubscriptionStatusORM
+from src.database.sql.subscriptions import SubscriptionsORM, PaymentORM, SubscriptionStatusORM, SMSPackageORM
 
 
 class SubscriptionsController(Controllers):
@@ -39,6 +39,54 @@ class SubscriptionsController(Controllers):
         self.user_controller = user_controller
         self.loop.create_task(self.daemon_util())
         pass
+
+    async def add_update_sms_email_package(self, top_up_pack: TopUpPacks) -> TopUpPacks:
+        """
+
+        :param top_up_pack:
+        :return:
+        """
+        with self.get_session() as session:
+            if top_up_pack.top_up_type == TopUpTypes.SMS.value:
+                sms_pack = SMSPackage(company_id=top_up_pack.company_id, package_name=top_up_pack.top_up_name,
+                                      total_sms=top_up_pack.total_sms, is_paid=False)
+
+                sms_package_orm = SMSPackageORM(**sms_pack.dict())
+                session.add(sms_package_orm)
+
+            # TODO - handle the situation where user is adding a package for email
+
+            return top_up_pack
+
+    async def set_sms_pack_to_paid(self, package_id: str):
+        """
+
+        :param package_id:
+        :return:
+        """
+        with self.get_session() as session:
+            sms_package_orm: SMSPackageORM = session.query(SMSPackageORM).filter_by(package_id=package_id).first()
+            if isinstance(sms_package_orm, SMSPackageORM):
+                sms_package_orm.is_paid = True
+
+            return isinstance(sms_package_orm, SMSPackageORM)
+    async def set_email_pack_to_paid(self, package_id: str):
+        """
+
+        :param package_id:
+        :return:
+        """
+        # implement email package paid here
+        return False
+
+    async def remove_package_its_unpaid(self, package_id: str):
+        with self.get_session() as session:
+            sms_package_orm = session.query(SMSPackageORM).filter_by(package_id=package_id).first()
+            if isinstance(sms_package_orm, SMSPackageORM):
+                session.delete(sms_package_orm)
+            else:
+                pass
+                #   TODO check if its an email package
 
     @error_handler
     async def add_update_company_subscription(self, subscription: Subscriptions) -> Subscriptions:

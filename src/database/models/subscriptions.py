@@ -36,7 +36,7 @@ class SubscriptionDetails(BaseModel):
             self.total_sms = 20
             self.total_emails = 50
             self.total_clients = 250
-            self.subscription_amount = 0
+            self.subscription_amount = 2
             self.subscription_period = 1
             self.additional_clients = 10
         elif plan_name == PlanNames.BUSINESS.value:
@@ -189,3 +189,47 @@ class PaymentNoticeInterval(BaseModel):
             return False
         three_days_ago = date.today() - timedelta(days=3)
         return self.last_expired_notice_sent_date >= three_days_ago
+
+
+class TopUpNames(Enum):
+    BASIC = "basic"
+    PROFESSIONAL = "professional"
+    PREMIUM = "premium"
+
+
+class TopUpTypes(Enum):
+    SMS = "sms"
+    EMAIL = "email"
+
+
+class TopUpPacks(BaseModel):
+    company_id: str
+    top_up_type: str
+    top_up_name: str
+
+    @property
+    def plan_name(self):
+        return f"{self.top_up_type}_{self.top_up_name}"
+
+    @property
+    def total_sms(self):
+        sms_limits = {
+            TopUpNames.BASIC.value: 1500,
+            TopUpNames.PROFESSIONAL.value: 4000,
+            TopUpNames.PREMIUM.value: 8000
+        }
+        return sms_limits.get(self.top_up_name, 0) if self.top_up_type == "sms" else 0
+
+    @property
+    def total_emails(self):
+        return 0
+
+    @property
+    def payment_amount(self):
+        payment_amounts = {
+            TopUpNames.BASIC.value: 540,
+            TopUpNames.PROFESSIONAL.value: 900,
+            TopUpNames.PREMIUM.value: 1400
+        }
+
+        return payment_amounts.get(self.top_up_name, 0) if self.top_up_type == "sms" else 0

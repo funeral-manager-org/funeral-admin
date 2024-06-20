@@ -12,7 +12,7 @@
                     <li class="label">Main</li>
                     <li><a href="{{ url_for('home.get_home') }}"><i class="ti-home"></i> Home</a></li>
 
-                    <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Managers<span
+                    <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Manage<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
                             <li><a href="{{ url_for('company.get_admin') }}"><i class="ti-briefcase"></i> Company</a></li>
@@ -50,6 +50,9 @@
                             </li>
                         </ul>
                     </li>
+
+                    <li><a href="#"><i class="ti-briefcase"></i> Billing</a></li>
+                    <li><a href="#"><i class="ti-briefcase"></i> Support</a></li>
 
                     {% if user and user.is_system_admin %}
                         <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Admin<span

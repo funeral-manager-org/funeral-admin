@@ -15,7 +15,7 @@
             </div>
             <hr/>
             <div class="card-header">
-                <h5 class="card-title font-weight-bold">SMS Top Up Options</h5>
+                <h5 class="card-title font-weight-bold">SMS Top Up <span class="font-weight-bold text-danger"><small>(Specials)</small></span></h5>
             </div>
             <div class="row">
                 <div class="col-md-4">
@@ -31,9 +31,13 @@
                                 <li class="font-weight-bold text-danger"> 36 Cents Per SMS</li>
 
                             </ul>
-                            <button type="button" class="btn btn-lg btn-block btn-primary">
-                                Buy Package ( R540.00 )
-                            </button>
+                            <form class="form-horizontal" method="POST" action="{{ url_for('subscriptions.messaging_top_up') }}">
+                                <input type="hidden" name="top_up_type" id="top_up_type" value="sms" >
+                                <input type="hidden" name="top_up_name" id="top_up_name" value="basic">
+                                <button type="submit" class="btn btn-lg btn-block btn-primary">
+                                    Buy Package ( R540.00 )
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -49,9 +53,14 @@
                                 <li class="font-weight-bold text-success m-b-4">1,500 SMS (Marketing Campaign)</li>
                                 <li class="font-weight-bold text-danger"> 22 Cents Per SMS</li>
                             </ul>
-                            <button type="button" class="btn btn-lg btn-block btn-primary">
+                            <form class="form-horizontal" method="POST" action="{{ url_for('subscriptions.messaging_top_up') }}">
+                                <input type="hidden" name="top_up_type" id="top_up_type" value="sms" >
+                                <input type="hidden" name="top_up_name" id="top_up_name" value="professional">
+                                <button type="submit" class="btn btn-lg btn-block btn-primary">
                                 Buy Package ( R 900.00 )
-                            </button>
+                                </button>
+                            </form>
+
 
                         </div>
                     </div>
@@ -68,9 +77,14 @@
                                 <li class="font-weight-bold text-success m-b-4">2,500 SMS (Marketing Campaign)</li>
                                 <li class="font-weight-bold text-success m-b-4">500 Employee Notifications</li>
                                 <li class="font-weight-bold text-danger"> 15 Cents Per SMS</li>                            </ul>
-                            <button type="button" class="btn btn-lg btn-block btn-primary">
-                                Buy Package ( R 1,440.00 )
-                            </button>
+
+                            <form class="form-horizontal" method="POST" action="{{ url_for('subscriptions.messaging_top_up') }}">
+                                <input type="hidden" name="top_up_type" id="top_up_type" value="sms" >
+                                <input type="hidden" name="top_up_name" id="top_up_name" value="premium">
+                                <button type="submit" class="btn btn-lg btn-block btn-primary">
+                                    Buy Package ( R 1,440.00 )
+                                </button>
+                            </form>
 
                         </div>
                     </div>

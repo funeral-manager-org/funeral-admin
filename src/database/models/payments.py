@@ -1,7 +1,6 @@
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field, validator, PositiveInt
-from sqlalchemy.orm import relationship
 
 from src.database.tools import create_transaction_id
 from src.utils import create_id

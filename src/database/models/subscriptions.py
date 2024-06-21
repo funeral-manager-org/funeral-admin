@@ -204,6 +204,7 @@ class TopUpTypes(Enum):
 
 
 class TopUpPacks(BaseModel):
+    package_id: str = Field(default_factory=create_id)
     company_id: str
     top_up_type: str
     top_up_name: str

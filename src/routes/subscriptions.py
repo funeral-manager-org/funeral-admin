@@ -230,4 +230,3 @@ async def package_payment_failure(user: User, package_id: str):
     flash(message=message, category="danger")
     subscription_logger.error(message)
     return redirect(url_for('company.get_admin'))
-

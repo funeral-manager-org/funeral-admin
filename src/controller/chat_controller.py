@@ -1,5 +1,4 @@
 import random
-
 from src.controller import Controllers, error_handler
 from src.database.models.support_chat import ChatMessage, ChatUser
 from src.database.sql.support_chat import ChatMessageORM, ChatUserORM
@@ -27,7 +26,6 @@ colours = {
     "Pink": "#FFC0CB",
     "Brown": "#A52A2A",
     "Black": "#000000",
-
     "Gray": "#808080",
     "Cyan": "#00FFFF",
     "Magenta": "#FF00FF",
@@ -68,7 +66,6 @@ colours = {
     "Cinnamon": "#D2691E",
     "Celadon": "#ACE1AF",
     "Cobalt": "#0047AB",
-
     "Denim": "#1560BD",
     "Fern": "#4F7942",
     "Garnet": "#733635",

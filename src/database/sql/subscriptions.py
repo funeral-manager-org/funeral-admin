@@ -126,7 +126,6 @@ class PackageORM(Base):
             return sms_balance, email_balance
         return 0
 
-
     def to_dict(self):
         """
         Convert the object to a dictionary representation.

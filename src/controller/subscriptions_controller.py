@@ -229,7 +229,13 @@ class SubscriptionsController(Controllers):
     @error_handler
     async def get_company_subscription(self, company_id: str) -> Subscriptions:
         with self.get_session() as session:
-            subscription_orm = session.query(SubscriptionsORM).filter_by(company_id=company_id).first()
+            subscription_orm = session.query(SubscriptionsORM) \
+                .options(joinedload(SubscriptionsORM.payments)) \
+                .filter_by(company_id=company_id) \
+                .first()
+
+            if subscription_orm is None:
+                return None
 
             return Subscriptions(**subscription_orm.to_dict())
 

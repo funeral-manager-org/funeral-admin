@@ -1,0 +1,93 @@
+{% extends "layouts/page.html" %}
+{% block content %}
+<section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <span class="font-weight-bold text-info">
+                    <i class="fa fa-money"> </i>
+                    Billing
+                </span>
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold text-info">Plan Type: {{ subscription.plan_name }}</h3>
+            </div>
+            {% if subscription %}
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <span class="font-weight-bold">
+                            Total SMS: <span class="text-info pull-right">{{ subscription.total_sms| number }} sms messages</span>
+                        </span>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="font-weight-bold">
+                            Total Emails: <span class="text-info pull-right">{{ subscription.total_emails| number }} email messages</span>
+                        </span>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="font-weight-bold">
+                            Total Clients: <span class="text-info pull-right">{{ subscription.total_clients| number }} clients</span>
+                        </span>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="font-weight-bold">
+                            Date Subscribed: <span class="text-info pull-right">{{ subscription.date_subscribed if subscription.date_subscribed else 'N/A' }}</span>
+                        </span>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="font-weight-bold">
+                            Subscription Period: <span class="text-info pull-right">{{ subscription.subscription_period }} months</span>
+                        </span>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="font-weight-bold">
+                            Subscription Amount: <span class="text-success pull-right">R {{ subscription.subscription_amount| number }}.00</span>
+                        </span>
+                    </li>
+                </ul>
+                    <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title font-weight-bold text-success">
+                            <i class="fa fa-money"> </i>
+                            Payments
+                        </h3>
+                    </div>
+                        <div class="card-body">
+
+                                {% if subscription.payments %}
+                                    <h4 class="mt-4">Payments</h4>
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th class="font-weight-bold text-info">Date</th>
+                                                <th class="font-weight-bold text-info">Amount</th>
+                                                <th class="font-weight-bold text-info">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for payment in subscription.payments %}
+                                                <tr>
+                                                    <td>{{ payment.payment_date if payment.payment_date else 'N/A' }}</td>
+                                                    <td>R {{ payment.amount| number }}.00</td>
+                                                    <td>{{ payment.payment_status }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                            <h3 class="card-title font-italic text-danger">No payments recorded.</h3>
+
+                                {% endif %}
+                            </div>
+                        </div>
+
+            {% else %}
+                <p>No subscription data available.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}

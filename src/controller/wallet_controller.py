@@ -98,6 +98,3 @@ class WalletController(Controllers):
             session.add(withdrawal_orm)
             
             return withdrawal
-
-
-

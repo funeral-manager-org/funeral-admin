@@ -126,11 +126,12 @@ class Subscriptions(BaseModel):
         return months_diff > self.subscription_period
 
 
-class SMSPackage(BaseModel):
+class Package(BaseModel):
     package_id: str = Field(default_factory=create_id)
     company_id: str
     package_name: str
-    total_sms: int
+    total_sms: int = Field(default=0)
+    total_email: int = Field(default=0)
     is_paid: bool = Field(default=False)
     is_added: bool = Field(default=False)
     date_bought: str = Field(default_factory=date_time)

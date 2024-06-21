@@ -7,7 +7,7 @@ from src.logger import init_logger
 from src.authentication import admin_login
 from src.database.models.companies import Company
 from src.database.models.payments import Payment
-from src.database.models.subscriptions import PlanNames, SubscriptionDetails, Subscriptions, TopUpPacks, SMSPackage
+from src.database.models.subscriptions import PlanNames, SubscriptionDetails, Subscriptions, TopUpPacks, Package
 from src.database.models.users import User
 from src.main import company_controller, paypal_controller, subscriptions_controller
 
@@ -133,7 +133,6 @@ async def messaging_top_up(user: User):
         return redirect(url_for('company.get_admin'))
 
     try:
-
         top_up_pack = TopUpPacks(**request.form, company_id=user.company_id)
         subscription_logger.info(top_up_pack)
 
@@ -162,7 +161,7 @@ async def messaging_top_up(user: User):
         subscription_logger.info(message)
         return redirect(url_for('company.get_admin'))
 
-    top_up_package: SMSPackage = await subscriptions_controller.add_update_sms_email_package(top_up_pack=top_up_pack)
+    top_up_package: Package = await subscriptions_controller.add_update_sms_email_package(top_up_pack=top_up_pack)
 
     success_url: str = url_for('subscriptions.package_payment_successful', package_id=top_up_package.package_id)
     failure_url: str = url_for('subscriptions.package_payment_failure', package_id=top_up_package.package_id)
@@ -200,29 +199,19 @@ async def package_payment_successful(user: User, package_id: str):
     # Extract payment amount
     amount = int(_payload.get("resource", {}).get("amount", {}).get("total"))
 
-    _is_sms_package_paid = await subscriptions_controller.set_sms_pack_to_paid(package_id=package_id)
-    _is_email_package_paid = await subscriptions_controller.set_email_pack_to_paid(package_id=package_id)
+    _is_package_paid = await subscriptions_controller.set_package_to_paid(package_id=package_id)
+
     #
-    if _is_sms_package_paid:
+    if _is_package_paid:
         payment = Payment(package_id=package_id,
                           amount_paid=amount,
                           payment_method="paypal",
-                          is_successful=True, month=1, comments="this is a payment for sms package")
+                          is_successful=True, month=1, comments="This is a payment for additional sms or email package")
 
         payment_ = await subscriptions_controller.add_company_payment(payment=payment)
-        subscription_logger.info("subscription payment for sms package succeeded")
+        subscription_logger.info("payment for sms / email package succeeded")
         subscription_logger.info(payment)
-        flash(message="Payment of {amount} for an SMS Package was made successfully", category="success")
-
-    if _is_email_package_paid:
-        payment = Payment(package_id=package_id,
-                          amount_paid=amount,
-                          payment_method="paypal",
-                          is_successful=True, month=1, comments="this is a payment for an email package")
-        payment_ = await subscriptions_controller.add_company_payment(payment=payment)
-        subscription_logger.info("subscription payment for email package succeeded")
-        subscription_logger.info(payment)
-        flash(message="Payment of {amount} for an Email Package was made successfully", category="success")
+        flash(message=f"Payment of {amount} for an SMS or Email Package was made successfully", category="success")
 
     return redirect(url_for('company.get_admin'))
 
@@ -237,7 +226,7 @@ async def package_payment_failure(user: User, package_id: str):
     :return:
     """
     await subscriptions_controller.remove_package_its_unpaid(package_id=package_id)
-    message: str = "Payment was not successful please try again later"
+    message: str = "Payment was not successfull please try again later"
     flash(message=message, category="danger")
     subscription_logger.error(message)
     return redirect(url_for('company.get_admin'))

@@ -3,19 +3,16 @@ import time
 from datetime import datetime
 
 import requests
-from colorama import Fore
 from flask import Flask
-
 from twilio.rest import Client
 
-from src.logger import init_logger
 from src.config import Settings
 from src.controller import Controllers, error_handler
 from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose, SMSSettings
 from src.database.sql.messaging import SMSInboxORM, SMSComposeORM, EmailComposeORM, SMSSettingsORM
 from src.emailer import EmailModel, SendMail
-from src.utils import create_id
 from src.main import system_cache
+from src.utils import create_id
 
 cached_ttl = system_cache.cached_ttl
 

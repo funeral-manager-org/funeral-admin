@@ -15,7 +15,7 @@ from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompo
 from src.database.models.subscriptions import Subscriptions, PaymentNoticeInterval
 from src.database.models.users import User
 from src.database.sql.companies import CompanyORM
-from src.database.sql.subscriptions import SubscriptionsORM, SMSPackageORM, SubscriptionStatusORM, \
+from src.database.sql.subscriptions import SubscriptionsORM, PackageORM, SubscriptionStatusORM, \
     PaymentNoticeIntervalORM
 
 
@@ -211,10 +211,14 @@ class NotificationsController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            sms_packages_orm_list = session.query(SMSPackageORM).filter_by(company_id=company_id).all()
+            packages_orm_list: list[PackageORM] = session.query(PackageORM).filter_by(
+                company_id=company_id, is_added=False, is_paid=True).all()
 
-            for package in sms_packages_orm_list:
-                subscription.total_sms += package.use_package()
+            for package in packages_orm_list:
+                sms_balance, email_balance = package.use_package()
+
+                subscription.total_sms += sms_balance
+                subscription.total_emails += email_balance
 
             return subscription
 
@@ -315,7 +319,8 @@ class NotificationsController(Controllers):
         :return: SubscriptionORM
         """
         with self.get_session() as session:
-            return session.query(SubscriptionsORM).options(joinedload(SubscriptionsORM.payments)).filter_by(company_id=company_id).first()
+            return session.query(SubscriptionsORM).options(joinedload(SubscriptionsORM.payments)).filter_by(
+                company_id=company_id).first()
 
     @error_handler
     async def construct_message(self, company_data, holder, policy_registration_data):
@@ -472,7 +477,6 @@ class NotificationsController(Controllers):
         self.logger.info("Started Notifications Daemon")
 
         while True:
-
             # Schedule the payment reminders task to run at the next execution time
             await self.execute_reminders()
             # Sleep until the next execution time

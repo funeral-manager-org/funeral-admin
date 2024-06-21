@@ -8,13 +8,13 @@ def bootstrapper():
     from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
     from src.database.sql.covers import ClientPersonalInformationORM, ClaimsORM, PolicyRegistrationDataORM
     from src.database.sql.messaging import SMSComposeORM, SMSInboxORM, EmailComposeORM
-    from src.database.sql.subscriptions import (SubscriptionsORM, SMSPackageORM, PaymentORM, SubscriptionStatusORM,
+    from src.database.sql.subscriptions import (SubscriptionsORM, PackageORM, PaymentORM, SubscriptionStatusORM,
                                                 PaymentNoticeIntervalORM)
 
     classes_to_create = [UserORM, PayPalORM, CompanyORM, EmployeeORM, CompanyBranchesORM, CoverPlanDetailsORM,
                          BankAccountORM, AddressORM, PostalAddressORM, ContactsORM, ClientPersonalInformationORM,
                          ClaimsORM, PolicyRegistrationDataORM, SMSComposeORM, SMSInboxORM, EmailComposeORM,
-                         SubscriptionsORM, SMSPackageORM, PaymentORM, SubscriptionStatusORM,
+                         SubscriptionsORM, PackageORM, PaymentORM, SubscriptionStatusORM,
                          PaymentNoticeIntervalORM]
 
     classes_to_create.reverse()

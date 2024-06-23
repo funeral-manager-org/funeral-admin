@@ -23,6 +23,10 @@
 .display-1 {
     font-size: 6rem; /* Optional: use display-1 for very large text */
 }
+.display-2 {
+    font-size: 2rem; /* Optional: use display-1 for very large text */
+    align-content: center;
+}
 
 .card {
     position: relative;
@@ -59,14 +63,21 @@
     <img src="{{ url_for('static', filename='images/header.jpg') }}" class="img-fluid card-img" height="300"/>
 </div>
 
-    <div class="card shadow-lg border-info">
-        <span class="font-weight-bold text-info">The Funeral Manager Application is a sophisticated web-based platform meticulously designed to streamline funeral cover management and funeral home administration. It offers an array of meticulously crafted features, tailored to meet the diverse needs of both users, clients and administrators alike.</span>
-        <hr>
+    <div class="card shadow-lg border-info display-2 align-content-center text-info font-weight-bold">
+        Funeral Manager Web Application
+    </div>
     <div class="card shadow-sm border-primary col-md-12">
-        <div class="card-header">
-            <h4 class="card-title font-weight-bold "><i class="ti ti-user"> </i> Login - Create Account</h4>
+        <div class="card-header bg-twitter">
+            <h4 class="card-title font-weight-bold ">
+                <span class="text-white">
+                <i class="ti ti-user"> </i>
+                </span>
+                <span class="text-white">
+                    Login - Create Account
+                </span>
+            </h4>
         </div>
-        <div class="card-body">
+        <div class="card-body m-t-9">
             <ul class="list-group">
                 {% if user %}
                     <li class="font-weight-bold ">
@@ -94,84 +105,137 @@
 
         <div class="row">
             <div class="card shadow-lg border-info col-md-6">
-                <div class="card-header font-weight-bold">
-                    <h2 class="card-title font-weight-bold"><i class="fa fa-clipboard"></i> Policy Registration</h2>
+                <div class="card-header bg-facebook">
+                    <h2 class="card-title font-weight-bold">
+                        <span class="text-white">
+                        <i class="fa fa-clipboard"></i>
+                        </span>
+                        <span class="text-white">
+                            Policy Registration
+                        </span>
+                    </h2>
+                </div>
+
+                <div class="card-body m-t-9">
                     <img src="{{ url_for('static', filename='images/business_6') }}"
                          class="front-page-image img-fluid" alt="policy registration"/>
-                </div>
 
-                <div class="card-body">
-                    Embark on the journey of securing your funeral cover plans with
-                    unparalleled ease and convenience.
+                    <div class="card-content m-t-8 font-weight-bold">
 
-                    Our platform provides a seamless registration process, allowing users to select from a wide
-                    range of options tailored to their unique requirements.
+                        <p>Embark on the journey of securing your funeral cover plans with
+                            unparalleled ease and convenience.</p>
+
+                        <p>Our platform provides a seamless registration process, allowing users to select from a wide
+                            range of options tailored to their unique requirements.</p>
+                    </div>
                 </div>
             </div>
 
             <div class="card shadow-lg border-info col-md-6">
-                <div class="card-header font-weight-bold">
-                    <h2 class="card-title font-weight-bold"> <i class="fa fa-file"></i> Claims Processing</h2>
+                <div class="card-header bg-facebook">
+                    <h2 class="card-title font-weight-bold">
+                        <span class="text-white">
+                        <i class="fa fa-file"></i>
+                        </span>
+                        <span class="text-white">
+                            Claims Processing
+                        </span>
+                    </h2>
+
+                </div>
+
+                <div class="card-body m-t-9">
                     <img src="{{ url_for('static', filename='images/business_7.jpg') }}"
                          class="front-page-image img-fluid" alt="Claims Processing"/>
-
-                </div>
-
-                <div class="card-body">
-                    Experience the epitome of efficiency with our streamlined claims processing system.
-                    Users can file claims effortlessly and monitor their progress with ease,
-                    ensuring timely and effective resolution of their requests.
+                    <div class="card-content m-t-8 font-weight-bold">
+                        <p>Experience the epitome of efficiency with our streamlined claims processing system.</p>
+                        <p>Users can file claims effortlessly and monitor their progress with ease,
+                            ensuring timely and effective resolution of their requests.</p>
+                    </div>
                 </div>
             </div>
 
             <div class="card shadow-lg border-info col-md-6">
-                <div class="card-header font-weight-bold">
-                    <h2 class="card-title font-weight-bold"><i class="fa fa-handshake-o"></i> Funeral Arrangement Assistance</h2>
+                <div class="card-header bg-facebook">
+                    <h2 class="card-title font-weight-bold">
+                        <span class="text-white">
+                        <i class="fa fa-handshake-o"></i>
+                        </span>
+                        <span class="text-white">
+                            Funeral Arrangement Assistance
+                        </span>
+                    </h2>
+                </div>
+                <div class="card-body m-t-9">
                     <img src="{{ url_for('static', filename='images/business_1.jpg') }}"
                          class="front-page-image img-fluid" alt="Funeral Arrangement Assistance"/>
-                </div>
-                <div class="card-body ">
-                    <p>Gain access to a wealth of resources and support designed to assist you in navigating the complexities of arranging funeral services and ceremonies. Our platform is dedicated to providing comprehensive assistance every step of the way.</p>
+                    <div class="card-content m-t-8 font-weight-bold">
+                        <p>Gain access to a wealth of resources and support designed to assist you in navigating the complexities of arranging funeral services and ceremonies. Our platform is dedicated to providing comprehensive assistance every step of the way.</p>
+                    </div>
                 </div>
             </div>
 
 
             <div class="card shadow-lg border-info col-md-6">
-                <div class="card-header font-weight-bold">
-                    <h2 class="card-title font-weight-bold"> <i class="fa fa-cogs"></i>Policy Management</h2>
+                <div class="card-header bg-facebook">
+                    <h2 class="card-title font-weight-bold">
+                        <span class="text-white">
+                        <i class="fa fa-cogs"></i>
+                        </span>
+                        <span class="text-white">
+                            Policy Management
+                        </span>
+                    </h2>
+                </div>
+                <div class="card-body m-t-9">
                     <img src="{{ url_for('static', filename='images/business_8.jpg') }}"
                          class="front-page-image img-fluid" alt="Policy Management"/>
-                </div>
-                <div class="card-body ">
-                    <p>Empower your administrative capabilities with our robust policy management tools. Administrators can effortlessly oversee policies, premiums, and claims through a centralized dashboard, ensuring seamless operations and unparalleled efficiency.</p>
+                        <div class="card-content m-t-8 font-weight-bold">
+                            <p>Empower your administrative capabilities with our robust policy management tools. Administrators can effortlessly oversee policies, premiums, and claims through a centralized dashboard, ensuring seamless operations and unparalleled efficiency.</p>
+                        </div>
                 </div>
             </div>
 
 
             <div class="card shadow-lg border-info col-md-6">
-                <div class="card-header">
-                    <h2 class="card-title font-weight-bold"><i class="fa fa-comments"></i> Client Communication</h2>
+                <div class="card-header bg-facebook">
+                    <h2 class="card-title font-weight-bold">
+                        <span class="text-white">
+                        <i class="fa fa-comments"></i>
+                        </span>
+                        <span class="text-white">
+                        Client Communication
+                        </span>
+                    </h2>
+                </div>
+                <div class="card-body m-t-9">
                     <img src="{{ url_for('static', filename='images/business_2.jpg') }}"
                          class="front-page-image img-fluid" alt="Client Communications"/>
-                </div>
-                <div class="card-body ">
-                    <p>For clients, the Communications Module enables:</p>
-                    <ul class="list-group">
-                        <li class="font-weight-bold ">1. Policy Registration Confirmation: Automated emails confirming successful policy registration.</li>
-                        <li class="font-weight-bold ">2. Premium Payment Reminders: Timely notifications reminding clients of upcoming premium payments.</li>
-                        <li class="font-weight-bold ">3. Claim Status Updates: Regular updates on the status of filed claims, ensuring clients are informed every step of the way.</li>
-                        <li class="font-weight-bold ">4. Funeral Arrangement Guidance: Guidance and support via email or SMS to assist clients in arranging funeral services and ceremonies.</li>
-                    </ul>
+                    <div class="card-content m-t-8 font-weight-bold">
+                        <p>For clients, the Communications Module enables:</p>
+                        <ul class="list-group">
+                            <li class="font-weight-bold ">1. Policy Registration Confirmation: Automated emails confirming successful policy registration.</li>
+                            <li class="font-weight-bold ">2. Premium Payment Reminders: Timely notifications reminding clients of upcoming premium payments.</li>
+                            <li class="font-weight-bold ">3. Claim Status Updates: Regular updates on the status of filed claims, ensuring clients are informed every step of the way.</li>
+                            <li class="font-weight-bold ">4. Funeral Arrangement Guidance: Guidance and support via email or SMS to assist clients in arranging funeral services and ceremonies.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
 
             <div class="card shadow-lg border-info col-md-6">
-                <div class="card-header">
-                    <h2 class="card-title font-weight-bold"> <i class="fa fa-bullhorn"></i>Management Communication</h2>
-                    <img src="{{ url_for('static', filename='images/business_3.jpg') }}" class="front-page-image img-fluid"/>
+                <div class="card-header bg-facebook">
+                    <h2 class="card-title font-weight-bold">
+                        <span class="text-white"> <i class="fa fa-bullhorn"></i></span>
+                        <span class="text-white">
+                            Management Communication
+                        </span></h2>
+
                 </div>
-                <div class="card-body ">
+                <div class="card-body m-t-9">
+                    <img src="{{ url_for('static', filename='images/business_3.jpg') }}" class="front-page-image img-fluid"/>
+                <div class="card-content m-t-8 font-weight-bold">
                     <p>For management, the Communications Module provides:</p>
                     <ul class="list-group">
                         <li class="font-weight-bold ">1. New Policy Registrations: Immediate notifications of new policy registrations, allowing for prompt follow-up and processing.</li>
@@ -180,43 +244,64 @@
                         <li class="font-weight-bold ">4. Performance Analytics: Comprehensive analytics and reports to track key performance indicators and inform strategic decision-making.</li>
                     </ul>
                 </div>
+                </div>
             </div>
 
 
             <div class="card shadow-lg border-info col-md-6">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fa fa-user-md"></i>Employee Dashboard</h2>
+                <div class="card-header bg-facebook">
+                    <h2 class="card-title">
+                        <span class="text-white">
+                            <i class="fa fa-user-md"></i>
+                        </span>
+                        <span class="text-white">
+                            Employee Dashboard
+                        </span>
+                    </h2>
+
+                </div>
+                <div class="card-body m-t-9">
                     <img src="{{ url_for('static', filename='images/business_4.jpg') }}" class="front-page-image img-fluid"/>
-                </div>
-                <div class="card-body ">
-                    <p>The Employee Dashboard provides essential tools and features for employees to efficiently manage day-to-day operations, including:</p>
-                    <ul class="list-group">
-                        <li class="font-weight-bold ">1. Policy Management: Manage user accounts, policies, premiums, and claims.</li>
-                        <li  class="font-weight-bold ">2. Claims Processing: Verify and process claims, ensuring timely resolution.</li>
-                        <li  class="font-weight-bold ">3. Client Communication: Communicate with clients to address inquiries and provide support.</li>
-                        <li  class="font-weight-bold ">4. Reports and Analytics: Access reports and analytics to track performance and inform decision-making.</li>
-                    </ul>
+                    <div class="card-content m-t-8 font-weight-bold">
+                        <p>The Employee Dashboard provides essential tools and features for employees to efficiently manage day-to-day operations, including:</p>
+                        <ul class="list-group">
+                            <li class="font-weight-bold ">1. Policy Management: Manage user accounts, policies, premiums, and claims.</li>
+                            <li  class="font-weight-bold ">2. Claims Processing: Verify and process claims, ensuring timely resolution.</li>
+                            <li  class="font-weight-bold ">3. Client Communication: Communicate with clients to address inquiries and provide support.</li>
+                            <li  class="font-weight-bold ">4. Reports and Analytics: Access reports and analytics to track performance and inform decision-making.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
 
             <div class="card shadow-lg border-info col-md-6">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fa fa-dashboard"></i> Managers Dashboard</h2>
-                    <img src="{{ url_for('static', filename='images/business_5.jpg') }}" class="front-page-image img-fluid"/>
+                <div class="card-header bg-facebook">
+                    <h2 class="card-title">
+                        <span class="text-white">
+                                <i class="fa fa-dashboard"></i>
+                        </span>
+                        <span class="text-white">
+                            Managers Dashboard
+                        </span>
+                    </h2>
+
                 </div>
-                <div class="card-body ">
-                    <p>The Manager Dashboard offers comprehensive oversight and strategic management capabilities, including:</p>
-                    <ul class="list-group">
-                        <li class="font-weight-bold ">1. Team Management: Manage employee accounts, roles, and permissions.</li>
-                        <li  class="font-weight-bold ">2. Policy Oversight: Monitor policy performance, trends, and compliance.</li>
-                        <li class="font-weight-bold ">3. Financial Management: Monitor premium payments, expenses, and revenue.</li>
-                        <li class="font-weight-bold ">4. Strategic Planning: Access advanced analytics and reports to inform strategic decision-making.</li>
-                    </ul>
+                <div class="card-body m-t-9">
+                    <img src="{{ url_for('static', filename='images/business_5.jpg') }}" class="front-page-image img-fluid"/>
+                    <div class="card-content m-t-8 font-weight-bold">
+                        <p>The Manager Dashboard offers comprehensive oversight and strategic management capabilities, including:</p>
+                        <ul class="list-group">
+                            <li class="font-weight-bold ">1. Team Management: Manage employee accounts, roles, and permissions.</li>
+                            <li  class="font-weight-bold ">2. Policy Oversight: Monitor policy performance, trends, and compliance.</li>
+                            <li class="font-weight-bold ">3. Financial Management: Monitor premium payments, expenses, and revenue.</li>
+                            <li class="font-weight-bold ">4. Strategic Planning: Access advanced analytics and reports to inform strategic decision-making.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
 
 
 </section>

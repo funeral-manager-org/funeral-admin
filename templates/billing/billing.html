@@ -6,7 +6,7 @@
             <h3 class="card-title">
                 <span class="font-weight-bold text-info">
                     <i class="fa fa-money"> </i>
-                    Billing
+                    Monthly Billing
                 </span>
             </h3>
         </div>
@@ -14,12 +14,23 @@
 
             <div class="card-header">
                 <h3 class="card-title font-weight-bold text-info">
-                    Plan Type: {{ subscription.plan_name }}
+                    Account Type: {{ subscription.plan_name }}
                 </h3>
             </div>
 
+
+
             {% if subscription %}
                 <ul class="list-group">
+                    <div class="card-header">
+                        <h3 class="card-title font-weight-bold text-success"> Account Details</h3>
+                    </div>
+                    <li class="list-group-item">
+                        <span class="font-weight-bold">
+                            Total Clients: <span class="text-info pull-right">{{ subscription.total_clients| number }} clients</span>
+                        </span>
+                    </li>
+
                     <li class="list-group-item">
                         <span class="font-weight-bold">
                             Total SMS: <span class="text-info pull-right">{{ subscription.total_sms| number }} sms messages</span>
@@ -30,24 +41,23 @@
                             Total Emails: <span class="text-info pull-right">{{ subscription.total_emails| number }} email messages</span>
                         </span>
                     </li>
+                    <div class="card-header">
+                        <h3 class="card-title font-weight-bold text-success">Payment Details</h3>
+                    </div>
+
                     <li class="list-group-item">
                         <span class="font-weight-bold">
-                            Total Clients: <span class="text-info pull-right">{{ subscription.total_clients| number }} clients</span>
+                            Date Registered: <span class="text-info pull-right">{{ subscription.date_subscribed if subscription.date_subscribed else 'N/A' }}</span>
                         </span>
                     </li>
+{#                    <li class="list-group-item">#}
+{#                        <span class="font-weight-bold">#}
+{#                            Subscription Period: <span class="text-info pull-right">{{ subscription.subscription_period }} months</span>#}
+{#                        </span>#}
+{#                    </li>#}
                     <li class="list-group-item">
                         <span class="font-weight-bold">
-                            Date Subscribed: <span class="text-info pull-right">{{ subscription.date_subscribed if subscription.date_subscribed else 'N/A' }}</span>
-                        </span>
-                    </li>
-                    <li class="list-group-item">
-                        <span class="font-weight-bold">
-                            Subscription Period: <span class="text-info pull-right">{{ subscription.subscription_period }} months</span>
-                        </span>
-                    </li>
-                    <li class="list-group-item">
-                        <span class="font-weight-bold">
-                            Subscription Amount: <span class="text-success pull-right">R {{ subscription.subscription_amount| number }}.00</span>
+                            Monthly Payment Amount: <span class="text-success pull-right">R {{ subscription.subscription_amount| number }}.00</span>
                         </span>
                     </li>
                 </ul>
@@ -85,6 +95,23 @@
 
                                 {% endif %}
                             </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-block btn-outline-primary btn-lg btn-rounded">
+                                <i class="fa fa-paypal"> </i>
+                                PAY NOW
+                            </button>
+
+                            <button class="btn btn-block btn-outline-success btn-lg btn-rounded">
+                                <i class="fa fa-arrow-up"> </i>
+                                Upgrade Account
+                            </button>
+
+                            <button class="btn btn-block btn-outline-danger btn-lg btn-rounded">
+                                <i class="fa fa-arrow-down"> </i>
+                                Downgrade Account
+                            </button>
+
                         </div>
 
             {% else %}

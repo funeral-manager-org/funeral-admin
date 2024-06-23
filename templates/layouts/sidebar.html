@@ -23,7 +23,7 @@
                             <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
                                     class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
-                                    <li><a href="{{ url_for('messaging.get_topup') }}"><i class="ti-credit-card"></i> TopUps</a></li>
+
 
                                     <li><a href="{{ url_for('messaging.get_sent') }}"><i class="fa fa-send"></i> Sent</a></li>
                                     <li><a href="{{ url_for('messaging.get_compose') }}"><i class="fa fa-send"></i> Compose</a></li>
@@ -50,8 +50,14 @@
                             </li>
                         </ul>
                     </li>
-
-                    <li><a href="{{ url_for('billing.get_billing') }}"><i class="ti-briefcase"></i> Billing</a></li>
+                    <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Billing<span
+                            class="sidebar-collapse-icon ti-angle-down"></span></a>
+                        <ul>
+                            <li><a href="{{ url_for('subscriptions.get_subscriptions') }}"> <i class="fa fa-paypal"> </i> Subscriptions </a> </li>
+                            <li><a href="{{ url_for('messaging.get_topup') }}"><i class="ti-credit-card"></i> TopUps</a></li>
+                            <li><a href="{{ url_for('billing.get_billing') }}"><i class="ti-briefcase"></i> Billing</a></li>
+                        </ul>
+                    </li>
                     <li><a href="#"><i class="ti-briefcase"></i> Support</a></li>
 
                     {% if user and user.is_system_admin %}

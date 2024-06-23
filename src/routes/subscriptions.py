@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, url_for, flash, redirect, request
+from flask import Blueprint, url_for, flash, redirect, request, render_template
 from pydantic import ValidationError
 
 from src.logger import init_logger
@@ -14,6 +14,23 @@ from src.main import company_controller, paypal_controller, subscriptions_contro
 subscriptions_route = Blueprint('subscriptions', __name__)
 
 subscription_logger = init_logger(name="subscriptions_route_logger")
+
+
+@subscriptions_route.get('/subscriptions/subscriptions')
+@admin_login
+async def get_subscriptions(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    if not user.company_id:
+        message: str = "You cannot subscribe please ensure to create a company"
+        flash(message=message, category="danger")
+        subscription_logger.info(message)
+        return redirect(url_for('home.get_home'))
+    context = dict(user=user)
+    return render_template('billing/subscriptions.html', **context)
 
 
 @subscriptions_route.post('/subscriptions/subscribe/<string:option>')

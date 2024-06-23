@@ -1,7 +1,7 @@
 {% extends "layouts/page.html" %}
 {% block content %}
 <section id="main-content">
-    <div class="card">
+    <div class="card shadow-sm border-info">
         <div class="card-header">
             <h3 class="card-title">
                 <span class="font-weight-bold text-info">
@@ -41,6 +41,7 @@
                             Total Emails: <span class="text-info pull-right">{{ subscription.total_emails| number }} email messages</span>
                         </span>
                     </li>
+
                     <div class="card-header">
                         <h3 class="card-title font-weight-bold text-success">Payment Details</h3>
                     </div>
@@ -50,18 +51,13 @@
                             Date Registered: <span class="text-info pull-right">{{ subscription.date_subscribed if subscription.date_subscribed else 'N/A' }}</span>
                         </span>
                     </li>
-{#                    <li class="list-group-item">#}
-{#                        <span class="font-weight-bold">#}
-{#                            Subscription Period: <span class="text-info pull-right">{{ subscription.subscription_period }} months</span>#}
-{#                        </span>#}
-{#                    </li>#}
                     <li class="list-group-item">
                         <span class="font-weight-bold">
                             Monthly Payment Amount: <span class="text-success pull-right">R {{ subscription.subscription_amount| number }}.00</span>
                         </span>
                     </li>
                 </ul>
-                    <div class="card">
+                    <div class="card  shadow-sm border-primary">
                     <div class="card-header">
                         <h3 class="card-title font-weight-bold text-success">
                             <i class="fa fa-money"> </i>
@@ -91,12 +87,16 @@
                                         </tbody>
                                     </table>
                                 {% else %}
-                                            <h3 class="card-title font-italic text-danger">No payments recorded.</h3>
+                                    <div class="card-header">
+                                            <h3 class="card-title font-italic text-danger align-content-center">No payments recorded.</h3>
+                                    </div>
 
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="card-footer">
+
+                        <div class="card card-columns shadow-lg border-primary">
+
                             <button class="btn btn-block btn-outline-primary btn-lg btn-rounded">
                                 <i class="fa fa-paypal"> </i>
                                 PAY NOW

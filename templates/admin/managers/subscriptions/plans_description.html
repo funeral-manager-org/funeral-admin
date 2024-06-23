@@ -6,19 +6,21 @@
     <div class="row">
 
         <div class="col-md-12">
-            <div class="card mb-4 shadow-sm">
+            <div class="card mb-4 shadow-lg border-primary">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="card-title my-0 font-weight-bold">One Month Trial</h4>
+                    <h4 class="card-title my-0 font-weight-bold text-white">
+                        <i class="fa fa-user-circle"> </i>
+                        One Month Trial</h4>
                 </div>
                 <div class="card-body">
-                    <h1 class="card-title pricing-card-title mt-4 text-dark font-weight-bold">Free (50 Zar - Account Fee)</h1>
+                    <h1 class="card-title pricing-card-title mt-4 text-dark font-weight-bold">Free (50 Zar - Account Reg Fee)</h1>
                     <ul class="list-unstyled mt-3 mb-4 mt-4">
                         <li class="font-weight-bold text-info">Access to basic features</li>
                         <li class="font-weight-bold text-info">20 SMS</li>
                         <li class="font-weight-bold text-info">50 Emails</li>
                         <li class="font-weight-bold text-info">Full customer support</li>
                         <li class="font-weight-bold text-info">Cancel anytime</li>
-                        <li class="font-weight-bold text-success">If Not cancelled the plan will be converted to a Monthly Subscription</li>
+{#                        <li class="font-weight-bold text-success">If Not cancelled the plan will be converted to a Monthly Subscription</li>#}
                     </ul>
                     <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="FREE") }}">
 
@@ -32,9 +34,12 @@
         </div>
 
         <div class="col-md-12">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="card-title my-0 font-weight-bold">Business</h4>
+            <div class="card mb-4 shadow-lg border-success">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title my-0 font-weight-bold text-white">
+                        <i class="fa fa-user-circle"> </i>
+                        Business
+                    </h4>
                 </div>
                 <div class="card-body">
                     <h1 class="card-title pricing-card-title m-t-4 text-dark font-weight-bold">ZAR 1500 <small class="text-muted">/ month</small></h1>
@@ -46,17 +51,20 @@
                         <li class="font-weight-bold text-info">24/7 priority customer support</li>
                     </ul>
                     <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="BUSINESS") }}">
-                        <button type="submit" class="btn btn-lg btn-block btn-primary btn-rounded">
+                        <button type="submit" class="btn btn-lg btn-block btn-outline-success btn-rounded">
                             <i class="fa fa-credit-card-alt"> </i>
-                            Subscribe
+                            Create Business Account
                         </button>
                     </form>
                 </div>
             </div>
 
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="card-title my-0 font-weight-bold">Premium</h4>
+            <div class="card mb-4 shadow-lg border-warning">
+                <div class="card-header bg-warning-dark">
+                    <h4 class="card-title my-0 font-weight-bold text-white">
+                        <i class="fa fa-user-circle"> </i>
+                        Premium
+                    </h4>
                 </div>
                 <div class="card-body">
                     <h1 class="card-title pricing-card-title m-t-4 text-dark font-weight-bold">ZAR 3,000 <small class="text-muted">/ Month</small></h1>
@@ -69,9 +77,9 @@
                     </ul>
                     <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="PREMIUM") }}">
 
-                        <button type="submit" class="btn btn-lg btn-block btn-primary btn-rounded">
+                        <button type="submit" class="btn btn-lg btn-block btn-outline-warning btn-rounded">
                             <i class="fa fa-credit-card-alt"> </i>
-                            Subscribe
+                            Create Premium Account
                         </button>
                     </form>
                 </div>

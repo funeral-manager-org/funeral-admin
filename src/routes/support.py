@@ -29,6 +29,12 @@ async def get_support(user: User):
         
     return render_template('support/support.html', **context)
 
-        
+@support_route.post('/support/ticket-create')
+@user_details
+async def do_create_ticket(user: User):
+    """
 
-
+    :param user:
+    :return:
+    """
+    pass

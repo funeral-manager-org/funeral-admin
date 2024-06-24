@@ -20,36 +20,30 @@
                             <li><a href="{{ url_for('employees.get_employees') }}"><i class="ti-briefcase"></i> Employees</a></li>
 
 
-                            <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
-                                    class="sidebar-collapse-icon ti-angle-down"></span></a>
-                                <ul>
-
-
-                                    <li><a href="{{ url_for('messaging.get_sent') }}"><i class="fa fa-send"></i> Sent</a></li>
-                                    <li><a href="{{ url_for('messaging.get_compose') }}"><i class="fa fa-send"></i> Compose</a></li>
-                                    <li><a href="{{ url_for('messaging.get_admin') }}"><i class="fa fa-cogs"></i> Settings & Stats</a></li>
-                                </ul>
-                            </li>
-
                         </ul>
 
                     </li>
 
-                    <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Employees<span
+                    <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Covers<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
                             <li><a href="{{ url_for('policy.get_policies') }}"><i class="ti-briefcase"></i> Policies</a></li>
                             <li><a href="{{ url_for('clients.get_clients') }}"><i class="ti-briefcase"></i> Clients</a></li>
 
-                            <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
-                                    class="sidebar-collapse-icon ti-angle-down"></span></a>
-                                <ul>
-                                    <li><a href="{{ url_for('messaging.get_employee_sent') }}"><i class="fa fa-send"></i> Sent</a></li>
-                                    <li><a href="{{ url_for('messaging.get_employee_compose') }}"><i class="fa fa-send"></i> Compose</a></li>
-                                </ul>
-                            </li>
                         </ul>
                     </li>
+
+
+                    <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
+                            class="sidebar-collapse-icon ti-angle-down"></span></a>
+                        <ul>
+                            <li><a href="{{ url_for('messaging.get_employee_sent') }}"><i class="fa fa-send"></i> Sent</a></li>
+                            <li><a href="{{ url_for('messaging.get_employee_compose') }}"><i class="fa fa-send"></i> Compose</a></li>
+                            <li><a href="{{ url_for('messaging.get_admin') }}"><i class="fa fa-cogs"></i> Settings & Stats</a></li>
+                        </ul>
+                    </li>
+
+
                     <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Billing<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>

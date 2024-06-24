@@ -1,0 +1,57 @@
+
+
+
+
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+
+<section id="main-content">
+    <div class="card shadow-lg border-warning">
+        <div class="card-header">
+            <h2 class="card-title font-weight-bold text-info">
+                <i class="fa fa-ticket"></i>
+                Support Tickets</h2>
+        </div>
+        <div class="card-body">
+            <form class="form-horizontal">
+                <div class="form-group">
+
+                    <label for="ticket_type" class="font-weight-light text-info">Ticket Type</label>
+                    <div class="form-control-feedback">
+                        <select class="form-control-lg" name="ticket_type" id="ticket_type">
+                            <option value="billing">Billing</option>
+                            <option value="covers">Covers</option>
+                            <option value="messaging">Messaging</option>
+                            <option value="employees">Employees</option>
+                            <option value="plans">Plans</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="subject" class="font-weight-light text-info">Subject</label>
+                    <div class="form-control-feedback">
+                        <input type="text" class="form-control-lg" name="subject" id="subject">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="message" class="font-weight-light text-info">Message</label>
+                    <div class="form-control-feedback">
+                        <textarea class="form-control-lg" name="message" id="message"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-lg btn-block btn-outline-success">
+                        <i class="fa fa-ticket"> </i>
+                        Submit Ticket
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</section>
+
+{% endblock  %}

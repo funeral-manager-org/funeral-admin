@@ -51,8 +51,10 @@ def _add_blue_prints(app: Flask):
     from src.routes.billing import billing_route
     from src.routes.system import system_route
 
+    from src.routes.support import support_route
+
     routes = [auth_route, home_route, company_route, employee_route, covers_route, clients_route, policy_route,
-              messaging_route, subscriptions_route,billing_route, system_route]
+              messaging_route, subscriptions_route, billing_route,support_route, system_route]
 
     for route in routes:
         app.register_blueprint(route)

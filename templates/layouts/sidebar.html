@@ -24,7 +24,7 @@
 
                     </li>
 
-                    <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Covers<span
+                    <li><a class="sidebar-sub-toggle"><i class="fa fa-folder"></i> Covers<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
                             <li><a href="{{ url_for('policy.get_policies') }}"><i class="ti-briefcase"></i> Policies</a></li>
@@ -52,7 +52,7 @@
                             <li><a href="{{ url_for('messaging.get_topup') }}"><i class="ti-credit-card"></i> Top Ups</a></li>
                         </ul>
                     </li>
-                    <li><a href="{{ url_for('support.get_support') }}"><i class="ti-briefcase"></i> Support</a></li>
+                    <li><a href="{{ url_for('support.get_support') }}"><i class="fa fa-ticket"></i> Support</a></li>
 
                     {% if user and user.is_system_admin %}
                         <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Admin<span

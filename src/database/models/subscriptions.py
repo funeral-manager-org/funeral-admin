@@ -220,18 +220,32 @@ class TopUpPacks(BaseModel):
             TopUpNames.PROFESSIONAL.value: 4000,
             TopUpNames.PREMIUM.value: 8000
         }
-        return sms_limits.get(self.top_up_name, 0) if self.top_up_type == "sms" else 0
+        return sms_limits.get(self.top_up_name, 0) if self.top_up_type == TopUpTypes.SMS.value else 0
 
     @property
     def total_emails(self):
-        return 0
+        email_limits = {
+            TopUpNames.BASIC.value: 1500,
+            TopUpNames.PROFESSIONAL.value: 4000,
+            TopUpNames.PREMIUM.value: 8000
+
+        }
+        return email_limits.get(self.top_up_name, 0) if self.top_up_type == TopUpTypes.EMAIL.value else 0
 
     @property
     def payment_amount(self):
-        payment_amounts = {
+        sms_payment_amounts = {
             TopUpNames.BASIC.value: 540,
             TopUpNames.PROFESSIONAL.value: 900,
             TopUpNames.PREMIUM.value: 1400
         }
-
-        return payment_amounts.get(self.top_up_name, 0) if self.top_up_type == "sms" else 0
+        email_payment_amounts = {
+            TopUpNames.BASIC.value: 540,
+            TopUpNames.PROFESSIONAL.value: 900,
+            TopUpNames.PREMIUM.value: 1400
+        }
+        if self.top_up_type == TopUpTypes.SMS.value:
+            return sms_payment_amounts.get(self.top_up_name, 0)
+        if self.top_up_type == TopUpTypes.EMAIL.value:
+            return email_payment_amounts.get(self.top_up_name, 0)
+        return 0

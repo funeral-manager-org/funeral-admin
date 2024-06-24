@@ -1,5 +1,5 @@
 
-<div class="card">
+<div class="card shadow-lg border-primary">
     <div class="card-header">
         <h3 class="card-title">
             <span class="font-weight-bold text-info">
@@ -19,9 +19,11 @@
             </div>
             <div class="row">
                 <div class="col-md-4">
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header">
-                            <h4 class="card-title my-0 font-weight-bold">Basic Email (TopUp) Package</h4>
+                    <div class="card mb-4 shadow-sm border-info">
+                        <div class="card-header bg-primary-dark">
+                            <h4 class="card-title my-0 font-weight-bold text-white">
+                                <i class="fa fa-envelope-square"> </i>
+                                Basic</h4>
                         </div>
                         <div class="card-body">
                             <h1 class="card-title pricing-card-title font-weight-bold m-t-12">R 540.00 <small class="text-muted"></small></h1>
@@ -31,16 +33,24 @@
                                 <li class="font-weight-bold text-danger"> 36 Cents Per Email</li>
 
                             </ul>
+                            <form class="form-horizontal" method="POST" action="{{ url_for('subscriptions.messaging_top_up') }}">
+                                <input type="hidden" name="top_up_type" id="top_up_type" value="email" >
+                                <input type="hidden" name="top_up_name" id="top_up_name" value="basic">
+
                                 <button type="submit" class="btn btn-lg btn-block btn-outline-primary btn-rounded">
-                                    Buy Package
+                                    <i class="fa fa-credit-card"> </i>
+                                    Add Package
                                 </button>
+                            </form>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header">
-                            <h4 class="card-title my-0 font-weight-bold">Professional Email (TopUP) Package</h4>
+                    <div class="card mb-4 shadow-sm border-info">
+                        <div class="card-header bg-success-dark">
+                            <h4 class="card-title my-0 font-weight-bold text-white">
+                                <i class="fa fa-envelope-square"> </i>
+                                Professional</h4>
                         </div>
                         <div class="card-body">
                             <h1 class="card-title pricing-card-title font-weight-bold m-t-12">R 900.00 <small class="text-muted"></small></h1>
@@ -49,17 +59,25 @@
                                 <li class="font-weight-bold text-success m-b-4">1,500 Email (Marketing Campaign)</li>
                                 <li class="font-weight-bold text-danger"> 22 Cents Per Email</li>
                             </ul>
-                                <button type="submit" class="btn btn-lg btn-block btn-outline-primary btn-rounded">
-                                    Buy Package
+                            <form class="form-horizontal" method="POST" action="{{ url_for('subscriptions.messaging_top_up') }}">
+                                <input type="hidden" name="top_up_type" id="top_up_type" value="email" >
+                                <input type="hidden" name="top_up_name" id="top_up_name" value="professional">
+
+                                <button type="submit" class="btn btn-lg btn-block btn-outline-success btn-rounded">
+                                    <i class="fa fa-credit-card"> </i>
+                                Add Package
                                 </button>
+                            </form>
 
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header">
-                            <h4 class="card-title my-0 font-weight-bold">Premium Email (TopUp) Package</h4>
+                    <div class="card mb-4 shadow-sm border-info">
+                        <div class="card-header bg-warning-dark">
+                            <h4 class="card-title my-0 font-weight-bold text-white">
+                                <i class="fa fa-envelope-square"> </i>
+                                Premium</h4>
                         </div>
                         <div class="card-body">
                             <h1 class="card-title pricing-card-title font-weight-bold m-t-12">R 1,440.00</h1>
@@ -69,10 +87,15 @@
                                 <li class="font-weight-bold text-success m-b-4">500 Employee Notifications</li>
                                 <li class="font-weight-bold text-danger"> 15 Cents Per Email</li>
                             </ul>
+                            <form class="form-horizontal" method="POST" action="{{ url_for('subscriptions.messaging_top_up') }}">
+                                <input type="hidden" name="top_up_type" id="top_up_type" value="email" >
+                                <input type="hidden" name="top_up_name" id="top_up_name" value="premium">
 
-                                <button type="submit" class="btn btn-lg btn-block btn-outline-primary btn-rounded">
-                                    Buy Package
+                                <button type="submit" class="btn btn-lg btn-block btn-outline-warning btn-rounded">
+                                    <i class="fa fa-credit-card"> </i>
+                                    Add Package
                                 </button>
+                            </form>
 
                         </div>
                     </div>

@@ -42,11 +42,6 @@ async def do_subscribe(user: User, option: str):
     :param user:
     :return:
     """
-    if not user.company_id:
-        message: str = "You cannot subscribe please ensure to create a company"
-        flash(message=message, category="danger")
-        subscription_logger.info(message)
-        return redirect(url_for('home.get_home'))
 
     if option not in PlanNames.plan_names():
         message: str = "Please select a valid subscription plan"
@@ -93,37 +88,32 @@ async def subscription_payment_successful(user: User):
             return redirect(url_for('home.get_home'))
 
         data = request.json
-
-        # Extract payment amount
-        amount = int(_payload.get("resource", {}).get("amount", {}).get("total"))
-
-        subscription = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
-
-        payment = Payment(subscription_id=subscription.subscription_id,
-                          amount_paid=amount,
-                          payment_method="paypal",
-                          is_successful=True, month=1)
-
-        payment = await subscriptions_controller.add_company_payment(payment=payment)
-        subscription_logger.info("subscription payment succeeded")
-        subscription_logger.info(payment)
-        if amount < subscription.subscription_amount:
-            flash(message=f"you have paid : {amount} instead of {subscription.subscription_amount}", category="danger")
-
-        else:
-            flash(message=f"Payment Of {amount} Made Successfully", category="success")
-
-        return redirect(url_for('company.get_admin'))
-
         # Convert amount to float
     except json.JSONDecodeError as e:
         print("Error decoding JSON:", e)
         subscription_logger.error(str(e))
         return None
-    except Exception as e:
-        print("An error occurred:", e)
-        subscription_logger.error(str(e))
-        return None
+
+    # Extract payment amount
+    amount = int(_payload.get("resource", {}).get("amount", {}).get("total"))
+
+    subscription = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
+
+    payment = Payment(subscription_id=subscription.subscription_id,
+                      amount_paid=amount,
+                      payment_method="paypal",
+                      is_successful=True, month=1)
+
+    payment = await subscriptions_controller.add_company_payment(payment=payment)
+    subscription_logger.info("subscription payment succeeded")
+    subscription_logger.info(payment)
+    if amount < subscription.subscription_amount:
+        flash(message=f"you have paid : {amount} instead of {subscription.subscription_amount}", category="danger")
+
+    else:
+        flash(message=f"Payment Of {amount} Made Successfully", category="success")
+
+    return redirect(url_for('company.get_admin'))
 
 
 @subscriptions_route.get('/subscriptions/payment/failure')

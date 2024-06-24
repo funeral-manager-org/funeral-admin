@@ -97,15 +97,18 @@
 
                         <div class="card card-columns shadow-lg border-primary">
 
-                            <button class="btn btn-block btn-outline-primary btn-lg btn-rounded">
-                                <i class="fa fa-paypal"> </i>
-                                PAY NOW
-                            </button>
+                            <form class="form-horizontal" method="POST" action="{{ url_for('billing.do_pay_now') }}">
+                                <button class="btn btn-block btn-outline-primary btn-lg btn-rounded">
+                                    <i class="fa fa-paypal"> </i>
+                                    PAY NOW
+                                </button>
+                            </form>
 
-                            <button class="btn btn-block btn-outline-success btn-lg btn-rounded">
-                                <i class="fa fa-arrow-up"> </i>
-                                Upgrade Account
-                            </button>
+                                <button class="btn btn-block btn-outline-success btn-lg btn-rounded">
+                                    <i class="fa fa-arrow-up"> </i>
+                                    Upgrade Account
+                                </button>
+
 
                             <button class="btn btn-block btn-outline-danger btn-lg btn-rounded">
                                 <i class="fa fa-arrow-down"> </i>

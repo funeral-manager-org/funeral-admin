@@ -7,7 +7,7 @@ from paypalrestsdk import configure, Payment
 
 from src.config import Settings
 from src.controller import Controllers
-from src.database.models.subscriptions import SubscriptionDetails, TopUpPacks
+from src.database.models.subscriptions import SubscriptionDetails, TopUpPacks, Subscriptions
 from src.database.models.users import User
 
 
@@ -57,7 +57,7 @@ class PayPalController(Controllers):
 
         return int(round(zar * exchange_rate))
 
-    async def create_payment(self, payment_details: SubscriptionDetails | TopUpPacks, user: User,
+    async def create_payment(self, payment_details: SubscriptionDetails | TopUpPacks | Subscriptions, user: User,
                              success_url: str, failure_url: str) -> tuple[Payment, bool] | tuple[None, None]:
         """
         :param payment_details:
@@ -70,10 +70,12 @@ class PayPalController(Controllers):
             total_amount = self.convert_to_usd(zar=payment_details.subscription_amount)
         elif isinstance(payment_details, TopUpPacks):
             total_amount = self.convert_to_usd(zar=payment_details.payment_amount)
+        elif isinstance(payment_details, Subscriptions):
+            total_amount = self.convert_to_usd(zar=payment_details.subscription_amount)
         else:
             return None, None
 
-        self.logger.info(f"Total Amount: {str(total_amount)}")
+        self.logger.info(f"Total Amount: {str(total_amount)} USD")
         # Include customer information and UID
         payment = Payment({
             "intent": "sale",

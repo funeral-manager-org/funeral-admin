@@ -55,7 +55,7 @@ def admin_login(route_function):
             # Assuming you have a function to retrieve the user details based on the uid
             user = await get_user_details(auth_cookie)
             try:
-                if user and user.is_company_admin:
+                if user and user.company_id and user.is_company_admin:
                     return await route_function(user, *args, **kwargs)  # Inject user as a parameter
                 flash(message="User may not be Authorized or Logged In", category="danger")
                 return redirect(url_for('home.get_home'))

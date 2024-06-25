@@ -11,7 +11,6 @@
                     </div>
                     <li class="label">Main</li>
                     <li><a href="{{ url_for('home.get_home') }}"><i class="ti-home"></i> Home</a></li>
-
                     <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Manage<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
@@ -19,31 +18,22 @@
                             <li><a href="{{ url_for('covers.get_covers') }}"><i class="ti-briefcase"></i> Plans</a></li>
                             <li><a href="{{ url_for('employees.get_employees') }}"><i class="ti-briefcase"></i> Employees</a></li>
                             <li><a href="{{ url_for('messaging.get_admin') }}"><i class="fa fa-cogs"></i> Settings & Stats</a></li>
-
                         </ul>
-
                     </li>
-
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-folder"></i> Covers<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
                             <li><a href="{{ url_for('policy.get_policies') }}"><i class="ti-briefcase"></i> Policies</a></li>
                             <li><a href="{{ url_for('clients.get_clients') }}"><i class="ti-briefcase"></i> Clients</a></li>
-
                         </ul>
                     </li>
-
-
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
                             <li><a href="{{ url_for('messaging.get_employee_sent') }}"><i class="fa fa-send"></i> Sent</a></li>
                             <li><a href="{{ url_for('messaging.get_employee_compose') }}"><i class="fa fa-send"></i> Compose</a></li>
-
                         </ul>
                     </li>
-
-
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-shopping-cart"></i> Billing<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
@@ -64,7 +54,6 @@
                             </ul>
                         </li>
                     {% endif %}
-
                     {% if user %}
                         <li><a href="{{ url_for('auth.do_logout')}}"><i class="ti-power-off"></i> Logout</a></li>
                     {% else %}

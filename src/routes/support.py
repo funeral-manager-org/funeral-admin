@@ -4,6 +4,7 @@ from random import randint
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
+from src.database.models.support import TicketPriority, TicketTypes
 from src.database.models.companies import EmployeeDetails
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose, SMSInbox, SMSSettings
 from src.database.models.covers import ClientPersonalInformation
@@ -22,12 +23,17 @@ async def get_support(user: User):
     :param user:
     :return:
     """
-    if user and user.email:
-        context = dict(user=user)
-    else:
-        context = {}
-        
+
+    context: dict[str, dict[any, any] | str | list[str]] = dict(user=user) if user and user.email else dict()
+
+    ticket_priority_list = TicketPriority.priority_list()
+    ticket_types_list = TicketTypes.ticket_types_list()
+
+    context.update(ticket_priority_list=ticket_priority_list,
+                   ticket_types_list=ticket_types_list)
+
     return render_template('support/support.html', **context)
+
 
 @support_route.post('/support/ticket-create')
 @user_details

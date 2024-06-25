@@ -1,9 +1,7 @@
 from datetime import datetime
 from enum import Enum
-
 from pydantic import BaseModel, Field
-
-from database.models.users import User
+from src.database.models.users import User
 from src.utils import create_id
 
 
@@ -14,11 +12,31 @@ class TicketStatus(str, Enum):
     CLOSED = "closed"
 
 
+class TicketTypes(str, Enum):
+    BILLING = "billing"
+    COVERS = "covers"
+    MESSAGING = "messaging"
+    EMPLOYEES = "employees"
+    PLANS = "plans"
+
+    @classmethod
+    def ticket_types_list(cls) -> list[str]:
+        return [cls.BILLING.value, cls.COVERS.value, cls.MESSAGING.value, cls.EMPLOYEES.value, cls.PLANS.value]
+
+
 class TicketPriority(str, Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     URGENT = "urgent"
+
+    @classmethod
+    def priority_list(cls) -> list[str]:
+        """
+
+        :return:
+        """
+        return [cls.LOW.value, cls.MEDIUM.value, cls.HIGH.value, cls.URGENT.value]
 
 
 class TicketMessage(BaseModel):

@@ -1,16 +1,10 @@
-from datetime import datetime
-from random import randint
+from flask import Blueprint, render_template
 
-from flask import Blueprint, render_template, url_for, flash, redirect, request
-from pydantic import ValidationError
+from flask import Blueprint, render_template
 
+from src.authentication import user_details
 from src.database.models.support import TicketPriority, TicketTypes
-from src.database.models.companies import EmployeeDetails
-from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose, SMSInbox, SMSSettings
-from src.database.models.covers import ClientPersonalInformation
-from src.authentication import login_required, user_details
 from src.database.models.users import User
-from src.main import company_controller, messaging_controller
 
 support_route = Blueprint('support', __name__)
 

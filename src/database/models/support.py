@@ -45,20 +45,20 @@ class TicketMessage(BaseModel):
     sender_id: str
     message: str
     created_at: datetime = Field(default=datetime.utcnow)
-    sender: User
 
 
 class Ticket(BaseModel):
     ticket_id: str = Field(default_factory=create_id)
+
+    user_id: str
+
+    assigned_to: str
+    ticket_type: str
     subject: str
-    message: str
+
     status: str = Field(default=TicketStatus.OPEN.value)
     priority: str = Field(default=TicketPriority.MEDIUM.value)
     created_at: datetime = Field(default=datetime.utcnow)
     updated_at: datetime = Field(default=datetime.utcnow)
-    user_id: str
-    assigned_to: str
 
-    user: User
-    assignee: User
     messages: list[TicketMessage]

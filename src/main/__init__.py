@@ -18,6 +18,8 @@ from src.controller.notifications_controller import NotificationsController
 from src.controller.subscriptions_controller import SubscriptionsController
 from src.controller.system_controller import SystemController
 
+from src.controller.support_controller import SupportController
+
 # from src.firewall import Firewall
 
 user_controller = UserController()
@@ -28,7 +30,7 @@ messaging_controller = MessagingController()
 notifications_controller = NotificationsController()
 subscriptions_controller = SubscriptionsController()
 system_controller = SystemController()
-
+support_controller = SupportController()
 # chat_io = SocketIO()
 
 
@@ -97,6 +99,8 @@ def create_app(config):
 
         # application engines
         messaging_controller.init_app(app=app, settings=config, emailer=send_mail)
+
+        support_controller.init_app(app=app, messaging_controller=messaging_controller)
 
         notifications_controller.init_app(app=app,
                                           messaging_controller=messaging_controller,

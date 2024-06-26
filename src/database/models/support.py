@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum
+
 from pydantic import BaseModel, Field
-from src.database.models.users import User
+
 from src.utils import create_id
 
 
@@ -39,26 +40,37 @@ class TicketPriority(str, Enum):
         return [cls.LOW.value, cls.MEDIUM.value, cls.HIGH.value, cls.URGENT.value]
 
 
+def create_ticket_id() -> str:
+    return create_id()
+
+
 class TicketMessage(BaseModel):
     message_id: str = Field(default_factory=create_id)
     ticket_id: str
     sender_id: str
     message: str
-    created_at: datetime = Field(default=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class Ticket(BaseModel):
-    ticket_id: str = Field(default_factory=create_id)
+    ticket_id: str
 
     user_id: str
 
-    assigned_to: str
+    assigned_to: str | None
     ticket_type: str
     subject: str
 
     status: str = Field(default=TicketStatus.OPEN.value)
     priority: str = Field(default=TicketPriority.MEDIUM.value)
-    created_at: datetime = Field(default=datetime.utcnow)
-    updated_at: datetime = Field(default=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     messages: list[TicketMessage]
+
+
+class NewTicketForm(BaseModel):
+    ticket_type: str
+    subject: str
+    priority: str
+    message: str

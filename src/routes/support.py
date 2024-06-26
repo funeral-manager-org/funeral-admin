@@ -32,6 +32,23 @@ async def get_support(user: User):
 
     return render_template('support/support.html', **context)
 
+@support_route.get('/support/ticket/<string:ticket_id>')
+@login_required
+async def view_ticket(user: User, ticket_id: str):
+    """
+
+    :param user:
+    :param ticket_id:
+    :return:
+    """
+    context: dict[str, dict[any, any] | str | list[str]] = dict(user=user) if user and user.email else dict()
+    support_ticket = await support_controller.get_support_ticket_by_ticket_id(ticket_id=ticket_id)
+
+    context.update(support_ticket=support_ticket)
+
+    return render_template('support/view_ticket.html', **context)
+
+
 
 @support_route.post('/support/ticket-create')
 @login_required

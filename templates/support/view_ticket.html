@@ -1,0 +1,64 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+    <div class="card shadow-lg border-warning">
+        <div class="card-header">
+            <h2 class="card-title font-weight-bold text-info">
+                <i class="fa fa-ticket"></i>
+                View Ticket
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h5 class="font-weight-bold">Ticket Details</h5>
+                <ul class="list-group">
+                    <li class="list-group-item"> <span class="text-info font-weight-light">Subject:</span> <span class="font-weight-bold">{{ support_ticket.subject }}</span></li>
+                    <li class="list-group-item">
+                        <span class="font-italic">Status:</span>
+                        {% if support_ticket.status == 'open' %}
+                            <span class="badge badge-success pull-right">Open</span>
+                        {% elif support_ticket.status == 'in_progress' %}
+                            <span class="badge badge-warning pull-right">In Progress</span>
+                        {% elif support_ticket.status == 'resolved' %}
+                            <span class="badge badge-primary pull-right">Resolved</span>
+                        {% elif support_ticket.status == 'closed' %}
+                            <span class="badge badge-secondary pull-right">Closed</span>
+                        {% else %}
+                            <span class="badge badge-light pull-right">Unknown</span>
+                        {% endif %}
+                    </li>
+                    <li class="list-group-item"> <span class="text-success">Created At:</span> <span class="pull-right">{{ support_ticket.created_at }}</span></li>
+                    <li class="list-group-item"> <span class="text-warning">Updated At:</span> <span class="pull-right">{{ support_ticket.updated_at }}</span></li>
+                </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h5 class="font-weight-bold">Messages</h5>
+                    <div class="list-group">
+                        {% for message in support_ticket.messages %}
+                            <div class="list-group-item list-group-item-action">
+
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">From: {{ message.sender_id }}</h5>
+                                    <small>{{ message.created_at }}</small>
+                                </div>
+
+                                <p class="mb-1">{{ message.message }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <button class="btn btn-block btn-outline-danger btn-rounded btn-sm">Close Ticket</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

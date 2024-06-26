@@ -56,3 +56,19 @@ class SupportController(Controllers):
             # Transform the result into a list of Ticket objects
             return [Ticket(**ticket_orm.to_dict()) for ticket_orm in tickets_with_messages if
                     isinstance(ticket_orm, TicketORM)]
+
+    async def get_support_ticket_by_ticket_id(self, ticket_id: str) -> Ticket | None:
+        """
+            return ticket with messages
+        :param ticket_id:
+        :return:
+        """
+        with self.get_session() as session:
+            ticket_orm = (
+                session.query(TicketORM)
+                .outerjoin(TicketMessageORM, TicketORM.ticket_id == TicketMessageORM.ticket_id)
+                .filter(TicketORM.ticket_id == ticket_id).first()
+            )
+
+            return Ticket(**ticket_orm.to_dict()) if isinstance(ticket_orm, TicketORM) else None
+

@@ -13,7 +13,7 @@ support_logger = init_logger("support_logger")
 
 
 @support_route.get('/support')
-@user_details
+@login_required
 async def get_support(user: User):
     """
 

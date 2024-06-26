@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
 
-from src.authentication import user_details
+from src.authentication import user_details, login_required
 from src.database.models.support import TicketPriority, TicketTypes, NewTicketForm, Ticket, TicketMessage, \
     create_ticket_id
 from src.database.models.users import User
@@ -34,7 +34,7 @@ async def get_support(user: User):
 
 
 @support_route.post('/support/ticket-create')
-@user_details
+@login_required
 async def do_create_ticket(user: User):
     """
 

@@ -43,11 +43,10 @@ async def view_ticket(user: User, ticket_id: str):
     """
     context: dict[str, dict[any, any] | str | list[str]] = dict(user=user) if user and user.email else dict()
     support_ticket = await support_controller.get_support_ticket_by_ticket_id(ticket_id=ticket_id)
-
-    context.update(support_ticket=support_ticket)
+    uid_email_tags: dict[str, str] = await support_controller.get_uid_tags(support_ticket=support_ticket)
+    context.update(support_ticket=support_ticket, uid_email_tags=uid_email_tags)
 
     return render_template('support/view_ticket.html', **context)
-
 
 
 @support_route.post('/support/ticket-create')

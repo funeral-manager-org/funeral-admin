@@ -1,5 +1,6 @@
 from flask import Flask
 
+from src.database.sql.user import UserORM
 from src.database.sql.support import TicketORM, TicketMessageORM
 from src.database.models.support import Ticket, TicketMessage
 from src.controller.messaging_controller import MessagingController
@@ -72,3 +73,15 @@ class SupportController(Controllers):
 
             return Ticket(**ticket_orm.to_dict()) if isinstance(ticket_orm, TicketORM) else None
 
+    async def get_uid_tags(self, support_ticket: Ticket) -> dict[str, str]:
+        """
+            :param support_ticket:
+            :return:
+        """
+        with self.get_session() as session:
+            uid_name_tag = {}
+            for message in support_ticket.messages:
+                user_orm: UserORM = session.query(UserORM).filter_by(uid=message.sender_id).first()
+                uid_name_tag[user_orm.uid] = user_orm.email
+
+            return uid_name_tag

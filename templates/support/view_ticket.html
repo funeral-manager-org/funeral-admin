@@ -43,7 +43,7 @@
                             <div class="list-group-item list-group-item-action">
 
                                 <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1">From: {{ message.sender_id }}</h5>
+                                    <h5 class="mb-1">From: {{ uid_email_tags.get(message.sender_id) }}</h5>
                                     <small>{{ message.created_at }}</small>
                                 </div>
 

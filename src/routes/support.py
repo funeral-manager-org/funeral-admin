@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from src.authentication import user_details, login_required
 from src.database.models.support import TicketPriority, TicketTypes, NewTicketForm, Ticket, TicketMessage, \
-    create_ticket_id
+    create_ticket_id, TicketStatus
 from src.database.models.users import User
 from src.logger import init_logger
 from src.main import support_controller
@@ -32,6 +32,7 @@ async def get_support(user: User):
 
     return render_template('support/support.html', **context)
 
+
 @support_route.get('/support/ticket/<string:ticket_id>')
 @login_required
 async def view_ticket(user: User, ticket_id: str):
@@ -43,6 +44,7 @@ async def view_ticket(user: User, ticket_id: str):
     """
     context: dict[str, dict[any, any] | str | list[str]] = dict(user=user) if user and user.email else dict()
     support_ticket: Ticket = await support_controller.get_support_ticket_by_ticket_id(ticket_id=ticket_id)
+    support_logger.info(f"Support Ticket : {support_ticket}")
     uid_email_tags: dict[str, str] = await support_controller.get_uid_tags(support_ticket=support_ticket)
     context.update(support_ticket=support_ticket, uid_email_tags=uid_email_tags)
 
@@ -73,6 +75,8 @@ async def do_create_ticket(user: User):
     flash(message=message, category="success")
     flash(message=ticket_id, category="success")
     return redirect(url_for('support.get_support'))
+
+
 @support_route.post('/support/ticket-response/<string:ticket_id>')
 @login_required
 async def respond_to_ticket(user: User, ticket_id: str):
@@ -85,6 +89,7 @@ async def respond_to_ticket(user: User, ticket_id: str):
     message = request.form.get('message')
     new_message = TicketMessage(ticket_id=ticket_id, sender_id=user.uid, message=message)
     ticket_message: TicketMessage = await support_controller.add_ticket_message(ticket_message=new_message)
+    support_ticket = await support_controller.ticket_set_status(ticket_id=ticket_id, status=TicketStatus.IN_PROGRESS.value)
     flash(message="response successfully sent", category="danger")
     return redirect(url_for('support.get_support'))
 
@@ -96,7 +101,3 @@ async def create_ticket(new_ticket: NewTicketForm, user: User) -> tuple[Ticket, 
     messages = [ticket_message]
     ticket = Ticket(**new_ticket.dict(), messages=messages, ticket_id=ticket_id, user_id=user.uid)
     return ticket, ticket_message
-
-
-
-

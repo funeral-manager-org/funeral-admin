@@ -38,6 +38,18 @@ class SupportController(Controllers):
 
             return ticket_message
 
+    async def ticket_set_status(self, ticket_id: str, status: str):
+        """
+
+        :param ticket_id:
+        :param status:
+        :return:
+        """
+        with self.get_session() as session:
+            ticket_orm = session.query(TicketORM).filter_by(ticket_id=ticket_id).first()
+            if isinstance(ticket_orm, TicketORM):
+                ticket_orm.status = status
+
     async def get_user_support_tickets(self, uid: str) -> list[Ticket]:
         """
         Get all support tickets for a specific user, including their messages.

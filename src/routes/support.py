@@ -12,6 +12,15 @@ support_route = Blueprint('support', __name__)
 support_logger = init_logger("support_logger")
 
 
+async def create_ticket(new_ticket: NewTicketForm, user: User) -> tuple[Ticket, TicketMessage]:
+    ticket_id = create_ticket_id()
+    ticket_message: TicketMessage = TicketMessage(message=new_ticket.message, sender_id=user.uid,
+                                                  ticket_id=ticket_id)
+    messages = [ticket_message]
+    ticket = Ticket(**new_ticket.dict(), messages=messages, ticket_id=ticket_id, user_id=user.uid)
+    return ticket, ticket_message
+
+
 @support_route.get('/support')
 @login_required
 async def get_support(user: User):
@@ -89,15 +98,40 @@ async def respond_to_ticket(user: User, ticket_id: str):
     message = request.form.get('message')
     new_message = TicketMessage(ticket_id=ticket_id, sender_id=user.uid, message=message)
     ticket_message: TicketMessage = await support_controller.add_ticket_message(ticket_message=new_message)
-    support_ticket = await support_controller.ticket_set_status(ticket_id=ticket_id, status=TicketStatus.IN_PROGRESS.value)
+    support_ticket = await support_controller.ticket_set_status(ticket_id=ticket_id,
+                                                                status=TicketStatus.IN_PROGRESS.value)
     flash(message="response successfully sent", category="danger")
     return redirect(url_for('support.get_support'))
 
 
-async def create_ticket(new_ticket: NewTicketForm, user: User) -> tuple[Ticket, TicketMessage]:
-    ticket_id = create_ticket_id()
-    ticket_message: TicketMessage = TicketMessage(message=new_ticket.message, sender_id=user.uid,
-                                                  ticket_id=ticket_id)
-    messages = [ticket_message]
-    ticket = Ticket(**new_ticket.dict(), messages=messages, ticket_id=ticket_id, user_id=user.uid)
-    return ticket, ticket_message
+@support_route.post('/support/ticket-resolve/<string:ticket_id>')
+@login_required
+async def resolve_ticket(user: User, ticket_id: str):
+    """
+
+    :param user:
+    :param ticket_id:
+    :return:
+    """
+    support_ticket = await support_controller.ticket_set_status(ticket_id=ticket_id,
+                                                                status=TicketStatus.RESOLVED.value)
+    flash(message="Ticket Status Successfully changed to resolved", category="danger")
+    return redirect(url_for('support.view_ticket', ticket_id=ticket_id))
+
+
+@support_route.post('/support/ticket-close/<string:ticket_id>')
+@login_required
+async def close_ticket(user: User, ticket_id: str):
+    """
+        **close_ticket**
+
+    :param user:
+    :param ticket_id:
+    :return:
+    """
+    support_ticket = await support_controller.ticket_set_status(ticket_id=ticket_id,
+                                                                status=TicketStatus.CLOSED.value)
+
+    flash(message="Ticket Status Successfully changed to closed", category="danger")
+    return redirect(url_for('support.view_ticket', ticket_id=ticket_id))
+

@@ -15,8 +15,10 @@
                 <div class="col-md-6">
                     <h5 class="font-weight-bold">Ticket Details</h5>
                 <ul class="list-group">
-                    <li class="list-group-item"> <span class="text-info font-weight-light">Subject:</span> <span class="font-weight-bold">{{ support_ticket.subject }}</span></li>
-                    <li class="list-group-item">
+                    <li class="list-group-item"> <span class="text-info font-weight-light">Category: </span> <span class="font-weight-bold pull-right text-right">{{ support_ticket.ticket_type | title }}</span></li>
+                    <li class="list-group-item"> <span class="text-info font-weight-light">Priority: </span> <span class="font-weight-bold pull-right">{{ support_ticket.priority | title}}</span></li>
+                    <li class="list-group-item"> <span class="text-info font-weight-light">Subject:</span> <span class="font-weight-bold pull-right">{{ support_ticket.subject | title }}</span></li>
+                    <li class="list-group-item m-t-6">
                         <span class="font-italic">Status:</span>
                         {% if support_ticket.status == 'open' %}
                             <span class="badge badge-success pull-right">Open</span>
@@ -32,6 +34,21 @@
                     </li>
                     <li class="list-group-item"> <span class="text-success">Created At:</span> <span class="pull-right">{{ support_ticket.created_at }}</span></li>
                     <li class="list-group-item"> <span class="text-warning">Updated At:</span> <span class="pull-right">{{ support_ticket.updated_at }}</span></li>
+                    <li class="list-group-item">
+                        <form class="form-horizontal"
+                              action="{{ url_for('support.resolve_ticket', ticket_id=support_ticket.ticket_id) }}"
+                              method="POST"
+                        >
+
+                            <button type="submit" class="btn btn-block btn-outline-success btn-sm btn-rounded">
+                                <span class="font-weight-bold">
+                                    <i class="fa fa-info"></i>
+                                        Is Issue Resolved ?
+                                </span>
+                            </button>
+                        </form>
+                    </li>
+
                 </ul>
                 </div>
             </div>
@@ -42,8 +59,8 @@
                         {% for message in support_ticket.sorted_messages %}
                             <div class="list-group-item list-group-item-action">
 
-                                <div class="d-flex w-100 justify-content-between">
-                                    <span class="mb-1">FROM: <span class="text-info">{{ uid_email_tags.get(message.sender_id) }}</span></span>
+                                <div class="d-flex w-100 justify-content-between m-t-9">
+                                    <span class="mb-1"> <span class="text-success">from:</span> <span class="text-info">{{ uid_email_tags.get(message.sender_id) }}</span></span>
                                     <small>{{ message.created_at }}</small>
                                 </div>
                                 <div class="border-info">
@@ -61,28 +78,35 @@
                              <textarea id="message" name="message" class="form-control-lg form-control"></textarea>
                          </div>
 
-                        <button type="submit"
-                                class="btn btn-block btn-outline-primary btn-rounded btn-sm"
-                        >
-                            <span class="font-weight-bold">
-                                <i class="fa fa-send"> </i>
-                                Respond
-                            </span>
-                        </button>
-
+                            <button type="submit"
+                                    class="btn btn-block btn-outline-primary btn-rounded btn-sm"
+                            >
+                                <span class="font-weight-bold">
+                                    <i class="fa fa-send"> </i>
+                                    Respond
+                                </span>
+                            </button>
 
                      </form>
+
+                <form class="form-horizontal m-t-9"
+                      action="{{ url_for('support.close_ticket', ticket_id=support_ticket.ticket_id) }}"
+                      method="POST">
+
+                        <button type="submit"
+                                class="btn btn-block btn-outline-danger btn-rounded btn-sm"
+                        >
+                        <span class="font-weight-bold">
+                            <i class="fa fa-power-off"> </i>
+                            Close Ticket
+                        </span>
+                        </button>
+
+                </form>
+
                  </div>
-                <div class="col-md-12 border-info">
-                    <button
-                            class="btn btn-block btn-outline-danger btn-rounded btn-sm"
-                    >
-                    <span class="font-weight-bold">
-                        <i class="fa fa-power-off"> </i>
-                        Close Ticket
-                    </span>
-                    </button>
-                </div>
+
+
             </div>
 
         </div>

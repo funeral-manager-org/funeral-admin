@@ -39,21 +39,49 @@
                 <div class="col-md-12">
                     <h5 class="font-weight-bold">Messages</h5>
                     <div class="list-group">
-                        {% for message in support_ticket.messages %}
+                        {% for message in support_ticket.sorted_messages %}
                             <div class="list-group-item list-group-item-action">
 
                                 <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1">From: {{ uid_email_tags.get(message.sender_id) }}</h5>
+                                    <span class="mb-1">FROM: <span class="text-info">{{ uid_email_tags.get(message.sender_id) }}</span></span>
                                     <small>{{ message.created_at }}</small>
                                 </div>
-
-                                <p class="mb-1">{{ message.message }}</p>
+                                <div class="border-info">
+                                    <span class="mb-1">{{ message.message }}</span>
+                                </div>
                             </div>
                         {% endfor %}
                     </div>
                 </div>
-                <div class="col-md-12">
-                    <button class="btn btn-block btn-outline-danger btn-rounded btn-sm">Close Ticket</button>
+                 <div class="col-md-12">
+                     <h5 class="font-weight-bold">Response</h5>
+                     <form class="form-horizontal" method="POST" action="{{ url_for('support.respond_to_ticket', ticket_id=support_ticket.ticket_id) }}">
+                         <div class="form-group">
+                             <label for="message">Message</label>
+                             <textarea id="message" name="message" class="form-control-lg form-control"></textarea>
+                         </div>
+
+                        <button type="submit"
+                                class="btn btn-block btn-outline-primary btn-rounded btn-sm"
+                        >
+                            <span class="font-weight-bold">
+                                <i class="fa fa-send"> </i>
+                                Respond
+                            </span>
+                        </button>
+
+
+                     </form>
+                 </div>
+                <div class="col-md-12 border-info">
+                    <button
+                            class="btn btn-block btn-outline-danger btn-rounded btn-sm"
+                    >
+                    <span class="font-weight-bold">
+                        <i class="fa fa-power-off"> </i>
+                        Close Ticket
+                    </span>
+                    </button>
                 </div>
             </div>
 

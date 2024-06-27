@@ -68,6 +68,10 @@ class Ticket(BaseModel):
 
     messages: list[TicketMessage]
 
+    @property
+    def sorted_messages(self):
+        return sorted(self.messages, key=lambda msg: msg.created_at) if self.messages else []
+
 
 class NewTicketForm(BaseModel):
     ticket_type: str

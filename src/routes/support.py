@@ -42,7 +42,7 @@ async def view_ticket(user: User, ticket_id: str):
     :return:
     """
     context: dict[str, dict[any, any] | str | list[str]] = dict(user=user) if user and user.email else dict()
-    support_ticket = await support_controller.get_support_ticket_by_ticket_id(ticket_id=ticket_id)
+    support_ticket: Ticket = await support_controller.get_support_ticket_by_ticket_id(ticket_id=ticket_id)
     uid_email_tags: dict[str, str] = await support_controller.get_uid_tags(support_ticket=support_ticket)
     context.update(support_ticket=support_ticket, uid_email_tags=uid_email_tags)
 
@@ -72,6 +72,20 @@ async def do_create_ticket(user: User):
     ticket_id = f"Ticket ID : {ticket.ticket_id}"
     flash(message=message, category="success")
     flash(message=ticket_id, category="success")
+    return redirect(url_for('support.get_support'))
+@support_route.post('/support/ticket-response/<string:ticket_id>')
+@login_required
+async def respond_to_ticket(user: User, ticket_id: str):
+    """
+
+    :param user:
+    :param ticket_id:
+    :return:
+    """
+    message = request.form.get('message')
+    new_message = TicketMessage(ticket_id=ticket_id, sender_id=user.uid, message=message)
+    ticket_message: TicketMessage = await support_controller.add_ticket_message(ticket_message=new_message)
+    flash(message="response successfully sent", category="danger")
     return redirect(url_for('support.get_support'))
 
 

@@ -12,6 +12,10 @@ class TicketStatus(str, Enum):
     RESOLVED = "resolved"
     CLOSED = "closed"
 
+    @classmethod
+    def UN_RESOLVED(cls) -> list[str]:
+        return [cls.OPEN.value, cls.IN_PROGRESS.value]
+
 
 class TicketTypes(str, Enum):
     BILLING = "billing"

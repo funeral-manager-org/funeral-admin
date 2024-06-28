@@ -49,8 +49,7 @@
                                 class="sidebar-collapse-icon ti-angle-down"></span></a>
                             <ul>
                                 <li><a href="{{ url_for('system.get_companies') }}"><i class="ti-briefcase"></i> Companies</a></li>
-                                <li><a href="#"><i class="ti-briefcase"></i> Clients</a></li>
-                                <li><a href="#"><i class="fa fa-send"></i> Subscriptions</a></li>
+                                <li><a href="{{ url_for('support.admin_unresolved_support_tickets') }}"><i class="fa fa-ticket"></i> Support Tickets</a></li>
                             </ul>
                         </li>
                     {% endif %}

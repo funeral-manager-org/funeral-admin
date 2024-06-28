@@ -1,10 +1,10 @@
 from flask import Flask
 
-from src.database.sql.user import UserORM
-from src.database.sql.support import TicketORM, TicketMessageORM
-from src.database.models.support import Ticket, TicketMessage
-from src.controller.messaging_controller import MessagingController
 from src.controller import Controllers
+from src.controller.messaging_controller import MessagingController
+from src.database.models.support import Ticket, TicketMessage, TicketStatus
+from src.database.sql.support import TicketORM, TicketMessageORM
+from src.database.sql.user import UserORM
 
 
 class SupportController(Controllers):
@@ -97,3 +97,16 @@ class SupportController(Controllers):
                 uid_name_tag[user_orm.uid] = user_orm.email
 
             return uid_name_tag
+
+    async def load_unresolved_tickets(self) -> list[Ticket]:
+        """
+
+        :return:
+        """
+        with self.get_session() as session:
+            unresolved_tickets_orm_list = (session.query(TicketORM)
+                                           .outerjoin(TicketMessageORM, TicketORM.ticket_id == TicketMessageORM.ticket_id)
+                                           .filter(TicketORM.status.in_(TicketStatus.UN_RESOLVED())).all())
+
+            return [Ticket(**ticket_orm.to_dict()) for ticket_orm in unresolved_tickets_orm_list
+                    if isinstance(TicketORM, ticket_orm)]

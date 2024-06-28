@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
 
-from src.authentication import user_details, login_required
+from src.authentication import user_details, login_required, admin_login
 from src.database.models.support import TicketPriority, TicketTypes, NewTicketForm, Ticket, TicketMessage, \
     create_ticket_id, TicketStatus
 from src.database.models.users import User
@@ -134,4 +134,19 @@ async def close_ticket(user: User, ticket_id: str):
 
     flash(message="Ticket Status Successfully changed to closed", category="danger")
     return redirect(url_for('support.view_ticket', ticket_id=ticket_id))
+
+
+# Admin Section
+@support_route.get('/admin/support/unresolved')
+@admin_login
+async def admin_unresolved_support_tickets(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    unresolved_tickets: list[Ticket] = await support_controller.load_unresolved_tickets()
+    support_logger.info(f"ORIGINAL UNRESOLVED: {unresolved_tickets}")
+    context = dict(user=user, unresolved_tickets=unresolved_tickets)
+    return render_template('support/admin/support.html', **context)
 

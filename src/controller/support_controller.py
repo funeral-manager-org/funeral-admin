@@ -1,6 +1,6 @@
 from flask import Flask
 
-from src.controller import Controllers
+from src.controller import Controllers, error_handler
 from src.controller.messaging_controller import MessagingController
 from src.database.models.support import Ticket, TicketMessage, TicketStatus
 from src.database.sql.support import TicketORM, TicketMessageORM
@@ -15,6 +15,7 @@ class SupportController(Controllers):
     def init_app(self, app: Flask, messaging_controller: MessagingController):
         super().init_app(app=app)
 
+    @error_handler
     async def create_support_ticket(self, ticket: Ticket):
         """
 
@@ -26,6 +27,7 @@ class SupportController(Controllers):
 
             return ticket
 
+    @error_handler
     async def add_ticket_message(self, ticket_message: TicketMessage):
         """
 
@@ -38,6 +40,7 @@ class SupportController(Controllers):
 
             return ticket_message
 
+    @error_handler
     async def ticket_set_status(self, ticket_id: str, status: str):
         """
 
@@ -50,6 +53,7 @@ class SupportController(Controllers):
             if isinstance(ticket_orm, TicketORM):
                 ticket_orm.status = status
 
+    @error_handler
     async def get_user_support_tickets(self, uid: str) -> list[Ticket]:
         """
         Get all support tickets for a specific user, including their messages.
@@ -70,6 +74,7 @@ class SupportController(Controllers):
             return [Ticket(**ticket_orm.to_dict()) for ticket_orm in tickets_with_messages if
                     isinstance(ticket_orm, TicketORM)]
 
+    @error_handler
     async def get_support_ticket_by_ticket_id(self, ticket_id: str) -> Ticket | None:
         """
             return ticket with messages
@@ -85,6 +90,7 @@ class SupportController(Controllers):
 
             return Ticket(**ticket_orm.to_dict()) if isinstance(ticket_orm, TicketORM) else None
 
+    @error_handler
     async def get_uid_tags(self, support_ticket: Ticket) -> dict[str, str]:
         """
             :param support_ticket:
@@ -98,6 +104,7 @@ class SupportController(Controllers):
 
             return uid_name_tag
 
+    @error_handler
     async def load_unresolved_tickets(self) -> list[Ticket]:
         """
 
@@ -105,8 +112,9 @@ class SupportController(Controllers):
         """
         with self.get_session() as session:
             unresolved_tickets_orm_list = (session.query(TicketORM)
-                                           .outerjoin(TicketMessageORM, TicketORM.ticket_id == TicketMessageORM.ticket_id)
+                                           .outerjoin(TicketMessageORM,
+                                                      TicketORM.ticket_id == TicketMessageORM.ticket_id)
                                            .filter(TicketORM.status.in_(TicketStatus.UN_RESOLVED())).all())
 
             return [Ticket(**ticket_orm.to_dict()) for ticket_orm in unresolved_tickets_orm_list
-                    if isinstance(TicketORM, ticket_orm)]
+                    if isinstance(ticket_orm, TicketORM)]

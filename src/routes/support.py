@@ -146,7 +146,6 @@ async def admin_unresolved_support_tickets(user: User):
     :return:
     """
     unresolved_tickets: list[Ticket] = await support_controller.load_unresolved_tickets()
-    support_logger.info(f"ORIGINAL UNRESOLVED: {unresolved_tickets}")
     context = dict(user=user, unresolved_tickets=unresolved_tickets)
     return render_template('support/admin/support.html', **context)
 

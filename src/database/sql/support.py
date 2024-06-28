@@ -95,5 +95,6 @@ class TicketORM(Base):
             'priority': self.priority,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'messages': [message.to_dict() for message in self.messages]
+            'messages': [message_orm.to_dict() for message_orm in self.messages
+                         if isinstance(message_orm, TicketMessageORM)]
         }

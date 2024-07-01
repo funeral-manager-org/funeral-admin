@@ -185,7 +185,7 @@ async def get_sent(user: User):
     return redirect(url_for('messaging.get_employee_sent'))
 
 
-@messaging_route.get('/admin/messaging/sms-sent/<int:page>/<int:count>')
+@messaging_route.post('/admin/messaging/sms-sent/<int:page>/<int:count>')
 @login_required
 async def get_sent_sms_paged(user: User, page: int = 0, count: int = 25):
     """
@@ -197,7 +197,10 @@ async def get_sent_sms_paged(user: User, page: int = 0, count: int = 25):
     :return:
     """
     branch_id = request.form.get('branch_id')
+    print(request.form)
     branches: list[CompanyBranches] = await company_controller.get_company_branches(company_id=user.company_id)
+
+    print(f"BRANCH ID : {branch_id}")
 
     if not branches:
         return redirect(url_for('messaging.get_admin'))
@@ -235,6 +238,56 @@ async def get_sent_sms(user: User, page: int = 0, count: int = 25):
     context = dict(user=user, sms_messages=sms_messages, branches=branches, page=page, count=count, branch_id=branch_id)
 
     return render_template('admin/managers/messaging/paged/sms_sent.html', **context)
+
+
+@messaging_route.get('/admin/messaging/email-sent/<int:page>/<int:count>')
+@login_required
+async def get_sent_email(user: User, page: int = 0, count: int = 25):
+    """
+
+    :param user:
+    :param page:
+    :param count:
+    :return:
+    """
+    branches: list[CompanyBranches] = await company_controller.get_company_branches(company_id=user.company_id)
+    if not branches:
+        return redirect(url_for('messaging.get_admin'))
+
+    branch_id = branches[-1].branch_id
+    email_messages: list[EmailCompose] = await messaging_controller.email_service.get_sent_email_paged(
+        branch_id=branch_id, page=page, count=count)
+    context = dict(user=user, email_messages=email_messages, branches=branches, page=page, count=count,
+                   branch_id=branch_id)
+
+    return render_template('admin/managers/messaging/paged/email_sent.html', **context)
+
+
+@messaging_route.route('/admin/messaging/email-sent/<string:branch_id>/<int:page>/<int:count>', methods=['GET', 'POST'])
+@login_required
+async def post_sent_email_paged(user: User, branch_id: str, page: int = 0, count: int = 25):
+    """
+
+    :param user:
+    :param page:
+    :param count:
+    :param branch_id:
+    :return:
+    """
+    branch_id: str = request.form.get('branch_id', branch_id)
+
+    branches: list[CompanyBranches] = await company_controller.get_company_branches(company_id=user.company_id)
+    if not branches:
+        return redirect(url_for('messaging.get_admin'))
+    if not branch_id:
+        branch_id = branches[-1].branch_id
+
+    email_messages: list[EmailCompose] = await messaging_controller.email_service.get_sent_email_paged(
+        branch_id=branch_id, page=page, count=count)
+    context = dict(user=user, email_messages=email_messages, branches=branches, page=page, count=count,
+                   branch_id=branch_id)
+
+    return render_template('admin/managers/messaging/paged/email_sent.html', **context)
 
 
 @messaging_route.get('/admin/administrator/messaging/compose')

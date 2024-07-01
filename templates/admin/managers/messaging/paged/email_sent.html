@@ -1,3 +1,5 @@
+
+
 {% extends "layouts/page.html" %}
 
 {% block content %}
@@ -6,12 +8,12 @@
     <div class="card">
         <div class="card-header  bg-primary d-flex justify-content-between align-items-center">
             <h4 class="card-title text-white font-weight-bold">
-                <i class="fa fa-send-o"> </i>
-                Sent SMS
+                <i class="fa fa-envelope-square"> </i>
+                Sent Email
             </h4>
             <div class="branch-selector">
 
-                <form id="branch-select-form"  method="post" action="{{ url_for('messaging.get_sent_sms_paged', page=page, count=count) }}">
+                <form id="branch-select-form"  method="post" action="{{ url_for('messaging.post_sent_email_paged', branch_id=branch_id, page=page, count=count) }}">
                     <div class="form-group mb-0">
 
                         <select id="branch_id" class="form-control" name="branch_id" onchange="document.getElementById('branch-select-form').submit();">
@@ -31,23 +33,18 @@
                 <table class="table table-bordered table-hover m-t-12">
                     <thead class="thead-dark m-t-12">
                         <tr>
-                            <th scope="col">Message</th>
-                            <th scope="col">From</th>
+                            <th scope="col">Subject</th>
+
                             <th scope="col">To</th>
                             <th scope="col">Date Sent</th>
-                            <th scope="col">Delivered</th>
-                            <th scope="col">Client Responded</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for sms in sms_messages %}
+                        {% for email in email_messages %}
                         <tr>
-                            <td>{{ sms.message }}</td>
-                            <td>{{ sms.from_cell or 'N/A' }}</td>
-                            <td>{{ sms.to_cell or 'N/A' }}</td>
-                            <td>{{ sms.date_time_sent or 'Not Sent' }}</td>
-                            <td>{{ 'Yes' if sms.is_delivered else 'No' }}</td>
-                            <td>{{ 'Yes' if sms.client_responded else 'No' }}</td>
+                            <td>{{ email.subject| safe }}</td>
+                            <td>{{ email.to_email }}</td>
+                            <td>{{ email.date_time_sent or 'Not Sent' }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -57,7 +54,7 @@
                     <ul class="pagination justify-content-center m-t-8">
                         {% if page > 0 %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('messaging.get_sent_sms_paged', page=page-1, count=count) }}">Previous</a>
+                                <a class="page-link" href="{{ url_for('messaging.post_sent_email_paged',branch_id=branch_id, page=page-1, count=count) }}">Previous</a>
                             </li>
                         {% else %}
                             <li class="page-item disabled">
@@ -66,7 +63,7 @@
                         {% endif %}
                         <li class="page-item">
                             <a class="page-link"
-                               href="{{ url_for('messaging.get_sent_sms_paged',  page=page+1, count=count) }}">Next</a>
+                               href="{{ url_for('messaging.post_sent_email_paged',branch_id=branch_id,  page=page+1, count=count) }}">Next</a>
                         </li>
                     </ul>
                 </nav>
@@ -74,3 +71,4 @@
     </div>
 </section>
 {% endblock %}
+

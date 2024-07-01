@@ -103,6 +103,27 @@ class EmailService(Controllers):
             return [EmailCompose(**email.to_dict()) for email in email_messages_orm
                     if isinstance(email, EmailComposeORM)]
 
+    @cached_ttl(ttl=360)
+    @error_handler
+    async def get_sent_email_paged(self, branch_id: str, page: int, count: int) -> list[EmailCompose]:
+        """
+        Get paged Sent Messages for a specific Branch
+        :param branch_id: Branch ID to filter messages
+        :param page: Page number to retrieve
+        :param count: Number of messages per page
+        :return: List of paged EmailCompose instances
+        """
+        with self.get_session() as session:
+            email_messages_orm = (
+                session.query(EmailComposeORM)
+                .filter_by(to_branch=branch_id)
+                .offset(page * count)
+                .limit(count)
+                .all()
+            )
+            return [EmailCompose(**email.to_dict()) for email in email_messages_orm
+                    if isinstance(email, EmailComposeORM)]
+
     @cached_ttl()
     @error_handler
     async def get_sent_email(self, message_id: str) -> EmailCompose | None:

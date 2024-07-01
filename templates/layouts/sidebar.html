@@ -34,8 +34,8 @@
                             <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Sent <span
                                     class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
-                                    <li><a href="{{ url_for('messaging.get_sent_sms_paged', page=0, count=25) }}"><i class="fa fa-mobile-phone"></i> SMS</a></li>
-                                    <li><a href="{{ url_for('messaging.get_employee_sent') }}"><i class="fa fa-send"></i> Email</a></li>
+                                    <li><a href="{{ url_for('messaging.get_sent_sms', page=0, count=25) }}"><i class="fa fa-mobile-phone"></i> SMS</a></li>
+                                    <li><a href="{{ url_for('messaging.get_sent_email', page=0, count=25) }}"><i class="fa fa-send"></i> Email</a></li>
                                 </ul>
 
                             </li>

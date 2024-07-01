@@ -246,6 +246,18 @@ class SMSService(Controllers):
             compose_orm_list = session.query(SMSComposeORM).filter_by(to_branch=branch_id).all()
             return [SMSCompose(**sms.to_dict()) for sms in compose_orm_list if isinstance(sms, SMSComposeORM)]
 
+    @cached_ttl()
+    @error_handler
+    async def get_sent_box_messages_paged(self, branch_id: str, page: int, count: int) -> list[SMSCompose]:
+        with self.get_session() as session:
+            offset = page * count
+            compose_orm_list = (session.query(SMSComposeORM)
+                                .filter_by(to_branch=branch_id)
+                                .offset(offset)
+                                .limit(count)
+                                .all())
+            return [SMSCompose(**sms.to_dict()) for sms in compose_orm_list if isinstance(sms, SMSComposeORM)]
+
     @error_handler
     async def mark_message_as_responded(self, reference: str) -> SMSCompose | None:
         with self.get_session() as session:

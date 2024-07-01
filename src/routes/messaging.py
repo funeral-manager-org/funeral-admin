@@ -4,7 +4,7 @@ from random import randint
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
-from src.database.models.companies import EmployeeDetails
+from src.database.models.companies import EmployeeDetails, CompanyBranches
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose, SMSInbox, SMSSettings
 from src.database.models.covers import ClientPersonalInformation
 from src.authentication import login_required
@@ -102,17 +102,48 @@ def create_fake_sms_data(to_branch: str, message: str, count: int = 10) -> list[
 
 async def method_get_sent(user):
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+
     branch_email_messages = {}
     branch_sms_messages = {}
+
     for branch in company_branches:
         sent_messages: list[EmailCompose] = await messaging_controller.email_service.get_sent_messages(
             branch_id=branch.branch_id)
+
         branch_email_messages[branch.branch_id] = sent_messages
-        sent_sms_messages: list[SMSCompose] = await messaging_controller.sms_service.get_sent_box_messages_from_database(branch_id=branch.branch_id)
+        sent_sms_messages: list[
+            SMSCompose] = await messaging_controller.sms_service.get_sent_box_messages_from_database(
+            branch_id=branch.branch_id)
         branch_sms_messages[branch.branch_id] = sent_sms_messages
 
-    context = dict(user=user, branch_messages=branch_email_messages, branch_sms=branch_sms_messages, company_branches=company_branches)
+    context = dict(user=user, branch_messages=branch_email_messages, branch_sms=branch_sms_messages,
+                   company_branches=company_branches)
+
     return render_template('admin/managers/messaging/sent.html', **context)
+
+
+async def get_sent_email_paged(user: User, branch_id: str, index: int, count: int = 25):
+    """
+
+    :param branch_id:
+    :param user:
+    :param index:
+    :param count:
+    :return:
+    """
+    return await messaging_controller.email_service.get_sent_messages(branch_id=branch_id)
+
+
+async def get_sent_sms_paged(user: User, branch_id: str, index: int, count: int = 25):
+    """
+
+    :param branch_id:
+    :param user:
+    :param index:
+    :param count:
+    :return:
+    """
+    return await messaging_controller.sms_service.get_sent_box_messages_paged(branch_id=branch_id)
 
 
 @messaging_route.get('/admin/administrator/messaging/inbox')
@@ -147,9 +178,63 @@ async def read_sms_message(user: User, message_id: str):
 @messaging_route.get('/admin/administrator/messaging/sent')
 @login_required
 async def get_sent(user: User):
+    """DEPRECATED"""
     if user.is_company_admin:
         return await method_get_sent(user)
+
     return redirect(url_for('messaging.get_employee_sent'))
+
+
+@messaging_route.get('/admin/messaging/sms-sent/<int:page>/<int:count>')
+@login_required
+async def get_sent_sms_paged(user: User, page: int = 0, count: int = 25):
+    """
+        need to page the retrieval
+    :param user:
+    :param branch_id:
+    :param page:
+    :param count:
+    :return:
+    """
+    branch_id = request.form.get('branch_id')
+    branches: list[CompanyBranches] = await company_controller.get_company_branches(company_id=user.company_id)
+
+    if not branches:
+        return redirect(url_for('messaging.get_admin'))
+
+    if not branch_id:
+        branch_id = branches[-1].branch_id
+
+    sms_messages: list[SMSCompose] = await messaging_controller.sms_service.get_sent_box_messages_paged(
+        branch_id=branch_id, page=page, count=count)
+
+    context = dict(user=user, sms_messages=sms_messages, branches=branches, page=page, count=count, branch_id=branch_id)
+
+    return render_template('admin/managers/messaging/paged/sms_sent.html', **context)
+
+
+@messaging_route.get('/admin/messaging/sms-sent/<int:page>/<int:count>')
+@login_required
+async def get_sent_sms(user: User, page: int = 0, count: int = 25):
+    """
+        need to page the retrieval
+    :param user:
+    :param branch_id:
+    :param page:
+    :param count:
+    :return:
+    """
+    branches: list[CompanyBranches] = await company_controller.get_company_branches(company_id=user.company_id)
+    if not branches:
+        return redirect(url_for('messaging.get_admin'))
+
+    branch_id = branches[-1].branch_id
+    sms_messages: list[SMSCompose] = await messaging_controller.sms_service.get_sent_box_messages_paged(
+        branch_id=branch_id, page=page, count=count)
+
+    context = dict(user=user, sms_messages=sms_messages, branches=branches, page=page, count=count, branch_id=branch_id)
+
+    return render_template('admin/managers/messaging/paged/sms_sent.html', **context)
 
 
 @messaging_route.get('/admin/administrator/messaging/compose')

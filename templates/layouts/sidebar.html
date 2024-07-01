@@ -30,8 +30,25 @@
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
-                            <li><a href="{{ url_for('messaging.get_employee_sent') }}"><i class="fa fa-send"></i> Sent</a></li>
-                            <li><a href="{{ url_for('messaging.get_employee_compose') }}"><i class="fa fa-send"></i> Compose</a></li>
+
+                            <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Sent <span
+                                    class="sidebar-collapse-icon ti-angle-down"></span></a>
+                                <ul>
+                                    <li><a href="{{ url_for('messaging.get_sent_sms_paged', page=0, count=25) }}"><i class="fa fa-mobile-phone"></i> SMS</a></li>
+                                    <li><a href="{{ url_for('messaging.get_employee_sent') }}"><i class="fa fa-send"></i> Email</a></li>
+                                </ul>
+
+                            </li>
+
+                            <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Compose <span
+                                    class="sidebar-collapse-icon ti-angle-down"></span></a>
+                                <ul>
+                                    <li><a href="{{ url_for('messaging.get_employee_compose') }}"><i class="fa fa-mobile"></i> SMS </a></li>
+                                    <li><a href="{{ url_for('messaging.get_employee_sent') }}"><i class="fa fa-mobile-phone"></i> Email</a></li>
+                                </ul>
+                            </li>
+
+
                         </ul>
                     </li>
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-shopping-cart"></i> Billing<span

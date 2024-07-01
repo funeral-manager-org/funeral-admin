@@ -55,7 +55,7 @@ async def view_ticket(user: User, ticket_id: str):
     support_ticket: Ticket = await support_controller.get_support_ticket_by_ticket_id(ticket_id=ticket_id)
     support_logger.info(f"Support Ticket : {support_ticket}")
     uid_email_tags: dict[str, str] = await support_controller.get_uid_tags(support_ticket=support_ticket)
-    context.update(support_ticket=support_ticket, uid_email_tags=uid_email_tags)
+    context.update(support_ticket=support_ticket.dict(), uid_email_tags=uid_email_tags)
 
     return render_template('support/view_ticket.html', **context)
 
@@ -95,11 +95,11 @@ async def respond_to_ticket(user: User, ticket_id: str):
     :param ticket_id:
     :return:
     """
-    message = request.form.get('message')
-    new_message = TicketMessage(ticket_id=ticket_id, sender_id=user.uid, message=message)
+    message: str = request.form.get('message')
+    new_message: TicketMessage = TicketMessage(ticket_id=ticket_id, sender_id=user.uid, message=message)
     ticket_message: TicketMessage = await support_controller.add_ticket_message(ticket_message=new_message)
-    support_ticket = await support_controller.ticket_set_status(ticket_id=ticket_id,
-                                                                status=TicketStatus.IN_PROGRESS.value)
+    await support_controller.ticket_set_status(ticket_id=ticket_id, status=TicketStatus.IN_PROGRESS.value)
+
     flash(message="response successfully sent", category="danger")
     return redirect(url_for('support.get_support'))
 
@@ -113,8 +113,8 @@ async def resolve_ticket(user: User, ticket_id: str):
     :param ticket_id:
     :return:
     """
-    support_ticket = await support_controller.ticket_set_status(ticket_id=ticket_id,
-                                                                status=TicketStatus.RESOLVED.value)
+    await support_controller.ticket_set_status(ticket_id=ticket_id, status=TicketStatus.RESOLVED.value)
+
     flash(message="Ticket Status Successfully changed to resolved", category="danger")
     return redirect(url_for('support.view_ticket', ticket_id=ticket_id))
 
@@ -129,10 +129,9 @@ async def close_ticket(user: User, ticket_id: str):
     :param ticket_id:
     :return:
     """
-    support_ticket = await support_controller.ticket_set_status(ticket_id=ticket_id,
-                                                                status=TicketStatus.CLOSED.value)
+    await support_controller.ticket_set_status(ticket_id=ticket_id, status=TicketStatus.CLOSED.value)
 
-    flash(message="Ticket Status Successfully changed to closed", category="danger")
+    flash(message="Ticket Successfully Closed", category="danger")
     return redirect(url_for('support.view_ticket', ticket_id=ticket_id))
 
 

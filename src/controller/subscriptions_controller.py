@@ -257,8 +257,9 @@ class SubscriptionsController(Controllers):
             return False
 
     @error_handler
-    async def set_subscription_status(self):
+    async def set_subscription_checked_status(self):
         """
+
             will set that subscription status has been checked for this week
         :return:
         """
@@ -285,10 +286,10 @@ class SubscriptionsController(Controllers):
             # this checks if subscription status has been checked for this week
             is_checked_this_week = await self.check_and_set_subscription_status()
             if not is_checked_this_week:
+                # this sets the status that everything was checked this week
+                await self.set_subscription_checked_status()
                 # this check will run once a week
                 await self.check_if_subscriptions_are_paid()
-                # this sets the status that everything was checked this week
-                await self.set_subscription_status()
             else:
                 self.logger.info("We Already checked subscription status this week and sent notifications")
 

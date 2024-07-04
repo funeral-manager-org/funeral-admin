@@ -4,7 +4,7 @@ from random import randint
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
-from logger import init_logger
+from src.logger import init_logger
 from src.database.models.companies import EmployeeDetails, CompanyBranches
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose, SMSInbox, SMSSettings
 from src.database.models.covers import ClientPersonalInformation

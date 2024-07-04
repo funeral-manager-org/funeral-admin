@@ -31,12 +31,12 @@ class SubscriptionDetails(BaseModel):
     additional_clients: int = Field(default=0)
 
     def create_plan(self, plan_name: str):
-        self.plan_name = plan_name
+        self.plan_name = plan_name.upper()
         if plan_name == PlanNames.FREE.value:
             self.total_sms = 20
             self.total_emails = 50
             self.total_clients = 250
-            self.subscription_amount = 2
+            self.subscription_amount = 5
             self.subscription_period = 1
             self.additional_clients = 10
         elif plan_name == PlanNames.BUSINESS.value:
@@ -57,7 +57,7 @@ class SubscriptionDetails(BaseModel):
             self.total_sms = 20
             self.total_emails = 50
             self.total_clients = 250
-            self.subscription_amount = 0
+            self.subscription_amount = 5
             self.subscription_period = 1
             self.additional_clients = 10
 

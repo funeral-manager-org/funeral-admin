@@ -51,7 +51,7 @@ async def do_subscribe(user: User, option: str):
 
     company_detail: Company = await company_controller.get_company_details(company_id=user.company_id)
 
-    subscription_details: SubscriptionDetails = SubscriptionDetails().create_plan(plan_name=option)
+    subscription_details: SubscriptionDetails = SubscriptionDetails().create_plan(plan_name=option.upper())
 
     success_url: str = url_for('subscriptions.subscription_payment_successful')
     failure_url: str = url_for('subscriptions.subscription_payment_failure')

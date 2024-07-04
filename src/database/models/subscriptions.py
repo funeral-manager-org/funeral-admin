@@ -22,6 +22,9 @@ class PlanNames(Enum):
 
 
 class SubscriptionDetails(BaseModel):
+    """
+        Currency Amounts are in South African Rands
+    """
     plan_name: str = ""
     total_sms: int = Field(default=20)
     total_emails: int = Field(default=50)
@@ -36,7 +39,7 @@ class SubscriptionDetails(BaseModel):
             self.total_sms = 20
             self.total_emails = 50
             self.total_clients = 250
-            self.subscription_amount = 5
+            self.subscription_amount = 50
             self.subscription_period = 1
             self.additional_clients = 10
         elif plan_name == PlanNames.BUSINESS.value:
@@ -57,7 +60,7 @@ class SubscriptionDetails(BaseModel):
             self.total_sms = 20
             self.total_emails = 50
             self.total_clients = 250
-            self.subscription_amount = 5
+            self.subscription_amount = 50
             self.subscription_period = 1
             self.additional_clients = 10
 

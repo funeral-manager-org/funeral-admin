@@ -4,6 +4,7 @@ from random import randint
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
+from logger import init_logger
 from src.database.models.companies import EmployeeDetails, CompanyBranches
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose, SMSInbox, SMSSettings
 from src.database.models.covers import ClientPersonalInformation
@@ -12,7 +13,7 @@ from src.database.models.users import User
 from src.main import company_controller, messaging_controller
 
 messaging_route = Blueprint('messaging', __name__)
-
+messaging_logger = init_logger("messaging_logger")
 
 @messaging_route.get('/admin/administrator/cloudflare')
 @login_required
@@ -46,7 +47,7 @@ async def update_sms_settings(user: User):
     try:
         settings = SMSSettings(**request.form, company_id=user.company_id)
     except ValidationError as e:
-        print(str(e))
+        messaging_logger.error(str(e))
         flash(message="please provide all required sms settings", category="danger")
         return redirect(url_for('messaging.get_admin'))
 
@@ -235,7 +236,8 @@ async def get_sent_sms(user: User, page: int = 0, count: int = 25):
     sms_messages: list[SMSCompose] = await messaging_controller.sms_service.get_sent_box_messages_paged(
         branch_id=branch_id, page=page, count=count)
 
-    context = dict(user=user, sms_messages=sms_messages, branches=branches, page=page, count=count, branch_id=branch_id)
+    context = dict(user=user, sms_messages=sms_messages, branches=branches,
+                   page=page, count=count, branch_id=branch_id)
 
     return render_template('admin/managers/messaging/paged/sms_sent.html', **context)
 

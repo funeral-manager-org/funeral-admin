@@ -15,6 +15,7 @@ from src.main import company_controller, messaging_controller
 messaging_route = Blueprint('messaging', __name__)
 messaging_logger = init_logger("messaging_logger")
 
+
 @messaging_route.get('/admin/administrator/cloudflare')
 @login_required
 async def get_cloudflare(user: User):
@@ -101,28 +102,6 @@ def create_fake_sms_data(to_branch: str, message: str, count: int = 10) -> list[
     return sms_data
 
 
-async def method_get_sent(user):
-    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
-
-    branch_email_messages = {}
-    branch_sms_messages = {}
-
-    for branch in company_branches:
-        sent_messages: list[EmailCompose] = await messaging_controller.email_service.get_sent_messages(
-            branch_id=branch.branch_id)
-
-        branch_email_messages[branch.branch_id] = sent_messages
-        sent_sms_messages: list[
-            SMSCompose] = await messaging_controller.sms_service.get_sent_box_messages_from_database(
-            branch_id=branch.branch_id)
-        branch_sms_messages[branch.branch_id] = sent_sms_messages
-
-    context = dict(user=user, branch_messages=branch_email_messages, branch_sms=branch_sms_messages,
-                   company_branches=company_branches)
-
-    return render_template('admin/managers/messaging/sent.html', **context)
-
-
 async def get_sent_email_paged(user: User, branch_id: str, index: int, count: int = 25):
     """
 
@@ -176,23 +155,12 @@ async def read_sms_message(user: User, message_id: str):
             return render_template("admin/managers/messaging/read_sms.html", **context)
 
 
-@messaging_route.get('/admin/administrator/messaging/sent')
-@login_required
-async def get_sent(user: User):
-    """DEPRECATED"""
-    if user.is_company_admin:
-        return await method_get_sent(user)
-
-    return redirect(url_for('messaging.get_employee_sent'))
-
-
 @messaging_route.post('/admin/messaging/sms-sent/<int:page>/<int:count>')
 @login_required
 async def get_sent_sms_paged(user: User, page: int = 0, count: int = 25):
     """
         need to page the retrieval
     :param user:
-    :param branch_id:
     :param page:
     :param count:
     :return:
@@ -223,7 +191,6 @@ async def get_sent_sms(user: User, page: int = 0, count: int = 25):
     """
         need to page the retrieval
     :param user:
-    :param branch_id:
     :param page:
     :param count:
     :return:
@@ -292,33 +259,24 @@ async def post_sent_email_paged(user: User, branch_id: str, page: int = 0, count
     return render_template('admin/managers/messaging/paged/email_sent.html', **context)
 
 
-@messaging_route.get('/admin/administrator/messaging/compose')
+# ---------------compose
+
+@messaging_route.get('/admin/messaging/email/compose')
 @login_required
-async def get_compose(user: User):
+async def get_email_compose(user: User):
     recipient_list: list[str] = RecipientTypes.get_fields()
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     context = dict(user=user, company_branches=company_branches, recipient_list=recipient_list)
-    return render_template('admin/managers/messaging/compose.html', **context)
+    return render_template('admin/managers/messaging/paged/compose/email.html', **context)
 
 
-@messaging_route.get('/admin/employees/messaging/inbox')
+@messaging_route.get('/admin/messaging/sms/compose')
 @login_required
-async def get_employee_inbox(user: User):
-    context = dict(user=user)
-    return render_template('admin/managers/messaging/inbox.html', **context)
-
-
-@messaging_route.get('/admin/employees/messaging/sent')
-@login_required
-async def get_employee_sent(user: User):
-    if user.is_employee:
-        return await method_get_sent(user)
-
-    elif user.is_company_admin:
-        return redirect(url_for('messaging.get_sent'))
-
-    flash(message="You are not authorized to access this methods", category="danger")
-    return redirect(url_for('home.get_home'))
+async def get_sms_compose(user: User):
+    recipient_list: list[str] = RecipientTypes.get_fields()
+    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+    context = dict(user=user, company_branches=company_branches, recipient_list=recipient_list)
+    return render_template('admin/managers/messaging/paged/compose/sms.html', **context)
 
 
 @messaging_route.get('/admin/messaging/outbox/<string:message_id>')
@@ -334,19 +292,6 @@ async def get_outbox_email_message(user: User, message_id: str):
     context = dict(user=user, message=sent_message)
     return render_template('admin/managers/messaging/message.html', **context)
 
-
-@messaging_route.get('/admin/employees/messaging/compose')
-@login_required
-async def get_employee_compose(user: User):
-    recipient_list: list[str] = RecipientTypes.get_fields()
-    # Removing Sending SMS to Employees
-    # recipient_list.pop(str(RecipientTypes.EMPLOYEES.value))
-    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
-    context = dict(user=user, company_branches=company_branches, recipient_list=recipient_list)
-    return render_template('admin/managers/messaging/compose.html', **context)
-
-
-#################################################################################################
 
 async def send_sms_to_branch_policy_holders(composed_sms: SMSCompose):
     """
@@ -430,14 +375,6 @@ def date_time() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-async def create_response(user: User):
-    if user.is_employee and not user.is_company_admin:
-        return redirect(url_for('messaging.get_employee_compose'))
-
-    # This will return company admin compose
-    return redirect(url_for('messaging.get_compose'))
-
-
 @messaging_route.post('/admin/messaging/sms/compose')
 @login_required
 async def send_composed_sms_message(user: User):
@@ -453,7 +390,7 @@ async def send_composed_sms_message(user: User):
     except ValidationError as e:
         print(str(e))
         flash(message="Error sending SMS please ensure to fill in the form", category="danger")
-        return await create_response(user=user)
+        return redirect(url_for('messaging.get_sms_compose'))
 
     if composed_sms.recipient_type.casefold() == RecipientTypes.EMPLOYEES.value.casefold():
         # Could Be interesting to just send this to a separate thread
@@ -467,19 +404,7 @@ async def send_composed_sms_message(user: User):
         await send_sms_to_branch_lapsed_policy_holders(composed_sms)
 
     flash(message="Message Successfully sent", category="success")
-    return await create_response(user=user)
-
-
-@messaging_route.post('/admin/messaging/whatsapp/compose')
-@login_required
-async def send_whatsapp_message(user: User):
-    """
-
-    :param user:
-    :return:
-    """
-    flash(message="Successfully sent whatsapp message", category="success")
-    return await create_response(user=user)
+    return redirect(url_for('messaging.get_sms_compose'))
 
 
 # Sending Email Messages Routes
@@ -509,7 +434,7 @@ async def send_email_message(user: User):
     except ValidationError as e:
         print(str(e))
         flash(message="Error sending SMS please ensure to fill in the form", category="danger")
-        return await create_response(user=user)
+        return redirect(url_for('messaging.get_email_compose'))
 
     if composed_email.recipient_type == RecipientTypes.EMPLOYEES.value:
 
@@ -530,7 +455,7 @@ async def send_email_message(user: User):
         await send_emails(composed_email=composed_email, persons_list=policy_holders)
     else:
         flash(message="Could Not Send Email Message", category="success")
-        return await create_response(user=user)
+        return redirect(url_for('messaging.get_email_compose'))
 
     flash(message="Successfully sent email message", category="success")
-    return await create_response(user=user)
+    return redirect(url_for('messaging.get_email_compose'))

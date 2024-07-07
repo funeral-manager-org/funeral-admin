@@ -53,8 +53,14 @@
             {% endif %}
         </div>
         {% if contact %}
-                <button type="submit" class="btn btn-sm btn-primary">Update Contact</button>
+                <button type="submit" class="btn btn-sm btn-outline-primary btn-block btn-rounded">
+                <i class="fa fa-save"> </i>
+                    Update Contact
+                </button>
         {% else %}
-                <button type="submit" class="btn btn-sm btn-primary">Add Contact</button>
+                <button type="submit" class="btn btn-sm btn-outline-success btn-block btn-rounded">
+                <i class="fa fa-save"> </i>
+                    Add Contact
+                </button>
         {% endif %}
     </form>

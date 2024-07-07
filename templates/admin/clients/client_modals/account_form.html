@@ -25,7 +25,7 @@
             <label for="account_type">Account Type:</label>
             <input type="text" class="form-control" id="account_type" name="account_type" {% if bank_account %}value="{{ bank_account.account_type }}"{% endif %} required>
         </div>
-        <button type="submit" class="btn btn-sm btn-primary">
+        <button type="submit" class="btn btn-sm btn-outline-primary btn-block btn-rounded">
         <i class="fa fa-save"> </i>
             {% if bank_account %}Edit Bank Account{% else %} Add Bank Account{% endif %}
         </button>

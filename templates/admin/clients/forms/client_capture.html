@@ -1,6 +1,4 @@
 
-
-
 <form action="{{ url_for('clients.add_client') }}" method="post">
 
     <input type="hidden" name="company_id" value="{{ user.company_id }}">
@@ -14,7 +12,7 @@
         <select id="branch_id" name="branch_id" class="form-control">
             <option value="" disabled>Select Branch</option>
             {% for branch in company_branches %}
-                <option value="{{ branch.branch_id }}" {% if policy_holder and policy_holder.branch_id == branch.branch_id %}selected{% endif %}>{{ branch.branch_name }}</option>
+                <option value="{{ branch.branch_id }}" {% if policy_holder and policy_holder.branch_id == branch.branch_id %}selected{% endif %}>{{ branch.branch_name| title }}</option>
             {% endfor %}
         </select>
     </div>
@@ -71,24 +69,24 @@
         </select>
     </div>
 
-    <button type="submit" class="btn btn-sm btn-primary">
+    <button type="submit" class="btn btn-sm  btn-outline-success btn-rounded">
         <i class="fa fa-save"></i>
         Update
     </button>
 
-    <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientContactID">
+    <a href="#" class="btn btn-sm btn-outline-info btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientContactID">
         <i class="fa fa-save"></i>
         Contact Details
     </a>
-    <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientPostalID">
+    <a href="#" class="btn btn-sm btn-outline-info btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientPostalID">
         <i class="fa fa-save"></i>
         Postal Address
     </a>
-    <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientAddressID">
+    <a href="#" class="btn btn-sm btn-outline-info btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientAddressID">
         <i class="fa fa-save"></i>
         Physical Address
     </a>
-    <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientAccountID">
+    <a href="#" class="btn btn-sm btn-outline-info btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientAccountID">
         <i class="fa fa-credit-card"> </i> Bank Account
     </a>
 

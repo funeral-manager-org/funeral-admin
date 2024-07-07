@@ -87,6 +87,44 @@ async def get_clients(user: User):
     return render_template('admin/clients/clients.html', **context)
 
 
+@clients_route.get('/admin/policy-holders/<int:page>/<int:count>')
+@login_required
+async def get_policy_holders_paged(user: User, page: int = 0, count: int = 25):
+    """
+
+    :param user:
+    :param page:
+    :param count:
+    :return:
+    """
+    results: dict[
+        str, list[ClientPersonalInformation] | int | bool] = await company_controller.get_policy_holders_paged(
+        company_id=user.company_id)
+    policy_holders = results.get('policy_holders')
+    has_next = results.get('has_next')
+    context = dict(user=user, policy_holders=policy_holders, page=page, count=count, has_next=has_next)
+    return render_template('admin/clients/policy_holders.html', **context)
+
+
+@clients_route.get('/admin/policy-holder')
+@login_required
+async def get_client_capture(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+    plan_covers = await company_controller.get_company_covers(company_id=user.company_id)
+
+    countries = await company_controller.get_countries()
+    policy_holder = {}
+
+    context = dict(user=user, company_branches=company_branches, plan_covers=plan_covers, countries=countries,
+                   policy_holder=policy_holder)
+
+    return render_template('admin/clients/client_capture.html', **context)
+
 
 @clients_route.post('/admin/employees/clients/new-clients')
 @login_required

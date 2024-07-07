@@ -1,0 +1,26 @@
+
+
+
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+    <section id="main-content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="font-weight-bold card-title text-info">
+                <i class="fa fa-file-text"> </i>
+                Client Capture
+            </h3>
+        </div>
+
+        <div class="card-body">
+            <!-- Client capture form -->
+            <div class="card-body m-t-10">
+                {% include 'admin/clients/forms/client_capture.html' %}
+            </div>
+        </div>
+    </div>
+
+    </section>
+{% endblock %}

@@ -833,6 +833,53 @@ class CompanyController(Controllers):
 
     @cached_ttl()
     @error_handler
+    async def return_all_active_company_policies_paged(self, company_id: str, page: int = 0,
+                                                       count: int = 25) -> list[PolicyRegistrationData]:
+        """
+        Fetch paged results of active company policies.
+
+        :param company_id:
+        :param page: Page number starting from 0.
+        :param count: Number of records per page.
+        :return: List of PolicyRegistrationData.
+        """
+        with self.get_session() as session:
+            offset = page * count
+            policies_orm_list = (
+                session.query(PolicyRegistrationDataORM)
+                .filter_by(policy_active=True, company_id=company_id)
+                .offset(offset)
+                .limit(count)
+                .all()
+            )
+            return [PolicyRegistrationData(**policy.to_dict()) for policy in policies_orm_list]
+
+    @cached_ttl()
+    @error_handler
+    async def return_all_lapsed_company_policies_paged(self, company_id: str, page: int = 0,
+                                                       count: int = 25) -> list[PolicyRegistrationData]:
+        """
+        Fetch paged results of active company policies.
+
+        :param company_id:
+        :param page: Page number starting from 0.
+        :param count: Number of records per page.
+        :return: List of PolicyRegistrationData.
+        """
+        with self.get_session() as session:
+            offset = page * count
+            policies_orm_list = (
+                session.query(PolicyRegistrationDataORM)
+                .filter_by(policy_active=False, company_id=company_id)
+                .offset(offset)
+                .limit(count)
+                .all()
+            )
+            return [PolicyRegistrationData(**policy.to_dict()) for policy in policies_orm_list]
+
+
+    @cached_ttl()
+    @error_handler
     async def return_all_outstanding_company_policies(self) -> list[PolicyRegistrationData]:
         """
 

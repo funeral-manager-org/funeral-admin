@@ -1,0 +1,42 @@
+
+
+{% extends "layouts/page.html" %}
+{% block content %}
+<section id="main-content">
+    <div class="card shadow-lg border-success">
+        <div class="card-header">
+            <h2 class="card-title font-weight-bold text-info">
+                <i class="fa fa-search-plus"> </i>
+                Search Policies
+            </h2>
+        </div>
+
+    <div class="card-body">
+        <!-- Form to search policies -->
+        <form class="form-horizontal" action="{{ url_for('policy.search_policies') }}" method="post" id="search-form">
+            <div class="form-group shadow-sm border-info m-t-8 m-4">
+                <label class="font-weight-bold text-info" for="search-option">Search Option</label><br>
+                <input type="radio" id="search-id-number" name="search-option" value="id_number" checked>
+                <label for="search-id-number">ID Number</label><br>
+                <input type="radio" id="search-policy-number" name="search-option" value="policy_number">
+                <label for="search-policy-number">Policy Number</label><br>
+                <input type="radio" id="search-policy-holder-name" name="search-option" value="policy_holder_name">
+                <label for="search-policy-holder-name">Policy Holder Name</label>
+            </div>
+            <div class="form-group">
+                <label class="font-weight-bold text-info" for="search-input">Search</label>
+                <div class="input-group-append">
+                    <input type="text" class="form-control-lg" id="search-input" name="search-input" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-block btn-outline-info btn-rounded btn-lg">
+                <i class="fa fa-search-plus"> </i>
+                Search
+            </button>
+        </form>
+    </div>
+
+    </div>
+</section>
+
+{% endblock %}

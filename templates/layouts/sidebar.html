@@ -23,7 +23,14 @@
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-folder"></i> Covers<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
-                            <li><a href="{{ url_for('policy.get_policies') }}"><i class="ti-briefcase"></i> Policies</a></li>
+                            <li><a class="sidebar-sub-toggle"><i class="fa fa-folder"></i> Policies<span class="sidebar-collapse-icon ti-angle-down"></span></a>
+                                <ul>
+                                    <li><a href="{{ url_for('policy.get_active_policies_paged', page=0, count=25) }}"><i class="ti-briefcase"></i> Active Policies</a></li>
+                                    <li><a href="{{ url_for('policy.get_lapsed_policies_paged', page=0, count=25) }}"><i class="ti-briefcase"></i> Lapsed Policies</a></li>
+                                    <li><a href="{{ url_for('policy.get_search_policies') }}"><i class="ti-briefcase"></i> LookUp Policies</a></li>
+                                </ul>
+                            </li>
+
                             <li><a href="{{ url_for('clients.get_clients') }}"><i class="ti-briefcase"></i> Clients</a></li>
                         </ul>
                     </li>

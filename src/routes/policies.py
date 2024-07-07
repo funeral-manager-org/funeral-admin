@@ -9,7 +9,7 @@ policy_route = Blueprint('policy', __name__)
 
 @policy_route.get('/admin/employees/policies')
 @login_required
-async def get_policies(user: User):
+async def get_policies_home(user: User):
     """
 
         :param user:
@@ -19,6 +19,19 @@ async def get_policies(user: User):
     outstanding_policies = await company_controller.return_all_outstanding_company_policies()
     context = dict(user=user, policies_list=policies_list, outstanding_policies=outstanding_policies)
     return render_template('admin/policies/policies.html', **context)
+
+
+@policy_route.get('/admin/policies/search')
+@login_required
+async def get_search_policies(user: User):
+    """
+
+        :param user:
+        :return:
+    """
+
+    context = dict(user=user)
+    return render_template('admin/policies/paged/search_policies.html', **context)
 
 
 @policy_route.post('/admin/employees/policies/search')
@@ -47,9 +60,47 @@ async def search_policies(user: User):
         flash(message="policies found", category="success")
     else:
         flash(message="Unable to find the policies specified", category="success")
-    print(policies_list)
-    context = dict(user=user, policies_list=policies_list)
+
+    context = dict(user=user,page=0, count=25, policies_list=policies_list)
     # Render template with search results
     return render_template('admin/policies/search_results.html', **context)
 
 
+@policy_route.get('/admin/policies/active/<int:page>/<int:count>')
+@login_required
+async def get_active_policies_paged(user: User, page: int = 0, count: int = 25):
+    """
+
+    :param user:
+    :param page:
+    :param count:
+    :return:
+    """
+    if not user.company_id:
+        flash(message="No Registered Funeral Company", category="danger")
+        return redirect(url_for('policy.get_policies_home'))
+
+    policies_list = await company_controller.return_all_active_company_policies_paged(company_id=user.company_id,
+                                                                                      page=page, count=count)
+    context = dict(user=user, page=page, count=count, policies_list=policies_list)
+    return render_template('admin/policies/paged/active_policies.html', **context)
+
+
+@policy_route.get('/admin/policies/lapsed/<int:page>/<int:count>')
+@login_required
+async def get_lapsed_policies_paged(user: User, page: int = 0, count: int = 25):
+    """
+
+    :param user:
+    :param page:
+    :param count:
+    :return:
+    """
+    if not user.company_id:
+        flash(message="No Registered Funeral Company", category="danger")
+        return redirect(url_for('policy.get_policies_home'))
+
+    policies_list = await company_controller.return_all_lapsed_company_policies_paged(company_id=user.company_id,
+                                                                                      page=page, count=count)
+    context = dict(user=user, page=page, count=count, policies_list=policies_list)
+    return render_template('admin/policies/paged/lapsed_policies.html', **context)

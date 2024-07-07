@@ -17,10 +17,7 @@
                     <tr>
                         <th>Policy Number</th>
                         <th>Plan Number</th>
-                        <th class="d-none d-md-table-cell">Policy Type</th>
-                        <th class="d-none d-md-table-cell">Members</th>
                         <th class="d-none d-md-table-cell">Premiums</th>
-                        <th class="d-none d-md-table-cell">Date Activated</th>
                         <th class="d-none d-md-table-cell">Payment Day</th>
                         <th>Is Active</th>
                     </tr>
@@ -30,10 +27,7 @@
                     <tr>
                         <td>{{ policy.policy_number }}</td>
                         <td>{{ policy.plan_number }}</td>
-                        <td class="d-none d-md-table-cell">{{ policy.policy_type }}</td>
-                        <td class="d-none d-md-table-cell">{{ policy.total_family_members }}</td>
                         <td class="d-none d-md-table-cell">R {{ policy.total_premiums | number }}.00</td>
-                        <td class="d-none d-md-table-cell">{{ policy.date_activated }}</td>
                         <td class="d-none d-md-table-cell">{{ policy.payment_day }}</td>
                         <td>{{ policy.policy_active }}</td>
                     </tr>

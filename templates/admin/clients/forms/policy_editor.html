@@ -1,9 +1,11 @@
 
 
 
-    <div class="card">
+    <div class="card shadow-lg border-info">
             <div class="card-header">
-                    <h2 class="card-title font-weight-bold text-info">Edit Policy Registration Data</h2>
+                    <h2 class="card-title font-weight-bold text-info">Edit Policy
+
+                    </h2>
             </div>
             <div class="card-body">
                 <form action="{{ url_for('clients.edit_policy_details') }}" method="post">
@@ -20,45 +22,46 @@
                                value="{{ policy_data.policy_type }}" required>
                         <input type="hidden" class="form-control" id="total_family_members" name="total_family_members"
                                value="{{ policy_data.total_family_members }}" required>
-                    <div class="form-group">
+
+                    <div class="form-group shadow-sm">
                         <label for="total_premiums">Total Premiums</label>
-                        <input type="number" class="form-control" id="total_premiums" name="total_premiums"
-                               value="{{ policy_data.total_premiums }}" required>
+                        <input type="number" class="form-control shadow-sm border-warning" id="total_premiums" name="total_premiums"
+                               value="{{ policy_data.total_premiums }}" required disabled>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group shadow-sm">
                         <label for="payment_code_reference">Payment Code Reference</label>
-                        <input type="text" class="form-control" id="payment_code_reference" name="payment_code_reference"
+                        <input type="text" class="form-control shadow-sm border-info" id="payment_code_reference" name="payment_code_reference"
                                value="{{ policy_data.payment_code_reference }}" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group shadow-sm">
                         <label for="date_activated">Date Activated</label>
-                        <input type="date" class="form-control" id="date_activated" name="date_activated"
+                        <input type="date" class="form-control shadow-sm border-info" id="date_activated" name="date_activated"
                                value="{{ policy_data.date_activated }}">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group shadow-sm">
                         <label for="first_premium_date">First Premium Date</label>
-                        <input type="date" class="form-control" id="first_premium_date" name="first_premium_date"
+                        <input type="date" class="form-control shadow-sm border-info" id="first_premium_date" name="first_premium_date"
                                value="{{ policy_data.first_premium_date }}">
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group shadow-sm">
                         <label for="payment_day">Payment Day</label>
-                        <input type="number" class="form-control" id="payment_day" name="payment_day"
+                        <input type="number" class="form-control shadow-sm border-success" id="payment_day" name="payment_day"
                                value="{{ policy_data.payment_day }}">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group shadow-sm">
                         <label for="payment_method">Payment Method</label>
-                        <select class="form-control" id="payment_method" name="payment_method">
+                        <select class="form-control shadow-sm border-primary" id="payment_method" name="payment_method">
                             {% for method in payment_methods %}
                                 <option value="{{ method }}">{{ method }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="policy_active"
+                    <div class="form-group form-check shadow-sm border-success">
+                        <input type="checkbox" class="form-check-input border-success shadow-lg" id="policy_active"
                                name="policy_active" {% if policy_data.policy_active %}checked{% endif %}>
-                        <label class="form-check-label" for="policy_active">Policy Active</label>
+                        <label class="form-check-label shadow-lg font-weight-bold text-info" for="policy_active">Policy Active</label>
                     </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-sm btn-primary pull-left">

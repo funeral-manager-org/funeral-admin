@@ -3,11 +3,11 @@
 {% block content %}
 
     <section id="main-content">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title font-weight-bold text-info">
+        <div class="card shadow-lg border-info">
+            <div class="card-header shadow-sm bg-facebook border-info">
+                <h2 class="card-title font-weight-bold text-white">
                     <i class="fa fa-users"> </i>
-                    Clients Admin
+                    Policy Holder Admin
                 </h2>
             </div>
             <div class="card-body">
@@ -41,14 +41,14 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" id="premiums-tab" data-toggle="tab" href="#premiums" role="tab" aria-controls="premiums" aria-selected="false">
-                            <span class="font-weight-bold text-info">
-                                <i class="fa fa-credit-card"> </i>
-                                Upcoming Premiums
-                            </span>
-                        </a>
-                    </li>
+{#                    <li class="nav-item">#}
+{#                        <a class="nav-link" id="premiums-tab" data-toggle="tab" href="#premiums" role="tab" aria-controls="premiums" aria-selected="false">#}
+{#                            <span class="font-weight-bold text-info">#}
+{#                                <i class="fa fa-credit-card"> </i>#}
+{#                                Upcoming Premiums#}
+{#                            </span>#}
+{#                        </a>#}
+{#                    </li>#}
 
 
                 </ul>
@@ -57,89 +57,94 @@
                 <div class="tab-content" id="myTabContent">
                     <!-- Client capture tab -->
                     <div class="tab-pane fade show active" id="viewer" role="tabpanel" aria-labelledby="viewer-tab">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Funeral Policy of : <span class="text-info">{{ policy_holder.full_names }} {{ policy_holder.surname }}</span></h3>
+                        <div class="card shadow-lg border-info">
+                            <div class="card-header bg-facebook shadow-lg border-info m-b-12">
+                                <h3 class="card-title text-white">
+                                    <i class="fa fa-user-md"> </i>
+                                    Funeral Policy of : <span class="text-white">{{ policy_holder.full_names| title }} {{ policy_holder.surname| title }}</span>
+                                </h3>
                             </div>
                             <div class="card-body">
-                                <ul>
-                                    <li class="font-weight-bold">Title: <span class="text-info">{{ policy_holder.title }}</span></li>
-                                    <li class="font-weight-bold">ID Number: <span class="text-info">{{ policy_holder.id_number }}</span></li>
-                                    <li class="font-weight-bold">Date of Birth: <span class="text-info">{{ policy_holder.date_of_birth }}</span></li>
-                                    <li class="font-weight-bold">Nationality: <span class="text-info">{{ policy_holder.nationality }}</span></li>
-                                    <li class="font-weight-bold">Is Policy Holder: <span class="text-info">{{ "Yes" if policy_holder.is_policy_holder else "No" }}</span></li>
-                                    <li class="font-weight-bold">Plan Number: <span class="text-info">{{ policy_holder.plan_number }}</span></li>
-                                    <li class="font-weight-bold">Policy Number: <span class="text-info">{{ policy_holder.policy_number }}</span></li>
+                                <ul class="list-group">
+                                    <li class="list-group-item font-weight-light">Title: <span class="text-info pull-right">{{ policy_holder.title }}</span></li>
+                                    <li class="list-group-item font-weight-light">ID Number: <span class="text-info pull-right">{{ policy_holder.id_number }}</span></li>
+                                    <li class="list-group-item font-weight-light">Date of Birth: <span class="text-info  pull-right">{{ policy_holder.date_of_birth }}</span></li>
+                                    <li class="list-group-item font-weight-light">Nationality: <span class="text-info  pull-right">{{ policy_holder.nationality }}</span></li>
+                                    <li class="list-group-item font-weight-light">Is Policy Holder: <span class="text-info  pull-right">{{ "Yes" if policy_holder.is_policy_holder else "No" }}</span></li>
+                                    <li class="list-group-item font-weight-light">Plan Number: <span class="text-info  pull-right">{{ policy_holder.plan_number }}</span></li>
+                                    <li class="list-group-item font-weight-light">Policy Number: <span class="text-info  pull-right">{{ policy_holder.policy_number }}</span></li>
                                 </ul>
                             </div>
                         </div>
-                        <div class="card">
+                        <div class="card shadow-lg border-info">
 
-                            <div class="card-header">
-                                <h3 class="card-title">Policy Number : <span class="text-info">{{ policy_data.policy_number }}</span></h3>
+                            <div class="card-header shadow-lg bg-facebook">
+                                <h3 class="card-title text-white">
+                                    <i class="fa fa-file"> </i>
+                                    Policy Details
+                                </h3>
                             </div>
 
 
                             <div class="card-body">
-                                <ul>
-                                    <li class="font-weight-bold">Policy Number: <span class="text-info">{{ policy_data.policy_number }}</span></li>
-                                    <li class="font-weight-bold">Plan Number: <span class="text-info">{{ policy_data.plan_number }}</span></li>
-                                    <li class="font-weight-bold">Policy Type: <span class="text-info">{{ policy_data.policy_type }}</span></li>
-                                    <li class="font-weight-bold">Total Family Members: <span class="text-info">{{ policy_data.total_family_members }}</span></li>
+                                <ul class="list-group">
+                                    <li class="list-group-item font-weight-light">Policy Number: <span class="text-info pull-right">{{ policy_data.policy_number }}</span></li>
+                                    <li class="list-group-item font-weight-light">Plan Number: <span class="text-info pull-right">{{ policy_data.plan_number }}</span></li>
+                                    <li class="list-group-item font-weight-light">Policy Type: <span class="text-info pull-right">{{ policy_data.policy_type }}</span></li>
+                                    <li class="list-group-item font-weight-light">Total Family Members: <span class="text-info pull-right">{{ policy_data.total_family_members }}</span></li>
 
-                                    <li class="font-weight-bold">Payment Code Reference: <span class="text-info">{{ policy_data.payment_code_reference }}</span></li>
+                                    <li class="list-group-item font-weight-light">Payment Code Reference: <span class="text-info pull-right">{{ policy_data.payment_code_reference }}</span></li>
                                     {% if  policy_data.date_activated %}
-                                        <li class="font-weight-bold">Date Activated: <span class="text-info">{{ policy_data.date_activated }}</span></li>
+                                        <li class="list-group-item font-weight-light">Date Activated: <span class="text-info pull-right">{{ policy_data.date_activated }}</span></li>
                                     {% endif %}
                                     {% if  policy_data.first_premium_date %}
-                                        <li class="font-weight-bold">First Premium Date: <span class="text-info">{{ policy_data.first_premium_date }}</span></li>
+                                        <li class="list-group-item font-weight-light">First Premium Date: <span class="text-info pull-right">{{ policy_data.first_premium_date }}</span></li>
                                     {% endif %}
                                     {% if  policy_data.payment_day %}
-                                        <li class="font-weight-bold">Payment Day: <span class="text-info">{{ policy_data.payment_day }}</span></li>
+                                        <li class="list-group-item font-weight-light">Payment Day: <span class="text-info pull-right">{{ policy_data.payment_day }}</span></li>
                                     {% endif %}
                                     {% if policy_data.client_signature %}
-                                        <li class="font-weight-bold">Client Signature: <span class="text-info">{{ policy_data.client_signature }}</span></li>
+                                        <li class="list-group-item font-weight-light">Client Signature: <span class="text-info pull-right">{{ policy_data.client_signature }}</span></li>
                                     {% endif %}
                                     {% if  policy_data.employee_signature %}
-                                        <li class="font-weight-bold">Employee Signature: <span class="text-info">{{ policy_data.employee_signature }}</span></li>
+                                        <li class="list-group-item font-weight-light">Employee Signature: <span class="text-info pull-right">{{ policy_data.employee_signature }}</span></li>
                                     {% endif %}
                                     {% if  policy_data.payment_method %}
-                                        <li class="font-weight-bold">Payment Method: <span class="text-info">{{ policy_data.payment_method }}</span></li>
+                                        <li class="list-group-item font-weight-light">Payment Method: <span class="text-info pull-right">{{ policy_data.payment_method }}</span></li>
                                     {% endif %}
 
-                                    <li class="font-weight-bold">Policy Active: <span class="text-info">{{ "Yes" if policy_data.policy_active else "No" }}</span></li>
-                                    <li class="font-weight-bold">Monthly Premiums: <span class="text-info">R {{ policy_data.total_premiums| number }}.00</span></li>
+                                    <li class="list-group-item font-weight-light">Policy Active: <span class="text-info pull-right">{{ "Yes" if policy_data.policy_active else "No" }}</span></li>
+                                    <li class="list-group-item font-weight-light">Monthly Premiums: <span class="text-info pull-right">R {{ policy_data.total_premiums| number }}.00</span></li>
                                 </ul>
                             </div>
                         </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title font-weight-bold text-info">Beneficiaries &amp; Dependents </h3>
+                        <div class="card shadow-lg border-info">
+                            <div class="card-header shadow-sm border-info bg-facebook m-b-12">
+                                <h3 class="card-title font-weight-bold text-white">
+                                    <i class="fa fa-user-plus"> </i>
+                                    Beneficiaries &amp; Dependents
+                                </h3>
                             </div>
                             <div class="card-body">
                             <table class="table table-bordered table-striped">
 
-                                    <thead class="font-weight-bold text-info">
+                                    <thead class="font-weight-light text-info">
                                         <tr>
                                             <td>Full Names</td>
                                             <td>Surname</td>
-                                            <td>ID Number</td>
-                                            <td>Date of Birth</td>
-                                            <td>Nationality</td>
-                                            <td>Plan Number</td>
+                                            <td>ID #</td>
+                                            <td>Plan #</td>
                                             <td>Insured Party</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for policy_holder in beneficiaries %}
                                             <tr>
-                                                <td class="font-weight-bold text-info">
+                                                <td class="font-weight-light text-info">
                                                         {{ policy_holder.title }} {{ policy_holder.full_names }}
                                                 </td>
                                                 <td>{{ policy_holder.surname }}</td>
                                                 <td>{{ policy_holder.id_number }}</td>
-                                                <td>{{ policy_holder.date_of_birth }}</td>
-                                                <td>{{ policy_holder.nationality }}</td>
                                                 <td>{{ policy_holder.plan_number or "N/A" }}</td>
                                                 <td>{{ policy_holder.insured_party }}</td>
                                             </tr>
@@ -149,7 +154,7 @@
 
                             </div>
                             <div class="card-footer">
-                                <a href="#" class="btn btn-sm btn-primary mr-2 mr-md-12 mb-2 mb-md-0 pull-right" data-toggle="modal" data-target="#addFamilyID">
+                                <a href="#" class="btn btn-sm btn-outline-primary btn-rounded mr-2 mr-md-12 mb-2 mb-md-0 pull-right" data-toggle="modal" data-target="#addFamilyID">
                                     Add Beneficiary or Dependents
                                 </a>
                             </div>
@@ -187,19 +192,6 @@
                         </div>
                     </div>
 
-                    <!-- Upcoming premiums tab -->
-                    <div class="tab-pane fade" id="premiums" role="tabpanel" aria-labelledby="premiums-tab">
-                        <div class="card-body">
-                            <!-- Content for upcoming premiums tab goes here -->
-                            <div class="card-header">
-                                <h3 class="font-weight-bold card-title">
-                                    <i class="fa fa-credit-card"> </i>
-                                    Upcoming Premiums
-                                </h3>
-                            </div>
-
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

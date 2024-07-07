@@ -73,8 +73,14 @@
     </div>
 
     <button type="submit" class="btn btn-lg btn-block btn-outline-success btn-rounded">
-        <i class="fa fa-user-plus"></i>
-        Add Client
+        {% if policy_holder %}
+            <i class="fa fa-user-plus"></i>
+            Add Client
+        {% else %}
+            <i class="fa fa-save"></i>
+            Update Client
+
+        {% endif %}
     </button>
 
 </form>

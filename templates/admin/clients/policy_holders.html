@@ -26,8 +26,10 @@
                 <tbody>
                     {% for policy_holder in policy_holders_list %}
                         <tr>
-                            <td class="font-weight-bold text-info">
-                                <a href="{{ url_for('clients.get_client', uid=policy_holder.uid) }}">
+                            <td class="font-weight-bold">
+                                <a href="{{ url_for('clients.get_client', uid=policy_holder.uid) }}"
+                                    class="text-info font-weight-light font-italic"
+                                >
                                     {{ policy_holder.title }} {{ policy_holder.full_names }}
                                 </a>
                             </td>

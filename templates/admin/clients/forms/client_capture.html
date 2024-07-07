@@ -7,20 +7,19 @@
     {% if policy_holder %}
         <input type="hidden" name="uid" value="{{ policy_holder.uid }}">
     {% endif %}
-    <div class="form-group">
+    <div class="form-group shadow-sm">
         <label class="font-weight-bold" for="branch_id">Select Branch</label>
-        <select id="branch_id" name="branch_id" class="form-control">
-            <option value="" disabled>Select Branch</option>
+        <select id="branch_id" name="branch_id" class="form-control border-info">
+            <option value="" selected disabled>Select Branch</option>
             {% for branch in company_branches %}
                 <option value="{{ branch.branch_id }}" {% if policy_holder and policy_holder.branch_id == branch.branch_id %}selected{% endif %}>{{ branch.branch_name| title }}</option>
             {% endfor %}
         </select>
     </div>
-
-    <div class="form-group">
+    <div class="form-group  shadow-sm">
         <label class="font-weight-bold" for="plan_number">Select Plan</label>
-        <select name="plan_number" id="plan_number" class="form-control">
-            <option value="" disabled>Please select Plan</option>
+        <select name="plan_number" id="plan_number" class="form-control border-info">
+            <option value="" selected disabled>Please select Plan</option>
             {% for plan in plan_covers %}
                 <option value="{{ plan.plan_number }}" {% if policy_holder and policy_holder.plan_number == plan.plan_number %}selected{% endif %}>
                     {{ plan.plan_name| title }}, {{ plan.plan_type| title }}, R {{ plan.premium_costs| number }}.00, R {{ plan.coverage_amount| number }}.00
@@ -28,40 +27,44 @@
             {% endfor %}
         </select>
     </div>
-
-    <div class="form-group">
+    <div class="form-group  shadow-sm">
         <label for="title" class="font-weight-bold">Title</label>
-        <input type="text" class="form-control" id="title" name="title"
-               {% if policy_holder %}value="{{ policy_holder.title }}"{% endif %}  required>
+        <select class="form-control border-info" id="title" name="title">
+            <option value="" selected disabled>Please Select Client Title</option>
+            <option value="mr" {% if policy_holder and policy_holder.title == "mr"  %}selected{% endif %}>MR</option>
+            <option value="mrs" {% if policy_holder and policy_holder.title == "mrs"  %}selected{% endif %}>MRS</option>
+            <option value="miss" {% if policy_holder and policy_holder.title == "miss"  %}selected{% endif %}>MISS</option>
+{#            <option value="doctor" {% if policy_holder and policy_holder.title == "doctor"  %}selected{% endif %}>Doctor</option>         #}
+        </select>
     </div>
 
-    <div class="form-group">
+    <div class="form-group  shadow-sm">
         <label for="full_names"  class="font-weight-bold">Full Names</label>
-        <input type="text" class="form-control" id="full_names" name="full_names"
+        <input type="text" class="form-control border-info" id="full_names" name="full_names"
                {% if policy_holder %}value="{{ policy_holder.full_names }}"{% endif %} required>
     </div>
 
-    <div class="form-group">
+    <div class="form-group  shadow-sm">
         <label for="surname" class="font-weight-bold">Surname</label>
-        <input type="text" class="form-control" id="surname" name="surname"
+        <input type="text" class="form-control border-info" id="surname" name="surname"
                {% if policy_holder %}value="{{ policy_holder.surname }}"{% endif %} required>
     </div>
 
-    <div class="form-group">
+    <div class="form-group  shadow-sm">
         <label for="id_number" class="font-weight-bold">ID Number</label>
-        <input type="text" class="form-control" id="id_number" name="id_number"
+        <input type="text" class="form-control border-info" id="id_number" name="id_number"
                {% if policy_holder %}value="{{ policy_holder.id_number }}"{% endif %} required>
     </div>
 
-    <div class="form-group">
+    <div class="form-group  shadow-sm">
         <label for="date_of_birth" class="font-weight-bold">Date of Birth</label>
-        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth"
+        <input type="date" class="form-control border-info" id="date_of_birth" name="date_of_birth"
                {% if policy_holder %}value="{{ policy_holder.date_of_birth }}"{% endif %} required>
     </div>
 
-    <div class="form-group">
+    <div class="form-group  shadow-sm">
         <label for="nationality" class="font-weight-bold">Nationality</label>
-        <select class="form-control" id="nationality" name="nationality" required>
+        <select class="form-control border-info" id="nationality" name="nationality" required>
             <option value="" disabled {% if policy_holder.nationality %} {% else %}selected{% endif %}>Select Nationality</option>
             {% for country in countries %}
                 <option value="{{ country }}" {% if policy_holder and policy_holder.nationality == country %}selected{% endif %}>{{ country }}</option>
@@ -69,26 +72,10 @@
         </select>
     </div>
 
-    <button type="submit" class="btn btn-sm  btn-outline-success btn-rounded">
-        <i class="fa fa-save"></i>
-        Update
+    <button type="submit" class="btn btn-lg btn-block btn-outline-success btn-rounded">
+        <i class="fa fa-user-plus"></i>
+        Add Client
     </button>
-
-    <a href="#" class="btn btn-sm btn-outline-info btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientContactID">
-        <i class="fa fa-save"></i>
-        Contact Details
-    </a>
-    <a href="#" class="btn btn-sm btn-outline-info btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientPostalID">
-        <i class="fa fa-save"></i>
-        Postal Address
-    </a>
-    <a href="#" class="btn btn-sm btn-outline-info btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientAddressID">
-        <i class="fa fa-save"></i>
-        Physical Address
-    </a>
-    <a href="#" class="btn btn-sm btn-outline-info btn-rounded mr-2 mr-md-12 mb-2 mb-md-0" data-toggle="modal" data-target="#clientAccountID">
-        <i class="fa fa-credit-card"> </i> Bank Account
-    </a>
 
 </form>
 

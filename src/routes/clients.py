@@ -24,21 +24,15 @@ async def get_client(user: User, uid: str):
     :return: Rendered template
     """
     # Retrieve all necessary data in parallel
-    company_branches_task = company_controller.get_company_branches(company_id=user.company_id)
-    policy_holder_task = company_controller.get_policy_holder(uid=uid)
-    beneficiaries_task = company_controller.get_beneficiaries(
-        policy_number=None)  # Assuming it's independent of policy number
-    plan_covers_task = company_controller.get_company_covers(company_id=user.company_id)
-    countries_task = company_controller.get_countries()
-    policy_data_task = company_controller.get_policy_data(uid=None)  # Assuming it's independent of policy UID
-    payment_methods_task = company_controller.get_payment_methods()
+    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+    policy_holder = await company_controller.get_policy_holder(uid=uid)
+    beneficiaries = await company_controller.get_beneficiaries(
+        policy_number=policy_holder.policy_number)  # Assuming it's independent of policy number
 
-    # Wait for all parallel tasks to complete
-    (company_branches, policy_holder, beneficiaries,
-     plan_covers, countries, policy_data, payment_methods) = await gather(
-        company_branches_task, policy_holder_task, beneficiaries_task,
-        plan_covers_task, countries_task, policy_data_task, payment_methods_task
-    )
+    plan_covers = await company_controller.get_company_covers(company_id=user.company_id)
+    countries = await company_controller.get_countries()
+    policy_data = await company_controller.get_policy_data(policy_number=policy_holder.policy_number)  # Assuming it's independent of policy UID
+    payment_methods = await company_controller.get_payment_methods()
 
     # Prepare the context dictionary
     context = {
@@ -56,10 +50,13 @@ async def get_client(user: User, uid: str):
     if policy_holder.bank_account_id:
         context['bank_account'] = await company_controller.get_bank_account(
             bank_account_id=policy_holder.bank_account_id)
+
     if policy_holder.address_id:
         context['address'] = await company_controller.get_address(address_id=policy_holder.address_id)
+
     if policy_holder.postal_id:
         context['postal_address'] = await company_controller.get_postal_address(postal_id=policy_holder.postal_id)
+
     if policy_holder.contact_id:
         context['contact'] = await company_controller.get_contact(contact_id=policy_holder.contact_id)
 
@@ -97,12 +94,13 @@ async def get_policy_holders_paged(user: User, page: int = 0, count: int = 25):
     :param count:
     :return:
     """
-    results: dict[
-        str, list[ClientPersonalInformation] | int | bool] = await company_controller.get_policy_holders_paged(
-        company_id=user.company_id)
-    policy_holders = results.get('policy_holders')
-    has_next = results.get('has_next')
-    context = dict(user=user, policy_holders=policy_holders, page=page, count=count, has_next=has_next)
+
+    policy_holders_list = await company_controller.get_policy_holders_paged(
+        company_id=user.company_id, page=page, count=count)
+
+    context = dict(user=user, policy_holders_list=policy_holders_list, page=page, count=count)
+
+    error_logger.info(f"Policy Holders On Paged Router: {policy_holders_list}")
     return render_template('admin/clients/policy_holders.html', **context)
 
 
@@ -137,14 +135,15 @@ async def add_client(user: User):
     try:
         policy_holder: ClientPersonalInformation = ClientPersonalInformation(**request.form)
         policy_holder.insured_party = str(InsuredParty.POLICY_HOLDER.value)
+
     except ValidationError as e:
         error_logger.error(str(e))
         flash(message="Unable to create or update client please provide all required details", category="danger")
         return redirect(url_for('clients.get_clients'))
-
+    # when client was being registered the plan was selected
     plan_cover = await company_controller.get_plan_cover(
         company_id=user.company_id, plan_number=policy_holder.plan_number)
-
+    # new policy is being generated for the client
     policy = PolicyRegistrationData(uid=policy_holder.uid,
                                     branch_id=policy_holder.branch_id,
                                     company_id=policy_holder.company_id,
@@ -152,14 +151,19 @@ async def add_client(user: User):
                                     policy_type=plan_cover.plan_type,
                                     total_premiums=plan_cover.premium_costs)
 
+    # set policy number for the policyholder to the newly created policy
     policy_holder.policy_number = policy.policy_number
+
+    # adding the policy holder to the database
     policy_holder = await company_controller.add_policy_holder(policy_holder=policy_holder)
 
     policy_ = await company_controller.add_policy_data(policy_data=policy)
 
-    message = "Successfully created new client please remember to add family members"
+    message = "Successfully created new client Please Remember to add family members"
     flash(message=message, category="success")
-    return redirect(url_for('clients.get_clients'))
+    message = f"The client Policy Number is: {policy.policy_number}"
+    flash(message=message, category="success")
+    return redirect(url_for('clients.get_client', uid=policy_holder.uid))
 
 
 @clients_route.post('/admin/employees/clients/policy-editor')

@@ -604,7 +604,7 @@ class CompanyController(Controllers):
     async def get_policy_holders_paged(self,
                                        company_id: str,
                                        page: int = 0,
-                                       count: int = 25) -> dict[str, list[ClientPersonalInformation] | int | bool]:
+                                       count: int = 25) -> list[ClientPersonalInformation]:
         """
         Fetch paged policyholders for a specific company.
 
@@ -627,23 +627,11 @@ class CompanyController(Controllers):
                 .limit(count + 1)  # Fetch one extra to check if there's a next page
             )
             policy_holders_list = policy_holders_query.all()
-
-            # Determine if there's a next page
-            has_next = len(policy_holders_list) > count
-
-            # Return only the requested number of items
-            paged_policy_holders = policy_holders_list[:count]
+            self.logger.info(f"Policy Holders Inside Method: {policy_holders_list}")
 
             # Convert ORM results to data models
-            policy_holders = [ClientPersonalInformation(**holder.to_dict()) for holder in paged_policy_holders]
+            return [ClientPersonalInformation(**holder.to_dict()) for holder in policy_holders_list]
 
-            # Return the results and pagination info
-            return {
-                "policy_holders": policy_holders,
-                "page": page,
-                "count": count,
-                "has_next": has_next
-            }
 
     @cached_ttl()
     @error_handler

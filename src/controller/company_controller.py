@@ -632,7 +632,6 @@ class CompanyController(Controllers):
             # Convert ORM results to data models
             return [ClientPersonalInformation(**holder.to_dict()) for holder in policy_holders_list]
 
-
     @cached_ttl()
     @error_handler
     async def get_policy_holder(self, uid: str) -> ClientPersonalInformation | None:
@@ -644,9 +643,9 @@ class CompanyController(Controllers):
 
     @cached_ttl()
     @error_handler
-    async def get_policy_data(self, uid: str):
+    async def get_policy_data(self, policy_number: str):
         with self.get_session() as session:
-            policy_data_orm = session.query(PolicyRegistrationDataORM).filter_by(uid=uid).first()
+            policy_data_orm = session.query(PolicyRegistrationDataORM).filter_by(policy_number=policy_number).first()
             if isinstance(policy_data_orm, PolicyRegistrationDataORM):
                 return PolicyRegistrationData(**policy_data_orm.to_dict())
             return None

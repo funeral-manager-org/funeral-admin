@@ -24,14 +24,14 @@ async def get_client(user: User, uid: str):
     :return: Rendered template
     """
     # Retrieve all necessary data in parallel
-    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     policy_holder = await company_controller.get_policy_holder(uid=uid)
-    beneficiaries = await company_controller.get_beneficiaries(
-        policy_number=policy_holder.policy_number)  # Assuming it's independent of policy number
+
+    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+    beneficiaries = await company_controller.get_beneficiaries(policy_number=policy_holder.policy_number)
 
     plan_covers = await company_controller.get_company_covers(company_id=user.company_id)
     countries = await company_controller.get_countries()
-    policy_data = await company_controller.get_policy_data(policy_number=policy_holder.policy_number)  # Assuming it's independent of policy UID
+    policy_data = await company_controller.get_policy_data(policy_number=policy_holder.policy_number)
     payment_methods = await company_controller.get_payment_methods()
 
     # Prepare the context dictionary
@@ -220,6 +220,7 @@ async def add_beneficiary_dependent(user: User, policy_number: str):
 async def add_bank_account(user: User, uid: str):
     """
 
+    :param uid:
     :param user:
     :return:
     """

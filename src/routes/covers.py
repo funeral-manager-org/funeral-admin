@@ -98,6 +98,7 @@ async def get_quick_pay(user: User):
     :return:
     """
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+
     context = dict(user=user, company_branches=company_branches)
     return render_template('admin/premiums/pay.html', **context)
 

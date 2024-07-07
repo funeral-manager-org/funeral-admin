@@ -10,7 +10,6 @@
                 Search Policies
             </h2>
         </div>
-
     <div class="card-body">
         <!-- Form to search policies -->
         <form class="form-horizontal" action="{{ url_for('policy.search_policies') }}" method="post" id="search-form">
@@ -24,19 +23,21 @@
                 <label for="search-policy-holder-name">Policy Holder Name</label>
             </div>
             <div class="form-group">
-                <label class="font-weight-bold text-info" for="search-input">Search</label>
+                    <label class="font-weight-bold text-info" for="search-input"><i class="fa fa-search"></i>
+                    Search
+                    </label>
                 <div class="input-group-append">
-                    <input type="text" class="form-control-lg" id="search-input" name="search-input" required>
+                    <input type="text" class="form-control shadow-sm border-info" id="search-input" name="search-input" required>
                 </div>
             </div>
+            <div class="form-group">
             <button type="submit" class="btn btn-block btn-outline-info btn-rounded btn-lg">
                 <i class="fa fa-search-plus"> </i>
                 Search
             </button>
+                </div>
         </form>
     </div>
-
     </div>
 </section>
-
 {% endblock %}

@@ -20,7 +20,7 @@
                             <li><a href="{{ url_for('messaging.get_admin') }}"><i class="fa fa-cogs"></i> Settings & Stats</a></li>
                         </ul>
                     </li>
-                    <li><a class="sidebar-sub-toggle"><i class="fa fa-folder"></i> Covers<span
+                    <li><a class="sidebar-sub-toggle"><i class="fa fa-user-plus"></i> Covers<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
                             <li><a class="sidebar-sub-toggle"><i class="fa fa-user-plus"></i> Policies<span class="sidebar-collapse-icon ti-angle-down"></span></a>
@@ -35,6 +35,14 @@
                                     <li><a href="{{ url_for('clients.get_policy_holders_paged', page=0, count=25) }}"><i class="ti-user"></i> Policy Holders</a></li>
                                     <li><a href="{{ url_for('clients.get_client_capture') }}"><i class="fa fa-user-times"></i> Capture</a></li>
 
+                                </ul>
+                            </li>
+
+                            <li><a class="sidebar-sub-toggle"><i class="fa fa-credit-card-alt"></i> Premiums<span class="sidebar-collapse-icon ti-angle-down"></span></a>
+                                <ul>
+                                    <li><a href="{{ url_for('covers.get_quick_pay') }}"><i class="ti-credit-card"></i> Quick Pay </a></li>
+                                    <li><a href="{{ url_for('covers.get_current_premiums') }}"><i class="ti-credit-card"></i> Current </a></li>
+                                    <li><a href="{{ url_for('covers.get_outstanding_premiums') }}"><i class="ti-credit-card"></i> Outstanding</a></li>
                                 </ul>
                             </li>
 

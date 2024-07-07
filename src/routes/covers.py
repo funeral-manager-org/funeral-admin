@@ -63,3 +63,41 @@ async def get_plan_cover(user: User, company_id: str, plan_number: str):
     subscribed_clients = await company_controller.get_plan_subscribers(plan_number=plan_number)
     context = dict(user=user, plan_cover=plan_cover, subscribed_clients=subscribed_clients)
     return render_template('admin/managers/covers/view.html', **context)
+
+
+@covers_route.get('/admin/premiums/current')
+@login_required
+async def get_current_premiums(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    context = dict(user=user)
+    return render_template('admin/premiums/current.html', **context)
+
+
+@covers_route.get('/admin/premiums/outstanding')
+@login_required
+async def get_outstanding_premiums(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    context = dict(user=user)
+    return render_template('admin/premiums/outstanding.html', **context)
+
+
+@covers_route.get('/admin/premiums/quick-pay')
+@login_required
+async def get_quick_pay(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+    context = dict(user=user, company_branches=company_branches)
+    return render_template('admin/premiums/pay.html', **context)
+

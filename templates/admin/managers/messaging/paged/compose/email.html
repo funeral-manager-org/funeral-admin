@@ -5,7 +5,7 @@
 {% block content %}
 
 <section id="main-content">
-    <div class="card">
+    <div class="card shadow-lg border-success">
         <div class="card-header  bg-primary d-flex justify-content-between align-items-center">
             <h4 class="card-title text-white font-weight-bold">
                 <i class="fa fa-envelope-square"> </i>
@@ -20,13 +20,13 @@
 
                 <div class="form-group">
                     <label class="font-weight-bold text-info" for="subject">Subject</label>
-                    <input type="text" class="form-control" id="subject" name="subject">
+                    <input type="text" class="form-control border-info" id="subject" name="subject">
                 </div>
                 <div class="form-group">
                     <label class="font-weight-bold text-info" for="message">Message</label>
-                    <textarea class="col-12" id="message" name="message" rows="12"></textarea>
+                    <textarea class="col-12 border-info" id="message" name="message" rows="12"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-outline-success btn-block btn-rounded">
                     <i class="fa fa-envelope-o"> </i>
                     Email
                 </button>

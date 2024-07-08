@@ -643,7 +643,7 @@ class CompanyController(Controllers):
 
     @cached_ttl()
     @error_handler
-    async def get_policy_data(self, policy_number: str):
+    async def get_policy_data(self, policy_number: str) -> PolicyRegistrationData| None:
         with self.get_session() as session:
             policy_data_orm = session.query(PolicyRegistrationDataORM).filter_by(policy_number=policy_number).first()
             if isinstance(policy_data_orm, PolicyRegistrationDataORM):

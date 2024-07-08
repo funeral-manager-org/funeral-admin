@@ -2,7 +2,7 @@
 {% extends "layouts/page.html" %}
 {% block content %}
     <section id="main-content">
-        <div class="card shadow-lg border-info">
+        <div class="card shadow-lg border-info col-lg-6 col-sm-12">
             <div class="card-header shadow-sm border-info bg-facebook">
                 <h3 class="card-title text-white">
                     <i class="fa fa-cc"> </i>
@@ -10,24 +10,64 @@
                 </h3>
             </div>
             <div class="card-body">
-                <form class="form-horizontal">
+                <form class="form-horizontal" action="{{ url_for('covers.retrieve_branch_current_premiums') }}" method="POST">
+                        <div class="form-group shadow-sm">
+                            <label class="font-weight-bold" for="branch_id">Select Branch</label>
+                            <select id="branch_id" name="branch_id" class="form-control border-info" onchange="this.form.submit()">
+                                <option value="" selected disabled>Select Branch</option>
+                                {% for branch in company_branches %}
+                                    <option value="{{ branch.branch_id }}" {% if branch_details and branch_details.branch_id == branch.branch_id %}selected{% endif %}>{{ branch.branch_name|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% if clients_list %}
+                        <div class="form-group shadow-sm">
+                            <label class="font-weight-bold" for="client_id">Select Client</label>
+                            <select id="client_id" name="client_id" class="form-control border-info" onchange="this.form.submit()">
+                                <option value="" selected disabled>Select Client</option>
+                                {% for client in clients_list %}
+                                    <option value="{{ client.uid }}" {% if selected_client and selected_client.uid == client.uid %}selected{% endif %}>{{ client.full_names }} {{ client.surname }} {{ client.policy_number }} {{ client.id_number }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+                    {% if selected_client %}
+                        <div class="form-group">
+                            <ul class="list-group">
+                                <li class="list-group-item">Client Name : <span class="text-info pull-right">{{ selected_client.full_names| title }}</span></li>
+                                <li class="list-group-item">Surname : <span class="text-info pull-right">{{ selected_client.surname| title }}</span></li>
+                                <li class="list-group-item">ID Number : <span class="text-info pull-right">{{ selected_client.id_number }}</span></li>
+                                <li class="list-group-item m-t-4">Plan Number : <span class="text-info pull-right">{{ selected_client.plan_number }}</span></li>
+                                <li class="list-group-item">Policy Number : <span class="text-info pull-right">{{ selected_client.policy_number }}</span></li>
 
-                    <div class="form-group shadow-sm">
-                        <label class="font-weight-bold" for="branch_id">Select Branch</label>
-                        <select id="branch_id" name="branch_id" class="form-control border-info">
-                            <option value="" selected disabled>Select Branch</option>
-                            {% for branch in company_branches %}
-                                <option value="{{ branch.branch_id }}" {% if policy_holder and policy_holder.branch_id == branch.branch_id %}selected{% endif %}>{{ branch.branch_name| title }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                                <li class="list-group-item m-t-6">Payment Day: <span class="text-info pull-right">{{ policy_data.payment_day }}</span></li>
+                                <li class="list-group-item">Payment Method: <span class="text-info pull-right">{{ policy_data.payment_method }}</span></li>
+                                <li class="list-group-item m-t-6">Monthly Premium : <span class="text-success pull-right">R {{ policy_data.total_premiums| number }}.00</span></li>
+                            </ul>
+                        </div>
+                        <div class="form-group">
+                            <label for="payment_method">Select Payment Method</label>
+                            <select id="payment_method" name="payment_method" class="form-control shadow-sm border-info">
+                                <option value="" selected disabled>Select Payment Method</option>
+                                {% for method in payment_methods %}
+                                   <option value="{{ method }}">{{ method|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="actual_amount">Actual Paid</label>
+                            <input  value="{{ policy_data.total_premiums }}" type="number" name="actual_amount" id="actual_amount" class="form-control shadow-sm border-success">
+                        </div>
+                    {% endif %}
                     <div class="form-group">
-                        <button type="submit" class="btn btn-block btn-outline-info btn-rounded btn-lg">
-                            <i class="fa fa-search-plus"> </i>
-                            Search
-                        </button>
+                        {% if selected_client %}
+                            <button type="submit" class="btn btn-block btn-outline-info btn-rounded btn-lg">
+                                <i class="fa fa-search-plus"></i> Pay
+                            </button>
+                        {% endif %}
                     </div>
                 </form>
+
             </div>
         </div>
     </section>

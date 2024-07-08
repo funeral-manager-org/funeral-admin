@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
+from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData
 from src.authentication import login_required
-from src.database.models.companies import CoverPlanDetails
+from src.database.models.companies import CoverPlanDetails, CompanyBranches
 from src.database.models.users import User
 from src.main import company_controller
 
@@ -100,5 +101,38 @@ async def get_quick_pay(user: User):
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
 
     context = dict(user=user, company_branches=company_branches)
+    return render_template('admin/premiums/pay.html', **context)
+
+
+@covers_route.post('/admin/premiums/current/branch')
+@login_required
+async def retrieve_branch_current_premiums(user: User):
+    """
+
+    :param branch_id:
+    :param user:
+    :return:
+    """
+    branch_id: str = request.form.get('branch_id')
+    client_id: str = request.form.get('client_id')
+
+    branch_details: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
+    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+
+    clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
+        branch_id=branch_id)
+
+    context = dict(user=user, company_branches=company_branches, branch_details=branch_details,
+                   clients_list=clients_list)
+
+    if client_id:
+        selected_client = [client for client in clients_list if client.uid == client_id][-1]
+        policy_data: PolicyRegistrationData = await company_controller.get_policy_data(
+            policy_number=selected_client.policy_number)
+        payment_methods = await company_controller.get_payment_methods()
+        context.update(selected_client=selected_client, policy_data=policy_data, payment_methods=payment_methods)
+
+
+
     return render_template('admin/premiums/pay.html', **context)
 

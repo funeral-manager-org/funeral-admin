@@ -1,4 +1,7 @@
 from flask import Flask
+
+from src.database.sql.covers import PremiumsORM
+from src.database.models.covers import Premiums
 from src.controller import Controllers
 
 
@@ -20,3 +23,15 @@ class CoversController(Controllers):
         :return:
         """
         super().init_app(app=app)
+
+    async def add_premiums_payment(self, premium_payment: Premiums) -> Premiums:
+        """
+
+        :param premium_payment:
+        :return:
+        """
+        with self.get_session() as session:
+            payment_orm = PremiumsORM(**premium_payment.dict())
+            session.add(payment_orm)
+
+            return premium_payment

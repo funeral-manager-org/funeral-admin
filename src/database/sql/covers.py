@@ -1,4 +1,7 @@
-from sqlalchemy import Column, String, inspect, Integer, Boolean
+from datetime import date
+
+from sqlalchemy import Column, String, inspect, Integer, Boolean, ForeignKey, Date
+from sqlalchemy.orm import relationship
 
 from src.database.constants import ID_LEN, NAME_LEN
 from src.database.sql import Base, engine
@@ -41,7 +44,7 @@ class ClientPersonalInformationORM(Base):
         """
         Convert the object to a dictionary representation.
         """
-        return {
+        _dict = {
             "uid": self.uid,
             "branch_id": self.branch_id,
             "company_id": self.company_id,
@@ -60,6 +63,7 @@ class ClientPersonalInformationORM(Base):
             "postal_id": self.postal_id,
             "bank_account_id": self.bank_account_id
         }
+        return _dict
 
 
 class ClaimsORM(Base):
@@ -136,6 +140,7 @@ class PolicyRegistrationDataORM(Base):
     payment_method = Column(String(255))
 
     policy_active = Column(Boolean, default=False)
+    premiums = relationship('PremiumsORM', backref="policy_data", lazy=True, cascade="all, delete-orphan")
 
     @classmethod
     def create_if_not_table(cls):
@@ -151,7 +156,7 @@ class PolicyRegistrationDataORM(Base):
         """
         Convert the object to a dictionary representation.
         """
-        return {
+        result = {
             "uid": self.uid,
             "branch_id": self.branch_id,
             "company_id": self.company_id,
@@ -168,5 +173,54 @@ class PolicyRegistrationDataORM(Base):
             "employee_signature": self.employee_signature,
             "payment_method": self.payment_method,
             "policy_active": self.policy_active
+        }
+        if self.premiums:
+            result.update(premiums=[premium.to_dict() for premium in self.premiums])
+        return result
 
+
+class PremiumsORM(Base):
+    __tablename__ = "premiums"
+    premium_id: str = Column(String(ID_LEN), primary_key=True)
+    policy_number: str = Column(String(9), ForeignKey('policy_registration_data.policy_number'))
+    amount_paid: int = Column(Integer)
+    late_payment_charges: int = Column(Integer)
+    payment_method: str = Column(String(36))
+    payment_date: date = Column(Date)
+    payment_status: str = Column(String(36))
+    year_paid: int = Column(Integer)
+    month_paid: int = Column(Integer)
+    day_paid: int = Column(Integer)
+    next_payment_amount: int = Column(Integer)
+    next_payment_date: date = Column(Date)
+    payment_frequency: str = Column(String(36))
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            "premium_id": self.premium_id,
+            "policy_number": self.policy_number,
+            "amount_paid": self.amount_paid,
+            "late_payment_charges": self.late_payment_charges,
+            "payment_method": self.payment_method,
+            "payment_date": self.payment_date,
+            "payment_status": self.payment_status,
+            "year_paid": self.year_paid,
+            "month_paid": self.month_paid,
+            "day_paid": self.day_paid,
+            "next_payment_amount": self.next_payment_amount,
+            "next_payment_date": self.next_payment_date,
+            "payment_frequency": self.payment_frequency,
         }

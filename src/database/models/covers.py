@@ -1,6 +1,9 @@
 from datetime import date, datetime, timedelta
+from typing import Optional
+
+from dateutil.relativedelta import relativedelta
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from src.utils import create_id, create_policy_number, create_claim_number
 
 
@@ -162,3 +165,85 @@ class Claims(BaseModel):
 
     funeral_company: str
     claim_type: ClaimType  # Add a field for the claim type
+
+
+def this_year() -> int:
+    """Return the current year."""
+    return datetime.now().year
+
+
+def this_month() -> int:
+    """Return the current month."""
+    return datetime.now().month
+
+
+def this_day() -> int:
+    """Return the current day of the month."""
+    return datetime.now().day
+
+
+def next_due_date(days_offset: int = 30) -> date:
+    """Return the next due date, defaulting to 30 days from today."""
+    return datetime.now().date() + timedelta(days=days_offset)
+
+
+class PaymentStatus(str, Enum):
+    PAID = "Paid"
+    DUE = "Due"
+    OVERDUE = "Overdue"
+
+
+class PaymentFrequency(str, Enum):
+    MONTHLY = "Monthly"
+    QUARTERLY = "Quarterly"
+    ANNUALLY = "Annually"
+
+
+class Premiums(BaseModel):
+    # Historical data fields
+    premium_id: str = Field(default_factory=create_id)
+    policy_number: str
+
+    amount_paid: int = Field(default=0)
+    late_payment_charges: int = Field(default=0)
+    payment_method: str = Field(default="Unknown")
+
+    payment_date: date = Field(default_factory=datetime.now().date)
+    payment_status: str = Field(default=PaymentStatus.DUE.value)
+
+    year_paid: int = Field(default_factory=this_year)
+    month_paid: int = Field(default_factory=this_month)
+    day_paid: int = Field(default_factory=this_day)
+
+    next_payment_amount: int = Field(default=0)
+    next_payment_date: date = Field(default_factory=next_due_date)
+
+    payment_frequency: str = Field(default=PaymentFrequency.MONTHLY.value)
+
+    @validator('next_payment_date', pre=True, always=True)
+    def calculate_next_payment_date(cls, v, values):
+        """Calculate the next payment date based on last payment date and frequency."""
+        if 'payment_date' in values and values['payment_date']:
+            frequency = values.get('payment_frequency', PaymentFrequency.MONTHLY.value)
+            if frequency == PaymentFrequency.MONTHLY.value:
+                return values['payment_date'] + relativedelta(months=1)
+            elif frequency == PaymentFrequency.QUARTERLY.value:
+                return values['payment_date'] + relativedelta(months=3)
+            elif frequency == PaymentFrequency.ANNUALLY.value:
+                return values['payment_date'] + relativedelta(years=1)
+        return v
+
+    # def calculate_late_payment_charges(self) -> int:
+    #     """Calculate the late payment charges based on overdue period."""
+    #     if self.payment_status == PaymentStatus.OVERDUE:
+    #         days_overdue = (datetime.now().date() - self.next_payment_date).days
+    #         if days_overdue > 0:
+    #             periods = days_overdue // 10
+    #             return int(self.next_payment_amount * 0.05 * periods)
+    #     return 0
+    #
+    # @validator('late_payment_charges', always=True)
+    # def update_late_payment_charges(cls, v, values):
+    #     """Update the late payment charges based on the current date."""
+    #     premium_instance = Premiums(**values)
+    #     return premium_instance.calculate_late_payment_charges()

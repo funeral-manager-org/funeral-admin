@@ -1,14 +1,15 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
-from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData
+from src.logger import init_logger
+from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentFrequency
 from src.authentication import login_required
 from src.database.models.companies import CoverPlanDetails, CompanyBranches
 from src.database.models.users import User
-from src.main import company_controller
+from src.main import company_controller, covers_controller
 
 covers_route = Blueprint('covers', __name__)
-
+covers_logger = init_logger('covers_logger')
 
 @covers_route.get('/admin/administrator/plans')
 @login_required
@@ -106,38 +107,69 @@ async def get_quick_pay(user: User):
 
 @covers_route.post('/admin/premiums/current/branch')
 @login_required
-async def retrieve_branch_current_premiums(user: User):
+async def premiums_payments(user: User):
     """
-    Retrieve the current premiums for a branch and optionally a selected client.
+        Retrieve the current premiums for a branch and optionally a selected client.
     """
-    branch_id: str = request.form.get('branch_id')
-    client_id: str = request.form.get('client_id')
+    policy_data: PolicyRegistrationData | None = None
+    branch_id: str = request.form.get('branch_id', None)
+    client_id: str = request.form.get('client_id', None)
+    payment_method: str = request.form.get('payment_method', None)
+    actual_amount: int = int(request.form.get('actual_amount', 0))
 
-    # Fetch branch details and company branches
-    branch_details: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
-
-    # Fetch clients for the branch
-    clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
-        branch_id=branch_id)
-
     context = {
         'user': user,
-        'company_branches': company_branches,
-        'branch_details': branch_details,
-        'clients_list': clients_list
-    }
+        'company_branches': company_branches}
+
+    clients_list = []
+    # Fetch branch details and company branches
+    if branch_id:
+        branch_details: CompanyBranches = next((branch for branch in company_branches if branch.branch_id == branch_id),None)
+        if branch_details:
+            context.update(branch_details=branch_details)
+
+        # Fetch clients for the branch
+        clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
+            branch_id=branch_id)
+        context.update(clients_list=clients_list)
 
     if client_id:
         # Ensure client is in the list to avoid list index out of bounds error
         selected_client = next((client for client in clients_list if client.uid == client_id), None)
         if selected_client:
-            policy_data: PolicyRegistrationData = await company_controller.get_policy_data(
-                policy_number=selected_client.policy_number)
+            policy_data = await company_controller.get_policy_data(policy_number=selected_client.policy_number)
             payment_methods = await company_controller.get_payment_methods()
             context.update(selected_client=selected_client, policy_data=policy_data, payment_methods=payment_methods)
-        else:
-            # Handle the case where the client is not found in the list
-            flash('Selected client not found in the branch', 'error')
+
+    if actual_amount and payment_method:
+        # Actually Make Premium payment
+
+        payment_frequency = PaymentFrequency.MONTHLY.value
+        next_payment_amount = policy_data.total_premiums if policy_data else 0
+
+        if policy_data and actual_amount > policy_data.total_premiums:
+            frequency = actual_amount // policy_data.total_premiums
+            if frequency == 3:
+                payment_frequency = PaymentFrequency.QUARTERLY.value
+                next_payment_amount = policy_data.total_premiums * 3
+            elif frequency == 12:
+                payment_frequency = PaymentFrequency.ANNUALLY.value
+                next_payment_amount = policy_data.total_premiums * 12
+            else:
+                payment_frequency = PaymentFrequency.MONTHLY.value
+                payment_remainder = actual_amount - policy_data.total_premiums
+                next_payment_amount = policy_data.total_premiums - payment_remainder
+
+        premium_payment = Premiums(policy_number=policy_data.policy_number, amount_piad=actual_amount,
+                                   payment_method=payment_method, next_payment_amount=next_payment_amount,
+                                   payment_frequency=payment_frequency)
+
+        paid_premium = await covers_controller.add_premiums_payment(premium_payment=premium_payment)
+        covers_logger.info(f'Covers Logger: {paid_premium}')
+
+        context.update(paid_premium=paid_premium)
+
+        return render_template('admin/premiums/receipt.html', **context)
 
     return render_template('admin/premiums/pay.html', **context)

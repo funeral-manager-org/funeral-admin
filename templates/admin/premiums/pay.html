@@ -10,7 +10,7 @@
                 </h3>
             </div>
             <div class="card-body">
-                <form class="form-horizontal" action="{{ url_for('covers.retrieve_branch_current_premiums') }}" method="POST">
+                <form class="form-horizontal" action="{{ url_for('covers.premiums_payments') }}" method="POST">
                         <div class="form-group shadow-sm">
                             <label class="font-weight-bold" for="branch_id">Select Branch</label>
                             <select id="branch_id" name="branch_id" class="form-control border-info" onchange="this.form.submit()">

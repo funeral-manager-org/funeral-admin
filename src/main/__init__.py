@@ -11,6 +11,7 @@ send_mail = SendMail()
 
 from src.controller.auth import UserController
 from src.controller.company_controller import CompanyController
+from src.controller.covers_controller import CoversController
 from src.controller.paypal_controller import PayPalController
 from src.controller.chat_controller import ChatController
 from src.controller.messaging_controller import MessagingController
@@ -24,6 +25,7 @@ from src.controller.support_controller import SupportController
 
 user_controller = UserController()
 company_controller = CompanyController()
+covers_controller = CoversController()
 paypal_controller = PayPalController()
 chat_controller = ChatController()
 messaging_controller = MessagingController()
@@ -93,6 +95,7 @@ def create_app(config):
         # chat_io.init_app(app)
         user_controller.init_app(app=app)
         company_controller.init_app(app=app)
+        covers_controller.init_app(app=app)
         paypal_controller.init_app(app=app, config_instance=config)
         chat_controller.init_app(app=app)
         system_controller.init_app(app=app)

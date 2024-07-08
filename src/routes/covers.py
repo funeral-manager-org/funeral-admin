@@ -125,7 +125,7 @@ async def retrieve_branch_current_premiums(user: User):
     context = dict(user=user, company_branches=company_branches, branch_details=branch_details,
                    clients_list=clients_list)
 
-    if client_id:
+    if client_id and clients_list:
         selected_client = [client for client in clients_list if client.uid == client_id][-1]
         policy_data: PolicyRegistrationData = await company_controller.get_policy_data(
             policy_number=selected_client.policy_number)

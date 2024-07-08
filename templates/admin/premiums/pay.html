@@ -2,7 +2,8 @@
 {% extends "layouts/page.html" %}
 {% block content %}
     <section id="main-content">
-        <div class="card shadow-lg border-info col-lg-6 col-sm-12">
+    <div class="row">
+        <div class="card shadow-lg border-info col-lg-5 col-sm-12 ">
             <div class="card-header shadow-sm border-info bg-facebook">
                 <h3 class="card-title text-white">
                     <i class="fa fa-cc"> </i>
@@ -42,7 +43,7 @@
 
                                 <li class="list-group-item m-t-6">Payment Day: <span class="text-info pull-right">{{ policy_data.payment_day }}</span></li>
                                 <li class="list-group-item">Payment Method: <span class="text-info pull-right">{{ policy_data.payment_method }}</span></li>
-                                <li class="list-group-item m-t-6">Monthly Premium : <span class="text-success pull-right">R {{ policy_data.total_premiums| number }}.00</span></li>
+                                <li class="list-group-item m-t-6">Monthly Premium : <span class="text-success pull-right">R {{ policy_data.total_balance_due| number }}.00</span></li>
                             </ul>
                         </div>
                         <div class="form-group">
@@ -62,7 +63,7 @@
                     <div class="form-group">
                         {% if selected_client %}
                             <button type="submit" class="btn btn-block btn-outline-info btn-rounded btn-lg">
-                                <i class="fa fa-search-plus"></i> Pay
+                                <i class="fa fa-credit-card-alt"></i> Paid
                             </button>
                         {% endif %}
                     </div>
@@ -70,5 +71,23 @@
 
             </div>
         </div>
+
+        <div class="card shadow-lg border-info col-lg-6 col-sm-12 ">
+        <div class="card-header shadow-sm border-info bg-facebook">
+            <h3 class="card-title text-white">
+                <i class="fa fa-cc"> </i>
+                Historical Payments
+            </h3>
+
+        </div>
+
+        <div class="card-body m-t-12">
+            {% if  policy_data and policy_data.premiums %}
+                <span>Historical Payments Present</span>
+            {% endif %}
+
+        </div>
+        </div>
+    </div>
     </section>
 {% endblock %}

@@ -90,6 +90,7 @@ class EmployeeRoles:
     MORTICIAN = 'Mortician'
     SUPPORT_STAFF = 'Support Staff'
     SERVICE_MANAGER = 'Service Manager'  # New role for managing extra services
+
     @classmethod
     def get_all_roles(cls):
         return [value for name, value in vars(cls).items() if not name.startswith('__') and isinstance(value, str)]
@@ -189,4 +190,3 @@ class EmployeeDetails(BaseModel):
     contact_id: str | None
     postal_id: str | None
     bank_account_id: str | None
-

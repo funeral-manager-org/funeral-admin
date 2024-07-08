@@ -332,7 +332,7 @@ class NotificationsController(Controllers):
         :param policy_registration_data: The policy registration data.
         :return: str
         """
-        day_name, date_str = policy_registration_data.return_next_payment_date()
+        day_name, date_str = policy_registration_data.next_payment_date()
         return await self.template_message(company_data, date_str, day_name, holder, policy_registration_data)
 
     @staticmethod

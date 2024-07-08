@@ -183,16 +183,19 @@ class PremiumsORM(Base):
     __tablename__ = "premiums"
     premium_id: str = Column(String(ID_LEN), primary_key=True)
     policy_number: str = Column(String(9), ForeignKey('policy_registration_data.policy_number'))
+    scheduled_payment_date: date = Column(Date)
+
+    payment_amount: int = Column(Integer)
     amount_paid: int = Column(Integer)
-    late_payment_charges: int = Column(Integer)
+    date_paid: date = Column(Date)
+
     payment_method: str = Column(String(36))
-    payment_date: date = Column(Date)
+
     payment_status: str = Column(String(36))
-    year_paid: int = Column(Integer)
-    month_paid: int = Column(Integer)
-    day_paid: int = Column(Integer)
+
     next_payment_amount: int = Column(Integer)
     next_payment_date: date = Column(Date)
+
     payment_frequency: str = Column(String(36))
 
     @classmethod
@@ -212,14 +215,15 @@ class PremiumsORM(Base):
         return {
             "premium_id": self.premium_id,
             "policy_number": self.policy_number,
+            "scheduled_payment_date": self.scheduled_payment_date,
+
+            "payment_amount": self.payment_amount,
             "amount_paid": self.amount_paid,
-            "late_payment_charges": self.late_payment_charges,
+            "date_paid": self.date_paid,
+
             "payment_method": self.payment_method,
-            "payment_date": self.payment_date,
             "payment_status": self.payment_status,
-            "year_paid": self.year_paid,
-            "month_paid": self.month_paid,
-            "day_paid": self.day_paid,
+
             "next_payment_amount": self.next_payment_amount,
             "next_payment_date": self.next_payment_date,
             "payment_frequency": self.payment_frequency,

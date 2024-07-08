@@ -108,31 +108,36 @@ async def get_quick_pay(user: User):
 @login_required
 async def retrieve_branch_current_premiums(user: User):
     """
-
-    :param branch_id:
-    :param user:
-    :return:
+    Retrieve the current premiums for a branch and optionally a selected client.
     """
     branch_id: str = request.form.get('branch_id')
     client_id: str = request.form.get('client_id')
 
+    # Fetch branch details and company branches
     branch_details: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
 
+    # Fetch clients for the branch
     clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
         branch_id=branch_id)
 
-    context = dict(user=user, company_branches=company_branches, branch_details=branch_details,
-                   clients_list=clients_list)
+    context = {
+        'user': user,
+        'company_branches': company_branches,
+        'branch_details': branch_details,
+        'clients_list': clients_list
+    }
 
-    if client_id and clients_list:
-        selected_client = [client for client in clients_list if client.uid == client_id][-1]
-        policy_data: PolicyRegistrationData = await company_controller.get_policy_data(
-            policy_number=selected_client.policy_number)
-        payment_methods = await company_controller.get_payment_methods()
-        context.update(selected_client=selected_client, policy_data=policy_data, payment_methods=payment_methods)
-
-
+    if client_id:
+        # Ensure client is in the list to avoid list index out of bounds error
+        selected_client = next((client for client in clients_list if client.uid == client_id), None)
+        if selected_client:
+            policy_data: PolicyRegistrationData = await company_controller.get_policy_data(
+                policy_number=selected_client.policy_number)
+            payment_methods = await company_controller.get_payment_methods()
+            context.update(selected_client=selected_client, policy_data=policy_data, payment_methods=payment_methods)
+        else:
+            # Handle the case where the client is not found in the list
+            flash('Selected client not found in the branch', 'error')
 
     return render_template('admin/premiums/pay.html', **context)
-

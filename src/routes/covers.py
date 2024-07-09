@@ -103,9 +103,10 @@ async def get_current_premiums_paged(user: User, page: int = 0, count: int = 25)
                     "client": client.dict(),
                     "policy_data": policy.dict()
                 }
-    print(client_policy_data)
-    context = dict(user=user, clients_list=clients_list, branch_id=branch_id, company_branches=company_branches,
-                   policy_data_list=policy_data_list, page=page, count=count)
+
+    context = dict(user=user, clients_list=clients_list, branch_id=branch_id,
+                   company_branches=company_branches, policy_data_list=policy_data_list,
+                   page=page, count=count)
 
     return render_template('admin/premiums/current.html', **context)
 
@@ -140,16 +141,19 @@ async def get_quick_pay(user: User):
 @login_required
 async def premiums_payments(user: User):
     """
-        Retrieve the current premiums for a branch and optionally a selected client.
+    Retrieve the current premiums for a branch and optionally a selected client.
     """
+    # Initialize variables
     policy_data: PolicyRegistrationData | None = None
     selected_client: ClientPersonalInformation | None = None
 
+    # Extract form data
     branch_id: str = request.form.get('branch_id', None)
     client_id: str = request.form.get('client_id', None)
     payment_method: str = request.form.get('payment_method', None)
     actual_amount: int = int(request.form.get('actual_amount', 0))
 
+    # Fetch company branches
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     context = {
         'user': user,
@@ -157,44 +161,38 @@ async def premiums_payments(user: User):
         'payment_status': PaymentStatus
     }
 
-    clients_list = []
-    # Fetch branch details and company branches
+    # Fetch branch details and clients list if branch_id is provided
+    clients_list: list[ClientPersonalInformation] = []
+
     if branch_id:
-        branch_details: CompanyBranches = next((branch for branch in company_branches if branch.branch_id == branch_id),
-                                               None)
+        branch_details = next((branch for branch in company_branches if branch.branch_id == branch_id), None)
         if branch_details:
             context.update(branch_details=branch_details)
 
-        # Fetch clients for the branch
-        clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
-            branch_id=branch_id)
+        clients_list = await company_controller.get_branch_policy_holders(branch_id=branch_id)
         context.update(clients_list=clients_list)
 
-    if client_id:
-        # Ensure client is in the list to avoid list index out of bounds error
+    # Fetch selected client and policy data if client_id is provided
+    if client_id and clients_list:
         selected_client = next((client for client in clients_list if client.uid == client_id), None)
         if selected_client:
-
             policy_data = await covers_controller.get_policy_data(policy_number=selected_client.policy_number)
             if policy_data:
+                # Ensure this month's premium is forecasted
                 if not policy_data.get_this_month_premium():
-                    # TODO this is a hack find a permanent solution for creating forecasted premiums
                     await covers_controller.create_forecasted_premiums(policy_number=policy_data.policy_number)
                     policy_data = await covers_controller.get_policy_data(policy_number=selected_client.policy_number)
 
-                # covers_logger.info(f"Policy Data : {policy_data}")
                 covers_logger.info(f"Total balance Due : {str(policy_data.total_balance_due)}")
 
                 payment_methods = await company_controller.get_payment_methods()
                 context.update(selected_client=selected_client, policy_data=policy_data, payment_methods=payment_methods)
             else:
-                flash(message="There is no cover associated with this Policy Holder, We cannot Process Payment",
-                      category="danger")
+                flash("There is no cover associated with this Policy Holder, We cannot Process Payment", category="danger")
 
+    # Process the premium payment if all required data is available
     if selected_client and policy_data and actual_amount and payment_method:
-        # Actually Make Premium payment
-        # TODO - please ensure the system can pay forward
-        premium: Premiums = policy_data.get_first_unpaid()
+        premium = policy_data.get_first_unpaid()
         if not premium:
             premium.amount_paid = actual_amount
             premium.date_paid = datetime.now().date()
@@ -203,11 +201,11 @@ async def premiums_payments(user: User):
             premium.next_payment_amount = premium.payment_amount
 
             paid_premium = await covers_controller.add_update_premiums_payment(premium_payment=premium)
-            covers_logger.info(f'Covers Paid Premium Logger:{paid_premium.premium_id} {paid_premium.amount_paid} {paid_premium.is_paid}')
+            covers_logger.info(f'Covers Paid Premium Logger: {paid_premium.premium_id} {paid_premium.amount_paid} {paid_premium.is_paid}')
 
             context.update(paid_premium=paid_premium)
-
             return render_template('admin/premiums/receipt.html', **context)
 
         flash("Premium Already Paid", category="success")
+
     return render_template('admin/premiums/pay.html', **context)

@@ -23,14 +23,14 @@
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-user-plus"></i> Covers<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
-                            <li><a class="sidebar-sub-toggle"><i class="fa fa-user-plus"></i> Policies<span class="sidebar-collapse-icon ti-angle-down"></span></a>
+                            <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-plus"></i> Policies</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
                                     <li><a href="{{ url_for('policy.get_active_policies_paged', page=0, count=25) }}"><i class="ti-user"></i> Active Policies</a></li>
                                     <li><a href="{{ url_for('policy.get_lapsed_policies_paged', page=0, count=25) }}"><i class="fa fa-user-times"></i> Lapsed Policies</a></li>
                                     <li><a href="{{ url_for('policy.get_search_policies') }}"><i class="fa fa-search"></i> Search</a></li>
                                 </ul>
                             </li>
-                            <li><a class="sidebar-sub-toggle"><i class="fa fa-user-md"></i> Policy Holders<span class="sidebar-collapse-icon ti-angle-down"></span></a>
+                            <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-md"></i> Policy Holders</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
                                     <li><a href="{{ url_for('clients.get_policy_holders_paged', page=0, count=25) }}"><i class="ti-user"></i> Policy Holders</a></li>
                                     <li><a href="{{ url_for('clients.get_client_capture') }}"><i class="fa fa-user-times"></i> Capture</a></li>
@@ -38,7 +38,7 @@
                                 </ul>
                             </li>
 
-                            <li><a class="sidebar-sub-toggle"><i class="fa fa-credit-card-alt"></i> Premiums<span class="sidebar-collapse-icon ti-angle-down"></span></a>
+                            <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-credit-card-alt"></i> Premiums</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
                                     <li><a href="{{ url_for('covers.get_quick_pay') }}"><i class="ti-credit-card"></i> Quick Pay </a></li>
                                     <li><a href="{{ url_for('covers.get_current_premiums_paged', page=0, count=25) }}"><i class="ti-credit-card"></i> Current </a></li>
@@ -46,14 +46,14 @@
                                 </ul>
                             </li>
 
-                            <li><a href="{{ url_for('clients.get_clients') }}"><i class="ti-briefcase"></i> Clients</a></li>
+{#                            <li><a href="{{ url_for('clients.get_clients') }}"><i class="ti-briefcase"></i> Clients</a></li>#}
                         </ul>
                     </li>
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
 
-                            <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Sent <span
+                            <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-envelope"></i> Sent </span><span
                                     class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
                                     <li><a href="{{ url_for('messaging.get_sent_sms', page=0, count=25) }}"><i class="fa fa-mobile-phone"></i> SMS</a></li>
@@ -62,8 +62,8 @@
 
                             </li>
 
-                            <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Compose <span
-                                    class="sidebar-collapse-icon ti-angle-down"></span></a>
+                            <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-envelope"></i> Compose </span>
+                                <span class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
                                     <li><a href="{{ url_for('messaging.get_sms_compose') }}"><i class="fa fa-mobile"></i> SMS </a></li>
                                     <li><a href="{{ url_for('messaging.get_email_compose') }}"><i class="fa fa-mobile-phone"></i> Email</a></li>

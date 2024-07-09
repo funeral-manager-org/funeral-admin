@@ -44,7 +44,7 @@ class ClientPersonalInformationORM(Base):
         """
         Convert the object to a dictionary representation.
         """
-        _dict = {
+        return {
             "uid": self.uid,
             "branch_id": self.branch_id,
             "company_id": self.company_id,
@@ -63,7 +63,6 @@ class ClientPersonalInformationORM(Base):
             "postal_id": self.postal_id,
             "bank_account_id": self.bank_account_id
         }
-        return _dict
 
 
 class ClaimsORM(Base):
@@ -173,7 +172,8 @@ class PolicyRegistrationDataORM(Base):
             "employee_signature": self.employee_signature,
             "payment_method": self.payment_method,
             "policy_active": self.policy_active,
-            "premiums": [premium.to_dict() for premium in self.premiums or []]
+            "premiums": [premium.to_dict() for premium in self.premiums or []
+                         if isinstance(premium, PremiumsORM)]
         }
 
 

@@ -74,7 +74,7 @@ class SubscriptionsORM(Base):
         """
         Convert the object to a dictionary representation.
         """
-        _dict = {
+        return {
             "company_id": self.company_id,
             "subscription_id": self.subscription_id,
             "plan_name": self.plan_name,
@@ -83,11 +83,10 @@ class SubscriptionsORM(Base):
             "total_clients": self.total_clients,
             "date_subscribed": self.date_subscribed.strftime('%Y-%m-%d') if self.date_subscribed else None,
             "subscription_amount": self.subscription_amount,
-            "subscription_period": self.subscription_period
+            "subscription_period": self.subscription_period,
+            "payments": [payment.to_dict() for payment in self.payments or []
+                         if isinstance(payment, PaymentORM)]
         }
-        _dict.update(payments=self.payments)
-
-        return _dict
 
 
 class PackageORM(Base):
@@ -129,7 +128,7 @@ class PackageORM(Base):
         """
         Convert the object to a dictionary representation.
         """
-        _dict = {
+        return {
             'package_id': self.package_id,
             'company_id': self.company_id,
             'package_name': self.package_name,
@@ -137,12 +136,10 @@ class PackageORM(Base):
             'total_email': self.total_email,
             'is_paid': self.is_paid,
             'is_added': self.is_added,
-            'date_bought': self.date_bought
+            'date_bought': self.date_bought,
+            'payments': [payment.to_dict() for payment in self.payments or []
+                         if isinstance(payment, PaymentORM)]
         }
-
-        _dict.update(payments=self.payments)
-
-        return _dict
 
 
 class SubscriptionStatusORM(Base):

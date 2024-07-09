@@ -77,7 +77,7 @@ class SMSComposeORM(Base):
             "message_id": self.message_id,
             "message": self.message,
             "reference": self.reference,
-            "from_cell":self.from_cell,
+            "from_cell": self.from_cell,
             "to_cell": self.to_cell,
             "to_branch": self.to_branch,
             "recipient_type": self.recipient_type,
@@ -139,7 +139,6 @@ class SMSSettingsORM(Base):
     upcoming_payments_notifications: bool = Column(Boolean)
     policy_paid_notifications: bool = Column(Boolean)
     claims_notifications: bool = Column(Boolean)
-
 
     @classmethod
     def create_if_not_table(cls):

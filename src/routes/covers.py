@@ -90,8 +90,20 @@ async def get_current_premiums_paged(user: User, page: int = 0, count: int = 25)
     clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
         branch_id=branch_id)
 
-    policy_data_list: list[PolicyRegistrationData] = await covers_controller.get_branch_policy_data_list(branch_id=branch_id)
+    policy_data_list: list[PolicyRegistrationData] = await covers_controller.get_branch_policy_data_list(
+        branch_id=branch_id, page=page, count=count)
+    client_policy_data = {}
 
+    # TODO use this structure instead to display results
+    for client in clients_list:
+        for policy in policy_data_list:
+            if client.policy_number == policy.policy_number:
+                client_policy_data[client.uid] = {
+                    "policy_number": client.policy_number,
+                    "client": client.dict(),
+                    "policy_data": policy.dict()
+                }
+    print(client_policy_data)
     context = dict(user=user, clients_list=clients_list, branch_id=branch_id, company_branches=company_branches,
                    policy_data_list=policy_data_list, page=page, count=count)
 
@@ -161,21 +173,23 @@ async def premiums_payments(user: User):
     if client_id:
         # Ensure client is in the list to avoid list index out of bounds error
         selected_client = next((client for client in clients_list if client.uid == client_id), None)
-
         if selected_client:
 
             policy_data = await covers_controller.get_policy_data(policy_number=selected_client.policy_number)
+            if policy_data:
+                if not policy_data.get_this_month_premium():
+                    # TODO this is a hack find a permanent solution for creating forecasted premiums
+                    await covers_controller.create_forecasted_premiums(policy_number=policy_data.policy_number)
+                    policy_data = await covers_controller.get_policy_data(policy_number=selected_client.policy_number)
 
-            if not policy_data.get_this_month_premium():
-                # TODO this is a hack find a permanent solution for creating forecasted premiums
-                await covers_controller.create_forecasted_premiums(policy_number=policy_data.policy_number)
-                policy_data = await covers_controller.get_policy_data(policy_number=selected_client.policy_number)
+                # covers_logger.info(f"Policy Data : {policy_data}")
+                covers_logger.info(f"Total balance Due : {str(policy_data.total_balance_due)}")
 
-            # covers_logger.info(f"Policy Data : {policy_data}")
-            covers_logger.info(f"Total balance Due : {str(policy_data.total_balance_due)}")
-
-            payment_methods = await company_controller.get_payment_methods()
-            context.update(selected_client=selected_client, policy_data=policy_data, payment_methods=payment_methods)
+                payment_methods = await company_controller.get_payment_methods()
+                context.update(selected_client=selected_client, policy_data=policy_data, payment_methods=payment_methods)
+            else:
+                flash(message="There is no cover associated with this Policy Holder, We cannot Process Payment",
+                      category="danger")
 
     if selected_client and policy_data and actual_amount and payment_method:
         # Actually Make Premium payment

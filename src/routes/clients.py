@@ -8,7 +8,7 @@ from src.database.models.bank_accounts import BankAccount
 from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, InsuredParty
 from src.database.models.users import User
-from src.main import company_controller
+from src.main import company_controller, covers_controller
 
 clients_route = Blueprint('clients', __name__)
 error_logger = init_logger('clients')
@@ -43,7 +43,8 @@ async def get_client(user: User, uid: str):
         'policy_data': policy_data,
         'countries': countries,
         'payment_methods': payment_methods,
-        'beneficiaries': beneficiaries
+        'beneficiaries': beneficiaries,
+        'InsuredParty': InsuredParty
     }
 
     # Additional data retrieval if necessary
@@ -79,7 +80,7 @@ async def get_clients(user: User):
     policy_holder = {}
 
     context = dict(user=user, company_branches=company_branches, plan_covers=plan_covers, countries=countries,
-                   policy_holder=policy_holder, policy_holders_list=policy_holders_list)
+                   policy_holder=policy_holder, policy_holders_list=policy_holders_list, InsuredParty=InsuredParty)
 
     return render_template('admin/clients/clients.html', **context)
 
@@ -119,7 +120,7 @@ async def get_client_capture(user: User):
     policy_holder = {}
 
     context = dict(user=user, company_branches=company_branches, plan_covers=plan_covers, countries=countries,
-                   policy_holder=policy_holder)
+                   policy_holder=policy_holder, InsuredParty=InsuredParty)
 
     return render_template('admin/clients/client_capture.html', **context)
 
@@ -149,7 +150,8 @@ async def add_client(user: User):
                                     company_id=policy_holder.company_id,
                                     plan_number=policy_holder.plan_number,
                                     policy_type=plan_cover.plan_type,
-                                    total_premiums=plan_cover.premium_costs)
+                                    total_premiums=plan_cover.premium_costs,
+                                    premiums=[])
 
     # set policy number for the policyholder to the newly created policy
     policy_holder.policy_number = policy.policy_number
@@ -158,9 +160,11 @@ async def add_client(user: User):
     policy_holder = await company_controller.add_policy_holder(policy_holder=policy_holder)
 
     policy_ = await company_controller.add_policy_data(policy_data=policy)
+    await covers_controller.create_forecasted_premiums(policy_number=policy_holder.policy_number)
 
     message = "Successfully created new client Please Remember to add family members"
     flash(message=message, category="success")
+
     message = f"The client Policy Number is: {policy.policy_number}"
     flash(message=message, category="success")
     return redirect(url_for('clients.get_client', uid=policy_holder.uid))

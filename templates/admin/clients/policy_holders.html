@@ -12,7 +12,7 @@
                 </h3>
             </div>
         <div class="card-body">
-            <table class="table table-striped table-bordered">
+            <table class="table table-striped">
                 <thead class="font-weight-bold text-info">
                     <tr>
                         <td>Names</td>
@@ -21,6 +21,7 @@
                         <td class="d-none d-md-table-cell">DOB</td>
                         <td class="d-none d-md-table-cell">Nationality</td>
                         <td>Plan Number</td>
+                        <td></td>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,16 +29,17 @@
                         <tr>
                             <td class="font-weight-bold">
                                 <a href="{{ url_for('clients.get_client', uid=policy_holder.uid) }}"
-                                    class="text-info font-weight-light font-italic"
+                                    class="badge badge-success"
                                 >
-                                    {{ policy_holder.title }} {{ policy_holder.full_names }}
+                                    {{ policy_holder.title | capitalize }} {{ policy_holder.full_names|title }}
                                 </a>
                             </td>
-                            <td>{{ policy_holder.surname }}</td>
+                            <td>{{ policy_holder.surname| title }}</td>
                             <td>{{ policy_holder.id_number }}</td>
                             <td class="d-none d-md-table-cell">{{ policy_holder.date_of_birth }}</td>
                             <td class="d-none d-md-table-cell">{{ policy_holder.nationality }}</td>
                             <td>{{ policy_holder.plan_number or "N/A" }}</td>
+                            <td></td>
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -7,7 +7,7 @@ def bootstrapper():
     from src.database.sql.bank_account import BankAccountORM
     from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
     from src.database.sql.covers import ClientPersonalInformationORM, ClaimsORM, PolicyRegistrationDataORM , PremiumsORM
-    from src.database.sql.messaging import SMSComposeORM, SMSInboxORM, EmailComposeORM
+    from src.database.sql.messaging import SMSComposeORM, SMSInboxORM, EmailComposeORM, SMSSettingsORM
     from src.database.sql.subscriptions import (SubscriptionsORM, PackageORM, PaymentORM, SubscriptionStatusORM,
                                                 PaymentNoticeIntervalORM)
     from src.database.sql.support import TicketORM, TicketMessageORM
@@ -16,7 +16,7 @@ def bootstrapper():
                          BankAccountORM, AddressORM, PostalAddressORM, ContactsORM, ClientPersonalInformationORM,
                          ClaimsORM,PremiumsORM, PolicyRegistrationDataORM, SMSComposeORM, SMSInboxORM, EmailComposeORM,
                          SubscriptionsORM, PackageORM, PaymentORM, SubscriptionStatusORM,
-                         PaymentNoticeIntervalORM, TicketMessageORM, TicketORM ]
+                         PaymentNoticeIntervalORM, TicketMessageORM, TicketORM,SMSSettingsORM]
 
     classes_to_create.reverse()
     for cls in classes_to_create:

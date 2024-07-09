@@ -783,9 +783,8 @@ class CompanyController(Controllers):
                     policy_data_orm.policy_active = policy_data.policy_active
             else:
                 # Create a new policy data entry
-                policy_data_orm = PolicyRegistrationDataORM(**policy_data.dict())
-
-            session.add(policy_data_orm)
+                policy_data_orm = PolicyRegistrationDataORM(**policy_data.dict(exclude={'premiums'}))
+                session.add(policy_data_orm)
 
             return policy_data
 

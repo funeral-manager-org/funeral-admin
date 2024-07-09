@@ -82,18 +82,25 @@ class CoversController(Controllers):
             return None
 
     @error_handler
-    async def get_branch_policy_data_list(self, branch_id: str) -> list[PolicyRegistrationData]:
+    async def get_branch_policy_data_list(self,
+                                          branch_id: str,
+                                          page: int = 0,
+                                          count: int = 25) -> list[PolicyRegistrationData]:
         """
-            **get_branch_policy_data_list**
+        **get_branch_policy_data_list**
 
-        :param branch_id:
-        :return:
+        :param branch_id: ID of the branch
+        :param page: Page number (default is 0)
+        :param count: Number of items per page (default is 25)
+        :return: List of PolicyRegistrationData
         """
         with self.get_session() as session:
             policy_data_orm_list = (
                 session.query(PolicyRegistrationDataORM)
                 .filter_by(branch_id=branch_id)
                 .options(joinedload(PolicyRegistrationDataORM.premiums))
+                .offset(page * count)
+                .limit(count)
                 .all()
             )
             return [PolicyRegistrationData(**policy_data_orm.to_dict()) for policy_data_orm in policy_data_orm_list]
@@ -107,7 +114,7 @@ class CoversController(Controllers):
 
         with self.get_session() as session:
             today = datetime.datetime.now().date()
-            scheduled_payment_date = policy_data.next_payment_date()
+            scheduled_payment_date = today.replace(day=1) + relativedelta(months=1)
 
             for i in range(1, total, 1):
                 scheduled_payment_date = next_due_date(start_date=scheduled_payment_date)

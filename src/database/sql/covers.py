@@ -156,7 +156,7 @@ class PolicyRegistrationDataORM(Base):
         """
         Convert the object to a dictionary representation.
         """
-        result = {
+        return {
             "uid": self.uid,
             "branch_id": self.branch_id,
             "company_id": self.company_id,
@@ -172,11 +172,9 @@ class PolicyRegistrationDataORM(Base):
             "client_signature": self.client_signature,
             "employee_signature": self.employee_signature,
             "payment_method": self.payment_method,
-            "policy_active": self.policy_active
+            "policy_active": self.policy_active,
+            "premiums": [premium.to_dict() for premium in self.premiums or []]
         }
-        if self.premiums:
-            result.update(premiums=[premium.to_dict() for premium in self.premiums])
-        return result
 
 
 class PremiumsORM(Base):

@@ -222,7 +222,7 @@ class PolicyRegistrationData(BaseModel):
 
     payment_method: str | None
     policy_active: bool = Field(default=False)
-    premiums: list[Premiums] | None
+    premiums: list[Premiums]
 
     @property
     def total_balance_due(self) -> int:

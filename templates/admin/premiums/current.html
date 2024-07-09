@@ -36,15 +36,36 @@
             </thead>
             <tbody>
                 {% for policy_data in policy_data_list  %}
+                    <tr>
                     <td><span class="badge badge-info"> {{ policy_data.policy_number }}</span></td>
                     <td><span class="badge badge-info"> {{ policy_data.plan_number }}</span></td>
                     <td><span class="badge badge-warning"> R {{ policy_data.total_premiums | number}}.00</span></td>
                     <td><span class="badge badge-info"> {{ policy_data.get_previous_month_premium().scheduled_payment_date }}</span></td>
                     <td><span class="badge badge-success">{{ policy_data.get_previous_month_premium().payment_status }}</span></td>
                     <td></td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+                <nav aria-label="Page navigation m-t-8">
+                    <ul class="pagination justify-content-center m-t-8">
+                        {% if page > 0 %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('covers.get_current_premiums_paged',branch_id=branch_id, page=page-1, count=count) }}">Previous</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                        {% endif %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="{{ url_for('covers.get_current_premiums_paged',branch_id=branch_id,  page=page+1, count=count) }}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+
         </div>
 
 

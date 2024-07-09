@@ -41,7 +41,7 @@
                             <li><a class="sidebar-sub-toggle"><i class="fa fa-credit-card-alt"></i> Premiums<span class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
                                     <li><a href="{{ url_for('covers.get_quick_pay') }}"><i class="ti-credit-card"></i> Quick Pay </a></li>
-                                    <li><a href="{{ url_for('covers.get_current_premiums') }}"><i class="ti-credit-card"></i> Current </a></li>
+                                    <li><a href="{{ url_for('covers.get_current_premiums_paged', page=0, count=25) }}"><i class="ti-credit-card"></i> Current </a></li>
                                     <li><a href="{{ url_for('covers.get_outstanding_premiums') }}"><i class="ti-credit-card"></i> Outstanding</a></li>
                                 </ul>
                             </li>

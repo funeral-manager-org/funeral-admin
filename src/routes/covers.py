@@ -70,15 +70,31 @@ async def get_plan_cover(user: User, company_id: str, plan_number: str):
     return render_template('admin/managers/covers/view.html', **context)
 
 
-@covers_route.get('/admin/premiums/current')
+@covers_route.route('/admin/premiums/current/<int:page>/<int:count>', methods=['GET', 'POST'])
 @login_required
-async def get_current_premiums(user: User):
+async def get_current_premiums_paged(user: User, page: int = 0, count: int = 25):
     """
 
+    :param count:
+    :param page:
     :param user:
     :return:
     """
-    context = dict(user=user)
+    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+
+    # if this is not a post message then the request is being sent by menu links
+    branch_id = request.form.get('branch_id', None)
+    if not branch_id:
+        branch_id = company_branches[-1].branch_id
+
+    clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
+        branch_id=branch_id)
+
+    policy_data_list: list[PolicyRegistrationData] = await covers_controller.get_branch_policy_data_list(branch_id=branch_id)
+
+    context = dict(user=user, clients_list=clients_list, branch_id=branch_id, company_branches=company_branches,
+                   policy_data_list=policy_data_list, page=page, count=count)
+
     return render_template('admin/premiums/current.html', **context)
 
 

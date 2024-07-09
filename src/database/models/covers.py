@@ -299,6 +299,16 @@ class PolicyRegistrationData(BaseModel):
                 return premium
         return None
 
+    def get_previous_month_premium(self):
+        if not self.premiums:
+            return None
+        today = datetime.now().date()
+        last_month = today - relativedelta(months=1)
+        for premium in self.premiums:
+            if premium.scheduled_payment_date.month == last_month.month:
+                return premium
+        return None
+
     def get_first_unpaid(self):
         if not self.premiums:
             return None

@@ -81,6 +81,23 @@ class CoversController(Controllers):
                 return PolicyRegistrationData(**policy_data_orm.to_dict())
             return None
 
+    @error_handler
+    async def get_branch_policy_data_list(self, branch_id: str) -> list[PolicyRegistrationData]:
+        """
+            **get_branch_policy_data_list**
+
+        :param branch_id:
+        :return:
+        """
+        with self.get_session() as session:
+            policy_data_orm_list = (
+                session.query(PolicyRegistrationDataORM)
+                .filter_by(branch_id=branch_id)
+                .options(joinedload(PolicyRegistrationDataORM.premiums))
+                .all()
+            )
+            return [PolicyRegistrationData(**policy_data_orm.to_dict()) for policy_data_orm in policy_data_orm_list]
+
     async def create_forecasted_premiums(self, policy_number: str, total: int = 12):
         """
 
@@ -99,4 +116,3 @@ class CoversController(Controllers):
 
                 premium_dict = premium.dict(exclude={'late_payment_threshold_days', 'percent_charged'})
                 session.add(PremiumsORM(**premium_dict))
-

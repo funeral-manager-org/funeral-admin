@@ -76,14 +76,26 @@
         <div class="card-header shadow-sm border-info bg-facebook">
             <h3 class="card-title text-white">
                 <i class="fa fa-cc"> </i>
-                Historical Payments
+                Recent Historical Payments
             </h3>
-
         </div>
-
         <div class="card-body m-t-12">
             {% if  policy_data and policy_data.premiums %}
-                <span>Historical Payments Present</span>
+                <ul class="list-group">
+                    {% set counter = 0 %}
+                    {% for premium in policy_data.premiums %}
+                        {% if premium.is_paid  and counter < 2 %}
+                            <li class="list-group-item"><span class="font-weight-bold">Scheduled Payment Date:</span> <span class="text-info pull-right">{{ premium.scheduled_payment_date }}</span></li>
+                            <li class="list-group-item"><span class="font-weight-bold text-success">Date Paid:</span> <span class="text-success pull-right">{{ premium.date_paid }}</span></li>
+                            <li class="list-group-item"><span class="font-weight-bold">Payment Method:</span> <span class="text-info pull-right">{{ premium.payment_method }}</span></li>
+                            <li class="list-group-item m-t-8"><span class="font-weight-bold text-info">Monthly Payment:</span> <span class="text-info pull-right">R {{ premium.payment_amount| number }}.00</span></li>
+                            <li class="list-group-item"><span class="font-weight-bold text-success">Amount Paid :</span> <span class="text-success pull-right">R {{ premium.amount_paid| number }}.00</span></li>
+                            <li class="list-group-item m-t-8"><span class="font-weight-bold text-danger">Late Charges :</span> <span class="text-danger pull-right">R {{ premium.late_charges| number }}.00</span></li>
+                            <li class="list-group-item"><span class="font-weight-bold text-danger">Balance Due:</span> <span class="text-danger pull-right">R {{ premium.balance_due|number }}.00</span></li>
+                        {% set counter = counter + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
             {% endif %}
 
         </div>

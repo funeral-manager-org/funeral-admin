@@ -150,10 +150,11 @@ async def premiums_payments(user: User):
             policy_data = await covers_controller.get_policy_data(policy_number=selected_client.policy_number)
 
             if not policy_data.get_this_month_premium():
+                # TODO this is a hack find a permanent solution for creating forecasted premiums
                 await covers_controller.create_forecasted_premiums(policy_number=policy_data.policy_number)
                 policy_data = await covers_controller.get_policy_data(policy_number=selected_client.policy_number)
 
-            covers_logger.info(f"Policy Data : {policy_data}")
+            # covers_logger.info(f"Policy Data : {policy_data}")
             covers_logger.info(f"Total balance Due : {str(policy_data.total_balance_due)}")
 
             payment_methods = await company_controller.get_payment_methods()

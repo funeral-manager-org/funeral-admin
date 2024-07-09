@@ -103,22 +103,28 @@ class CoversController(Controllers):
                 .limit(count)
                 .all()
             )
-            return [PolicyRegistrationData(**policy_data_orm.to_dict()) for policy_data_orm in policy_data_orm_list]
+            return [PolicyRegistrationData(**policy_data_orm.to_dict())
+                    for policy_data_orm in policy_data_orm_list]
 
+    @error_handler
     async def create_forecasted_premiums(self, policy_number: str, total: int = 12):
         """
-
+            by default this method will create at least 12 premium records in advance
         :return:
         """
         policy_data: PolicyRegistrationData = await self.get_policy_data(policy_number=policy_number)
 
         with self.get_session() as session:
             today = datetime.datetime.now().date()
+            # sets payment day as the 1st of next month
             scheduled_payment_date = today.replace(day=1) + relativedelta(months=1)
 
             for i in range(1, total, 1):
+                # advance payment day to the month following the present
                 scheduled_payment_date = next_due_date(start_date=scheduled_payment_date)
-                premium = Premiums(policy_number=policy_number, scheduled_payment_date=scheduled_payment_date,
+
+                premium = Premiums(policy_number=policy_number,
+                                   scheduled_payment_date=scheduled_payment_date,
                                    payment_amount=policy_data.total_premiums)
 
                 premium_dict = premium.dict(exclude={'late_payment_threshold_days', 'percent_charged'})

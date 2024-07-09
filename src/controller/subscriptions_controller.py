@@ -227,14 +227,13 @@ class SubscriptionsController(Controllers):
                 session.delete(subscription_orm)
 
     @error_handler
-    async def get_company_subscription(self, company_id: str) -> Subscriptions:
+    async def get_company_subscription(self, company_id: str) -> Subscriptions | None:
         with self.get_session() as session:
-            subscription_orm = session.query(SubscriptionsORM) \
-                .options(joinedload(SubscriptionsORM.payments)) \
-                .filter_by(company_id=company_id) \
-                .first()
+            subscription_orm = (session.query(SubscriptionsORM)
+                                .options(joinedload(SubscriptionsORM.payments))
+                                .filter_by(company_id=company_id).first())
 
-            if subscription_orm is None:
+            if not subscription_orm:
                 return None
 
             return Subscriptions(**subscription_orm.to_dict())

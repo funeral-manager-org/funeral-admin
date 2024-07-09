@@ -615,15 +615,11 @@ class CompanyController(Controllers):
         """
         with self.get_session() as session:
             policy_holder = InsuredParty.POLICY_HOLDER.value
-
-            # Calculate offset
-            offset = page * count
-
             # Query for paginated results
             policy_holders_query = (
                 session.query(ClientPersonalInformationORM)
                 .filter_by(company_id=company_id, insured_party=policy_holder)
-                .offset(offset)
+                .offset(page * count)
                 .limit(count + 1)  # Fetch one extra to check if there's a next page
             )
             policy_holders_list = policy_holders_query.all()
@@ -643,7 +639,7 @@ class CompanyController(Controllers):
 
     @cached_ttl()
     @error_handler
-    async def get_policy_data(self, policy_number: str) -> PolicyRegistrationData| None:
+    async def get_policy_data(self, policy_number: str) -> PolicyRegistrationData | None:
         with self.get_session() as session:
 
             policy_data_orm = (
@@ -790,7 +786,7 @@ class CompanyController(Controllers):
 
     @cached_ttl()
     @error_handler
-    async def get_countries(self):
+    async def get_countries(self) -> list[str]:
         return self.countries
 
     @cached_ttl()
@@ -842,18 +838,18 @@ class CompanyController(Controllers):
     @cached_ttl()
     @error_handler
     async def search_policies_by_policy_holder_name(self, policy_holder_name: str) -> list[PolicyRegistrationData]:
-        '''
+        """
             Search for policies by policyholders name.
             :param policy_holder_name: The name of the policyholders to search for.
             :return: List of policies matching the policyholders name.
-        '''
+        """
         with self.get_session() as session:
             # Perform a single query to fetch policies by policyholders name
-            policies_orm = session.query(PolicyRegistrationDataORM) \
-                .join(ClientPersonalInformationORM,
-                      ClientPersonalInformationORM.policy_number == PolicyRegistrationDataORM.policy_number) \
-                .filter(ClientPersonalInformationORM.full_names == policy_holder_name) \
-                .all()
+            policies_orm = (
+                session.query(PolicyRegistrationDataORM)
+                .join(ClientPersonalInformationORM,ClientPersonalInformationORM.policy_number == PolicyRegistrationDataORM.policy_number)
+                .filter(ClientPersonalInformationORM.full_names == policy_holder_name)
+                .all())
 
             # Convert ORM objects to PolicyRegistrationData objects
             return [PolicyRegistrationData(**policy_orm.to_dict()) for policy_orm in policies_orm]
@@ -882,11 +878,10 @@ class CompanyController(Controllers):
         :return: List of PolicyRegistrationData.
         """
         with self.get_session() as session:
-            offset = page * count
             policies_orm_list = (
                 session.query(PolicyRegistrationDataORM)
                 .filter_by(policy_active=True, company_id=company_id)
-                .offset(offset)
+                .offset(page * count)
                 .limit(count)
                 .all()
             )
@@ -905,11 +900,10 @@ class CompanyController(Controllers):
         :return: List of PolicyRegistrationData.
         """
         with self.get_session() as session:
-            offset = page * count
             policies_orm_list = (
                 session.query(PolicyRegistrationDataORM)
                 .filter_by(policy_active=False, company_id=company_id)
-                .offset(offset)
+                .offset(page * count)
                 .limit(count)
                 .all()
             )

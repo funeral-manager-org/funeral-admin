@@ -172,7 +172,7 @@ class Premiums(BaseModel):
     @property
     def late_payment_charges(self) -> int:
         """
-        Calculate the late payment charges based on the number of late days.
+            Calculate the late payment charges based on the number of late days.
         """
 
         if self.late_payment_days >= self.late_payment_threshold_days:

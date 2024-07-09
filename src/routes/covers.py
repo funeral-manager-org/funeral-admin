@@ -38,10 +38,9 @@ async def add_plan_cover(user: User):
     """
     try:
         plan_cover = CoverPlanDetails(**request.form)
-        print(plan_cover)
         plan_cover.company_id = user.company_id
     except ValidationError as e:
-        print(str(e))
+        covers_logger.error(str(e))
         flash(message="Unable to create plan please provide all necessary details", category="danger")
         return redirect(url_for('covers.get_covers'))
 
@@ -126,7 +125,9 @@ async def premiums_payments(user: User):
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     context = {
         'user': user,
-        'company_branches': company_branches}
+        'company_branches': company_branches,
+        'payment_status': PaymentStatus
+    }
 
     clients_list = []
     # Fetch branch details and company branches
@@ -172,10 +173,11 @@ async def premiums_payments(user: User):
             premium.next_payment_amount = premium.payment_amount
 
             paid_premium = await covers_controller.add_update_premiums_payment(premium_payment=premium)
-            covers_logger.info(f'Covers Logger: {paid_premium}')
+            covers_logger.info(f'Covers Paid Premium Logger:{paid_premium.premium_id} {paid_premium.amount_paid} {paid_premium.is_paid}')
 
             context.update(paid_premium=paid_premium)
 
             return render_template('admin/premiums/receipt.html', **context)
+
         flash("Premium Already Paid", category="success")
     return render_template('admin/premiums/pay.html', **context)

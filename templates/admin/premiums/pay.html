@@ -2,8 +2,8 @@
 {% extends "layouts/page.html" %}
 {% block content %}
     <section id="main-content">
-    <div class="row">
-        <div class="card shadow-lg border-info col-lg-5 col-sm-12 ">
+    <div class="row flex-row">
+        <div class="card shadow-lg border-info col-lg-6 col-sm-12 ">
             <div class="card-header shadow-sm border-info bg-facebook">
                 <h3 class="card-title text-white">
                     <i class="fa fa-cc"> </i>
@@ -38,12 +38,39 @@
                                 <li class="list-group-item">Client Name : <span class="text-info pull-right">{{ selected_client.full_names| title }}</span></li>
                                 <li class="list-group-item">Surname : <span class="text-info pull-right">{{ selected_client.surname| title }}</span></li>
                                 <li class="list-group-item">ID Number : <span class="text-info pull-right">{{ selected_client.id_number }}</span></li>
-                                <li class="list-group-item m-t-4">Plan Number : <span class="text-info pull-right">{{ selected_client.plan_number }}</span></li>
-                                <li class="list-group-item">Policy Number : <span class="text-info pull-right">{{ selected_client.policy_number }}</span></li>
+                                <li class="list-group-item m-t-4">Plan Number : <span class="pull-right badge badge-info">{{ selected_client.plan_number }}</span></li>
+                                <li class="list-group-item">Policy Number : <span class="pull-right badge badge-success">{{ selected_client.policy_number }}</span></li>
 
                                 <li class="list-group-item m-t-6">Payment Day: <span class="text-info pull-right">{{ policy_data.payment_day }}</span></li>
                                 <li class="list-group-item">Payment Method: <span class="text-info pull-right">{{ policy_data.payment_method }}</span></li>
-                                <li class="list-group-item m-t-6">Monthly Premium : <span class="text-success pull-right">R {{ policy_data.total_balance_due| number }}.00</span></li>
+                                <li class="list-group-item">Monthly Premium : <span class="text-success pull-right">R {{ policy_data.total_premiums| number }}.00</span></li>
+                                <li class="list-group-item">Total Due : <span class="text-success pull-right">R {{ policy_data.total_balance_due| number }}.00</span></li>
+                                <li class="list-group-item m-t-8 font-weight-bold"><span class="badge badge-info">Payment Status:</span> <span class="text-success pull-right">
+
+                                    {% if policy_data.get_this_month_premium().payment_status == payment_status.PAID.value %}
+                                        <span class="badge badge-success">
+                                        <i class="fa fa-thumbs-up"> </i>
+                                            {{ policy_data.get_this_month_premium().payment_status }}
+                                        </span>
+                                    {% endif %}
+
+                                    {% if policy_data.get_this_month_premium().payment_status == payment_status.DUE.value %}
+                                        <span class="badge badge-warning">
+                                        <i class="fa fa-thumbs-up"> </i>
+                                            {{ policy_data.get_this_month_premium().payment_status }}
+                                        </span>
+                                    {% endif %}
+
+                                    {% if policy_data.get_this_month_premium().payment_status == payment_status.OVERDUE.value %}
+                                        <span class="badge badge-danger">
+                                        <i class="fa fa-thumbs-up"> </i>
+                                            {{ policy_data.get_this_month_premium().payment_status }}
+                                        </span>
+                                    {% endif %}
+
+
+                                </span></li>
+
                             </ul>
                         </div>
                         <div class="form-group">

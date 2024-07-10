@@ -5,9 +5,15 @@ from dateutil.relativedelta import relativedelta
 from flask import Flask
 from sqlalchemy.orm import joinedload
 
+from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose
+from src.controller.messaging_controller import MessagingController
+from src.database.models.companies import Company, CompanyBranches
+from src.database.models.contacts import Contacts
+from src.database.sql.companies import CompanyORM, CompanyBranchesORM
+from src.database.sql.contacts import ContactsORM
 from src.controller import Controllers, error_handler
-from src.database.models.covers import Premiums, PremiumInvoice, PolicyRegistrationData
-from src.database.sql.covers import PremiumsORM, PolicyRegistrationDataORM
+from src.database.models.covers import Premiums, PremiumInvoice, PolicyRegistrationData, ClientPersonalInformation
+from src.database.sql.covers import PremiumsORM, PolicyRegistrationDataORM, ClientPersonalInformationORM
 
 
 def next_due_date(start_date: date) -> date:
@@ -27,14 +33,16 @@ class CoversController(Controllers):
 
     def __init__(self):
         super().__init__()
+        self.messaging_controller: MessagingController | None = None
 
-    def init_app(self, app: Flask):
+    def init_app(self, app: Flask, messaging_controller: MessagingController):
         """
             pass
         :param app:
         :return:
         """
         super().init_app(app=app)
+        self.messaging_controller = messaging_controller
 
     @error_handler
     async def add_update_premiums_payment(self, premium_payment: Premiums) -> Premiums:
@@ -129,3 +137,116 @@ class CoversController(Controllers):
 
                 premium_dict = premium.dict(exclude={'late_payment_threshold_days', 'percent_charged'})
                 session.add(PremiumsORM(**premium_dict))
+
+    async def send_premium_payment_notification(self,
+                                                premium: Premiums,
+                                                policy_data: PolicyRegistrationData):
+        """
+
+        :param policy_data:
+        :param premium:
+        :return:
+        """
+        with self.get_session() as session:
+
+            personal_data_orm = session.query(ClientPersonalInformationORM).filter_by(uid=policy_data.uid).first()
+            personal_data = ClientPersonalInformation(**personal_data_orm.to_dict())
+
+            if personal_data.contact_id:
+                contact_data_orm = session.query(ContactsORM).filter_by(contact_id=personal_data.contact_id).first()
+
+                if isinstance(contact_data_orm, ContactsORM):
+                    contact = Contacts(**contact_data_orm.to_dict())
+                else:
+                    return False
+            else:
+                return False
+            
+            company_details_orm = session.query(CompanyORM).filter_by(company_id=personal_data.company_id).first()
+            branch_details_orm = session.query(CompanyBranchesORM).filter_by(branch_id=personal_data.branch_id).first()
+            company_details = Company(**company_details_orm.to_dict())
+            branch_details = CompanyBranches(**branch_details_orm.to_dict())
+
+            await self.do_send_notice(personal_data=personal_data, contact=contact, policy_data=policy_data,
+                                      premium=premium,
+                                      company_details=company_details, branch_details=branch_details)
+            return True
+
+    async def do_send_notice(self, personal_data: ClientPersonalInformation, contact: Contacts,
+                             policy_data: PolicyRegistrationData,
+                             premium: Premiums, company_details: Company, branch_details: CompanyBranches):
+        """
+
+        :param contact:
+        :param personal_data:
+        :param policy_data:
+        :param premium:
+        :param company_details:
+        :param branch_details:
+        :return:
+        """
+        sms_template = f"""
+        Premium Payment Notification From
+
+                {company_details.company_name.capitalize()}
+        
+        Hi We would like to inform that your premiums for your policy with 
+        policy number of {premium.policy_number} has been successfully paid to the 
+        amount of R {premium.amount_paid}.00 
+        
+        Payment was made on {premium.date_paid}
+        
+        Next Premium Details
+        
+            Next Payment Date {premium.next_payment_date}
+            Next Premium Amount {premium.next_payment_amount}
+
+        Thank you
+            {company_details.company_name.capitalize()}
+                
+        """
+
+        sms_message = SMSCompose(message=sms_template, to_cell=contact.cell,
+                                 to_branch=personal_data.branch_id,
+                                 recipient_type=RecipientTypes.CLIENTS.value)
+
+        await self.messaging_controller.send_sms(composed_sms=sms_message)
+
+        subject = f"Premium Payment Notification From  {company_details.company_name.capitalize()}"
+
+        email_template = f"""
+        <div class='card shadow-lg border-info'>
+            <div class='card-header'>
+                <h2 class='card-title'>Premium Payment Notification From {company_details.company_name.capitalize()}</h2>
+            </div>
+
+            <div class='card-body'>
+                <div class='card-content font-weight-bold'>                                        
+                    Hi We would like to inform that your premiums for your policy with 
+                    Policy number of {premium.policy_number} has been successfully paid to the 
+                    amount of R {premium.amount_paid}.00
+                </div> 
+                
+                <span class='font-weight-bold text-info'>
+                    Payment was made on {premium.date_paid}
+                </span>
+                <div class='card-content font-weight-bold'>
+                Next Premium Details
+                <blockquote>
+                    Next Payment Date {premium.next_payment_date}
+                    Next Premium Amount {premium.next_payment_amount}
+                </blockquote>
+                </div>
+                
+                <h3>Thank you</h3>
+                <blockquote>
+                    {company_details.company_name.capitalize()}
+                </blockquote>
+            </div>
+        </div>                        
+        """
+        email_message = EmailCompose(
+            to_email=contact.email, subject=subject, message=email_template, to_branch=personal_data.branch_id,
+            recipient_type=RecipientTypes.CLIENTS.value)
+
+        await self.messaging_controller.send_email(email_message)

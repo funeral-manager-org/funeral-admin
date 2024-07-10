@@ -95,7 +95,7 @@ def create_app(config):
         # chat_io.init_app(app)
         user_controller.init_app(app=app)
         company_controller.init_app(app=app)
-        covers_controller.init_app(app=app)
+
         paypal_controller.init_app(app=app, config_instance=config)
         chat_controller.init_app(app=app)
         system_controller.init_app(app=app)
@@ -103,6 +103,7 @@ def create_app(config):
         # application engines
         messaging_controller.init_app(app=app, settings=config, emailer=send_mail)
 
+        covers_controller.init_app(app=app, messaging_controller=messaging_controller)
         support_controller.init_app(app=app, messaging_controller=messaging_controller)
 
         notifications_controller.init_app(app=app,

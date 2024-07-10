@@ -166,14 +166,15 @@ async def premiums_payments(user: User):
 
     if branch_id:
         try:
-            branch_details = next((branch for branch in company_branches if branch.branch_id == branch_id), None)
+            branch_details = next((branch for branch in company_branches if branch.branch_id == branch_id), {})
         except StopIteration as e:
-            branch_details = None
+            branch_details = {}
 
-        if branch_details:
-            context.update(branch_details=branch_details)
+        context.update(branch_details=branch_details)
 
-        clients_list = await company_controller.get_branch_policy_holders(branch_id=branch_id)
+        clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
+            branch_id=branch_id)
+
         context.update(clients_list=clients_list)
 
     # Fetch selected client and policy data if client_id is provided
@@ -197,11 +198,15 @@ async def premiums_payments(user: User):
                 context.update(selected_client=selected_client, policy_data=policy_data, payment_methods=payment_methods)
             else:
                 flash("There is no cover associated with this Policy Holder, We cannot Process Payment", category="danger")
+        else:
+            # selected client not found either we changed the branch or there is a big error
+            pass
 
     # Process the premium payment if all required data is available
     if selected_client and policy_data and actual_amount and payment_method:
-        premium = policy_data.get_first_unpaid()
-        if premium:
+        # should rather allow the employee to choose the premium to make payment for
+        premium = policy_data.get_this_month_premium()
+        if premium and not premium.is_paid:
             premium.amount_paid = actual_amount
             premium.date_paid = datetime.now().date()
             premium.payment_method = payment_method
@@ -211,9 +216,17 @@ async def premiums_payments(user: User):
             paid_premium = await covers_controller.add_update_premiums_payment(premium_payment=premium)
             covers_logger.info(f'Covers Paid Premium Logger: {paid_premium.premium_id} {paid_premium.amount_paid} {paid_premium.is_paid}')
 
+            is_sent = await covers_controller.send_premium_payment_notification(
+                premium=paid_premium, policy_data=policy_data)
+            if not is_sent:
+                flash(message="failed to send payment notifications please complete the client contact records",
+                      category='danger')
+
             context.update(paid_premium=paid_premium)
+            # TODO Create payment Receipt
+
             return render_template('admin/premiums/receipt.html', **context)
 
-        flash("Premium Already Paid", category="success")
+        flash(message="Premium to be paid Not Found or already paid", category="danger")
 
     return render_template('admin/premiums/pay.html', **context)

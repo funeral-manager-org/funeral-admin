@@ -91,8 +91,8 @@
                                 <input  value="{{ policy_data.total_premiums }}" type="number" name="actual_amount" id="actual_amount" class="form-control shadow-sm border-success">
                             </div>
                         {% endif %}
-
                     {% endif %}
+
                 {% if not is_paid %}
                     <div class="form-group">
                         {% if selected_client %}
@@ -116,14 +116,16 @@
                 </form>
             </div>
         </div>
+
         <div class="card shadow-lg border-info col-lg-6 col-sm-12 ">
-        <div class="card-header shadow-sm border-info bg-facebook">
-            <h3 class="card-title text-white">
-                <i class="fa fa-cc"> </i>
-                Recent Historical Payments
-            </h3>
-        </div>
+            <div class="card-header shadow-sm border-info bg-facebook">
+                <h3 class="card-title text-white">
+                    <i class="fa fa-cc"> </i>
+                    Recent Historical Payments
+                </h3>
+            </div>
         <div class="card-body m-t-12">
+
             {% if  policy_data and policy_data.premiums %}
                 <ul class="list-group">
                     {% set counter = 0 %}
@@ -143,6 +145,7 @@
                     {% endfor %}
                 </ul>
             {% endif %}
+
         </div>
         </div>
     </div>

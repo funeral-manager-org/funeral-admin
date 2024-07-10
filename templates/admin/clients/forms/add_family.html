@@ -46,12 +46,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="client_type">Client Type</label>
-
+                        <label for="insured_party">Client Type</label>
                         <select id="insured_party" name="insured_party" class="form-control">
                             <option value="" selected disabled>Select if your client is Dependent or Beneficiary</option>
-                            <option value="Dependent">Dependent</option>
-                            <option value="Beneficiary">Beneficiary</option>
+                            {% for client_type in InsuredParty.get_client_types() %}
+                                {% if client_type != InsuredParty.POLICY_HOLDER.value %}
+                                    <option value="{{ client_type }}">{{ client_type| title }}</option>
+                                {% endif %}
+                            {% endfor %}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-sm btn-primary">

@@ -54,6 +54,10 @@ class InsuredParty(Enum):
     BENEFICIARY = "Beneficiary"
     DEPENDENT = "DEPENDENT"
 
+    @classmethod
+    def get_client_types(cls) -> list[str]:
+        return [method.value for method in cls]
+
 
 class ClientPersonalInformation(BaseModel):
     uid: str = Field(default_factory=create_id)
@@ -165,10 +169,11 @@ class Premiums(BaseModel):
         else:
             self.payment_status = PaymentStatus.DUE.value
         print(f"Updated payment Status : {self.payment_status}")
+
     @property
     def is_payment_overdue(self) -> bool:
         return not self.is_paid and datetime.now().date() > (
-                    self.scheduled_payment_date + relativedelta(days=self.late_payment_threshold_days))
+                self.scheduled_payment_date + relativedelta(days=self.late_payment_threshold_days))
 
     @property
     def checked_payment_status(self) -> str:

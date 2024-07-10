@@ -1,8 +1,11 @@
-import uuid, random, string
+import random
+import re
+import string
+from datetime import datetime, timedelta
 from enum import Enum
 from os import path
-from datetime import datetime, timedelta
-import re
+
+from ulid import ULID
 
 
 # TODO create a class to contain this enum types for the entire project
@@ -124,8 +127,9 @@ def friendlytimestamp(value):
         return timestamp_dt.strftime("%Y-%m-%d")
 
 
-def create_id():
-    return str(uuid.uuid4())
+def create_id() -> str:
+    return str(ULID.from_datetime(datetime.now()))
+
 
 
 def create_plan_number():
@@ -161,3 +165,8 @@ def string_today():
 def camel_to_snake(name: str) -> str:
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+if __name__ == "__main__":
+    for i in range(10):
+        print(create_id())

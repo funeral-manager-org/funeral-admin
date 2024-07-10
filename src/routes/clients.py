@@ -207,7 +207,7 @@ async def add_beneficiary_dependent(user: User, policy_number: str):
     try:
         policy_data = await company_controller.get_policy_with_policy_number(policy_number=policy_number)
         beneficiary_data = ClientPersonalInformation(**request.form)
-
+        # beneficiary_data.insured_party = InsuredParty.BENEFICIARY.value
     except ValidationError as e:
         error_logger.error(str(e))
         flash(message="Error adding beneficiary", category="danger")

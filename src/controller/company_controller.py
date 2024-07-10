@@ -422,7 +422,9 @@ class CompanyController(Controllers):
     @error_handler
     async def get_branch_policy_holders(self, branch_id: str) -> list[ClientPersonalInformation]:
         with self.get_session() as session:
-            clients_orm_list = session.query(ClientPersonalInformationORM).filter_by(branch_id=branch_id).all()
+            policy_holder = InsuredParty.POLICY_HOLDER.value
+            clients_orm_list = session.query(ClientPersonalInformationORM).filter_by(branch_id=branch_id,
+                                                                                     insured_party=policy_holder).all()
             return [ClientPersonalInformation(**client.to_dict()) for client in clients_orm_list]
 
     @cached_ttl()

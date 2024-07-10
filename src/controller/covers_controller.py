@@ -161,20 +161,23 @@ class CoversController(Controllers):
                     return False
             else:
                 return False
-            
+
             company_details_orm = session.query(CompanyORM).filter_by(company_id=personal_data.company_id).first()
             branch_details_orm = session.query(CompanyBranchesORM).filter_by(branch_id=personal_data.branch_id).first()
             company_details = Company(**company_details_orm.to_dict())
             branch_details = CompanyBranches(**branch_details_orm.to_dict())
 
-            await self.do_send_notice(personal_data=personal_data, contact=contact, policy_data=policy_data,
-                                      premium=premium,
+            # TODO This needs to be moved to the messaging controller
+            await self.do_send_notice(personal_data=personal_data, contact=contact,
+                                      policy_data=policy_data, premium=premium,
                                       company_details=company_details, branch_details=branch_details)
             return True
 
-    async def do_send_notice(self, personal_data: ClientPersonalInformation, contact: Contacts,
+    async def do_send_notice(self, personal_data: ClientPersonalInformation,
+                             contact: Contacts,
                              policy_data: PolicyRegistrationData,
-                             premium: Premiums, company_details: Company, branch_details: CompanyBranches):
+                             premium: Premiums, company_details: Company,
+                             branch_details: CompanyBranches):
         """
 
         :param contact:

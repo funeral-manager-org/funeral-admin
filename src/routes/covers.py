@@ -175,6 +175,7 @@ async def premiums_payments(user: User):
         clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
             branch_id=branch_id)
 
+        # this will allow the employee to select from only clients who are policy holders
         context.update(clients_list=clients_list)
 
     # Fetch selected client and policy data if client_id is provided

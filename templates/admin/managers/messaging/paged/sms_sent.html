@@ -10,24 +10,18 @@
                 Sent SMS
             </h4>
             <div class="branch-selector">
-
                 <form id="branch-select-form"  method="post" action="{{ url_for('messaging.get_sent_sms_paged', page=page, count=count) }}">
                     <div class="form-group mb-0">
-
                         <select id="branch_id" class="form-control" name="branch_id" onchange="document.getElementById('branch-select-form').submit();">
-
                             {% for branch in branches %}
                                 <option value="{{ branch.branch_id }}" {% if branch.branch_id == branch_id %}selected{% endif %}>{{ branch.branch_name| title }}</option>
                             {% endfor %}
-
                         </select>
                     </div>
                 </form>
-
             </div>
         </div>
         <div class="card-body">
-
                 <table class="table table-bordered table-hover m-t-12">
                     <thead class="thead-dark m-t-12">
                         <tr>

@@ -164,7 +164,7 @@ class Premiums(BaseModel):
             self.payment_status = PaymentStatus.OVERDUE.value
         else:
             self.payment_status = PaymentStatus.DUE.value
-
+        print(f"Updated payment Status : {self.payment_status}")
     @property
     def is_payment_overdue(self) -> bool:
         return not self.is_paid and datetime.now().date() > (

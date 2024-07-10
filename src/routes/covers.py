@@ -105,7 +105,9 @@ async def get_current_premiums_paged(user: User, page: int = 0, count: int = 25)
                 }
 
     context = dict(user=user, clients_list=clients_list, branch_id=branch_id,
-                   company_branches=company_branches, policy_data_list=policy_data_list,
+                   company_branches=company_branches,
+                   payment_status=PaymentStatus,
+                   policy_data_list=policy_data_list,
                    page=page, count=count)
 
     return render_template('admin/premiums/current.html', **context)

@@ -181,7 +181,7 @@ async def edit_policy_details(user: User):
     try:
         print("inside editor")
 
-        policy_data = PolicyRegistrationData(**request.form)
+        policy_data = PolicyRegistrationData(**request.form, premiums=[])
         uid = policy_data.uid
     except ValidationError as e:
         error_logger.error(str(e))

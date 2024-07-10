@@ -47,14 +47,16 @@
 
                                 <li class="list-group-item m-t-6">Monthly Premium : <span class="text-success pull-right">R {{ policy_data.total_premiums| number }}.00</span></li>
                                 <li class="list-group-item">Total Due : <span class="text-success pull-right">R {{ policy_data.total_balance_due| number }}.00</span></li>
-
+                                {% set is_paid = False %}
                                 <li class="list-group-item m-t-8 font-weight-bold"><span class="badge badge-info">Payment Status:</span>
                                     <span class="text-success pull-right">
                                         {% if policy_data.get_this_month_premium().checked_payment_status == payment_status.PAID.value %}
                                             <span class="badge badge-success">
                                             <i class="fa fa-thumbs-up"> </i>
                                                 {{ policy_data.get_this_month_premium().checked_payment_status }}
+
                                             </span>
+                                            {% set is_paid = True %}
                                         {% endif %}
                                         {% if policy_data.get_this_month_premium().checked_payment_status == payment_status.DUE.value %}
                                             <span class="badge badge-warning">
@@ -71,23 +73,25 @@
                                         {% endif %}
                                     </span>
                                 </li>
-
                             </ul>
                         </div>
-                        <div class="form-group">
-                            <label for="payment_method">Select Payment Method</label>
-                            <select id="payment_method" name="payment_method" class="form-control shadow-sm border-info">
-                                <option value="" selected disabled>Select Payment Method</option>
-                                {% for method in payment_methods %}
-                                   <option value="{{ method }}">{{ method|title }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="actual_amount">Actual Paid</label>
-                            <input  value="{{ policy_data.total_premiums }}" type="number" name="actual_amount" id="actual_amount" class="form-control shadow-sm border-success">
-                        </div>
+                        {% if not is_paid %}
+                            <div class="form-group">
+                                <label for="payment_method">Select Payment Method</label>
+                                <select id="payment_method" name="payment_method" class="form-control shadow-sm border-info">
+                                    <option value="" selected disabled>Select Payment Method</option>
+                                    {% for method in payment_methods %}
+                                       <option value="{{ method }}">{{ method|title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="actual_amount">Actual Paid</label>
+                                <input  value="{{ policy_data.total_premiums }}" type="number" name="actual_amount" id="actual_amount" class="form-control shadow-sm border-success">
+                            </div>
+                        {% endif %}
                     {% endif %}
+                {% if not is_paid %}
                     <div class="form-group">
                         {% if selected_client %}
                             <button type="submit" class="btn btn-block btn-outline-info btn-rounded btn-lg">
@@ -95,6 +99,7 @@
                             </button>
                         {% endif %}
                     </div>
+                {% endif %}
                 </form>
 
             </div>

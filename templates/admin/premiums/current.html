@@ -21,28 +21,41 @@
                         </select>
                     </div>
                 </form>
-            </div>
 
+            </div>
         </div>
         <div class="card-body m-t-4">
         <table class="table  table-striped m-t-4">
             <thead class="font-weight-bold text-info">
-                <td>Policy #</td>
-                <td>Plan #</td>
-                <td>Premium</td>
-                <td>Month</td>
-                <td>Is Paid</td>
-                <td></td>
+                <tr>
+                    <td>Policy #</td>
+                    <td class="d-none d-md-table-cell">Plan #</td>
+                    <td>Premium</td>
+                    <td class="d-none d-md-table-cell">Month</td>
+                    <td>Is Paid</td>
+                    <td></td>
+                </tr>
             </thead>
             <tbody>
                 {% for policy_data in policy_data_list  %}
                     <tr>
-                    <td><span class="badge badge-info"> {{ policy_data.policy_number }}</span></td>
-                    <td><span class="badge badge-info"> {{ policy_data.plan_number }}</span></td>
-                    <td><span class="badge badge-warning"> R {{ policy_data.total_premiums | number}}.00</span></td>
-                    <td><span class="badge badge-info"> {{ policy_data.get_previous_month_premium().scheduled_payment_date }}</span></td>
-                    <td><span class="badge badge-success">{{ policy_data.get_this_month_premium().checked_payment_status }}</span></td>
-                    <td></td>
+                        <td><span class="badge badge-info"> {{ policy_data.policy_number }}</span></td>
+                        <td class="d-none d-md-table-cell"><span class="badge badge-info"> {{ policy_data.plan_number }}</span></td>
+                        <td><span class="badge badge-warning"> R {{ policy_data.total_premiums | number}}.00</span></td>
+                        <td class="d-none d-md-table-cell"><span class="badge badge-info"> {{ policy_data.get_previous_month_premium().scheduled_payment_date }}</span></td>
+                        <td>
+                            {% if policy_data.get_this_month_premium().checked_payment_status == payment_status.PAID.value  %}
+                                <span class="badge badge-success">
+                            {% elif policy_data.get_this_month_premium().checked_payment_status == payment_status.DUE.value %}
+                                <span class="badge badge-warning">
+                            {% else %}
+                                <span class="badge badge-danger">
+                            {% endif %}
+                                    {{ policy_data.get_this_month_premium().checked_payment_status }}</span>
+
+
+                        </td>
+                        <td></td>
                     </tr>
                 {% endfor %}
             </tbody>

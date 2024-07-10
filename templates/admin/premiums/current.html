@@ -41,7 +41,7 @@
                     <td><span class="badge badge-info"> {{ policy_data.plan_number }}</span></td>
                     <td><span class="badge badge-warning"> R {{ policy_data.total_premiums | number}}.00</span></td>
                     <td><span class="badge badge-info"> {{ policy_data.get_previous_month_premium().scheduled_payment_date }}</span></td>
-                    <td><span class="badge badge-success">{{ policy_data.get_previous_month_premium().payment_status }}</span></td>
+                    <td><span class="badge badge-success">{{ policy_data.get_this_month_premium().checked_payment_status }}</span></td>
                     <td></td>
                     </tr>
                 {% endfor %}

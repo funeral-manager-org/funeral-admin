@@ -169,7 +169,7 @@ async def premiums_payments(user: User):
             branch_details = next((branch for branch in company_branches if branch.branch_id == branch_id), None)
         except StopIteration as e:
             branch_details = None
-            
+
         if branch_details:
             context.update(branch_details=branch_details)
 
@@ -201,7 +201,7 @@ async def premiums_payments(user: User):
     # Process the premium payment if all required data is available
     if selected_client and policy_data and actual_amount and payment_method:
         premium = policy_data.get_first_unpaid()
-        if not premium:
+        if premium:
             premium.amount_paid = actual_amount
             premium.date_paid = datetime.now().date()
             premium.payment_method = payment_method

@@ -123,7 +123,8 @@ def this_day() -> int:
 
 def next_due_date(days_offset: int = 30) -> date:
     """Return the next due date, defaulting to 30 days from today."""
-    return datetime.now().date() + timedelta(days=days_offset)
+    today = datetime.now().date().replace(day=1)
+    return today + relativedelta(months=1)
 
 
 class PaymentStatus(str, Enum):
@@ -144,11 +145,11 @@ class Premiums(BaseModel):
 
     premium_id: str = Field(default_factory=create_ulid)
     policy_number: str
-    scheduled_payment_date: date = Field(default_factory=datetime.now().date)
+    scheduled_payment_date: date = Field(default_factory=lambda: datetime.now().date())
 
     payment_amount: int = Field(default=0)
     amount_paid: int = Field(default=0)
-    date_paid: date = Field(default_factory=datetime.now().date)
+    date_paid: date = Field(default_factory=lambda: datetime.now().date())
 
     payment_method: str = Field(default=PaymentMethods.intermediary.value)
     payment_status: str = Field(default=PaymentStatus.DUE.value)
@@ -156,29 +157,38 @@ class Premiums(BaseModel):
     next_payment_date: date = Field(default_factory=next_due_date)
     payment_frequency: str = Field(default=PaymentFrequency.MONTHLY.value)
 
+    def update_payment_status(self):
+        if (self.balance_due < 1) or self.is_paid:
+            self.payment_status = PaymentStatus.PAID.value
+        elif self.balance_due > 0 and self.is_payment_overdue:
+            self.payment_status = PaymentStatus.OVERDUE.value
+        else:
+            self.payment_status = PaymentStatus.DUE.value
+
+    @property
+    def is_payment_overdue(self) -> bool:
+        return not self.is_paid and datetime.now().date() > (
+                    self.scheduled_payment_date + relativedelta(days=self.late_payment_threshold_days))
+
+    @property
+    def checked_payment_status(self) -> str:
+        self.update_payment_status()
+        return self.payment_status
+
     @property
     def is_paid(self) -> bool:
-        return int(self.amount_paid) >= int(self.payment_amount) > 0
+        return self.amount_paid >= self.total_due > 0
 
     @property
     def late_payment_days(self) -> int:
-        """
-        Calculate the number of late payment days.
-        """
-        if self.date_paid > self.scheduled_payment_date:
-            return (self.date_paid - self.scheduled_payment_date).days
-        return 0
+        return max((self.date_paid - self.scheduled_payment_date).days, 0)
 
     @property
     def late_payment_charges(self) -> int:
-        """
-            Calculate the late payment charges based on the number of late days.
-        """
-
         if self.late_payment_days >= self.late_payment_threshold_days:
-            charged_per_threshold = self.payment_amount * (self.percent_charged / 100)
+            charged_per_threshold = int(self.payment_amount * (self.percent_charged / 100))
             max_charges = int(charged_per_threshold * 4)
-            return min(int((self.late_payment_days // self.late_payment_threshold_days) * charged_per_threshold),
+            return min((self.late_payment_days // self.late_payment_threshold_days) * charged_per_threshold,
                        max_charges)
         return 0
 
@@ -225,12 +235,14 @@ class PolicyRegistrationData(BaseModel):
     premiums: list[Premiums]
 
     @property
-    def total_balance_due(self) -> int:
-        """
-        The total amount of money owed to the funeral company
-        """
-        today = datetime.today().date()
+    def sorted_premiums(self) -> list[Premiums]:
+        """returns premiums sorted in ascending order"""
+        return sorted(self.premiums, key=lambda _premium: _premium.scheduled_payment_date)
 
+    @property
+    def total_balance_due(self) -> int:
+        """The total amount of money owed to the funeral company"""
+        today = datetime.today().date()
         return sum((premium.balance_due for premium in self.premiums
                     if ((premium.scheduled_payment_date <= today) and (not premium.is_paid))))
 
@@ -253,73 +265,89 @@ class PolicyRegistrationData(BaseModel):
 
     def can_send_payment_reminder(self) -> bool:
         """
-        Check if the payment notification can be sent.
-        Notification can be sent if the current date is within 7 days before the payment_day.
-
+        if today is within seven days of reminders being tried then send the reminders
         :return: True if notification can be sent, otherwise False.
         """
         if self.payment_day is None:
             return False
 
-        # Get the current day of the month
-        today = datetime.today().day
-
         # Calculate the difference in days
-        day_difference = (self.payment_day - today) % 31
+        day_difference = (self.payment_day - this_day()) % 31
 
         # Check if the difference is within the 5 to 7-day window
         return 5 <= day_difference <= 7
 
-    def next_payment_date(self) -> date:
+    def next_payment_date(self) -> date | None:
         """
         Determine the next payment date.
         """
         if self.premiums:
-            today = datetime.today().date()
-            next_payment_date = max(premium.next_payment_date for premium in self.premiums)
+            today = datetime.now().date()
+            next_payment_date = max(premium.next_payment_date for premium in self.sorted_premiums)
 
             if today <= next_payment_date:
                 return next_payment_date
 
-        today = datetime.today().date()
+        today: date = datetime.now().date()
         if self.payment_day is not None:
-            current_month_due_date = today.replace(day=self.payment_day)
+            current_month_due_date: date = today.replace(day=self.payment_day)
+
             if today.day <= self.payment_day:
+                # Payment Day has not yet passed and Premium not paid
                 return current_month_due_date
             else:
-                next_month_due_date = current_month_due_date + relativedelta(months=1)
-                return next_month_due_date
-        return today  # Default to today if no payment_day is specified
+                # returns next month due date
+                return current_month_due_date + relativedelta(months=1)
+        return None  # Default to None if no payment_day is specified
 
-    def get_this_month_premium(self):
+    def get_this_month_premium(self) -> Premiums | None:
+        """will return premium model for this month"""
         if not self.premiums:
             return None
-        for premium in self.premiums:
+        for premium in self.sorted_premiums:
             if premium.scheduled_payment_date.month == datetime.now().month:
                 return premium
         return None
 
-    def get_previous_month_premium(self):
+    def get_previous_month_premium(self) -> Premiums | None:
+        """will return previous month premium if exist"""
         if not self.premiums:
             return None
-        today = datetime.now().date()
-        last_month = today - relativedelta(months=1)
-        for premium in self.premiums:
-            if premium.scheduled_payment_date.month == last_month.month:
+        last_month_date: date = datetime.now().date() - relativedelta(months=1)
+        for premium in self.sorted_premiums:
+            if premium.scheduled_payment_date.month == last_month_date.month:
                 return premium
         return None
 
-    def get_first_unpaid(self):
+    def get_first_unpaid(self) -> Premiums | None:
+        """will return the first premium which is not paid"""
         if not self.premiums:
             return None
-        # Sort premiums by scheduled_payment_date
-        self.premiums = sorted(self.premiums, key=lambda premium: premium.scheduled_payment_date)
         # Find the first unpaid premium
-        for premium in self.premiums:
+        for premium in self.sorted_premiums:
             if not premium.is_paid:
                 return premium
         return None  # Return None if all premiums are paid
 
-    def next_payment_amount(self):
-        if self.premiums:
-            pass
+    def next_payment_amount(self) -> int | None:
+        """
+            will return the premium for next month if available
+        :return:
+        """
+        if not self.premiums:
+            return None
+        next_month_date: date = datetime.now().date() + relativedelta(months=1)
+        for premium in self.sorted_premiums:
+            if premium.scheduled_payment_date.month == next_month_date.month:
+                return premium.payment_amount
+        return None
+
+    def next_month_premium(self) -> Premiums | None:
+        """returns next months Premium"""
+        if not self.premiums:
+            return None
+        next_month_date: date = datetime.now().date() + relativedelta(months=1)
+        for premium in self.sorted_premiums:
+            if premium.scheduled_payment_date.month == next_month_date.month:
+                return premium
+        return None

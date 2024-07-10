@@ -165,7 +165,11 @@ async def premiums_payments(user: User):
     clients_list: list[ClientPersonalInformation] = []
 
     if branch_id:
-        branch_details = next((branch for branch in company_branches if branch.branch_id == branch_id), None)
+        try:
+            branch_details = next((branch for branch in company_branches if branch.branch_id == branch_id), None)
+        except StopIteration as e:
+            branch_details = None
+            
         if branch_details:
             context.update(branch_details=branch_details)
 
@@ -174,7 +178,11 @@ async def premiums_payments(user: User):
 
     # Fetch selected client and policy data if client_id is provided
     if client_id and clients_list:
-        selected_client = next((client for client in clients_list if client.uid == client_id), None)
+        try:
+            selected_client = next((client for client in clients_list if client.uid == client_id), None)
+        except StopIteration as e:
+            selected_client = None
+
         if selected_client:
             policy_data = await covers_controller.get_policy_data(policy_number=selected_client.policy_number)
             if policy_data:

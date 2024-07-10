@@ -35,6 +35,7 @@
                     {% if selected_client %}
                         <div class="form-group">
                             <ul class="list-group">
+
                                 <li class="list-group-item">Client Name : <span class="text-info pull-right">{{ selected_client.full_names| title }}</span></li>
                                 <li class="list-group-item">Surname : <span class="text-info pull-right">{{ selected_client.surname| title }}</span></li>
                                 <li class="list-group-item">ID Number : <span class="text-info pull-right">{{ selected_client.id_number }}</span></li>
@@ -51,10 +52,9 @@
                                 <li class="list-group-item m-t-8 font-weight-bold"><span class="badge badge-info">Payment Status:</span>
                                     <span class="text-success pull-right">
                                         {% if policy_data.get_this_month_premium().checked_payment_status == payment_status.PAID.value %}
-                                            <span class="badge badge-success">
-                                            <i class="fa fa-thumbs-up"> </i>
-                                                {{ policy_data.get_this_month_premium().checked_payment_status }}
-
+                                            <span class="badge badge-success text-accent-4">
+                                                <i class="fa fa-thumbs-up"> </i>
+                                                    {{ policy_data.get_this_month_premium().checked_payment_status }}
                                             </span>
                                             {% set is_paid = True %}
                                         {% endif %}
@@ -75,6 +75,7 @@
                                 </li>
                             </ul>
                         </div>
+                        {#    The Pay Button will show up when Premium is Not Yet Paid #}
                         {% if not is_paid %}
                             <div class="form-group">
                                 <label for="payment_method">Select Payment Method</label>
@@ -90,21 +91,31 @@
                                 <input  value="{{ policy_data.total_premiums }}" type="number" name="actual_amount" id="actual_amount" class="form-control shadow-sm border-success">
                             </div>
                         {% endif %}
+
                     {% endif %}
                 {% if not is_paid %}
                     <div class="form-group">
                         {% if selected_client %}
                             <button type="submit" class="btn btn-block btn-outline-info btn-rounded btn-lg">
-                                <i class="fa fa-credit-card-alt"></i> Paid
+                                <i class="fa fa-credit-card-alt"></i> Mark as Paid
+                            </button>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="form-group">
+                        {% if selected_client %}
+                            <button type="submit" class="btn btn-block btn-outline-success btn-rounded btn-lg">
+                                <i class="fa fa-print"></i> Reprint Receipt
+                            </button>
+                            <button type="submit" class="btn btn-block btn-outline-primary btn-rounded btn-lg">
+                                <i class="fa fa-send-o"></i> Resend Notifications
                             </button>
                         {% endif %}
                     </div>
                 {% endif %}
                 </form>
-
             </div>
         </div>
-
         <div class="card shadow-lg border-info col-lg-6 col-sm-12 ">
         <div class="card-header shadow-sm border-info bg-facebook">
             <h3 class="card-title text-white">
@@ -117,7 +128,8 @@
                 <ul class="list-group">
                     {% set counter = 0 %}
                     {% for premium in policy_data.premiums %}
-                        {% if premium.is_paid  and counter < 2 %}
+                        {% if premium.is_paid  and (counter < 2) %}
+
                             <li class="list-group-item"><span class="font-weight-bold">Scheduled Payment Date:</span> <span class="text-info pull-right">{{ premium.scheduled_payment_date }}</span></li>
                             <li class="list-group-item"><span class="font-weight-bold text-success">Date Paid:</span> <span class="text-success pull-right">{{ premium.date_paid }}</span></li>
                             <li class="list-group-item"><span class="font-weight-bold">Payment Method:</span> <span class="text-info pull-right">{{ premium.payment_method }}</span></li>
@@ -125,12 +137,12 @@
                             <li class="list-group-item"><span class="font-weight-bold text-success">Amount Paid :</span> <span class="text-success pull-right">R {{ premium.amount_paid| number }}.00</span></li>
                             <li class="list-group-item m-t-8"><span class="font-weight-bold text-danger">Late Charges :</span> <span class="text-danger pull-right">R {{ premium.late_charges| number }}.00</span></li>
                             <li class="list-group-item"><span class="font-weight-bold text-danger">Balance Due:</span> <span class="text-danger pull-right">R {{ premium.balance_due|number }}.00</span></li>
-                        {% set counter = counter + 1 %}
+                            {# this will advance counter on every interation  #}
+                            {% set counter = counter + 1 %}
                         {% endif %}
                     {% endfor %}
                 </ul>
             {% endif %}
-
         </div>
         </div>
     </div>

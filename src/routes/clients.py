@@ -179,7 +179,6 @@ async def edit_policy_details(user: User):
     :return:
     """
     try:
-        print("inside editor")
 
         policy_data = PolicyRegistrationData(**request.form, premiums=[])
         uid = policy_data.uid

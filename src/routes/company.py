@@ -22,13 +22,10 @@ async def get_admin(user: User):
     :return:
     """
     context = dict(user=user)
-    print(f"User : {user}")
-    print(f"Company ID: {user.company_id}")
+
     if user.company_id:
         company_data: Company = await company_controller.get_company_details(company_id=user.company_id)
         company_branches = await company_controller.get_company_branches(company_id=user.company_id)
-        print(f" company : {company_data}")
-        print(f"branches : {company_branches}")
     else:
         company_data = {}
         company_branches = []
@@ -81,7 +78,7 @@ async def do_register(user: User):
                       company_slogan=company_slogan,
                       company_description=company_description,
                       admin_uid=user.uid)
-    print(f"Company ID: {company.company_id}")
+
     registered_company = await company_controller.register_company(company=company)
     user.is_company_admin = True
     user.company_id = registered_company.company_id
@@ -129,8 +126,7 @@ async def get_branch(user: User, branch_id: str):
         return redirect(url_for('company.get_admin'))
     employee_roles: list[str] = await company_controller.get_employee_roles(company_id=user.company_id)
     employee_list: list[EmployeeDetails] = await company_controller.get_branch_employees(branch_id=branch_id)
-    print("#################################################")
-    print(employee_list)
+
     context = dict(user=user, branch=branch, employee_roles=employee_roles, employee_list=employee_list,
                    total_employees=len(employee_list))
 
@@ -274,8 +270,6 @@ async def add_employee(user: User, branch_id: str):
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
     new_employee, employee_ = await company_controller.add_employee(employee=new_employee)
-    print(f"New Employee : {employee_}")
-
     if new_employee:
         branch = await company_controller.get_branch_by_id(branch_id=branch_id)
         branch.total_employees += 1
@@ -371,7 +365,6 @@ async def add_employee_address(user: User, branch_id: str, employee_id: str):
     try:
         address = Address(**request.form)
     except ValidationError as e:
-        print(str(e))
         flash(message="Please input all required fields", category="danger")
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
@@ -405,7 +398,6 @@ async def add_employee_bank_account(user: User, branch_id: str, employee_id: str
     try:
         bank_account = BankAccount(**request.form)
     except ValidationError as e:
-        print(str(e))
         flash(message="Please input all required fields", category="danger")
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
@@ -439,7 +431,6 @@ async def add_employee_contacts(user: User, branch_id: str, employee_id: str):
     try:
         contact = Contacts(**request.form)
     except ValidationError as e:
-        print(str(e))
         flash(message="Please input all required fields", category="danger")
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
@@ -467,7 +458,6 @@ async def add_employee_postal_address(user: User, branch_id: str, employee_id: s
     try:
         postal_address = PostalAddress(**request.form)
     except ValidationError as e:
-        print(str(e))
         flash(message="Please input all required fields", category="danger")
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 

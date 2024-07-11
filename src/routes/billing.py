@@ -46,7 +46,6 @@ async def do_pay_now(user: User):
     payment, is_created = await paypal_controller.create_payment(payment_details=subscription,
                                                                  user=user,
                                                                  success_url=success_url, failure_url=failure_url)
-
     if is_created:
         # Redirect user to PayPal for payment approval
         for link in payment.links:

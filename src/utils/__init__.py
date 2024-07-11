@@ -1,11 +1,11 @@
+from dateutil.relativedelta import relativedelta
+from ulid import ULID
 import random
 import re
 import string
 from datetime import datetime, timedelta
 from enum import Enum
 from os import path
-
-from ulid import ULID
 
 
 # TODO create a class to contain this enum types for the entire project
@@ -57,17 +57,20 @@ def days_left(value):
     if value is None:
         return None
 
+    delta = relativedelta(days=value)
+
     if value < 60:
         return f"{value} days"
-    elif 2 <= value // 30 <= 24:
-        months = value // 30
-        days = value % 30
-        return f"{months} months and {days} days"
-    else:
-        years = value // 365
-        months = (value % 365) // 30
-        days = (value % 365) % 30
-        return f"{years} years, {months} months, and {days} days"
+
+    parts = []
+    if delta.years:
+        parts.append(f"{delta.years} years")
+    if delta.months:
+        parts.append(f"{delta.months} months")
+    if delta.days:
+        parts.append(f"{delta.days} days")
+
+    return ', '.join(parts)
 
 
 def format_square_meters(value):

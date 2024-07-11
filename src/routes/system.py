@@ -1,7 +1,5 @@
 from flask import Blueprint, render_template
 
-from flask import Blueprint, render_template
-
 from src.authentication import system_login
 from src.database.models.companies import Company
 from src.database.models.subscriptions import PlanNames, Subscriptions

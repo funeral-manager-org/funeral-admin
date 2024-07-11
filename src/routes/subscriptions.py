@@ -91,7 +91,6 @@ async def subscription_payment_successful(user: User):
         data = request.json
         # Convert amount to float
     except json.JSONDecodeError as e:
-        print("Error decoding JSON:", e)
         subscription_logger.error(str(e))
         return None
 

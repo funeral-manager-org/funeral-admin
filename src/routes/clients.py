@@ -51,13 +51,10 @@ async def get_client(user: User, uid: str):
     if policy_holder.bank_account_id:
         context['bank_account'] = await company_controller.get_bank_account(
             bank_account_id=policy_holder.bank_account_id)
-
     if policy_holder.address_id:
         context['address'] = await company_controller.get_address(address_id=policy_holder.address_id)
-
     if policy_holder.postal_id:
         context['postal_address'] = await company_controller.get_postal_address(postal_id=policy_holder.postal_id)
-
     if policy_holder.contact_id:
         context['contact'] = await company_controller.get_contact(contact_id=policy_holder.contact_id)
 
@@ -98,7 +95,6 @@ async def get_policy_holders_paged(user: User, page: int = 0, count: int = 25):
 
     policy_holders_list = await company_controller.get_policy_holders_paged(
         company_id=user.company_id, page=page, count=count)
-
     context = dict(user=user, policy_holders_list=policy_holders_list, page=page, count=count)
 
     error_logger.info(f"Policy Holders On Paged Router: {policy_holders_list}")
@@ -115,10 +111,8 @@ async def get_client_capture(user: User):
     """
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     plan_covers = await company_controller.get_company_covers(company_id=user.company_id)
-
     countries = await company_controller.get_countries()
     policy_holder = {}
-
     context = dict(user=user, company_branches=company_branches, plan_covers=plan_covers, countries=countries,
                    policy_holder=policy_holder, InsuredParty=InsuredParty)
 
@@ -156,7 +150,7 @@ async def add_client(user: User):
     # set policy number for the policyholder to the newly created policy
     policy_holder.policy_number = policy.policy_number
 
-    # adding the policy holder to the database
+    # adding the policyholder to the database
     policy_holder = await company_controller.add_policy_holder(policy_holder=policy_holder)
 
     policy_ = await company_controller.add_policy_data(policy_data=policy)
@@ -179,7 +173,6 @@ async def edit_policy_details(user: User):
     :return:
     """
     try:
-
         policy_data = PolicyRegistrationData(**request.form, premiums=[])
         uid = policy_data.uid
     except ValidationError as e:
@@ -188,7 +181,6 @@ async def edit_policy_details(user: User):
         return redirect(url_for("clients.get_clients"))
 
     policy_ = await company_controller.add_policy_data(policy_data=policy_data)
-    print(policy_)
 
     flash(message="Successfully updated Policy Data", category="success")
     return redirect(url_for("clients.get_client", uid=uid))

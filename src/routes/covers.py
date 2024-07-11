@@ -7,7 +7,7 @@ from src.logger import init_logger
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentFrequency, \
     PaymentStatus
 from src.authentication import login_required
-from src.database.models.companies import CoverPlanDetails, CompanyBranches
+from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company
 from src.database.models.users import User
 from src.main import company_controller, covers_controller
 
@@ -227,9 +227,24 @@ async def premiums_payments(user: User):
 
             context.update(paid_premium=paid_premium)
             # TODO Create payment Receipt
-
+            company_details: Company = await company_controller.get_company_details(company_id=user.company_id)
+            if company_details:
+                context.update(company=company_details)
+                title = f"{company_details.company_name} Invoice - Premium Payment For - Policy: {policy_data.policy_number}"
+                context.update(title=title)
             return render_template('admin/premiums/receipt.html', **context)
 
         flash(message="Premium to be paid Not Found or already paid", category="danger")
 
     return render_template('admin/premiums/pay.html', **context)
+
+
+@covers_route.get('/admin/premiums/receipt/<string:invoice_number>')
+@login_required
+async def receipt_reprint(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    pass

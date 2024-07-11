@@ -40,24 +40,18 @@ async def get_company_details(user: User, company_id: str):
     for branch in company_branches:
         if branch.contact_id:
             contact = await company_controller.get_contact(contact_id=branch.contact_id)
-
         else:
             contact = {}
-
         if branch.postal_id:
             postal_address = await company_controller.get_postal_address(postal_id=branch.postal_id)
-
         else:
             postal_address = {}
-
         if branch.address_id:
             physical_address = await company_controller.get_address(address_id=branch.address_id)
-
         else:
             physical_address = {}
         if branch.bank_account_id:
             bank_account = await company_controller.get_bank_account(bank_account_id=branch.bank_account_id)
-
         else:
             bank_account = {}
 

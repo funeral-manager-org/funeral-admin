@@ -157,6 +157,7 @@ async def premiums_payments(user: User):
 
     # Fetch company branches
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+
     context = {
         'user': user,
         'company_branches': company_branches,
@@ -167,6 +168,7 @@ async def premiums_payments(user: User):
     clients_list: list[ClientPersonalInformation] = []
 
     if branch_id:
+        # Loading Branch Clients
         try:
             branch_details = next((branch for branch in company_branches if branch.branch_id == branch_id), {})
         except StopIteration as e:
@@ -205,6 +207,12 @@ async def premiums_payments(user: User):
         else:
             # selected client not found either we changed the branch or there is a big error
             pass
+    else:
+        # This is so that employees can be informed of the next action to take
+        if branch_id and not clients_list:
+            flash(message="Branch Do not have active clients", category="danger")
+        else:
+            flash(message="Select Client to Make / Check Payment", category="success")
 
     # Process the premium payment if all required data is available
     if selected_client and policy_data and actual_amount and payment_method:

@@ -13,3 +13,4 @@ redis~=5.0.6
 colorama~=0.4.6
 python-dateutil~=2.9.0.post0
 ulid-py
+python-ulid

@@ -170,6 +170,7 @@ async def premiums_payments(user: User):
         try:
             branch_details = next((branch for branch in company_branches if branch.branch_id == branch_id), {})
         except StopIteration as e:
+            covers_logger.error("Unable to find branch details - this should not happen")
             branch_details = {}
 
         context.update(branch_details=branch_details)
@@ -177,7 +178,7 @@ async def premiums_payments(user: User):
         clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
             branch_id=branch_id)
 
-        # this will allow the employee to select from only clients who are policy holders
+        # this will allow the employee to select from only clients who are policyholders
         context.update(clients_list=clients_list)
 
     # Fetch selected client and policy data if client_id is provided

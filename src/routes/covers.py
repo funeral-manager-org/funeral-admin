@@ -134,7 +134,10 @@ async def get_quick_pay(user: User):
     :return:
     """
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
-
+    if company_branches:
+        flash(message="Please Select Branch to Update or View Payment Records", category="success")
+    else:
+        flash(message="Snapped! - This is either a Terrible Error or you do not have any branches in your company", category="danger")
     context = dict(user=user, company_branches=company_branches)
     return render_template('admin/premiums/pay.html', **context)
 
@@ -148,6 +151,7 @@ async def premiums_payments(user: User):
     # Initialize variables
     policy_data: PolicyRegistrationData | None = None
     selected_client: ClientPersonalInformation | None = None
+    clients_list: list[ClientPersonalInformation] = []
 
     # Extract form data
     branch_id: str = request.form.get('branch_id', None)
@@ -170,18 +174,30 @@ async def premiums_payments(user: User):
     if branch_id:
         # Loading Branch Clients
         try:
-            branch_details = next((branch for branch in company_branches if branch.branch_id == branch_id), {})
+            branch_details: CompanyBranches | dict = next((branch for branch in company_branches if branch.branch_id == branch_id),
+                                                          {})
+            if not branch_details:
+                flash(message="Branch not found", category="danger")
+                return redirect(url_for('home.get_home'))
+
+            if user.company_id != branch_details.company_id:
+                flash(message="Something is Terribly wrong or you are not authorized to view this resource",
+                      category="danger")
+                return redirect(url_for('home.get_home'))
+
         except StopIteration as e:
             covers_logger.error("Unable to find branch details - this should not happen")
+            flash(message="This is a Terrible Error - We Obviously Did Something wrong please report this",
+                  category="danger")
             branch_details = {}
 
-        context.update(branch_details=branch_details)
-
-        clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
-            branch_id=branch_id)
-
-        # this will allow the employee to select from only clients who are policyholders
-        context.update(clients_list=clients_list)
+        if branch_details:
+            clients_list = await company_controller.get_branch_policy_holders(branch_id=branch_id)
+            # removing clients without actual policy numbers
+            clients_list = [client for client in clients_list if client.policy_number]
+            # this will allow the employee to select from only clients who are policyholders
+            context.update(branch_details=branch_details)
+            context.update(clients_list=clients_list)
 
     # Fetch selected client and policy data if client_id is provided
     if client_id and clients_list:
@@ -203,7 +219,7 @@ async def premiums_payments(user: User):
                 payment_methods = await company_controller.get_payment_methods()
                 context.update(selected_client=selected_client, policy_data=policy_data, payment_methods=payment_methods)
             else:
-                flash("There is no cover associated with this Policy Holder, We cannot Process Payment", category="danger")
+                flash("There is no Policy Associated with the selected Client, We cannot Process Payment", category="danger")
         else:
             # selected client not found either we changed the branch or there is a big error
             pass
@@ -215,9 +231,11 @@ async def premiums_payments(user: User):
             flash(message="Select Client to Make / Check Payment", category="success")
 
     # Process the premium payment if all required data is available
-    if selected_client and policy_data and actual_amount and payment_method:
+    if selected_client and policy_data and actual_amount > 0 and payment_method:
         # should rather allow the employee to choose the premium to make payment for
-        premium = policy_data.get_this_month_premium()
+
+        premium: Premiums = policy_data.get_this_month_premium()
+
         if premium and not premium.is_paid:
             premium.amount_paid = actual_amount
             premium.date_paid = datetime.now().date()
@@ -225,22 +243,25 @@ async def premiums_payments(user: User):
             premium.payment_status = PaymentStatus.PAID.value
             premium.next_payment_amount = premium.payment_amount
 
-            paid_premium = await covers_controller.add_update_premiums_payment(premium_payment=premium)
-            covers_logger.info(f'Covers Paid Premium Logger: {paid_premium.premium_id} {paid_premium.amount_paid} {paid_premium.is_paid}')
+            paid_premium: Premiums = await covers_controller.add_update_premiums_payment(premium_payment=premium)
+            context.update(paid_premium=paid_premium)
 
-            is_sent = await covers_controller.send_premium_payment_notification(
-                premium=paid_premium, policy_data=policy_data)
+            covers_logger.info(f'Covers Paid Premium Logger: {paid_premium.premium_id} {paid_premium.amount_paid} {paid_premium.is_paid}')
+            is_sent = await covers_controller.send_premium_payment_notification(premium=paid_premium,
+                                                                                policy_data=policy_data)
             if not is_sent:
+                # Could Not Send payment Notifications either by email or SMS
+                covers_logger.info("failed to send payment notifications please complete the client contact records")
                 flash(message="failed to send payment notifications please complete the client contact records",
                       category='danger')
 
-            context.update(paid_premium=paid_premium)
-            # TODO Create payment Receipt
+            # TODO Create payment Receipt - right now
             company_details: Company = await company_controller.get_company_details(company_id=user.company_id)
             if company_details:
                 context.update(company=company_details)
                 title = f"{company_details.company_name} Invoice - Premium Payment For - Policy: {policy_data.policy_number}"
                 context.update(title=title)
+
             return render_template('admin/premiums/receipt.html', **context)
 
         flash(message="Premium to be paid Not Found or already paid", category="danger")

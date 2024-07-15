@@ -37,7 +37,7 @@ class PaymentORM(Base):
             'transaction_id': self.transaction_id,
             'subscription_id': self.subscription_id,
             'package_id': self.package_id,
-            'invoice_number': self.invoice_number,
+            'receipt_number': self.invoice_number,
             'amount_paid': self.amount_paid,
             'date_paid': self.date_paid,
             'payment_method': self.payment_method,

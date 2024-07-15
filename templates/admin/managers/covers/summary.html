@@ -1,0 +1,45 @@
+
+
+
+<div class="card-footer">
+    <div class="card-header">
+        <h3 class="card-title font-weight-bold">
+            <span class="text-info">{{ subscribers_data.summary_month|title }}</span>
+            <small>Policy Payment Summary</small>
+        </h3>
+    </div>
+    <ul class="list-group m-t-12">
+        <li class="list-group-item">
+            <span class="font-weight-bold">
+            Policies :</span>  <span class="pull-right text-success">{{ subscribers_data.total_policies|number }}
+            </span>
+        </li>
+        <li class="list-group-item">
+            <span class="font-weight-bold">
+            Premiums :</span> <span class="pull-right text-success"> R {{ subscribers_data.total_premiums|number }}.00
+            </span>
+        </li>
+        <li class="list-group-item m-t-8">
+            <span class="font-weight-bold">
+            Policies Paid:</span> <span class="pull-right text-info"> {{ subscribers_data.total_premiums_paid|number }}
+            </span>
+        </li>
+        <li class="list-group-item">
+            <span class="font-weight-bold">
+            Premiums Paid :</span> <span class="pull-right text-info"> {{ subscribers_data.total_amount_paid|number }}.00
+            </span>
+        </li>
+        <li class="list-group-item m-t-8">
+            <span class="font-weight-bold">
+             Policies Not Paid:</span> <span class="pull-right text-danger">  {{ (subscribers_data.total_policies - subscribers_data.total_premiums_paid) | number }}
+            </span>
+        </li>
+        <li class="list-group-item">
+            <span class="font-weight-bold">
+            Premiums Not Paid :</span> <span class="pull-right text-danger"> R {{ (subscribers_data.total_premiums - subscribers_data.total_amount_paid) |number }}.00
+        </span>
+        </li>
+
+    </ul>
+</div>
+

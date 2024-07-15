@@ -161,6 +161,9 @@ class Premiums(BaseModel):
     next_payment_date: date = Field(default_factory=next_due_date)
     payment_frequency: str = Field(default=PaymentFrequency.MONTHLY.value)
 
+    def __bool__(self) -> bool:
+        return bool(self.premium_id)
+
     def update_payment_status(self):
         if (self.balance_due < 1) or self.is_paid:
             self.payment_status = PaymentStatus.PAID.value
@@ -206,15 +209,24 @@ class Premiums(BaseModel):
         return self.total_due - self.amount_paid
 
 
-class PremiumInvoice(BaseModel):
-    invoice_number: str = Field(default_factory=create_ulid)
+class PremiumReceipt(BaseModel):
+    receipt_number: str = Field(default_factory=create_ulid)
     premium_id: str
 
-    datetime_paid: datetime = Field(default_factory=datetime.now())
+    datetime_paid: datetime = Field(default_factory=datetime.now)
     paid_amount: int = Field(default=0)
     policy_number: str
-    secondary_cell: str
-    payment_notification_sent: bool = Field(default=False)
+    sms_notification_sent: bool = Field(default=False)
+    email_notification_sent: bool = Field(default=False)
+    whatsapp_notification_sent: bool = Field(default=False)
+
+    @classmethod
+    def from_premium(cls, premium: Premiums) -> 'PremiumReceipt':
+        return cls(
+            premium_id=premium.premium_id,
+            paid_amount=premium.amount_paid,
+            policy_number=premium.policy_number
+        )
 
 
 class PolicyRegistrationData(BaseModel):
@@ -241,7 +253,7 @@ class PolicyRegistrationData(BaseModel):
 
     @property
     def sorted_premiums(self) -> list[Premiums]:
-        """returns premiums sorted in ascending order"""
+        """returns premiums sorted in ascending order by premium date"""
         return sorted(self.premiums, key=lambda _premium: _premium.scheduled_payment_date)
 
     @property
@@ -250,6 +262,19 @@ class PolicyRegistrationData(BaseModel):
         today = datetime.today().date()
         return sum((premium.balance_due for premium in self.premiums
                     if ((premium.scheduled_payment_date <= today) and (not premium.is_paid))))
+
+    @property
+    def out_standing(self) -> bool:
+        this_month_premium = self.get_this_month_premium()
+        if not this_month_premium:
+            return True
+        this_month_premium.update_payment_status()
+        # outstanding because the latest premium is overdue
+        if this_month_premium.payment_status == PaymentStatus.OVERDUE.value:
+            return True
+
+        # check if any other premium was not paid before
+        return self.total_balance_due > self.total_premiums
 
     def total_future_payments(self, include_previous: bool = False, total_months: int = 3) -> int:
         """
@@ -313,6 +338,13 @@ class PolicyRegistrationData(BaseModel):
             if premium.scheduled_payment_date.month == datetime.now().month:
                 return premium
         return None
+
+    @staticmethod
+    def report_month_in_words() -> str:
+        months_names = {
+            1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June', 7: 'July', 8: 'August',
+            9: 'September', 10: 'October', 11: 'November', 12: 'December'}
+        return months_names[datetime.now().month]
 
     def get_previous_month_premium(self) -> Premiums | None:
         """will return previous month premium if exist"""

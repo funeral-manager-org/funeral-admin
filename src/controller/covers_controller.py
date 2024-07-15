@@ -12,7 +12,7 @@ from src.database.models.contacts import Contacts
 from src.database.sql.companies import CompanyORM, CompanyBranchesORM
 from src.database.sql.contacts import ContactsORM
 from src.controller import Controllers, error_handler
-from src.database.models.covers import Premiums, PremiumInvoice, PolicyRegistrationData, ClientPersonalInformation
+from src.database.models.covers import Premiums, PolicyRegistrationData, ClientPersonalInformation, PremiumReceipt
 from src.database.sql.covers import PremiumsORM, PolicyRegistrationDataORM, ClientPersonalInformationORM
 
 
@@ -72,9 +72,10 @@ class CoversController(Controllers):
             premium_orm.payment_status = status
 
     @error_handler
-    async def add_premium_invoice(self, invoice: PremiumInvoice, premium_id: str):
+    async def add_premium_receipt(self, receipt: PremiumReceipt) -> PremiumReceipt:
         with self.get_session() as session:
-            pass
+            session.add(PremiumsORM(**receipt.dict()))
+            return receipt
 
     @error_handler
     async def get_policy_data(self, policy_number: str) -> PolicyRegistrationData | None:
@@ -112,7 +113,32 @@ class CoversController(Controllers):
                 .all()
             )
             return [PolicyRegistrationData(**policy_data_orm.to_dict())
-                    for policy_data_orm in policy_data_orm_list]
+                    for policy_data_orm in policy_data_orm_list if isinstance(policy_data_orm, PolicyRegistrationDataORM)]
+
+    async def get_outstanding_branch_policy_data_list(self,
+                                                      branch_id: str,
+                                                      page: int = 0,
+                                                      count: int = 25) -> list[PolicyRegistrationData]:
+        """
+            **get_outstanding_branch_policy_data_list*8
+        :param branch_id:
+        :param page:
+        :param count:
+        :return:
+        """
+        with self.get_session() as session:
+            policy_data_orm_list = (
+                session.query(PolicyRegistrationDataORM)
+                .filter_by(branch_id=branch_id)
+                .options(joinedload(PolicyRegistrationDataORM.premiums))
+                .offset(page * count)
+                .all()
+            )
+            policy_reg_data: list[PolicyRegistrationData] = [PolicyRegistrationData(**policy_data_orm.to_dict())
+                                                             for policy_data_orm in policy_data_orm_list
+                                                             if isinstance(policy_data_orm, PolicyRegistrationDataORM)]
+            # filter out outstanding policies and return policies upto the limit = count
+            return [policy for policy in policy_reg_data if policy.out_standing][:count]
 
     @error_handler
     async def create_forecasted_premiums(self, policy_number: str, total: int = 12):
@@ -253,3 +279,11 @@ class CoversController(Controllers):
             recipient_type=RecipientTypes.CLIENTS.value)
 
         await self.messaging_controller.send_email(email_message)
+
+    async def create_invoice_record(self, premium: Premiums) -> PremiumReceipt:
+        """
+
+        :param premium:
+        :return:
+        """
+        return await self.add_premium_receipt(receipt=PremiumReceipt.from_premium(premium=premium))

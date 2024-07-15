@@ -11,7 +11,7 @@ Base = declarative_base()
 #     __tablename__ = 'payments_orm'
 #
 #     transaction_id = Column(String(ID_LEN), primary_key=True)
-#     invoice_number = Column(Integer, Sequence('invoice_number_seq'), autoincrement=True)
+#     receipt_number = Column(Integer, Sequence('invoice_number_seq'), autoincrement=True)
 #     subscription_id = Column(String(ID_LEN), ForeignKey('subscriptions.subscription_id'))
 #     package_id = Column(String(ID_LEN), ForeignKey('sms_packages.package_id'))
 #     amount_paid = Column(Integer)
@@ -36,7 +36,7 @@ Base = declarative_base()
 #             'transaction_id': self.transaction_id,
 #             'subscription_id': self.subscription_id,
 #             'package_id': self.package_id,
-#             'invoice_number': self.invoice_number,
+#             'receipt_number': self.receipt_number,
 #             'amount_paid': self.amount_paid,
 #             'date_paid': self.date_paid,
 #             'payment_method': self.payment_method,

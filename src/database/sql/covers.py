@@ -1,6 +1,6 @@
-from datetime import date
+from datetime import date, datetime
 
-from sqlalchemy import Column, String, inspect, Integer, Boolean, ForeignKey, Date
+from sqlalchemy import Column, String, inspect, Integer, Boolean, ForeignKey, Date, DateTime
 from sqlalchemy.orm import relationship
 
 from src.database.constants import ID_LEN, NAME_LEN
@@ -151,11 +151,11 @@ class PolicyRegistrationDataORM(Base):
         if inspect(engine).has_table(cls.__tablename__):
             cls.__table__.drop(bind=engine)
 
-    def to_dict(self):
+    def to_dict(self, include_relationships=True):
         """
         Convert the object to a dictionary representation.
         """
-        return {
+        data = {
             "uid": self.uid,
             "branch_id": self.branch_id,
             "company_id": self.company_id,
@@ -171,10 +171,13 @@ class PolicyRegistrationDataORM(Base):
             "client_signature": self.client_signature,
             "employee_signature": self.employee_signature,
             "payment_method": self.payment_method,
-            "policy_active": self.policy_active,
-            "premiums": [premium.to_dict() for premium in self.premiums or []
-                         if isinstance(premium, PremiumsORM)]
+            "policy_active": self.policy_active
+
         }
+        if include_relationships:
+            data["premiums"] = [premium.to_dict(include_relationships=True) for premium in self.premiums or []
+                                if isinstance(premium, PremiumsORM)]
+        return data
 
 
 class PremiumsORM(Base):
@@ -196,6 +199,9 @@ class PremiumsORM(Base):
 
     payment_frequency: str = Column(String(36))
 
+    # Define relationship to PremiumReceiptORM
+    receipts = relationship("PremiumReceiptORM", back_populates="premium", lazy=True, cascade="all, delete-orphan")
+
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
@@ -206,23 +212,70 @@ class PremiumsORM(Base):
         if inspect(engine).has_table(cls.__tablename__):
             cls.__table__.drop(bind=engine)
 
-    def to_dict(self):
+    def to_dict(self, include_relationships=True):
         """
         Convert the object to a dictionary representation.
         """
-        return {
+        data = {
             "premium_id": self.premium_id,
             "policy_number": self.policy_number,
             "scheduled_payment_date": self.scheduled_payment_date,
-
             "payment_amount": self.payment_amount,
             "amount_paid": self.amount_paid,
             "date_paid": self.date_paid,
-
             "payment_method": self.payment_method,
             "payment_status": self.payment_status,
-
             "next_payment_amount": self.next_payment_amount,
             "next_payment_date": self.next_payment_date,
             "payment_frequency": self.payment_frequency,
         }
+
+        if include_relationships:
+            data["receipts"] = [receipt.to_dict(include_relationships=False) for receipt in self.receipts or []
+                                if isinstance(receipt, PremiumReceiptORM)]
+        return data
+
+
+class PremiumReceiptORM(Base):
+    """
+        this are receipts for premium payments
+    """
+    __tablename__ = 'premium_receipts'
+    receipt_number: str = Column(String(ID_LEN), primary_key=True, index=True)
+    premium_id: str = Column(String(ID_LEN), ForeignKey('premiums.premium_id'))
+    datetime_paid: datetime = Column(DateTime)
+    paid_amount: int = Column(Integer)
+    policy_number: str = Column(String(9), ForeignKey('policy_registration_data.policy_number'))
+
+    sms_notification_sent: bool = Column(Boolean)
+    email_notification_sent: bool = Column(Boolean)
+    whatsapp_notification_sent: bool = Column(Boolean)
+    premium = relationship("PremiumsORM", back_populates="receipts")
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self, include_relationships=True):
+        """
+        Convert the object to a dictionary representation.
+        """
+        data = {
+            "receipt_number": self.receipt_number,
+            "premium_id": self.premium_id,
+            "datetime_paid": self.datetime_paid,
+            "paid_amount": self.paid_amount,
+            "policy_number": self.policy_number,
+            "sms_notification_sent": self.sms_notification_sent,
+            "email_notification_sent": self.email_notification_sent,
+            "whatsapp_notification_sent": self.whatsapp_notification_sent,
+        }
+        if include_relationships:
+            data['premium'] = self.premium.to_dict(include_relationships=False) if self.premium else {}
+        return data

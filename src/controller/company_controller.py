@@ -584,6 +584,23 @@ class CompanyController(Controllers):
             return [PolicyRegistrationData(**subscriber.to_dict()) for subscriber in plan_subscribers
                     if isinstance(subscriber, PolicyRegistrationDataORM)]
 
+    async def get_plan_subscribers_paged(self, company_id: str, plan_number: str, page: int = 0, count: int = 25):
+        """
+
+        :param company_id:
+        :param plan_number:
+        :param page:
+        :param count:
+        :return:
+        """
+        with self.get_session() as session:
+            plan_policies_query = (session.query(CoverPlanDetailsORM)
+                                   .filter_by(plan_number=plan_number)
+                                   .offset(page * count).limit(count + 1))
+            plan_policies_orm_list = plan_policies_query.all()
+            return [CoverPlanDetails(**policy.to_dict()) for policy in plan_policies_orm_list or []
+                    if isinstance(policy, CoverPlanDetailsORM)]
+
     @cached_ttl(ttl=60)
     @error_handler
     async def get_policy_holders(self, company_id: str) -> list[ClientPersonalInformation]:
@@ -643,7 +660,6 @@ class CompanyController(Controllers):
     @error_handler
     async def get_policy_data(self, policy_number: str) -> PolicyRegistrationData | None:
         with self.get_session() as session:
-
             policy_data_orm = (
                 session.query(PolicyRegistrationDataORM)
                 .filter_by(policy_number=policy_number)
@@ -667,7 +683,6 @@ class CompanyController(Controllers):
                 policy_number=policy_number).all()
             return [ClientPersonalInformation(**client.to_dict()) for client in beneficiaries_list_orm]
 
-    @cached_ttl()
     @error_handler
     async def get_payment_methods(self) -> list[str]:
         return PaymentMethods.get_payment_methods()
@@ -849,7 +864,8 @@ class CompanyController(Controllers):
             # Perform a single query to fetch policies by policyholders name
             policies_orm = (
                 session.query(PolicyRegistrationDataORM)
-                .join(ClientPersonalInformationORM,ClientPersonalInformationORM.policy_number == PolicyRegistrationDataORM.policy_number)
+                .join(ClientPersonalInformationORM,
+                      ClientPersonalInformationORM.policy_number == PolicyRegistrationDataORM.policy_number)
                 .filter(ClientPersonalInformationORM.full_names == policy_holder_name)
                 .all())
 

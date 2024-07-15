@@ -31,8 +31,7 @@
                 <li class="nav-item">
                     <a class="nav-link" id="clients-tab" data-toggle="tab" href="#clients" role="tab" aria-controls="clients" aria-selected="false">
                         <span class="font-weight-bold text-info">
-
-                            Subscribed Clients
+                            Policies
                         </span>
                     </a>
                 </li>
@@ -52,9 +51,9 @@
                                 </h3>
                             </div>
 
-                            <ol class="m-t-10 font-weight-bold col-lg-6 col-md-6">
+                            <ol class="m-t-10 font-weight-bold col-lg-12 col-md-12">
                                 <li>Plan Number: <span class="text-info pull-right">{{ plan_cover.plan_number }}</span></li>
-                                <li>Plan Type: <span class="text-info pull-right">{{ plan_cover.plan_type| title }}</span></li>
+                                <li>Plan Type: <span class="text-info pull-right font-weight-bold">{{ plan_cover.plan_type| title }}</span></li>
                                 <li><hr></li>
                                 <li>Benefits
                                     <ul class="list-inline pull-right">
@@ -93,6 +92,7 @@
                                 <li>Contact Information: <span class="text-info pull-right">{{ plan_cover.contact_information }}</span></li>
                             </ol>
                         </div>
+                       {% include "admin/managers/covers/summary.html" %}
                     </div>
                 </div>
 
@@ -108,35 +108,39 @@
                     <div class="card-body">
                         <!-- Display subscribed clients here -->
                         <!-- Assuming you have a list of subscribed clients -->
-                        <table class="table table-bordered table-striped">
+                        <table class="table table-striped">
                             <thead>
                                 <tr class="font-weight-bold text-info">
                                     <td>Policy Number</td>
-                                    <td>Plan Number</td>
                                     <td>Policy Type</td>
-                                    <td>Total Members</td>
+                                    <td>Insured Members</td>
                                     <td>Premium</td>
-                                    <td>Date Activated</td>
-                                    <td>Payment Day</td>
-                                    <td>Payment Method</td>
+                                    <td>is Paid</td>
+                                    <td></td>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for client in subscribed_clients %}
+                                {% for policy in subscribers_data.policies %}
                                     <tr>
-                                        <td>{{ client.policy_number }}</td>
-                                        <td>{{ client.plan_number }}</td>
-                                        <td>{{ client.policy_type }}</td>
-                                        <td>{{ client.total_family_members }}</td>
-                                        <td>{{ client.total_premiums }}</td>
-                                        <td>{{ client.date_activated }}</td>
-                                        <td>{{ client.payment_day }}</td>
-                                        <td>{{ client.payment_method }}</td>
+                                        <td><span class="badge text-dark font-weight-bold">{{ policy.policy_number }}</span></td>
+                                        <td class="font-weight-bold">{{ policy.policy_type|title }}</td>
+                                        <td>{{ policy.total_family_members }}</td>
+                                        <td>R {{ policy.total_premiums }}.00</td>
+                                        <td>
+                                            {% if  policy.get_this_month_premium().is_paid %}
+                                            <span class="badge badge-success">PAID</span>
+                                            {% else %}
+                                            <span class="badge badge-danger">UN-PAID</span>
+                                            {% endif %}
+                                        </td>
+                                        <td></td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
+                    {% include "admin/managers/covers/summary.html" %}
+
                 </div>
             </div>
         </div>

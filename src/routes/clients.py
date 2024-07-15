@@ -1,13 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
-from asyncio import gather
 
-from src.logger import init_logger
 from src.authentication import login_required
 from src.database.models.bank_accounts import BankAccount
 from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, InsuredParty
 from src.database.models.users import User
+from src.logger import init_logger
 from src.main import company_controller, covers_controller
 
 clients_route = Blueprint('clients', __name__)

@@ -25,8 +25,12 @@
                 <tbody>
                     {% for employee in employees_list %}
                             <tr>
-                                <td>{{ employee.full_names }}</td>
-                                <td>{{ employee.last_name }}</td>
+                                <td>
+                                    <a href="{{ url_for('employees.get_employee_detail', employee_id=employee.employee_id) }}">
+                                        {{ employee.full_names|title }}
+                                    </a>
+                                </td>
+                                <td>{{ employee.last_name|title }}</td>
                                 <td>{{ employee.id_number }}</td>
                                 <td>{{ employee.contact_number }}</td>
                                 <td>{{ employee.email }}</td>

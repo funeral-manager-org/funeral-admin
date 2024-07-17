@@ -1,0 +1,119 @@
+{% extends "layouts/page.html" %}
+
+{% block content %}
+
+<section id="main-content">
+<div class="card shadow-lg border-primary">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-user-circle-o"> </i>
+            Personal Details
+        </h3>
+    </div>
+
+    <div class="card-body">
+        <ul class="list-group">
+            <li class="list-group-item">Names: <span class="pull-right">{{ employee_detail.full_names|title }}</span></li>
+            <li class="list-group-item">Surname: <span class="pull-right">{{ employee_detail.last_name|title }}</span></li>
+            <li class="list-group-item">ID Number: <span class="pull-right">{{ employee_detail.id_number }}</span></li>
+            <li class="list-group-item m-t-12">Role: <span class="pull-right">{{ employee_detail.role|title }}</span></li>
+            <li class="list-group-item">Position: <span class="pull-right">{{ employee_detail.position|title }}</span></li>
+            <li class="list-group-item">Salary: <span class="pull-right text-info">R {{ employee_detail.salary|number }}.00</span></li>
+            <li class="list-group-item m-t-8">Employee Account Active:
+                {% if employee_detail.is_active %}
+                    <span class="pull-right badge badge-success"><i class="fa fa-thumbs-up"> </i> {{ employee_detail.is_active }}</span>
+                {% else %}
+                    <span class="pull-right badge badge-danger"><i class="fa fa-thumbs-down"> </i> {{ employee_detail.is_active }}</span>
+                {% endif %}
+
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="card shadow-lg border-info">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-user-circle-o"> </i>
+            Bank Account
+        </h3>
+    </div>
+    <div class="card-body">
+        {% if bank_account %}
+            <ul class="list-group">
+                <li class="list-group-item">Bank Name : <span class="pull-right">{{ bank_account.bank_name }}</span></li>
+                <li class="list-group-item">Account Holder : <span class="pull-right">{{ bank_account.account_holder }}</span></li>
+                <li class="list-group-item">Account Number : <span class="pull-right">{{ bank_account.account_number }}</span></li>
+                <li class="list-group-item">Account Type : <span class="pull-right">{{ bank_account.account_type }}</span></li>
+                <li class="list-group-item">Branch : <span class="pull-right">{{ bank_account.branch }}</span></li>
+            </ul>
+        {% else %}
+            <p>Employee Does not have any Bank Records</p>
+        {% endif %}
+
+    </div>
+</div>
+<div class="card shadow-lg border-info">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-user-circle-o"> </i>
+            Contact Details
+        </h3>
+    </div>
+    <div class="card-body">
+        {% if physical_address %}
+            <ul class="list-group">
+                <li class="list-group-item">Cell : <span class="pull-right">{{ contact_details.cell }}</span></li>
+                <li class="list-group-item">Tel : <span class="pull-right">{{ contact_details.tel }}</span></li>
+                <li class="list-group-item">Email : <span class="pull-right">{{ contact_details.email }}</span></li>
+                <li class="list-group-item">Facebook : <span class="pull-right">{{ contact_details.facebook }}</span></li>
+                <li class="list-group-item">Twitter : <span class="pull-right">{{ contact_details.twitter }}</span></li>
+                <li class="list-group-item">WhatsApp : <span class="pull-right">{{ contact_details.whatsapp }}</span></li>
+            </ul>
+
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-lg border-info">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-user-circle-o"> </i>
+            Physical Address
+        </h3>
+    </div>
+    <div class="card-body">
+        {% if physical_address %}
+            <ul class="list-group">
+                <li class="list-group-item">Street : <span class="pull-right">{{ physical_address.street }}</span></li>
+                <li class="list-group-item">City : <span class="pull-right">{{ physical_address.city|title }}</span></li>
+                <li class="list-group-item">Province : <span class="pull-right">{{ physical_address.state_province|title }}</span></li>
+                <li class="list-group-item">Postal Code : <span class="pull-right">{{ physical_address.postal_code }}</span></li>
+                <li class="list-group-item">Country : <span class="pull-right">{{ physical_address.country|title }}</span></li>
+            </ul>
+
+        {% endif %}
+    </div>
+</div>
+<div class="card shadow-lg border-info">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-user-circle-o"> </i>
+            Postal Address
+        </h3>
+    </div>
+    <div class="card-body">
+        {% if physical_address %}
+            <ul class="list-group">
+                <li class="list-group-item">Address Line 1 : <span class="pull-right">{{ postal_address.address_line_1 }}</span></li>
+                <li class="list-group-item">City : <span class="pull-right">{{ postal_address.town_city|title }}</span></li>
+                <li class="list-group-item">Province : <span class="pull-right">{{ postal_address.province|title }}</span></li>
+                <li class="list-group-item">Postal Code : <span class="pull-right">{{ postal_address.postal_code }}</span></li>
+                <li class="list-group-item">Country : <span class="pull-right">{{ postal_address.country|title }}</span></li>
+            </ul>
+
+        {% endif %}
+    </div>
+</div>
+
+</section>
+{% endblock %}

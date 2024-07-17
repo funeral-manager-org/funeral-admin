@@ -1,9 +1,9 @@
 
 
 
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title text-info font-weight-bold">
+    <div class="card shadow-lg border-success">
+        <div class="card-header bg-facebook">
+            <h2 class="card-title text-white font-weight-bold">
                 <i class="fa fa-folder"> </i>
                 Company Registration
             </h2>
@@ -42,11 +42,17 @@
                     <label class="font-weight-bold text-info" for="company_slogan">Company Slogan / Corporate Moto:<span class="font-weight-bold text-danger">*</span></label>
                     <input type="text" class="form-control" id="company_slogan" name="company_slogan">
                 </div>
-                <button type="submit" class="btn btn-rounded btn-lg btn-primary">
-                    <i class="fa fa-save"> </i>
-                    Register
+                <button type="submit" class="btn btn-rounded btn-lg btn-outline-primary">
+                    {% if company_details %}
+                        <i class="fa fa-save"> </i>
+                        Update
+
+                    {% else %}
+                        <i class="fa fa-save"> </i>
+                        Register
+                    {% endif %}
                 </button>
-                <button type="reset" class="btn btn-rounded btn-lg btn-warning">
+                <button type="reset" class="btn btn-rounded btn-lg btn-outline-warning">
                     <i class="fa fa-cut"> </i>
                     Cancel
                 </button>

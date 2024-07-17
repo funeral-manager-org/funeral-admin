@@ -11,10 +11,10 @@
                     </div>
                     <li class="label">Main</li>
                     <li><a href="{{ url_for('home.get_home') }}"><i class="ti-home"></i> Home</a></li>
-                    <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Manage<span
+                    <li><a class="sidebar-sub-toggle"><span class="text-success"><i class="ti-dashboard"></i> Manage</span><span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
-                            <li><a href="{{ url_for('company.get_admin') }}"><i class="ti-briefcase"></i> Company</a></li>
+                            <li><a href="{{ url_for('company.get_admin') }}"><span class="text-success"><i class="ti-briefcase"></i> Company</span></a></li>
                             <li><a href="{{ url_for('covers.get_covers') }}"><i class="fa fa-user-plus"></i> Covers</a></li>
                             <li><a href="{{ url_for('employees.get_employees') }}"><i class="ti-briefcase"></i> Employees</a></li>
                             <li><a href="{{ url_for('messaging.get_admin') }}"><i class="fa fa-cogs"></i> Settings & Stats</a></li>
@@ -25,9 +25,9 @@
                         <ul>
                             <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-plus"></i> Policies</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
-                                    <li><a href="{{ url_for('policy.get_active_policies_paged', page=0, count=25) }}"><i class="ti-user"></i> Active Policies</a></li>
-                                    <li><a href="{{ url_for('policy.get_lapsed_policies_paged', page=0, count=25) }}"><i class="fa fa-user-times"></i> Lapsed Policies</a></li>
-                                    <li><a href="{{ url_for('policy.get_search_policies') }}"><i class="fa fa-search"></i> Search</a></li>
+                                    <li><a href="{{ url_for('policy.get_active_policies_paged', page=0, count=25) }}"><span class="text-primary"><i class="ti-user"></i> Active Policies</span></a></li>
+                                    <li><a href="{{ url_for('policy.get_lapsed_policies_paged', page=0, count=25) }}"><span class="text-danger"><i class="fa fa-user-times"></i> Lapsed Policies</span></a></li>
+                                    <li><a href="{{ url_for('policy.get_search_policies') }}"><span class="text-info"><i class="fa fa-search"></i> Search</span></a></li>
                                 </ul>
                             </li>
                             <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-md"></i> Policy Holders</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>

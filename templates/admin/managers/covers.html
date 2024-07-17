@@ -3,9 +3,9 @@
 {% block content %}
 
 <section id="main-content">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title font-weight-bold text-info">
+    <div class="card shadow-lg border-success">
+        <div class="card-header bg-facebook">
+            <h3 class="card-title font-weight-bold text-white">
                 <i class="fa fa-folder-open"> </i>
                 Covers
             </h3>
@@ -44,9 +44,9 @@
             <div class="tab-content" id="companyTabsContent">
                 <div class="tab-pane fade show active" id="companyDetails" role="tabpanel" aria-labelledby="companyDetails-tab">
                     <!-- Company Details Tab Content -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title font-weight-bold text-info">
+                    <div class="card shadow-lg border-info">
+                        <div class="card-header bg-facebook">
+                            <h3 class="card-title font-weight-bold text-white">
                                 <i class="fa fa-folder-open-o"> </i>
                                 Active Covers
                             </h3>
@@ -85,9 +85,12 @@
 
                 <div class="tab-pane fade" id="createPlan" role="tabpanel" aria-labelledby="createPlan-tab">
                     <!-- Add Company Branch Tab Content -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Create Plan</h3>
+                    <div class="card shadow-lg border-info">
+                        <div class="card-header bg-facebook">
+                            <h3 class="card-title text-white">
+                                <i class="fa fa-pencil-square"> </i>
+                                Create Plan
+                            </h3>
                         </div>
                         <div class="card-body">
                           {% include "admin/managers/covers/cover_form.html" %}

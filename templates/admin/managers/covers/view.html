@@ -3,9 +3,9 @@
 {% block content %}
 
 <section id="main-content">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title font-weight-bold text-info">
+    <div class="card shadow-lg border-info">
+        <div class="card-header bg-facebook">
+            <h3 class="card-title font-weight-bold text-white">
                 <i class="fa fa-umbrella"></i>
                 Plan Cover Details
             </h3>
@@ -41,8 +41,8 @@
             <div class="tab-content" id="myTabContent">
                 <!-- Details tab -->
                 <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
-                    <div class="card-body">
-                        <div class="card">
+
+                        <div class="card shadow-lg border-info">
                             <div class="card-header">
                                 <h3 class="card-title font-weight-bold text-info">
                                     <i class="fa fa-umbrella">
@@ -93,19 +93,19 @@
                             </ol>
                         </div>
                        {% include "admin/managers/covers/summary.html" %}
-                    </div>
+
                 </div>
 
                 <!-- Edit tab -->
                 <div class="tab-pane fade" id="edit" role="tabpanel" aria-labelledby="edit-tab">
-                    <div class="card-body">
+                    <div class="card shadow-lg border-info">
                         {% include "admin/managers/covers/cover_form.html" %}
                     </div>
                 </div>
 
                 <!-- Subscribed clients tab -->
                 <div class="tab-pane fade" id="clients" role="tabpanel" aria-labelledby="clients-tab">
-                    <div class="card-body">
+                    <div class="card shadow-lg border-info">
                         <!-- Display subscribed clients here -->
                         <!-- Assuming you have a list of subscribed clients -->
                         <table class="table table-striped">

@@ -1,4 +1,7 @@
-from pydantic import BaseModel, Field
+from datetime import datetime, date, timedelta
+
+from dateutil.relativedelta import relativedelta
+from pydantic import BaseModel, Field, EmailStr
 from src.utils import create_id, string_today, create_plan_number, create_employee_id
 
 
@@ -176,8 +179,7 @@ class EmployeeDetails(BaseModel):
     full_names: str
     last_name: str
     id_number: str
-    role: str
-    email: str
+    email: EmailStr
     contact_number: str
     position: str
     role: str
@@ -190,3 +192,233 @@ class EmployeeDetails(BaseModel):
     contact_id: str | None
     postal_id: str | None
     bank_account_id: str | None
+
+
+class TimeRecord(BaseModel):
+    employee_id: str
+    normal_minutes_per_session: int = Field(default=8 * 60)
+    clock_in: datetime
+    clock_out: datetime
+
+    note: str | None = ""
+
+    @property
+    def normal_minutes_worked(self) -> int:
+        """
+        Calculates the total minutes worked based on clock_in and clock_out times.
+        Handles cases where clock_out falls on the next day.
+
+        Returns:
+            int: Total minutes worked.
+        """
+        if not self.clock_in or not self.clock_out:
+            return 0  # Handle missing clock in/out times
+        # Calculate the difference in time
+        delta: timedelta = self.clock_out - self.clock_in
+        return min(int(delta.total_seconds() // 60), self.normal_minutes_per_session)
+
+    @property
+    def overtime_worked(self) -> int:
+        """
+            :return:
+        """
+        return max(self.normal_minutes_worked - self.normal_minutes_per_session, 0)
+
+    @property
+    def total_time_worked_minutes(self) -> int:
+        if not self.clock_in or not self.clock_out:
+            return 0  # Handle missing clock in/out times
+        # Calculate the difference in time
+        delta: timedelta = self.clock_out - self.clock_in
+        return int(delta.total_seconds() // 60)
+
+    def day_and_date_clocked_in(self) -> str:
+        """
+            **day_and_date_clocked_in**
+            Returns the day of the week and the exact date worked in the format "Monday, 22 June 2025".
+            Returns:
+                str: Day of the week and date worked.
+        """
+        day_of_week = self.clock_in.strftime("%A")
+        date_worked = self.clock_in.strftime("%d %B %Y")
+        return f"{day_of_week}, {date_worked}"
+
+    def day_and_date_clocked_out(self) -> str:
+        """
+            Returns the day of the week and the exact date worked in the format "Monday, 22 June 2025".
+            Returns:
+                str: Day of the week and date worked.
+        """
+        day_of_week = self.clock_out.strftime("%A")
+        date_worked = self.clock_out.strftime("%d %B %Y")
+        return f"{day_of_week}, {date_worked}"
+
+
+class AttendanceSummary(BaseModel):
+    employee_id: str
+    name: str
+    records: list[TimeRecord]
+
+    def total_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
+        """
+        Calculates the total minutes worked by summing up the minutes worked from all records within the specified date range.
+
+        Args:
+            from_date (Optional[date]): The start date for the range. Defaults to None.
+            to_date (Optional[date]): The end date for the range. Defaults to None.
+
+        Returns:
+            int: Total minutes worked.
+        """
+
+        def is_within_date_range(record: TimeRecord):
+            return (not from_date or record.clock_in.date() >= from_date) and (
+                    not to_date or record.clock_out.date() <= to_date)
+
+        return sum(record.total_time_worked_minutes for record in self.records or [] if is_within_date_range(record))
+
+    def normal_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
+        """
+        Calculates the total minutes worked by summing up the minutes worked from all records within the specified date range.
+
+        Args:
+            from_date (Optional[date]): The start date for the range. Defaults to None.
+            to_date (Optional[date]): The end date for the range. Defaults to None.
+
+        Returns:
+            int: Total minutes worked.
+        """
+
+        def is_within_date_range(record: TimeRecord):
+            return (not from_date or record.clock_in.date() >= from_date) and (
+                    not to_date or record.clock_out.date() <= to_date)
+
+        return sum(record.normal_minutes_worked for record in self.records or [] if is_within_date_range(record))
+
+    def overtime_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
+        """
+        Calculates the total minutes worked by summing up the minutes worked from all records within the specified date range.
+
+        Args:
+            from_date (Optional[date]): The start date for the range. Defaults to None.
+            to_date (Optional[date]): The end date for the range. Defaults to None.
+
+        Returns:
+            int: Total minutes worked.
+        """
+
+        def is_within_date_range(record: TimeRecord):
+            return (not from_date or record.clock_in.date() >= from_date) and (
+                    not to_date or record.clock_out.date() <= to_date)
+
+        return sum(record.overtime_worked for record in self.records or [] if is_within_date_range(record))
+
+
+class WorkSummary(BaseModel):
+    payslip_id: str = Field(default_factory=create_id)
+    employee_id: str
+    period_start: date
+    period_end: date
+
+    normal_minutes_per_week: int = Field(default=40 * 60)
+    base_salary_cents: int = Field(default=3500 * 100)
+    attendance: list[AttendanceSummary]
+    normal_weeks_in_month: int = Field(default=4)
+
+    @property
+    def weeks(self) -> float:
+        """
+        Calculates the number of weeks between period_start and period_end.
+
+        Returns:
+            float: Number of weeks.
+        """
+        delta = (self.period_end - self.period_start).days
+        return delta / 7
+
+    def overtime_rate_cents_per_minute(self) -> float:
+        """overtime rate taken as 1.5 of normal rate"""
+        return self.normal_rate_cents_per_minute * 1.5
+
+    @property
+    def normal_rate_cents_per_minute(self) -> float:
+        """Amount of Money made in cents per minute when normal time is worked"""
+        return self.base_salary_cents / (self.normal_minutes_per_week*self.normal_weeks_in_month)
+
+    @property
+    def total_minutes_worked(self) -> int:
+        """absolute total of minutes worked per period"""
+        return sum(
+            summary.total_time_worked_minutes(from_date=self.period_start, to_date=self.period_end) for summary in
+            self.attendance)
+
+    @property
+    def overtime_worked_minutes(self) -> int:
+        """
+        **overtime_worked_minutes**
+            Calculates the total overtime minutes worked for the employee within the specified period.
+
+        Note Overtime will not be paid if total minutes worked is less than normal time expected to be worked in the month
+
+        Returns:
+            int: Total overtime minutes worked.
+        """
+        if self.total_minutes_worked < (self.normal_minutes_per_week * self.weeks):
+            return 0
+
+        return sum(summary.overtime_worked_minutes(from_date=self.period_start, to_date=self.period_end) for summary in
+                   self.attendance)
+
+    @property
+    def normal_time_worked_minutes(self) -> int:
+        """
+        Calculates the total overtime minutes worked for the employee within the specified period.
+
+        Returns:
+            int: Total overtime minutes worked.
+        """
+        return sum(
+            summary.normal_time_worked_minutes(from_date=self.period_start, to_date=self.period_end) for summary in
+            self.attendance)
+
+    @property
+    def overtime_in_cents(self) -> int:
+        """
+            **actual_overtime_cents**
+            Calculates the total overtime pay for the employee within the specified period.
+
+            Returns:
+                int: Total overtime pay.
+        """
+        return int(self.overtime_worked_minutes * self.overtime_rate_cents_per_minute())
+
+    @property
+    def normal_pay_cents(self) -> int:
+        """
+            **normal_pay_cents**
+        :return:
+        """
+        return int(self.normal_time_worked_minutes * self.normal_rate_cents_per_minute)
+
+    @property
+    def net_salary_cents(self) -> int:
+        """
+        **actual_salary_cents**
+            Calculates the total salary for the employee within the specified period, including overtime pay.
+            Returns:
+                int: Total salary.
+        """
+        return self.overtime_in_cents + self.normal_pay_cents
+
+
+class Payslip(BaseModel):
+    payslip_id: str
+    employee_id: str
+    employee_name: str
+    pay_period_start: date
+    pay_period_end: date
+    base_salary: int
+    total_minutes_worked: int
+    overtime_minutes: int
+    overtime_amount: int
+    deductions: int

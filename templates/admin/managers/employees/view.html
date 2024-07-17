@@ -47,7 +47,7 @@
                 <li class="list-group-item">Branch : <span class="pull-right">{{ bank_account.branch }}</span></li>
             </ul>
         {% else %}
-            <p>Employee Does not have any Bank Records</p>
+            <span class="font-weight-bold text-danger">This Employee has no Bank Records</span>
         {% endif %}
 
     </div>
@@ -70,7 +70,7 @@
                 <li class="list-group-item">WhatsApp : <span class="pull-right">{{ contact_details.whatsapp }}</span></li>
             </ul>
         {% else %}
-            <span>This Employee has no contact details</span>
+            <span class="font-weight-bold text-danger">This Employee has no Contact Details</span>
         {% endif %}
     </div>
 </div>
@@ -92,7 +92,7 @@
                 <li class="list-group-item">Country : <span class="pull-right">{{ physical_address.country|title }}</span></li>
             </ul>
         {% else %}
-            <span>This Employee has no Physical Address</span>
+            <span class="font-weight-bold text-danger">This Employee has no Physical Address</span>
         {% endif %}
     </div>
 </div>
@@ -113,7 +113,7 @@
                 <li class="list-group-item">Country : <span class="pull-right">{{ postal_address.country|title }}</span></li>
             </ul>
         {% else %}
-            <span>This Employee has no Postal Address</span>
+            <span class="font-weight-bold text-danger">This Employee has no Postal Address</span>
         {% endif %}
     </div>
 </div>

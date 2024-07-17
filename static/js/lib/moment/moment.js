@@ -936,7 +936,7 @@
     // firstDayOfWeekOfYear 0 = sun, 6 = sat
     //                      the first week is the week that contains the first
     //                      of this day of the week
-    //                      (eg. ISO weeks use thursday (4))
+    //                      (eg. ISO weeks_in_period use thursday (4))
     function weekOfYear(mom, firstDayOfWeek, firstDayOfWeekOfYear) {
         var end = firstDayOfWeekOfYear - firstDayOfWeek,
             daysToDayOfWeek = firstDayOfWeekOfYear - mom.day(),
@@ -1061,7 +1061,7 @@
 
         currentDate = currentDateArray(config);
 
-        //compute day of the year from weeks and weekdays
+        //compute day of the year from weeks_in_period and weekdays
         if (config._w && config._a[DATE] == null && config._a[MONTH] == null) {
             dayOfYearFromWeekInfo(config);
         }
@@ -2029,7 +2029,7 @@
             this.milliseconds(0);
         }
 
-        // weeks are a special case
+        // weeks_in_period are a special case
         if (units === 'week') {
             this.weekday(0);
         }

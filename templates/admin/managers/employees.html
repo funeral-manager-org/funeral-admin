@@ -27,7 +27,10 @@
                             <tr>
                                 <td>
                                     <a href="{{ url_for('employees.get_employee_detail', employee_id=employee.employee_id) }}">
+                                        <span class="text-success font-weight-bold">
+                                            <i class="fa fa-user-circle-o"> </i>
                                         {{ employee.full_names|title }}
+                                        </span>
                                     </a>
                                 </td>
                                 <td>{{ employee.last_name|title }}</td>

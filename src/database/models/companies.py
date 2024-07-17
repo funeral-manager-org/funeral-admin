@@ -52,7 +52,6 @@ class CoverPlanDetails(BaseModel):
     Represents details about a funeral cover plan.
 
     Attributes:
-        branch_id (str): The ID of the branch associated with the plan.
         company_id (str): The ID of the company offering the plan.
         plan_name (str): The name of the funeral cover plan.
         plan_type (str): The type of funeral cover plan (e.g., "Individual", "Family", "Group").
@@ -82,7 +81,6 @@ class CoverPlanDetails(BaseModel):
 
 
 ###########################################################################################
-##### EMPLOYEE ROLES
 ###########################################################################################
 
 class EmployeeRoles:
@@ -321,29 +319,32 @@ class WorkSummary(BaseModel):
     period_end: date
 
     normal_minutes_per_week: int = Field(default=40 * 60)
-    base_salary_cents: int = Field(default=3500 * 100)
+    base_salary_cents_in_month: int = Field(default=3500 * 100)
     attendance: list[AttendanceSummary]
     normal_weeks_in_month: int = Field(default=4)
+    normal_overtime_multiplier: float = Field(default=1.5)
 
     @property
-    def weeks(self) -> float:
+    def weeks_in_period(self) -> float:
         """
-        Calculates the number of weeks between period_start and period_end.
-
+            Calculates the number of weeks_in_period between period_start and period_end.
         Returns:
-            float: Number of weeks.
+            float: Number of weeks_in_period.
         """
         delta = (self.period_end - self.period_start).days
         return delta / 7
 
     def overtime_rate_cents_per_minute(self) -> float:
-        """overtime rate taken as 1.5 of normal rate"""
-        return self.normal_rate_cents_per_minute * 1.5
+        """
+            **overtime_rate_cents_per_minute**
+                its basically normal rate increased by normal_overtime_multiplier
+        """
+        return self.normal_rate_cents_per_minute * self.normal_overtime_multiplier
 
     @property
     def normal_rate_cents_per_minute(self) -> float:
         """Amount of Money made in cents per minute when normal time is worked"""
-        return self.base_salary_cents / (self.normal_minutes_per_week*self.normal_weeks_in_month)
+        return self.base_salary_cents_in_month / (self.normal_minutes_per_week * self.normal_weeks_in_month)
 
     @property
     def total_minutes_worked(self) -> int:
@@ -363,7 +364,7 @@ class WorkSummary(BaseModel):
         Returns:
             int: Total overtime minutes worked.
         """
-        if self.total_minutes_worked < (self.normal_minutes_per_week * self.weeks):
+        if self.total_minutes_worked < (self.normal_minutes_per_week * self.weeks_in_period):
             return 0
 
         return sum(summary.overtime_worked_minutes(from_date=self.period_start, to_date=self.period_end) for summary in

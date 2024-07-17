@@ -2118,7 +2118,7 @@ function configFromArray (config) {
 
     currentDate = currentDateArray(config);
 
-    //compute day of the year from weeks and weekdays
+    //compute day of the year from weeks_in_period and weekdays
     if (config._w && config._a[DATE] == null && config._a[MONTH] == null) {
         dayOfYearFromWeekInfo(config);
     }
@@ -3249,7 +3249,7 @@ function startOf (units) {
             this.milliseconds(0);
     }
 
-    // weeks are a special case
+    // weeks_in_period are a special case
     if (units === 'week') {
         this.weekday(0);
     }

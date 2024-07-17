@@ -15,12 +15,12 @@
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
                             <li><a href="{{ url_for('company.get_admin') }}"><span class="text-success"><i class="ti-briefcase"></i> Company</span></a></li>
-                            <li><a href="{{ url_for('covers.get_covers') }}"><i class="fa fa-user-plus"></i> Covers</a></li>
-                            <li><a href="{{ url_for('employees.get_employees') }}"><i class="ti-briefcase"></i> Employees</a></li>
-                            <li><a href="{{ url_for('messaging.get_admin') }}"><i class="fa fa-cogs"></i> Settings & Stats</a></li>
+                            <li><a href="{{ url_for('covers.get_covers') }}"><span class="text-success"><i class="fa fa-user-plus"></i> Covers</span></a></li>
+                            <li><a href="{{ url_for('employees.get_employees') }}"><span class="text-success"><i class="ti-briefcase"></i> Employees</span></a></li>
+                            <li><a href="{{ url_for('messaging.get_admin') }}"><span class="text-danger"><i class="fa fa-cogs"></i> Settings & Stats</span></a></li>
                         </ul>
                     </li>
-                    <li><a class="sidebar-sub-toggle"><i class="fa fa-user-plus"></i> Covers<span
+                    <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-plus"></i> Covers</span><span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
                             <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-plus"></i> Policies</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
@@ -73,7 +73,7 @@
 
                         </ul>
                     </li>
-                    <li><a class="sidebar-sub-toggle"><i class="fa fa-shopping-cart"></i> Billing<span
+                    <li><a class="sidebar-sub-toggle"><span class="text-warning"><i class="fa fa-shopping-cart"></i> Billing</span><span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
                             <li><a href="{{ url_for('subscriptions.get_subscriptions') }}"> <i class="fa fa-universal-access"> </i> Account </a> </li>
@@ -81,7 +81,7 @@
                             <li><a href="{{ url_for('messaging.get_topup') }}"><i class="ti-credit-card"></i> Top Ups</a></li>
                         </ul>
                     </li>
-                    <li><a href="{{ url_for('support.get_support') }}"><i class="fa fa-ticket"></i> Support</a></li>
+                    <li><a href="{{ url_for('support.get_support') }}"><span class="text-danger"><i class="fa fa-ticket"></i> Support</span></a></li>
 
                     {% if user and user.is_system_admin %}
                         <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Admin<span

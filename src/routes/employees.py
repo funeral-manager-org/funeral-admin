@@ -24,7 +24,7 @@ async def get_employees(user: User):
 
 # noinspection DuplicatedCode
 @employee_route.get('/admin/administrators/employee/<string:employee_id>')
-@admin_login
+@login_required
 async def get_employee_detail(user: User, employee_id: str):
     """
     **get_employee_detail**

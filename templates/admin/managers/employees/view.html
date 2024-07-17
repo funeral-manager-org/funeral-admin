@@ -115,5 +115,27 @@
         {% endif %}
     </div>
 </div>
+{% if user and user.is_company_admin %}
+    <div class="card shadow-lg border-danger">
+        <div class="card-header bg-google-plus">
+            <h3 class="card-title text-white">
+                <i class="fa fa-cogs"> </i>
+                Management Tasks
+            </h3>
+        </div>
+        <div class="card-body">
+
+            <button class="btn btn-outline-primary btn-rounded btn-lg m-t-8">
+                <i class="fa fa-user-circle-o"></i>
+                Create PaySlip
+            </button>
+            
+            <button class="btn btn-outline-info btn-rounded btn-lg m-t-8">
+                <i class="fa fa-user-circle-o"></i>
+                Employee Editor
+            </button>
+        </div>
+    </div>
+{% endif %}
 </section>
 {% endblock %}

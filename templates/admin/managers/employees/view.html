@@ -60,7 +60,7 @@
         </h3>
     </div>
     <div class="card-body">
-        {% if physical_address %}
+        {% if contact_details %}
             <ul class="list-group">
                 <li class="list-group-item">Cell : <span class="pull-right">{{ contact_details.cell }}</span></li>
                 <li class="list-group-item">Tel : <span class="pull-right">{{ contact_details.tel }}</span></li>
@@ -69,7 +69,8 @@
                 <li class="list-group-item">Twitter : <span class="pull-right">{{ contact_details.twitter }}</span></li>
                 <li class="list-group-item">WhatsApp : <span class="pull-right">{{ contact_details.whatsapp }}</span></li>
             </ul>
-
+        {% else %}
+            <span>This Employee has no contact details</span>
         {% endif %}
     </div>
 </div>
@@ -90,7 +91,8 @@
                 <li class="list-group-item">Postal Code : <span class="pull-right">{{ physical_address.postal_code }}</span></li>
                 <li class="list-group-item">Country : <span class="pull-right">{{ physical_address.country|title }}</span></li>
             </ul>
-
+        {% else %}
+            <span>This Employee has no Physical Address</span>
         {% endif %}
     </div>
 </div>
@@ -102,7 +104,7 @@
         </h3>
     </div>
     <div class="card-body">
-        {% if physical_address %}
+        {% if postal_address %}
             <ul class="list-group">
                 <li class="list-group-item">Address Line 1 : <span class="pull-right">{{ postal_address.address_line_1 }}</span></li>
                 <li class="list-group-item">City : <span class="pull-right">{{ postal_address.town_city|title }}</span></li>
@@ -110,7 +112,8 @@
                 <li class="list-group-item">Postal Code : <span class="pull-right">{{ postal_address.postal_code }}</span></li>
                 <li class="list-group-item">Country : <span class="pull-right">{{ postal_address.country|title }}</span></li>
             </ul>
-
+        {% else %}
+            <span>This Employee has no Postal Address</span>
         {% endif %}
     </div>
 </div>

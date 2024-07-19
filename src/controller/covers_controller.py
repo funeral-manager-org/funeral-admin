@@ -160,6 +160,7 @@ class CoversController(Controllers):
         with self.get_session() as session:
             today = datetime.datetime.now().date()
             # sets payment day as the 1st of next month
+            # TODO Maybe needs a refactor Premium can calculate its own Dates
             scheduled_payment_date = today.replace(day=1) + relativedelta(months=1)
 
             for i in range(total):

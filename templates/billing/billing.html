@@ -11,15 +11,11 @@
             </h3>
         </div>
         <div class="card-body">
-
             <div class="card-header">
                 <h3 class="card-title font-weight-bold text-info">
                     Account Type: {{ subscription.plan_name }}
                 </h3>
             </div>
-
-
-
             {% if subscription %}
                 <ul class="list-group">
                     <div class="card-header">
@@ -30,7 +26,6 @@
                             Total Clients: <span class="text-info pull-right">{{ subscription.total_clients| number }} clients</span>
                         </span>
                     </li>
-
                     <li class="list-group-item">
                         <span class="font-weight-bold">
                             Total SMS: <span class="text-info pull-right">{{ subscription.total_sms| number }} sms messages</span>
@@ -65,7 +60,6 @@
                         </h3>
                     </div>
                         <div class="card-body">
-
                                 {% if subscription.payments %}
                                     <h4 class="mt-4">Payments</h4>
                                     <table class="table table-striped">
@@ -94,16 +88,13 @@
                                 {% endif %}
                             </div>
                         </div>
-
                         <div class="card card-columns shadow-lg border-primary">
-
                             <form class="form-horizontal" method="POST" action="{{ url_for('billing.do_pay_now') }}">
                                 <button class="btn btn-block btn-outline-primary btn-lg btn-rounded">
                                     <i class="fa fa-paypal"> </i>
                                     PAY NOW
                                 </button>
                             </form>
-
 {#                                <button class="btn btn-block btn-outline-success btn-lg btn-rounded">#}
 {#                                    <i class="fa fa-arrow-up"> </i>#}
 {#                                    Upgrade Account#}

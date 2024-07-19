@@ -54,11 +54,15 @@ class CoversController(Controllers):
         with self.get_session() as session:
             premium_orm = session.query(PremiumsORM).filter_by(premium_id=premium_payment.premium_id).first()
             if isinstance(premium_orm, PremiumsORM):
+                premium_orm.scheduled_payment_date = premium_payment.scheduled_payment_date
+                premium_orm.payment_amount = premium_payment.payment_amount
                 premium_orm.amount_paid = premium_payment.amount_paid
                 premium_orm.date_paid = premium_payment.date_paid
                 premium_orm.payment_method = premium_payment.payment_method
                 premium_orm.payment_status = premium_payment.payment_status
                 premium_orm.next_payment_amount = premium_payment.next_payment_amount
+                premium_orm.next_payment_date = premium_payment.next_payment_date
+                premium_orm.payment_frequency = premium_payment.payment_frequency
             else:
                 payment_orm = PremiumsORM(**premium_payment.dict())
                 session.add(payment_orm)
@@ -113,8 +117,10 @@ class CoversController(Controllers):
                 .all()
             )
             return [PolicyRegistrationData(**policy_data_orm.to_dict())
-                    for policy_data_orm in policy_data_orm_list if isinstance(policy_data_orm, PolicyRegistrationDataORM)]
+                    for policy_data_orm in policy_data_orm_list or []
+                    if isinstance(policy_data_orm, PolicyRegistrationDataORM)]
 
+    @error_handler
     async def get_outstanding_branch_policy_data_list(self,
                                                       branch_id: str,
                                                       page: int = 0,
@@ -135,7 +141,7 @@ class CoversController(Controllers):
                 .all()
             )
             policy_reg_data: list[PolicyRegistrationData] = [PolicyRegistrationData(**policy_data_orm.to_dict())
-                                                             for policy_data_orm in policy_data_orm_list
+                                                             for policy_data_orm in policy_data_orm_list or []
                                                              if isinstance(policy_data_orm, PolicyRegistrationDataORM)]
             # filter out outstanding policies and return policies upto the limit = count
             return [policy for policy in policy_reg_data if policy.out_standing][:count]
@@ -153,7 +159,7 @@ class CoversController(Controllers):
             # sets payment day as the 1st of next month
             scheduled_payment_date = today.replace(day=1) + relativedelta(months=1)
 
-            for i in range(1, total, 1):
+            for i in range(total):
                 # advance payment day to the month following the present
                 scheduled_payment_date = next_due_date(start_date=scheduled_payment_date)
 
@@ -164,6 +170,7 @@ class CoversController(Controllers):
                 premium_dict = premium.dict(exclude={'late_payment_threshold_days', 'percent_charged'})
                 session.add(PremiumsORM(**premium_dict))
 
+    @error_handler
     async def send_premium_payment_notification(self,
                                                 premium: Premiums,
                                                 policy_data: PolicyRegistrationData):
@@ -199,6 +206,7 @@ class CoversController(Controllers):
                                       company_details=company_details, branch_details=branch_details)
             return True
 
+    @error_handler
     async def do_send_notice(self, personal_data: ClientPersonalInformation,
                              contact: Contacts,
                              policy_data: PolicyRegistrationData,

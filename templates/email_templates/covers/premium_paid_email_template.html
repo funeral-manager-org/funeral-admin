@@ -1,0 +1,34 @@
+
+
+{% extends "email_templates/email_page.html" %}
+
+{% block content %}
+    <div class='card shadow-lg border-info'>
+        <div class='card-header'>
+            <h2 class='card-title'>Premium Payment Notification From {{ company_details.company_name | title }}</h2>
+        </div>
+        <div class='card-body'>
+            <div class='card-content font-weight-bold'>
+                Hi We would like to inform that your premiums for your policy with
+                Policy number of {{ premium.policy_number }} has been successfully paid to the
+                amount of R {{ premium.amount_paid| number }}.00
+            </div>
+
+            <span class='font-weight-bold text-info'>
+                Payment was made on {{ premium.date_paid }}
+            </span>
+            <div class='card-content font-weight-bold'>
+            Next Premium Details
+            <blockquote>
+                Next Payment Date {{ premium.next_payment_date }}
+                Next Premium Amount {{ premium.next_payment_amount }}
+            </blockquote>
+            </div>
+
+            <h3>Thank you</h3>
+            <blockquote>
+                {{ company_details.company_name | title }}
+            </blockquote>
+        </div>
+    </div>
+{% endblock %}

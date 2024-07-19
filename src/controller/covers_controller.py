@@ -2,7 +2,7 @@ import datetime
 from datetime import date
 
 from dateutil.relativedelta import relativedelta
-from flask import Flask
+from flask import Flask, render_template
 from sqlalchemy.orm import joinedload
 
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose
@@ -120,7 +120,7 @@ class CoversController(Controllers):
                                                       page: int = 0,
                                                       count: int = 25) -> list[PolicyRegistrationData]:
         """
-            **get_outstanding_branch_policy_data_list*8
+            **get_outstanding_branch_policy_data_list**
         :param branch_id:
         :param page:
         :param count:
@@ -214,26 +214,8 @@ class CoversController(Controllers):
         :param branch_details:
         :return:
         """
-        sms_template = f"""
-        Premium Payment Notification From
-
-                {company_details.company_name.capitalize()}
-        
-        Hi We would like to inform that your premiums for your policy with 
-        policy number of {premium.policy_number} has been successfully paid to the 
-        amount of R {premium.amount_paid}.00 
-        
-        Payment was made on {premium.date_paid}
-        
-        Next Premium Details
-        
-            Next Payment Date {premium.next_payment_date}
-            Next Premium Amount {premium.next_payment_amount}
-
-        Thank you
-            {company_details.company_name.capitalize()}
-                
-        """
+        context = dict(company_details=company_details, premium=premium)
+        sms_template = render_template('email_templates/covers/premium_paid_sms_notice.html', **context)
 
         sms_message = SMSCompose(message=sms_template, to_cell=contact.cell,
                                  to_branch=personal_data.branch_id,
@@ -243,37 +225,7 @@ class CoversController(Controllers):
 
         subject = f"Premium Payment Notification From  {company_details.company_name.capitalize()}"
 
-        email_template = f"""
-        <div class='card shadow-lg border-info'>
-            <div class='card-header'>
-                <h2 class='card-title'>Premium Payment Notification From {company_details.company_name.capitalize()}</h2>
-            </div>
-
-            <div class='card-body'>
-                <div class='card-content font-weight-bold'>                                        
-                    Hi We would like to inform that your premiums for your policy with 
-                    Policy number of {premium.policy_number} has been successfully paid to the 
-                    amount of R {premium.amount_paid}.00
-                </div> 
-                
-                <span class='font-weight-bold text-info'>
-                    Payment was made on {premium.date_paid}
-                </span>
-                <div class='card-content font-weight-bold'>
-                Next Premium Details
-                <blockquote>
-                    Next Payment Date {premium.next_payment_date}
-                    Next Premium Amount {premium.next_payment_amount}
-                </blockquote>
-                </div>
-                
-                <h3>Thank you</h3>
-                <blockquote>
-                    {company_details.company_name.capitalize()}
-                </blockquote>
-            </div>
-        </div>                        
-        """
+        email_template = render_template('email_templates/covers/premium_paid_email_template.html', **context)
         email_message = EmailCompose(
             to_email=contact.email, subject=subject, message=email_template, to_branch=personal_data.branch_id,
             recipient_type=RecipientTypes.CLIENTS.value)

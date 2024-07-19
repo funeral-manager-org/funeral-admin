@@ -1,0 +1,17 @@
+Premium Payment Notification From
+
+{{ company_details.company_name.capitalize() }}
+
+Hi We would like to inform that your premiums for your policy with
+policy number of {{ premium.policy_number }} has been successfully paid to the
+amount of R {{ premium.amount_paid }}.00
+
+Payment was made on {{ premium.date_paid }}
+
+Next Premium Details
+
+    Next Payment Date {{ premium.next_payment_date }}
+    Next Premium Amount {{ premium.next_payment_amount }}
+
+Thank you
+        {{ company_details.company_name.capitalize() }}

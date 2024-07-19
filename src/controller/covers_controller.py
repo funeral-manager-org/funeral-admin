@@ -13,7 +13,8 @@ from src.database.sql.companies import CompanyORM, CompanyBranchesORM
 from src.database.sql.contacts import ContactsORM
 from src.controller import Controllers, error_handler
 from src.database.models.covers import Premiums, PolicyRegistrationData, ClientPersonalInformation, PremiumReceipt
-from src.database.sql.covers import PremiumsORM, PolicyRegistrationDataORM, ClientPersonalInformationORM
+from src.database.sql.covers import PremiumsORM, PolicyRegistrationDataORM, ClientPersonalInformationORM, \
+    PremiumReceiptORM
 
 
 def next_due_date(start_date: date) -> date:
@@ -54,6 +55,7 @@ class CoversController(Controllers):
         with self.get_session() as session:
             premium_orm = session.query(PremiumsORM).filter_by(premium_id=premium_payment.premium_id).first()
             if isinstance(premium_orm, PremiumsORM):
+
                 premium_orm.scheduled_payment_date = premium_payment.scheduled_payment_date
                 premium_orm.payment_amount = premium_payment.payment_amount
                 premium_orm.amount_paid = premium_payment.amount_paid
@@ -63,6 +65,7 @@ class CoversController(Controllers):
                 premium_orm.next_payment_amount = premium_payment.next_payment_amount
                 premium_orm.next_payment_date = premium_payment.next_payment_date
                 premium_orm.payment_frequency = premium_payment.payment_frequency
+
             else:
                 payment_orm = PremiumsORM(**premium_payment.dict())
                 session.add(payment_orm)
@@ -78,7 +81,7 @@ class CoversController(Controllers):
     @error_handler
     async def add_premium_receipt(self, receipt: PremiumReceipt) -> PremiumReceipt:
         with self.get_session() as session:
-            session.add(PremiumsORM(**receipt.dict()))
+            session.add(PremiumReceiptORM(**receipt.dict()))
             return receipt
 
     @error_handler

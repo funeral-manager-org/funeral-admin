@@ -349,6 +349,9 @@ class WorkSummary(BaseModel):
     @property
     def total_minutes_worked(self) -> int:
         """absolute total of minutes worked per period"""
+        if self.period_start is None or self.period_end is None:
+            return 0
+
         return sum(
             summary.total_time_worked_minutes(from_date=self.period_start, to_date=self.period_end) for summary in
             self.attendance)
@@ -378,6 +381,9 @@ class WorkSummary(BaseModel):
         Returns:
             int: Total overtime minutes worked.
         """
+        if self.period_start is None or self.period_end is None:
+            return 0
+
         return sum(
             summary.normal_time_worked_minutes(from_date=self.period_start, to_date=self.period_end) for summary in
             self.attendance)

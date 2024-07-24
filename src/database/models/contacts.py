@@ -1,6 +1,4 @@
-import uuid
 from pydantic import BaseModel, Field
-
 from src.utils import create_id
 
 

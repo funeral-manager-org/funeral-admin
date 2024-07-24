@@ -48,17 +48,17 @@ class CompanyORM(Base):
 
 class CompanyBranchesORM(Base):
     __tablename__ = "company_branches"
-    branch_id = Column(String(ID_LEN), primary_key=True)
-    company_id = Column(String(ID_LEN))
+    branch_id = Column(String(ID_LEN), primary_key=True, index=True)
+    company_id = Column(String(ID_LEN), index=True)
     branch_name = Column(String(NAME_LEN))
     branch_description = Column(String(255))
     date_registered = Column(String(10), default=string_today)
     total_clients = Column(Integer, default=0)
     total_employees = Column(Integer, default=1)
-    address_id = Column(String(ID_LEN), nullable=True)
-    contact_id = Column(String(ID_LEN), nullable=True)
-    postal_id = Column(String(ID_LEN), nullable=True)
-    bank_account_id = Column(String(ID_LEN), nullable=True)
+    address_id = Column(String(ID_LEN), nullable=True, index=True)
+    contact_id = Column(String(ID_LEN), nullable=True, index=True)
+    postal_id = Column(String(ID_LEN), nullable=True, index=True)
+    bank_account_id = Column(String(ID_LEN), nullable=True, index=True)
 
     @classmethod
     def create_if_not_table(cls):
@@ -93,9 +93,9 @@ class CompanyBranchesORM(Base):
 class CoverPlanDetailsORM(Base):
     __tablename__ = "cover_plan_details"
 
-    company_id = Column(String(NAME_LEN))
+    company_id = Column(String(NAME_LEN), index=True)
 
-    plan_number = Column(String(10), primary_key=True)
+    plan_number = Column(String(10), primary_key=True, index=True)
     plan_name = Column(String(255))
     plan_type = Column(String(50))
 
@@ -141,10 +141,10 @@ class CoverPlanDetailsORM(Base):
 
 class EmployeeORM(Base):
     __tablename__ = "employee"
-    employee_id = Column(String(9), primary_key=True)
-    company_id = Column(String(ID_LEN))
-    branch_id = Column(String(ID_LEN))
-    uid = Column(String(ID_LEN))
+    employee_id = Column(String(9), primary_key=True, index=True)
+    company_id = Column(String(ID_LEN), index=True)
+    branch_id = Column(String(ID_LEN), index=True)
+    uid = Column(String(ID_LEN), index=True)
     full_names = Column(String(255))
     last_name = Column(String(255))
     role = Column(String(36))
@@ -157,10 +157,10 @@ class EmployeeORM(Base):
     salary = Column(Integer)
     is_active = Column(Boolean, default=True)
 
-    address_id = Column(String(ID_LEN), nullable=True)
-    contact_id = Column(String(ID_LEN), nullable=True)
-    postal_id = Column(String(ID_LEN), nullable=True)
-    bank_account_id = Column(String(ID_LEN), nullable=True)
+    address_id = Column(String(ID_LEN), nullable=True, index=True)
+    contact_id = Column(String(ID_LEN), nullable=True, index=True)
+    postal_id = Column(String(ID_LEN), nullable=True, index=True)
+    bank_account_id = Column(String(ID_LEN), nullable=True, index=True)
 
     @classmethod
     def create_if_not_table(cls):
@@ -201,12 +201,12 @@ class EmployeeORM(Base):
 class SalaryORM(Base):
     __tablename__ = 'salaries'
 
-    salary_id = Column(Integer, primary_key=True)
-    employee_id = Column(String(ID_LEN))
+    salary_id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(String(ID_LEN), index=True)
     amount = Column(Integer)
     effective_date = Column(Date)
-    company_id = Column(String(ID_LEN))
-    branch_id = Column(String(ID_LEN))
+    company_id = Column(String(ID_LEN), index=True)
+    branch_id = Column(String(ID_LEN), index=True)
 
     @classmethod
     def create_if_not_table(cls):
@@ -235,8 +235,8 @@ class SalaryORM(Base):
 class SalaryPaymentORM(Base):
     __tablename__ = 'salary_payments'
 
-    payment_id = Column(String(ID_LEN), primary_key=True)
-    salary_id = Column(String(ID_LEN))
+    payment_id = Column(String(ID_LEN), primary_key=True, index=True)
+    salary_id = Column(String(ID_LEN), index=True)
     payment_date = Column(Date)
     amount_paid = Column(Integer)
 

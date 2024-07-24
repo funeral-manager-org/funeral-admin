@@ -7,8 +7,8 @@ from src.database.sql import Base, engine
 class SMSInboxORM(Base):
     __tablename__ = "sms_inbox"
 
-    message_id: str = Column(String(ID_LEN), primary_key=True)
-    to_branch: str = Column(String(ID_LEN))
+    message_id: str = Column(String(ID_LEN), primary_key=True, index=True)
+    to_branch: str = Column(String(ID_LEN), index=True)
     parent_reference: str = Column(String(ID_LEN), nullable=True)
     from_cell: str = Column(String(17))
     is_response: bool = Column(Boolean)
@@ -47,7 +47,7 @@ class SMSInboxORM(Base):
 class SMSComposeORM(Base):
     __tablename__ = "sms_compose"
 
-    message_id: str = Column(String(ID_LEN), primary_key=True)
+    message_id: str = Column(String(ID_LEN), primary_key=True, index=True)
     reference: str = Column(String(ID_LEN))
     message: str = Column(Text)
     from_cell: str = Column(String(17))
@@ -90,8 +90,8 @@ class SMSComposeORM(Base):
 
 class EmailComposeORM(Base):
     __tablename__ = "email_compose"
-    message_id = Column(String(ID_LEN), primary_key=True)
-    to_branch = Column(String(NAME_LEN))
+    message_id = Column(String(ID_LEN), primary_key=True, index=True)
+    to_branch = Column(String(NAME_LEN), index=True)
     reference = Column(String(ID_LEN))
     from_email = Column(String(255))
     to_email = Column(String(255))
@@ -131,7 +131,7 @@ class EmailComposeORM(Base):
 
 class SMSSettingsORM(Base):
     __tablename__ = "sms_settings"
-    company_id: str = Column(String(ID_LEN), primary_key=True)
+    company_id: str = Column(String(ID_LEN), primary_key=True, index=True)
     enable_sms_notifications: bool = Column(Boolean)
     enable_sms_campaigns: bool = Column(Boolean)
     sms_signature: str = Column(String(255))

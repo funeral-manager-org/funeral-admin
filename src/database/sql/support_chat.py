@@ -10,7 +10,7 @@ class ChatUserORM(Base):
         User ORM
     """
     __tablename__ = 'chat_user'
-    uid: str = Column(String(NAME_LEN), primary_key=True, unique=True)
+    uid: str = Column(String(NAME_LEN), primary_key=True, unique=True, index=True)
     display_name: str = Column(String(NAME_LEN))
     user_banned: bool = Column(Boolean)
 
@@ -34,8 +34,8 @@ class ChatUserORM(Base):
 
 class ChatMessageORM(Base):
     __tablename__ = "chat_message"
-    uid: str = Column(String(NAME_LEN))
-    message_id: str = Column(String(NAME_LEN), primary_key=True)
+    uid: str = Column(String(NAME_LEN), index=True)
+    message_id: str = Column(String(NAME_LEN), primary_key=True, index=True)
     text: str = Column(String(NAME_LEN))
     timestamp: str = Column(String(NAME_LEN))
 

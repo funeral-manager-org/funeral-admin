@@ -39,7 +39,7 @@ class AddressORM(Base):
 
 class ContactsORM(Base):
     __tablename__ = "contacts"
-    contact_id = Column(String(ID_LEN), primary_key=True)
+    contact_id = Column(String(ID_LEN), primary_key=True, index=True)
     cell = Column(String(20))
     tel = Column(String(20), nullable=True)
     email = Column(String(255))
@@ -74,7 +74,7 @@ class ContactsORM(Base):
 
 class PostalAddressORM(Base):
     __tablename__ = "postal_addresses"
-    postal_id = Column(String(ID_LEN), primary_key=True)
+    postal_id = Column(String(ID_LEN), primary_key=True, index=True)
     address_line_1 = Column(String(255))
     town_city = Column(String(100))
     province = Column(String(100))

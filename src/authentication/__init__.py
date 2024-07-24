@@ -2,14 +2,14 @@ from functools import wraps
 
 from flask import request, redirect, url_for, flash
 
+from src.logger import init_logger
 from src.database.models.users import User
 from src.database.sql import Session
 from src.database.sql.user import UserORM
 from src.main import system_cache
 
 cached_ttl = system_cache.cached_ttl
-
-
+auth_logger = init_logger('auth_logger')
 # Your route handlers go here
 @cached_ttl(ttl=60 * 30)
 async def get_user_details(uid: str) -> User:
@@ -35,7 +35,7 @@ def login_required(route_function):
                 flash(message="User may not be Authorized or Logged In", category="danger")
                 return redirect(url_for('home.get_home'))
             except TypeError as e:
-                print(str(e))
+                auth_logger.error(str(e))
                 _mess = f'Error making request please try again later {str(e)}'
                 flash(message=_mess, category="danger")
                 return redirect(url_for('home.get_home'))

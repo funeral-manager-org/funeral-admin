@@ -8,8 +8,8 @@ from src.database.sql import engine, Base
 
 class WalletTransactionORM(Base):
     __tablename__ = 'wallet_transactions'
-    transaction_id: str = Column(String(ID_LEN), primary_key=True)
-    uid: str = Column(String(ID_LEN), nullable=False)
+    transaction_id: str = Column(String(ID_LEN), primary_key=True, index=True)
+    uid: str = Column(String(ID_LEN), nullable=False, index=True)
     date: datetime = Column(DateTime)
     transaction_type: str = Column(String(16), nullable=False)
     pay_to_wallet: str = Column(String(ID_LEN), nullable=False)
@@ -55,7 +55,7 @@ class WalletTransactionORM(Base):
 
 class WalletORM(Base):
     __tablename__ = "wallet"
-    uid: str = Column(String(ID_LEN), primary_key=True)
+    uid: str = Column(String(ID_LEN), primary_key=True, index=True)
     balance: int = Column(Integer)
     escrow: int = Column(Integer)
     transactions: str = Column(Text)
@@ -81,8 +81,8 @@ class WalletORM(Base):
 
 class WithdrawalRequestsORM(Base):
     __tablename__ = "withdrawal_requests"
-    uid: str = Column(String(ID_LEN))
-    request_id: str = Column(String(ID_LEN), primary_key=True)
+    uid: str = Column(String(ID_LEN), index=True)
+    request_id: str = Column(String(ID_LEN), primary_key=True, index=True)
     withdrawal_amount: int = Column(Integer)
     date_created: date = Column(Date)
     is_valid: bool = Column(Boolean)

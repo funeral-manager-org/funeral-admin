@@ -10,10 +10,10 @@ from src.database.sql import Base, engine
 class PaymentORM(Base):
     __tablename__ = 'payments_orm'
 
-    transaction_id = Column(String(ID_LEN), primary_key=True)
-    invoice_number = Column(Integer, Sequence('invoice_number_seq'), autoincrement=True)
-    subscription_id = Column(String(ID_LEN), ForeignKey('subscriptions.subscription_id'))
-    package_id = Column(String(ID_LEN), ForeignKey('packages.package_id'))
+    transaction_id = Column(String(ID_LEN), primary_key=True, index=True)
+    invoice_number = Column(Integer, Sequence('invoice_number_seq'), autoincrement=True, index=True)
+    subscription_id = Column(String(ID_LEN), ForeignKey('subscriptions.subscription_id'), index=True)
+    package_id = Column(String(ID_LEN), ForeignKey('packages.package_id'), index=True)
 
     amount_paid = Column(Integer)
     date_paid = Column(Date)

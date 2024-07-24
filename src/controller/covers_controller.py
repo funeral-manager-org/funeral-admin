@@ -19,6 +19,7 @@ from src.database.sql.covers import PremiumsORM, PolicyRegistrationDataORM, Clie
 
 def next_due_date(start_date: date) -> date:
     """
+    # TODO - refactor this is repetition
     Return the next due date on the same day of the next month.
     """
     return start_date + relativedelta(months=1)
@@ -111,6 +112,7 @@ class CoversController(Controllers):
         :return: List of PolicyRegistrationData
         """
         with self.get_session() as session:
+
             policy_data_orm_list = (
                 session.query(PolicyRegistrationDataORM)
                 .filter_by(branch_id=branch_id)

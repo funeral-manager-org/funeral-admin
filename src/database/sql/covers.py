@@ -9,9 +9,9 @@ from src.database.sql import Base, engine
 
 class ClientPersonalInformationORM(Base):
     __tablename__ = "client_personal_information"
-    uid = Column(String(ID_LEN), primary_key=True)
-    branch_id = Column(String(ID_LEN))
-    company_id = Column(String(ID_LEN))
+    uid = Column(String(ID_LEN), primary_key=True, index=True)
+    branch_id = Column(String(ID_LEN), index=True)
+    company_id = Column(String(ID_LEN), index=True)
     title = Column(String(NAME_LEN))
     full_names = Column(String(NAME_LEN))
     surname = Column(String(NAME_LEN))
@@ -25,10 +25,10 @@ class ClientPersonalInformationORM(Base):
     plan_number = Column(String(9))
     policy_number = Column(String(9))
 
-    address_id = Column(String(ID_LEN), nullable=True)
-    contact_id = Column(String(ID_LEN), nullable=True)
-    postal_id = Column(String(ID_LEN), nullable=True)
-    bank_account_id = Column(String(ID_LEN), nullable=True)
+    address_id = Column(String(ID_LEN), nullable=True, index=True)
+    contact_id = Column(String(ID_LEN), nullable=True, index=True)
+    postal_id = Column(String(ID_LEN), nullable=True, index=True)
+    bank_account_id = Column(String(ID_LEN), nullable=True, index=True)
 
     @classmethod
     def create_if_not_table(cls):
@@ -68,14 +68,14 @@ class ClientPersonalInformationORM(Base):
 class ClaimsORM(Base):
     __tablename__ = "claims"
 
-    uid = Column(String(ID_LEN))
-    claim_number = Column(String(9), primary_key=True)
-    branch_uid = Column(String(ID_LEN))
-    company_uid = Column(String(ID_LEN))
+    uid = Column(String(ID_LEN), index=True)
+    claim_number = Column(String(9), primary_key=True, index=True)
+    branch_uid = Column(String(ID_LEN), index=True)
+    company_uid = Column(String(ID_LEN), index=True)
 
-    employee_id = Column(String(ID_LEN), nullable=True)
-    plan_number = Column(String(9))
-    policy_number = Column(String(9))
+    employee_id = Column(String(ID_LEN), nullable=True, index=True)
+    plan_number = Column(String(9), index=True)
+    policy_number = Column(String(9), index=True)
 
     claim_amount = Column(Integer)
     claim_total_paid = Column(Integer)
@@ -119,9 +119,9 @@ class ClaimsORM(Base):
 
 class PolicyRegistrationDataORM(Base):
     __tablename__ = "policy_registration_data"
-    uid = Column(String(ID_LEN), primary_key=True)
-    branch_id = Column(String(ID_LEN))
-    company_id = Column(String(ID_LEN))
+    uid = Column(String(ID_LEN), primary_key=True, index=True)
+    branch_id = Column(String(ID_LEN), index=True)
+    company_id = Column(String(ID_LEN), index=True)
 
     policy_number = Column(String(9), unique=True)
     plan_number = Column(String(9))
@@ -182,8 +182,8 @@ class PolicyRegistrationDataORM(Base):
 
 class PremiumsORM(Base):
     __tablename__ = "premiums"
-    premium_id: str = Column(String(ID_LEN), primary_key=True)
-    policy_number: str = Column(String(9), ForeignKey('policy_registration_data.policy_number'))
+    premium_id: str = Column(String(ID_LEN), primary_key=True, index=True)
+    policy_number: str = Column(String(9), ForeignKey('policy_registration_data.policy_number'), index=True)
     scheduled_payment_date: date = Column(Date)
 
     payment_amount: int = Column(Integer)
@@ -242,10 +242,10 @@ class PremiumReceiptORM(Base):
     """
     __tablename__ = 'premium_receipts'
     receipt_number: str = Column(String(ID_LEN), primary_key=True, index=True)
-    premium_id: str = Column(String(ID_LEN), ForeignKey('premiums.premium_id'))
+    premium_id: str = Column(String(ID_LEN), ForeignKey('premiums.premium_id'), index=True)
     datetime_paid: datetime = Column(DateTime)
     paid_amount: int = Column(Integer)
-    policy_number: str = Column(String(9), ForeignKey('policy_registration_data.policy_number'))
+    policy_number: str = Column(String(9), ForeignKey('policy_registration_data.policy_number'), index=True)
 
     sms_notification_sent: bool = Column(Boolean)
     email_notification_sent: bool = Column(Boolean)

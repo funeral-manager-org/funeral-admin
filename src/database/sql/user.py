@@ -10,9 +10,9 @@ class UserORM(Base):
         User ORM
     """
     __tablename__ = 'users'
-    uid: str = Column(String(ID_LEN), primary_key=True, unique=True)
-    branch_id: str = Column(String(ID_LEN), nullable=True)
-    company_id: str = Column(String(ID_LEN), nullable=True)
+    uid: str = Column(String(ID_LEN), primary_key=True, unique=True, index=True)
+    branch_id: str = Column(String(ID_LEN), nullable=True, index=True)
+    company_id: str = Column(String(ID_LEN), nullable=True, index=True)
 
     username: str = Column(String(NAME_LEN))
     password_hash: str = Column(String(255))

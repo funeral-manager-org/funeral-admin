@@ -20,6 +20,7 @@
                             <li><a href="{{ url_for('messaging.get_admin') }}"><span class="text-danger"><i class="fa fa-cogs"></i> Settings & Stats</span></a></li>
                         </ul>
                     </li>
+
                     <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-plus"></i> Covers</span><span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
@@ -34,10 +35,8 @@
                                 <ul>
                                     <li><a href="{{ url_for('clients.get_policy_holders_paged', page=0, count=25) }}"><i class="ti-user"></i> Policy Holders</a></li>
                                     <li><a href="{{ url_for('clients.get_client_capture') }}"><i class="fa fa-user-times"></i> Capture</a></li>
-
                                 </ul>
                             </li>
-
                             <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-credit-card-alt"></i> Premiums</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
                                     <li><a href="{{ url_for('covers.get_quick_pay') }}"><i class="ti-credit-card"></i> Quick Pay </a></li>
@@ -45,23 +44,28 @@
                                     <li><a href="{{ url_for('covers.get_outstanding_premiums', page=0, count=25) }}"><i class="ti-credit-card"></i> Outstanding</a></li>
                                 </ul>
                             </li>
-
 {#                            <li><a href="{{ url_for('clients.get_clients') }}"><i class="ti-briefcase"></i> Clients</a></li>#}
+                        </ul>
+                    </li>
+                    <li><a class="sidebar-sub-toggle"><span class="text-success"><i class="ti-dashboard"></i> Human Resource</span><span
+                            class="sidebar-collapse-icon ti-angle-down"></span></a>
+                        <ul>
+                            <li><a href="{{ url_for('employees.get_attendance_register') }}"><i class="fa fa-registered"></i> Attendance Register </a></li>
+                            <li><a href="{{ url_for('employees.get_work_summary') }}"><i class="fa fa-file-excel-o"></i> Work Summary </a></li>
+                            <li><a href="{{ url_for('employees.get_payslips') }}"><i class="fa fa-credit-card-alt"></i> Payslips </a></li>
+                            <li><a href="{{ url_for('employees.get_payroll') }}"><i class="fa fa-folder-o"></i> Payroll </a></li>
                         </ul>
                     </li>
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
-
                             <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-envelope"></i> Sent </span><span
                                     class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
                                     <li><a href="{{ url_for('messaging.get_sent_sms', page=0, count=25) }}"><i class="fa fa-mobile-phone"></i> SMS</a></li>
                                     <li><a href="{{ url_for('messaging.get_sent_email', page=0, count=25) }}"><i class="fa fa-send"></i> Email</a></li>
                                 </ul>
-
                             </li>
-
                             <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-envelope"></i> Compose </span>
                                 <span class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
@@ -69,8 +73,6 @@
                                     <li><a href="{{ url_for('messaging.get_email_compose') }}"><i class="fa fa-mobile-phone"></i> Email</a></li>
                                 </ul>
                             </li>
-
-
                         </ul>
                     </li>
                     <li><a class="sidebar-sub-toggle"><span class="text-warning"><i class="fa fa-shopping-cart"></i> Billing</span><span
@@ -82,7 +84,6 @@
                         </ul>
                     </li>
                     <li><a href="{{ url_for('support.get_support') }}"><span class="text-danger"><i class="fa fa-ticket"></i> Support</span></a></li>
-
                     {% if user and user.is_system_admin %}
                         <li><a class="sidebar-sub-toggle"><i class="ti-dashboard"></i> Admin<span
                                 class="sidebar-collapse-icon ti-angle-down"></span></a>

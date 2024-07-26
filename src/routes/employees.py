@@ -49,3 +49,48 @@ async def get_employee_detail(user: User, employee_id: str):
         context.update(bank_account=bank_account)
 
     return render_template('admin/managers/employees/view.html', **context)
+
+@employee_route.get('/admin/employees/attendance-register')
+@login_required
+async def get_attendance_register(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    context = dict(user=user)
+    return render_template('hr/attendance-register.html', **context)
+
+@employee_route.get('/admin/employees/work-summary')
+@login_required
+async def get_work_summary(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    context = dict(user=user)
+    return render_template('hr/work-summary.html', **context)
+
+@employee_route.get('/admin/employees/payslips')
+@login_required
+async def get_payslips(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    context = dict(user=user)
+    return render_template('hr/payslips.html', **context)
+
+
+@employee_route.get('/admin/employees/payroll')
+@login_required
+async def get_payroll(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    context = dict(user=user)
+    return render_template('hr/payroll.html', **context)

@@ -218,6 +218,8 @@ class TimeRecord(BaseModel):
     @property
     def overtime_worked(self) -> int:
         """
+        if normal_minutes worked is less than normal minutes per work session
+        then overtime is zero - else overtime is the difference
             :return:
         """
         return max(self.normal_minutes_worked - self.normal_minutes_per_session, 0)
@@ -228,7 +230,8 @@ class TimeRecord(BaseModel):
             return 0  # Handle missing clock in/out times
         # Calculate the difference in time
         delta: timedelta = self.clock_out - self.clock_in
-        return int(delta.total_seconds() // 60)
+        seconds_to_minutes: int = int(delta.total_seconds() // 60)
+        return seconds_to_minutes
 
     def day_and_date_clocked_in(self) -> str:
         """

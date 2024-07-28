@@ -1,12 +1,13 @@
 from flask import Blueprint, render_template
 
+from src.logger import init_logger
 from src.authentication import login_required, admin_login
-from src.database.models.companies import EmployeeDetails
+from src.database.models.companies import EmployeeDetails, AttendanceSummary
 from src.database.models.users import User
-from src.main import company_controller
+from src.main import company_controller, employee_controller
 
 employee_route = Blueprint('employees', __name__)
-
+employee_logger = init_logger('employee_route')
 
 @employee_route.get('/admin/administrators/employees')
 @login_required
@@ -32,8 +33,7 @@ async def get_employee_detail(user: User, employee_id: str):
     :param employee_id:
     :return:
     """
-    employee_detail: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
-
+    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(employee_id=employee_id)
     context = dict(user=user, employee_detail=employee_detail)
     if employee_detail.contact_id:
         contact_details = await company_controller.get_contact(contact_id=employee_detail.contact_id)
@@ -50,6 +50,7 @@ async def get_employee_detail(user: User, employee_id: str):
 
     return render_template('admin/managers/employees/view.html', **context)
 
+
 @employee_route.get('/admin/employees/attendance-register')
 @login_required
 async def get_attendance_register(user: User):
@@ -58,19 +59,25 @@ async def get_attendance_register(user: User):
     :param user:
     :return:
     """
-    context = dict(user=user)
+    # records = get_records()
+    # # Check if the user has clocked in
+    # clocked_in = any(record.clock_in for record in records)
+    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
+    context = dict(user=user, employee_detail=employee_detail)
+    employee_logger.info(context)
     return render_template('hr/attendance-register.html', **context)
+
 
 @employee_route.get('/admin/employees/work-summary')
 @login_required
 async def get_work_summary(user: User):
     """
-
     :param user:
     :return:
     """
     context = dict(user=user)
     return render_template('hr/work-summary.html', **context)
+
 
 @employee_route.get('/admin/employees/payslips')
 @login_required

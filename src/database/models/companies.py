@@ -149,51 +149,9 @@ employee_roles = {
 }
 
 
-class EmployeeDetails(BaseModel):
-    """
-    Represents details about an employee.
-
-    Attributes:
-        employee_id (str): The ID of the employee.
-        company_id (str): The ID of the company to which the employee belongs.
-        branch_id (str): The ID of the branch to which the employee is assigned.
-        full_names (str): The first name and middle name of the employee.
-        last_name (str): The last name or surname of the employee.
-        email (str): The email address of the employee.
-        contact_number (str): The contact number of the employee.
-        position (str): The position or role of the employee.
-        date_of_birth (str): The date of birth of the employee.
-        date_joined (str): The date when the employee joined the company.
-        salary (float): The salary of the employee.
-        is_active (bool): Indicates whether the employee is currently active or not.
-    """
-
-    employee_id: str = Field(default_factory=create_employee_id)
-
-    uid: str | None
-    company_id: str | None
-    branch_id: str | None
-
-    full_names: str
-    last_name: str
-    id_number: str
-    email: EmailStr
-    contact_number: str
-    position: str
-    role: str
-    date_of_birth: str
-    date_joined: str = Field(default_factory=string_today)
-    salary: int
-    is_active: bool = True
-
-    address_id: str | None
-    contact_id: str | None
-    postal_id: str | None
-    bank_account_id: str | None
-
-
 class TimeRecord(BaseModel):
-    employee_id: str
+    time_id: str = Field(default_factory=create_id)
+    attendance_id: str
     normal_minutes_per_session: int = Field(default=8 * 60)
     clock_in: datetime
     clock_out: datetime
@@ -256,6 +214,7 @@ class TimeRecord(BaseModel):
 
 
 class AttendanceSummary(BaseModel):
+    attendance_id: str = Field(default_factory=create_id)
     employee_id: str
     name: str
     records: list[TimeRecord]
@@ -432,3 +391,49 @@ class Payslip(BaseModel):
     overtime_minutes: int
     overtime_amount: int
     deductions: int
+
+
+class EmployeeDetails(BaseModel):
+    """
+    Represents details about an employee.
+
+    Attributes:
+        employee_id (str): The ID of the employee.
+        company_id (str): The ID of the company to which the employee belongs.
+        branch_id (str): The ID of the branch to which the employee is assigned.
+        full_names (str): The first name and middle name of the employee.
+        last_name (str): The last name or surname of the employee.
+        email (str): The email address of the employee.
+        contact_number (str): The contact number of the employee.
+        position (str): The position or role of the employee.
+        date_of_birth (str): The date of birth of the employee.
+        date_joined (str): The date when the employee joined the company.
+        salary (float): The salary of the employee.
+        is_active (bool): Indicates whether the employee is currently active or not.
+    """
+
+    employee_id: str = Field(default_factory=create_employee_id)
+
+    uid: str | None
+    company_id: str | None
+    branch_id: str | None
+
+    full_names: str
+    last_name: str
+    id_number: str
+    email: EmailStr
+    contact_number: str
+    position: str
+    role: str
+    date_of_birth: str
+    date_joined: str = Field(default_factory=string_today)
+    salary: int
+    is_active: bool = True
+
+    address_id: str | None
+    contact_id: str | None
+    postal_id: str | None
+    bank_account_id: str | None
+    attendance_register: AttendanceSummary | None
+
+

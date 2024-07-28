@@ -1,4 +1,7 @@
-from sqlalchemy import Column, String, inspect, Integer, Boolean, JSON, Date, Text
+from datetime import datetime
+
+from sqlalchemy import Column, String, inspect, Integer, Boolean, JSON, Date, Text, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 
 from src.database.constants import ID_LEN, NAME_LEN, SHORT_DESCRIPTION_lEN
 from src.database.sql import Base, engine
@@ -161,6 +164,8 @@ class EmployeeORM(Base):
     contact_id = Column(String(ID_LEN), nullable=True, index=True)
     postal_id = Column(String(ID_LEN), nullable=True, index=True)
     bank_account_id = Column(String(ID_LEN), nullable=True, index=True)
+    attendance_register = relationship('AttendanceSummaryORM', back_populates='employee', lazy=True,
+                                       cascade="all, delete-orphan")
 
     @classmethod
     def create_if_not_table(cls):
@@ -172,7 +177,7 @@ class EmployeeORM(Base):
         if inspect(engine).has_table(cls.__tablename__):
             cls.__table__.drop(bind=engine)
 
-    def to_dict(self):
+    def to_dict(self, include_relationships=False):
         """
         Convert the object to a dictionary representation.
         """
@@ -194,7 +199,9 @@ class EmployeeORM(Base):
             "address_id": self.address_id,
             "contact_id": self.contact_id,
             "postal_id": self.postal_id,
-            "bank_account_id": self.bank_account_id
+            "bank_account_id": self.bank_account_id,
+            "attendance_register": self.attendance_register.to_dict(include_relationships=False)
+            if include_relationships and isinstance(self.attendance_register, AttendanceSummaryORM) else {}
         }
 
 
@@ -259,4 +266,71 @@ class SalaryPaymentORM(Base):
             'salary_id': self.salary_id,
             'payment_date': str(self.payment_date),
             'amount_paid': self.amount_paid
+        }
+
+
+class TimeRecordORM(Base):
+    __tablename__ = "employee_time_record"
+    time_id: str = Column(String(ID_LEN), primary_key=True, index=True)
+    attendance_id: str = Column(String(ID_LEN), ForeignKey('employee_attendance_summary.attendance_id'))
+    normal_minutes_per_session: int = Column(Integer, nullable=False)
+    clock_in: datetime = Column(DateTime)
+    clock_out: datetime = Column(DateTime)
+    summary = relationship('AttendanceSummaryORM', back_populates='records')
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self, include_relationships: bool = False):
+        """
+        Convert the object to a dictionary representation.
+        """
+        return {
+            'time_id': self.time_id,
+            'attendance_id': self.attendance_id,
+            'normal_minutes_per_session': self.normal_minutes_per_session,
+            'clock_in': self.clock_in,
+            'clock_out': self.clock_out,
+            'summary': self.summary.to_dict(include_relationships=False) if include_relationships else {}
+        }
+
+
+class AttendanceSummaryORM(Base):
+    __tablename__ = "employee_attendance_summary"
+    attendance_id: str = Column(String(ID_LEN), primary_key=True)
+    employee_id: str = Column(String(ID_LEN), ForeignKey('employee.employee_id'))
+    name: str = Column(String(NAME_LEN))
+    records = relationship("TimeRecordORM", back_populates="summary", lazy=True, cascade="all, delete-orphan")
+    employee = relationship("EmployeeORM", back_populates="attendance_register")
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self, include_relationships: bool = False):
+        """
+
+        :param include_relationships:
+        :return:
+        """
+        return {
+            'attendance_id': self.attendance_id,
+            'employee_id': self.employee_id,
+            'name': self.name,
+            'records': [record.to_dict(include_relationships=False) for record in self.records or []
+                        if isinstance(record, TimeRecordORM)],
+            'employee': self.employee.to_dict(include_relationships=False) if include_relationships else {}
         }

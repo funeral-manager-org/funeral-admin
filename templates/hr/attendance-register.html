@@ -13,8 +13,53 @@
         </div>
         <div class="card-body">
 
+        <table class="table table-striped">
+          <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Employee #</th>
+                  <th>Date</th>
+                  <th>Time In</th>
+                  <th>Time Out</th>
+                  <th>Status</th>
+                  <th>Notes</th>
+                </tr>
+          </thead>
+          <tbody>
+            {% for record in records %}
+            <tr>
+              <td>{{ record.name }}</td>
+             <td>{{ record.employee_id }}</td>
+              <td>{{ record.day_and_date_clocked_in() }}</td>
+              <td>{{ record.clock_in  }}</td>
+              <td>{{ record.clock_out }}</td>
+              <td>{{ 'Present' if record.clock_out else 'Absent' }}</td>
+              <td>{{ record.note }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="pagination">
+          <!-- Pagination controls here -->
+        </div>
 
         </div>
+
+      <div class="card-footer">
+        <div class="row">
+          <button id="clocked_in" class="btn btn-lg btn-block btn-rounded btn-outline-success">
+            <span class="font-weight-bold">
+              <i class="fa fa-clock-o"></i>
+              Clocked In
+            </span>
+          </button>
+          <button id="clocked_out" class="btn btn-lg btn-block btn-rounded btn-outline-danger">
+              <i class="fa fa-clock-o"></i>
+              Clocked Out
+          </button>
+        </div>
+      </div>
+
     </div>
 </section>
 {% endblock %}

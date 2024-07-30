@@ -47,14 +47,14 @@ async def get_employee_details(user: User):
         flash(message=message, category="danger")
         return redirect(url_for('home.get_home'))
     context = dict(user=user)
-    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(
+    employee_detail: EmployeeDetails | None = None
+    employee_detail = await employee_controller.get_employee_complete_details_uid(
         uid=user.uid)
+
     if employee_detail:
-        context.update(employee_detail=employee_detail)
         # this adds postal addresses and others
         await add_data_employee(context=context, employee_detail=employee_detail)
-
-        context = dict(user=user, employee_detail=employee_detail)
+        context.update(employee_detail=employee_detail)
     # return render_template('admin/managers/employees/view.html', **context)
     return render_template('admin/employees/employee.html', **context)
 

@@ -275,7 +275,7 @@ class TimeRecordORM(Base):
     attendance_id: str = Column(String(ID_LEN), ForeignKey('employee_attendance_summary.attendance_id'))
     normal_minutes_per_session: int = Column(Integer, nullable=False)
     clock_in: datetime = Column(DateTime)
-    clock_out: datetime = Column(DateTime)
+    clock_out: datetime = Column(DateTime, nullable=True)
     summary = relationship('AttendanceSummaryORM', back_populates='records')
 
     @classmethod

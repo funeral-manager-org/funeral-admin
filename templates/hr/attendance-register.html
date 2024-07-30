@@ -8,7 +8,7 @@
         <div class="card-header bg-facebook">
             <h2 class="card-title font-weight-bold text-white">
                 <i class="fa fa-registered"> </i>
-                Attendance Register
+              Attendance Register
             </h2>
         </div>
         <div class="card-body">
@@ -16,8 +16,6 @@
         <table class="table table-striped">
           <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Employee #</th>
                   <th>Date</th>
                   <th>Time In</th>
                   <th>Time Out</th>
@@ -26,17 +24,21 @@
                 </tr>
           </thead>
           <tbody>
-            {% for record in records %}
-            <tr>
-              <td>{{ record.name }}</td>
-             <td>{{ record.employee_id }}</td>
-              <td>{{ record.day_and_date_clocked_in() }}</td>
-              <td>{{ record.clock_in  }}</td>
-              <td>{{ record.clock_out }}</td>
-              <td>{{ 'Present' if record.clock_out else 'Absent' }}</td>
-              <td>{{ record.note }}</td>
-            </tr>
-            {% endfor %}
+                {% if employee_detail and employee_detail.summary and employee_detail.summary.records %}
+                    {% for record in employee_detail.summary.records %}
+                        <tr>
+                            <td>{{ record.day_and_date_clocked_in() }}</td>
+                            <td>{{ record.clock_in }}</td>
+                            <td>{{ record.clock_out }}</td>
+                            <td>{{ 'Present' if record.clock_out else 'Absent' }}</td>
+                            <td>{{ record.note }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5">No records available</td>
+                    </tr>
+                {% endif %}
           </tbody>
         </table>
         <div class="pagination">
@@ -47,16 +49,36 @@
 
       <div class="card-footer">
         <div class="row">
-          <button id="clocked_in" class="btn btn-lg btn-block btn-rounded btn-outline-success">
-            <span class="font-weight-bold">
-              <i class="fa fa-clock-o"></i>
-              Clocked In
-            </span>
-          </button>
-          <button id="clocked_out" class="btn btn-lg btn-block btn-rounded btn-outline-danger">
-              <i class="fa fa-clock-o"></i>
-              Clocked Out
-          </button>
+
+            <form class="form-horizontal" method="POST" action="{{ url_for('employees.employee_clocking_in') }}">
+                    {% if employee_detail %}
+                        <input type="hidden" id="employee_id" name="employee_id" value="{{ employee_detail.employee_id }}">
+                    {% endif %}
+
+                    {% if employee_detail and employee_detail.summary  and employee_detail.summary.has_clocked_in_today %}
+                        <button id="clocked_in" class="btn btn-lg btn-block btn-rounded btn-success btn-outline-success m-r-12" disabled>
+                              <i class="fa fa-clock-o"></i>
+                              Clocked In
+                        </button>
+                    {% else %}
+                        <button id="clocked_in" class="btn btn-lg btn-block btn-rounded btn-outline-success m-r-12">
+                              <i class="fa fa-clock-o"></i>
+                              Clocked In
+                        </button>
+                    {% endif %}
+
+            </form>
+
+            <form class="form-horizontal" method="POST" action="{{ url_for('employees.employee_clocking_out') }}">
+                    {% if employee_detail %}
+                        <input type="hidden" id="employee_id" name="employee_id" value="{{ employee_detail.employee_id }}">
+                    {% endif %}
+                <button id="clocked_out" class="btn btn-lg btn-block btn-rounded btn-outline-danger">
+                  <i class="fa fa-clock-o"></i>
+                  Clocked Out
+                </button>
+            </form>
+
         </div>
       </div>
 

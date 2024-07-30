@@ -154,7 +154,7 @@ class TimeRecord(BaseModel):
     attendance_id: str
     normal_minutes_per_session: int = Field(default=8 * 60)
     clock_in: datetime
-    clock_out: datetime
+    clock_out: datetime | None
 
     note: str | None = ""
 
@@ -217,7 +217,7 @@ class AttendanceSummary(BaseModel):
     attendance_id: str = Field(default_factory=create_id)
     employee_id: str
     name: str
-    records: list[TimeRecord]
+    records: list[TimeRecord] | None
 
     def total_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
         """
@@ -272,6 +272,28 @@ class AttendanceSummary(BaseModel):
                     not to_date or record.clock_out.date() <= to_date)
 
         return sum(record.overtime_worked for record in self.records or [] if is_within_date_range(record))
+
+    @property
+    def has_clocked_in_today(self) -> bool:
+        """
+        Determines if the employee has clocked in today.
+
+        Returns:
+            bool: True if the employee has clocked in today, False otherwise.
+        """
+        today = datetime.now().date()
+        return any(record.clock_in.date() == today for record in self.records)
+
+    @property
+    def has_clocked_out_today(self) -> bool:
+        """
+        Determines if the employee has clocked out today.
+
+        Returns:
+            bool: True if the employee has clocked out today, False otherwise.
+        """
+        today = datetime.now().date()
+        return any(record.clock_out and record.clock_out.date() == today for record in self.records)
 
 
 class WorkSummary(BaseModel):
@@ -436,4 +458,6 @@ class EmployeeDetails(BaseModel):
     bank_account_id: str | None
     attendance_register: AttendanceSummary | None
 
-
+    @property
+    def display_names(self) -> str:
+        return f"{self.full_names} {self.last_name}"

@@ -33,6 +33,15 @@ async def add_data_employee(context, employee_detail):
         context.update(bank_account=bank_account)
 
 
+# async def create_employee_record(user: User):
+#     """
+#
+#     :param user:
+#     :return:
+#     """
+#     EmployeeDetails(uid=user.uid, company_id=user.company_id, branch_id=user.branch_id)
+
+
 @employee_route.get('/admin/employee-details')
 @login_required
 async def get_employee_details(user: User):
@@ -42,14 +51,14 @@ async def get_employee_details(user: User):
     :return:
     """
     employee_logger.info(user)
-    if not user.can_access_employee_record:
+    if user.can_access_employee_record:
         message: str = "you have no proper employee record please inform admin"
         flash(message=message, category="danger")
         return redirect(url_for('home.get_home'))
-    context = dict(user=user)
-    employee_detail: EmployeeDetails | None = {}
-    employee_detail = await employee_controller.get_employee_complete_details_uid(
-        uid=user.uid)
+    employee_roles = await employee_controller.get_roles()
+    context = dict(user=user, employee_roles=employee_roles)
+    employee_detail: EmployeeDetails | dict = {}
+    employee_detail = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
 
     if employee_detail:
         # this adds postal addresses and others

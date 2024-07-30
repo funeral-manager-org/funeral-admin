@@ -95,7 +95,11 @@ class EmployeesController(Controllers):
                     employee_id=employee_detail.employee_id)
 
                 if isinstance(attendance_register_orm, AttendanceSummaryORM):
-                    time_record = TimeRecord(attendance_id=attendance_register_orm.attendance_id, clock_in=datetime.now())
+                    time_record = TimeRecord(attendance_id=attendance_register_orm.attendance_id,
+                                             clock_in=datetime.now())
                     session.add(TimeRecordORM(**time_record.dict(exclude={'summary'})))
             return True
         return False
+
+    async def get_roles(self) -> list[str]:
+        return EmployeeRoles.get_all_roles()

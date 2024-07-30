@@ -4,123 +4,114 @@
 <section id="main-content">
     <div class="card shadow-lg border-primary mb-4">
         <div class="card-header bg-facebook">
-            <h3 class="card-title">Employee Details</h3>
+            <h3 class="card-title text-white">Employee Details</h3>
         </div>
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Employee ID</label>
-                    <p class="form-control-plaintext">{{ employee_detail.employee_id }}</p>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Full Names</label>
-                    <p class="form-control-plaintext">{{ employee_detail.full_names }}</p>
-                </div>
+
+        <div class="card shadow-lg border-primary">
+            <div class="card-header bg-facebook">
+                <h3 class="card-title text-white">
+                    <i class="fa fa-user-circle-o"> </i>
+                    Personal Details
+                </h3>
             </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Last Name</label>
-                    <p class="form-control-plaintext">{{ employee_detail.last_name }}</p>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Email</label>
-                    <p class="form-control-plaintext">{{ employee_detail.email }}</p>
-                </div>
+        {% if employee_detail %}
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">Names: <span class="pull-right">{{ employee_detail.full_names|title }}</span></li>
+                    <li class="list-group-item">Surname: <span class="pull-right">{{ employee_detail.last_name|title }}</span></li>
+                    <li class="list-group-item">ID Number: <span class="pull-right">{{ employee_detail.id_number }}</span></li>
+                    <li class="list-group-item m-t-12">Role: <span class="pull-right">{{ employee_detail.role|title }}</span></li>
+                    <li class="list-group-item">Position: <span class="pull-right">{{ employee_detail.position|title }}</span></li>
+                    <li class="list-group-item">Salary: <span class="pull-right text-info">R {{ employee_detail.salary|number }}.00</span></li>
+                    <li class="list-group-item m-t-8">Employee Account Active:
+                        {% if employee_detail.is_active %}
+                            <span class="pull-right badge badge-success"><i class="fa fa-thumbs-up"> </i> {{ employee_detail.is_active }}</span>
+                        {% else %}
+                            <span class="pull-right badge badge-danger"><i class="fa fa-thumbs-down"> </i> {{ employee_detail.is_active }}</span>
+                        {% endif %}
+
+                    </li>
+                </ul>
             </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Contact Number</label>
-                    <p class="form-control-plaintext">{{ employee_detail.contact_number }}</p>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Position</label>
-                    <p class="form-control-plaintext">{{ employee_detail.position }}</p>
-                </div>
+        {% else %}
+            <div class="card-body">
+                <form method="post" action="{{ url_for('employees.update_employee_details') }}">
+                    <div class="row mb-3">
+{#                        <div class="col-md-6">#}
+{#                            <label for="employee_id" class="form-label">Employee ID</label>#}
+{#                            <input type="text" class="form-control" id="employee_id" name="employee_id" {% if employee_detail %} value="{{ employee_detail.employee_id }}" {% endif %} readonly>#}
+{#                        </div>#}
+                        <div class="col-md-6">
+                            <label for="full_names" class="form-label">Full Names</label>
+                            <input type="text" class="form-control" id="full_names" name="full_names" {% if employee_detail %}value="{{ employee_detail.full_names }}"{% endif %} required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" {% if employee_detail %}value="{{ employee_detail.last_name }}"{% endif %} required>
+                        </div>
+
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" {% if employee_detail %}value="{{ employee_detail.email }}"{% endif %} required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="contact_number" class="form-label">Contact Number</label>
+                            <input type="text" class="form-control" id="contact_number" name="contact_number" {% if employee_detail %} value="{{ employee_detail.contact_number }}"{% endif %} required>
+                        </div>
+
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="position" class="form-label">Position</label>
+                            <input type="text" class="form-control" id="position" name="position" {% if employee_detail %}value="{{ employee_detail.position }}"{% endif %} required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="salary" class="form-label">Salary</label>
+                            <input type="number" class="form-control" id="salary" name="salary" {% if employee_detail %}value="{{ employee_detail.salary }}"{% endif %} required>
+                        </div>
+
+                    </div>
+                    <div class="row mb-3">
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="role" class="form-label">Role</label>
+                        {% if employee_roles %}
+                            <select name="role" id="role" class="form-control">
+                                <option value="" disabled {% if not employee_detail %} selected {% endif %}>Select Employee Role</option>
+                                {% for role in employee_roles %}
+                                    <option value="{{ role }}" {% if employee_detail and employee_detail.role == role %} selected {% endif %}>{{ role|title }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="date_of_birth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" {% if employee_detail %}value="{{ employee_detail.date_of_birth }}"{% endif %} required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">Update Details</button>
+                    </div>
+                </form>
+
             </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Date of Birth</label>
-                    <p class="form-control-plaintext">{{ employee_detail.date_of_birth }}</p>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Date Joined</label>
-                    <p class="form-control-plaintext">{{ employee_detail.date_joined }}</p>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Salary</label>
-                    <p class="form-control-plaintext">{{ employee_detail.salary }}</p>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Role</label>
-                    <p class="form-control-plaintext">{{ employee_detail.role }}</p>
-                </div>
-            </div>
+
+        {% endif %}
         </div>
     </div>
 
-    <div class="card shadow-lg border-primary">
-        <div class="card-header bg-facebook">
-            <h3 class="card-title">Edit Employee Details</h3>
-        </div>
-        <div class="card-body">
-            <form method="post" action="{{ url_for('employees.update_employee_details') }}">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="employee_id" class="form-label">Employee ID</label>
-                        <input type="text" class="form-control" id="employee_id" name="employee_id" value="{{ employee_detail.employee_id }}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="full_names" class="form-label">Full Names</label>
-                        <input type="text" class="form-control" id="full_names" name="full_names" value="{{ employee_detail.full_names }}" required>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="last_name" class="form-label">Last Name</label>
-                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ employee_detail.last_name }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ employee_detail.email }}" required>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="contact_number" class="form-label">Contact Number</label>
-                        <input type="text" class="form-control" id="contact_number" name="contact_number" value="{{ employee_detail.contact_number }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="position" class="form-label">Position</label>
-                        <input type="text" class="form-control" id="position" name="position" value="{{ employee_detail.position }}" required>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="date_of_birth" class="form-label">Date of Birth</label>
-                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ employee_detail.date_of_birth }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="date_joined" class="form-label">Date Joined</label>
-                        <input type="date" class="form-control" id="date_joined" name="date_joined" value="{{ employee_detail.date_joined }}" readonly>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="salary" class="form-label">Salary</label>
-                        <input type="number" class="form-control" id="salary" name="salary" value="{{ employee_detail.salary }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="role" class="form-label">Role</label>
-                        <input type="text" class="form-control" id="role" name="role" value="{{ employee_detail.role }}" required>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
+{#    <div class="card shadow-lg border-primary">#}
+{#        <div class="card-header bg-facebook">#}
+{#            <h3 class="card-title">Edit Employee Details</h3>#}
+{#        </div>#}
+{#        <div class="card-body">#}
+{##}
+{#        </div>#}
+{#    </div>#}
 </section>
 {% endblock %}

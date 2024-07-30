@@ -55,8 +55,8 @@ async def get_employee_details(user: User):
         await add_data_employee(context=context, employee_detail=employee_detail)
 
         context = dict(user=user, employee_detail=employee_detail)
-    return render_template('admin/managers/employees/view.html', **context)
-    # return render_template('admin/employees/employee.html', **context)
+    # return render_template('admin/managers/employees/view.html', **context)
+    return render_template('admin/employees/employee.html', **context)
 
 
 @employee_route.post('/admin/employee-details/update')

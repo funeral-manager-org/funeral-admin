@@ -33,6 +33,17 @@ async def get_employee_details(user: User):
     return render_template('admin/employees/employee.html', **context)
 
 
+@employee_route.post('/admin/employee-details/update')
+@login_required
+async def update_employee_details(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    pass
+
+
 @employee_route.get('/admin/administrators/employees')
 @login_required
 async def get_employees(user: User):

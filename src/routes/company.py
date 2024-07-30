@@ -260,10 +260,11 @@ async def add_employee(user: User, branch_id: str):
     """
     try:
         new_employee = EmployeeDetails(**request.form)
-
+        print(new_employee)
         new_employee.company_id = user.company_id
         new_employee.branch_id = branch_id
         new_employee.email = new_employee.email.lower().strip()
+
     except ValidationError as e:
         print(str(e))
         flash(message="Please fill in all required employee details", category='danger')

@@ -201,7 +201,7 @@ class EmployeeORM(Base):
             "postal_id": self.postal_id,
             "bank_account_id": self.bank_account_id,
             "attendance_register": self.attendance_register.to_dict(include_relationships=False)
-            if include_relationships and isinstance(self.attendance_register, AttendanceSummaryORM) else {}
+            if include_relationships and isinstance(self.attendance_register, AttendanceSummaryORM) else None
         }
 
 

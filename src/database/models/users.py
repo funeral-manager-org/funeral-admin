@@ -41,8 +41,15 @@ class User(BaseModel):
     is_employee: bool = Field(default=False)
     is_client: bool = Field(default=False)
 
+
     class Config:
         orm_mode = True
+
+    def __str__(self):
+        return f"User(uid={self.uid}, branch_id={self.branch_id}, company_id={self.company_id}, username={self.username}, email={self.email})"
+
+    def __repr__(self):
+        return f"User(uid='{self.uid}', branch_id='{self.branch_id}', company_id='{self.company_id}', username='{self.username}', email='{self.email}', account_verified={self.account_verified}, is_system_admin={self.is_system_admin}, is_company_admin={self.is_company_admin}, is_employee={self.is_employee}, is_client={self.is_client})"
 
     def __bool__(self) -> bool:
         return bool(self.uid) and bool(self.username) and bool(self.password_hash)

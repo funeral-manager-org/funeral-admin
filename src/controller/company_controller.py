@@ -13,6 +13,7 @@ from src.database.sql.companies import CompanyORM, CompanyBranchesORM, EmployeeO
 from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
 from src.database.sql.covers import PolicyRegistrationDataORM, ClientPersonalInformationORM
 from src.main import system_cache
+from src.utils import create_employee_id
 
 cached_ttl = system_cache.cached_ttl
 
@@ -367,8 +368,8 @@ class CompanyController(Controllers):
             _id_number = employee.id_number
             employee_orm = session.query(EmployeeORM).filter_by(id_number=_id_number).first()
             await system_cache.clear_mem_cache()
-            if isinstance(employee_orm, EmployeeORM):
 
+            if isinstance(employee_orm, EmployeeORM):
                 if employee.full_names:
                     employee_orm.full_names = employee.full_names
                 if employee.last_name:
@@ -401,8 +402,12 @@ class CompanyController(Controllers):
                     employee_orm.contact_id = employee.contact_id
 
                 return False, employee
-
-            session.add(EmployeeORM(**employee.dict()))
+            try:
+                if not employee.employee_id:
+                    employee.employee_id = create_employee_id()
+                session.add(EmployeeORM(**employee.dict(exclude={'attendance_register'})))
+            except Exception as e:
+                print(str(e))
             return True, employee
 
     @cached_ttl()
@@ -414,8 +419,10 @@ class CompanyController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            employees_orm = session.query(EmployeeORM).filter_by(branch_id=branch_id).all()
-            return [EmployeeDetails(**employee.to_dict()) for employee in employees_orm if
+            if not branch_id:
+                return []
+            employees_orm_list = session.query(EmployeeORM).filter_by(branch_id=branch_id).all()
+            return [EmployeeDetails(**employee.to_dict()) for employee in employees_orm_list if
                     isinstance(employee, EmployeeORM)]
 
     @cached_ttl()

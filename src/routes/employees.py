@@ -47,7 +47,7 @@ async def get_employee_details(user: User):
         flash(message=message, category="danger")
         return redirect(url_for('home.get_home'))
     context = dict(user=user)
-    employee_detail: EmployeeDetails | None = None
+    employee_detail: EmployeeDetails | None = {}
     employee_detail = await employee_controller.get_employee_complete_details_uid(
         uid=user.uid)
 

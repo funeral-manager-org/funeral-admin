@@ -20,7 +20,8 @@ async def get_employee_details(user: User):
     :param user:
     :return:
     """
-    if not user.is_employee:
+    employee_logger.info(user)
+    if not user.can_access_employee_record:
         message: str = "you have no proper employee record please inform admin"
         flash(message=message, category="danger")
         return redirect(url_for('home.get_home'))

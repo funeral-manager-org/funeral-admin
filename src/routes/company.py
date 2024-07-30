@@ -35,7 +35,7 @@ async def get_admin(user: User):
         return render_template('admin/managers/manager.html', **context)
     elif user.is_company_admin:
         return render_template('admin/managers/manager.html', **context)
-    elif user.is_employee:
+    elif user.can_access_employee_record:
         return render_template('admin/employees/employee.html', **context)
     elif user.is_client:
         return render_template('admin/clients/clients.html', **context)

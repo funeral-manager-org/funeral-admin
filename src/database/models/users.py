@@ -66,6 +66,11 @@ class User(BaseModel):
             return False
         return self.uid == other.uid
 
+    @property
+    def can_access_employee_record(self):
+        """will allow employee or admin to access employee file only if its an employee and account is verified"""
+        return (self.is_employee or self.is_company_admin) and self.account_verified
+
 
 class CreateUser(BaseModel):
     uid: str
@@ -135,6 +140,3 @@ class PayPal(BaseModel):
 
     class Config:
         extra = Extra.ignore
-
-
-

@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 
 from src.logger import init_logger
 from src.authentication import login_required, admin_login
-from src.database.models.companies import EmployeeDetails, AttendanceSummary
+from src.database.models.companies import EmployeeDetails, AttendanceSummary, CompanyBranches
 from src.database.models.users import User
 from src.main import company_controller, employee_controller
 
@@ -88,7 +88,7 @@ async def get_employees(user: User):
     :param user:
     :return:
     """
-    company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+    company_branches: CompanyBranches = await company_controller.get_company_branches(company_id=user.company_id)
     employees_list: list[EmployeeDetails] = await company_controller.get_company_employees(company_id=user.company_id)
     context = dict(user=user, employees_list=employees_list, branches=company_branches)
     return render_template("admin/managers/employees.html", **context)
@@ -120,9 +120,6 @@ async def get_attendance_register(user: User):
     :param user:
     :return:
     """
-    # records = get_records()
-    # # Check if the user has clocked in
-    # clocked_in = any(record.clock_in for record in records)
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
     context = dict(user=user, employee_detail=employee_detail)
     employee_logger.info(context)

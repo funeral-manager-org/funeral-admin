@@ -367,6 +367,7 @@ class CompanyController(Controllers):
         with self.get_session() as session:
             _id_number = employee.id_number
             employee_orm = session.query(EmployeeORM).filter_by(id_number=_id_number).first()
+
             await system_cache.clear_mem_cache()
 
             if isinstance(employee_orm, EmployeeORM):

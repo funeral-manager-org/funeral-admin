@@ -33,15 +33,6 @@ async def add_data_employee(context, employee_detail):
         context.update(bank_account=bank_account)
 
 
-# async def create_employee_record(user: User):
-#     """
-#
-#     :param user:
-#     :return:
-#     """
-#     EmployeeDetails(uid=user.uid, company_id=user.company_id, branch_id=user.branch_id)
-
-
 @employee_route.get('/admin/employee-details')
 @login_required
 async def get_employee_details(user: User):
@@ -76,7 +67,17 @@ async def update_employee_details(user: User):
     :param user:
     :return:
     """
-    pass
+    employee_details = EmployeeDetails(**request.form, uid=user.uid)
+
+    if user.branch_id:
+        employee_details.branch_id = user.branch_id
+    if user.company_id:
+        employee_details.company_id = user.company_id
+
+    employee_logger.info(employee_details)
+    updated_employee = await employee_controller.add_update_employee_details(employee_details=employee_details)
+    flash(message="successfully updated employee details", category="success")
+    return redirect(url_for('employees.get_employee_details'))
 
 
 @employee_route.get('/admin/administrators/employees')

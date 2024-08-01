@@ -103,3 +103,30 @@ class EmployeesController(Controllers):
 
     async def get_roles(self) -> list[str]:
         return EmployeeRoles.get_all_roles()
+
+    async def add_update_employee_details(self, employee_details: EmployeeDetails):
+        """
+
+        :param employee_details:
+        :return:
+        """
+        with self.get_session() as session:
+            employee_orm: EmployeeORM = session.query(EmployeeORM).filter_by(
+                employee_id=employee_details.employee_id).first()
+
+            if isinstance(employee_orm, EmployeeORM):
+                employee_orm.uid = employee_details.uid
+                employee_orm.branch_id = employee_details.branch_id
+                employee_orm.company_id = employee_details.company_id
+                employee_orm.full_names = employee_details.full_names
+                employee_orm.last_name = employee_details.last_name
+                employee_orm.id_number = employee_details.id_number
+                employee_orm.email = employee_details.email
+                employee_orm.contact_number = employee_details.contact_number
+                employee_orm.position = employee_details.position
+                employee_orm.role = employee_details.role
+                employee_orm.date_of_birth = employee_details.date_of_birth
+                employee_orm.date_joined = employee_details.date_joined
+                employee_orm.salary = employee_details.salary
+            else:
+                session.add(EmployeeORM(**employee_details.dict(exclude={'attendance_register'})))

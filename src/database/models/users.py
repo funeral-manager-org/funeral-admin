@@ -41,7 +41,6 @@ class User(BaseModel):
     is_employee: bool = Field(default=False)
     is_client: bool = Field(default=False)
 
-
     class Config:
         orm_mode = True
 
@@ -75,7 +74,7 @@ class User(BaseModel):
 
     @property
     def can_access_employee_record(self):
-        """will allow employee or admin to access employee file only if its an employee and account is verified"""
+        """will allow employee or admin to access employee file only if it's an employee and account is verified"""
         return (self.is_employee or self.is_company_admin) and self.account_verified
 
 
@@ -93,13 +92,11 @@ class CreateUser(BaseModel):
 
     @property
     def password_hash(self):
-        print(f"Password : {self.password}")
         return encryptor.create_hash(password=self.password)
 
     def to_dict(self) -> dict[str, str | bool]:
         dict_ = self.dict(exclude={'password'})
         dict_.update(dict(password_hash=self.password_hash))
-        print(f"Update User : {dict_}")
         return dict_
 
 
@@ -122,7 +119,6 @@ class PasswordResetUser(BaseModel):
     def to_dict(self) -> dict[str, str | bool]:
         dict_ = self.dict(exclude={'password'})
         dict_.update(dict(password_hash=self.password_hash))
-        print(f"Update User : {dict_}")
         return dict_
 
 

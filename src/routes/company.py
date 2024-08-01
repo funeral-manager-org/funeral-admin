@@ -159,7 +159,7 @@ async def add_branch_address(user: User, branch_id: str):
     :return:
     """
     try:
-        branch_address = Address(**request.form)
+        branch_address: Address = Address(**request.form)
     except ValidationError as e:
         flash(message="Error adding branch address please input all fields", category="danger")
         return redirect(url_for('company.get_branch', branch_id=branch_id))

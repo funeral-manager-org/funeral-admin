@@ -112,7 +112,7 @@ class EmployeesController(Controllers):
         """
         with self.get_session() as session:
             employee_orm: EmployeeORM = session.query(EmployeeORM).filter_by(
-                employee_id=employee_details.employee_id).first()
+                uid=employee_details.uid).first()
 
             if isinstance(employee_orm, EmployeeORM):
                 employee_orm.uid = employee_details.uid

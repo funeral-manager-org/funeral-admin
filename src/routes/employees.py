@@ -84,9 +84,10 @@ async def update_employee_details(user: User):
 @login_required
 async def get_employees(user: User):
     """
+        **get_employees**
 
-    :param user:
-    :return:
+        :param user:
+        :return:
     """
     company_branches: CompanyBranches = await company_controller.get_company_branches(company_id=user.company_id)
     employees_list: list[EmployeeDetails] = await company_controller.get_company_employees(company_id=user.company_id)
@@ -99,10 +100,10 @@ async def get_employees(user: User):
 @login_required
 async def get_employee_detail(user: User, employee_id: str):
     """
-    **get_employee_detail**
-    :param user:
-    :param employee_id:
-    :return:
+        **get_employee_detail**
+        :param user:
+        :param employee_id:
+        :return:
     """
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
         employee_id=employee_id)
@@ -116,7 +117,7 @@ async def get_employee_detail(user: User, employee_id: str):
 @login_required
 async def get_attendance_register(user: User):
     """
-
+    **get_attendance_register**
     :param user:
     :return:
     """
@@ -130,7 +131,7 @@ async def get_attendance_register(user: User):
 @login_required
 async def employee_clocking_in(user: User):
     """
-
+    **employee_clocking_in**
     :param user:
     :return:
     """
@@ -147,7 +148,7 @@ async def employee_clocking_in(user: User):
         flash(message=message, category="danger")
         return redirect(url_for('employees.get_attendance_register'))
 
-    has_signed_in = await employee_controller.sign_in_employee(employee_detail=employee_detail)
+    has_signed_in: bool = await employee_controller.sign_in_employee(employee_detail=employee_detail)
 
     if has_signed_in:
         sign_in_time = datetime.datetime.now().strftime("%I:%M %p")

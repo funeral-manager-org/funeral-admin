@@ -8,19 +8,16 @@
     </div>
     <div class="card-body">
         <ul class="list-group col-12">
-            <li class="list-group-item font-weight-bold">Employee Name: <span class="font-italic text-info pull-right">{{ employee_detail.full_names }} {{ employee_detail.last_name }}</span></li>
-            <li class="list-group-item font-weight-bold">Street: <span class="font-italic text-info pull-right">{{ physical_address.street }}</span></li>
-            <li class="list-group-item font-weight-bold">Town/City: <span class="font-italic text-info pull-right">{{ physical_address.city }}</span></li>
-            <li class="list-group-item font-weight-bold">Province: <span class="font-italic text-info pull-right">{{ physical_address.state_province }}</span></li>
+            <li class="list-group-item font-weight-bold">Employee Name: <span class="font-italic text-info pull-right">{{ employee_detail.full_names|title }} {{ employee_detail.last_name|title }}</span></li>
+            <li class="list-group-item font-weight-bold">Street: <span class="font-italic text-info pull-right">{{ physical_address.street|title }}</span></li>
+            <li class="list-group-item font-weight-bold">Town/City: <span class="font-italic text-info pull-right">{{ physical_address.city|title }}</span></li>
+            <li class="list-group-item font-weight-bold">Province: <span class="font-italic text-info pull-right">{{ physical_address.state_province|title }}</span></li>
             <li class="list-group-item font-weight-bold">Postal Code: <span class="font-italic text-info pull-right">{{ physical_address.postal_code }}</span></li>
-            <li class="list-group-item font-weight-bold">Country: <span class="font-italic text-info pull-right">{{ physical_address.country }}</span></li>
+            <li class="list-group-item font-weight-bold">Country: <span class="font-italic text-info pull-right">{{ physical_address.country|title }}</span></li>
         </ul>
-
     </div>
     <div class="card-footer">
-        <button class="btn btn-outline-success btn-rounded"
-                data-toggle="modal" data-target="#physicalModal"
-        >
+        <button class="btn btn-outline-success btn-rounded" data-toggle="modal" data-target="#physicalModal">
             <i class="fa fa-edit"> </i>
             Editor
         </button>

@@ -50,16 +50,13 @@
                         Contact Details
                     </button>
                 {% endif %}
-
                 {% if not bank_account %}
                     <button class="btn btn-outline-primary btn-rounded">
                         <i class="fa fa-bank"> </i>
                         Banking Details
                     </button>
                 {% endif %}
-
                 {% if not  postal_address %}
-
                     <button class="btn btn-outline-primary btn-rounded"
                             data-toggle="modal" data-target="#postalModal"
                     >
@@ -67,7 +64,6 @@
                         Postal Address
                     </button>
                 {% endif %}
-
                 {% if not  physical_address %}
                     <button class="btn btn-outline-primary btn-rounded"
                             data-toggle="modal" data-target="#physicalModal"
@@ -84,20 +80,16 @@
             </div>
         {% endif %}
         </div>
-
         {% if employee_detail and contact_details %}
             {% include 'admin/employees/contacts.html' %}
         {% endif %}
-
         {% if employee_detail and postal_address  %}
             {% include 'admin/employees/postal.html' %}
         {% endif %}
         {% if employee_detail and physical_address  %}
             {% include 'admin/employees/physical.html' %}
         {% endif %}
-
     </div>
-
 </section>
 {% endblock %}
 

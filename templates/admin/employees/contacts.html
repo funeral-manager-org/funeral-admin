@@ -15,7 +15,7 @@
                 <i class="fa fa-mobile-phone"> </i>
                 Cell: <a href="tel:{{ contact_details.cell }}" class="font-weight-bold text-info pull-right">{{ contact_details.cell }}</a></li>
 
-            {% if contact_details.tel %}
+            {% if contact_details and contact_details.tel %}
                 <li  class="list-group-item font-weight-bold">
                     <i class="fa fa-phone-square"> </i>
                     Tel: <a href="tel:{{ contact_details.tel }}" class="font-weight-bold text-success pull-right">{{ contact_details.tel }}</a></li>
@@ -23,17 +23,17 @@
                 <li  class="list-group-item font-weight-bold">
                     <i class="fa fa-envelope-square"> </i>
                     Email: <a href="email:{{ contact_details.email }}" class="font-weight-bold text-success pull-right">{{ contact_details.email }}</a></li>
-            {% if contact_details.facebook %}
+            {% if contact_details and  contact_details.facebook %}
                 <li  class="list-group-item font-weight-bold">
                     <i class="fa fa-facebook-official"> </i>
                     Facebook: <a href="https://facebook.com/{{ contact_details.facebook }}" target="_blank" class="font-weight-bold text-info pull-right">{{ contact_details.facebook }}</a></li>
             {% endif %}
-            {% if contact_details.twitter %}
+            {% if contact_details and  contact_details.twitter %}
                 <li  class="list-group-item font-weight-bold">
                     <i class="fa fa-twitter-square"> </i>
                     Twitter: <a href="https://x.com/{{ contact_details.twitter }}" target="_blank" class="font-weight-bold text-info pull-right">{{ contact_details.twitter }}</a></li>
             {% endif %}
-            {% if contact_details.whatsapp %}
+            {% if contact_details and  contact_details.whatsapp %}
                 <li  class="list-group-item font-weight-bold">
                     <i class="fa fa-whatsapp"> </i>
                     WhatsApp: <a href="https://wa.me/{{ contact_details.whatsapp }}" target="_blank" class="font-weight-bold text-info pull-right">{{ contact_details.whatsapp }}</a></li>

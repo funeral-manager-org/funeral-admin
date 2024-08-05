@@ -402,7 +402,7 @@ class CompanyController(Controllers):
                 if employee.contact_id:
                     employee_orm.contact_id = employee.contact_id
 
-                return False, employee
+                return True, employee
             try:
                 if not employee.employee_id:
                     employee.employee_id = create_employee_id()

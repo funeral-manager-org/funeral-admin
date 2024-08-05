@@ -104,6 +104,8 @@ class EmployeesController(Controllers):
     async def get_roles(self) -> list[str]:
         return EmployeeRoles.get_all_roles()
 
+    # noinspection DuplicatedCode
+    @error_handler
     async def add_update_employee_details(self, employee_details: EmployeeDetails):
         """
 
@@ -114,8 +116,9 @@ class EmployeesController(Controllers):
             employee_orm: EmployeeORM = session.query(EmployeeORM).filter_by(
                 uid=employee_details.uid).first()
 
+            await system_cache.clear_mem_cache()
+
             if isinstance(employee_orm, EmployeeORM):
-                employee_orm.uid = employee_details.uid
                 employee_orm.branch_id = employee_details.branch_id
                 employee_orm.company_id = employee_details.company_id
                 employee_orm.full_names = employee_details.full_names
@@ -128,5 +131,18 @@ class EmployeesController(Controllers):
                 employee_orm.date_of_birth = employee_details.date_of_birth
                 employee_orm.date_joined = employee_details.date_joined
                 employee_orm.salary = employee_details.salary
+                employee_orm.is_active = employee_details.is_active
+
+                if employee_details.address_id:
+                    employee_orm.address_id = employee_details.address_id
+                if employee_details.contact_id:
+                    employee_orm.contact_id = employee_details.contact_id
+                if employee_details.postal_id:
+                    employee_orm.postal_id = employee_details.postal_id
+                if employee_details.bank_account_id:
+                    employee_orm.bank_account_id = employee_details.bank_account_id
+
             else:
                 session.add(EmployeeORM(**employee_details.dict(exclude={'attendance_register'})))
+
+            return employee_details

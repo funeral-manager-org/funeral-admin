@@ -1,7 +1,9 @@
 import datetime
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from pydantic import ValidationError
 
+from src.database.models.contacts import Contacts, PostalAddress
 from src.logger import init_logger
 from src.authentication import login_required, admin_login
 from src.database.models.companies import EmployeeDetails, AttendanceSummary, CompanyBranches
@@ -42,13 +44,15 @@ async def get_employee_details(user: User):
     :return:
     """
     employee_logger.info(user)
+
     if not user.can_access_employee_record:
         message: str = "you have no proper employee record please inform admin"
         flash(message=message, category="danger")
         return redirect(url_for('home.get_home'))
-    employee_roles = await employee_controller.get_roles()
-    context = dict(user=user, employee_roles=employee_roles)
-    employee_detail: EmployeeDetails | dict = {}
+
+    employee_roles: list[str] = await employee_controller.get_roles()
+    context: dict[str, list[str] | User | EmployeeDetails] = dict(user=user, employee_roles=employee_roles)
+    employee_detail: EmployeeDetails | None = None
     employee_detail = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
 
     if employee_detail:
@@ -67,7 +71,7 @@ async def update_employee_details(user: User):
     :param user:
     :return:
     """
-    employee_details = EmployeeDetails(**request.form, uid=user.uid)
+    employee_details: EmployeeDetails = EmployeeDetails(**request.form, uid=user.uid)
 
     if user.branch_id:
         employee_details.branch_id = user.branch_id
@@ -75,7 +79,85 @@ async def update_employee_details(user: User):
         employee_details.company_id = user.company_id
 
     employee_logger.info(employee_details)
-    updated_employee = await employee_controller.add_update_employee_details(employee_details=employee_details)
+    employee = await employee_controller.add_update_employee_details(employee_details=employee_details)
+
+    if not isinstance(employee, EmployeeDetails):
+        flash(message="Unable to update employee details", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    flash(message="successfully updated employee details", category="success")
+    return redirect(url_for('employees.get_employee_details'))
+
+
+@employee_route.post('/admin/employee-details/update-contacts')
+@login_required
+async def update_contact_details(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+        contact_details: Contacts = Contacts(**request.form)
+
+    except ValidationError as e:
+        employee_logger.error(str(e))
+        flash(message="unable to add contact details to employee", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    employee_details: EmployeeDetails = await company_controller.get_employee_by_uid(uid=user.uid)
+    if not isinstance(employee_details, EmployeeDetails):
+        flash(message="Employee details not found please try again later", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    contact = await company_controller.add_contacts(contact=contact_details)
+
+    if not isinstance(contact, Contacts):
+        flash(message="could not add or update contact details please try again later", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    employee_details.contact_id = contact.contact_id
+    employee = await employee_controller.add_update_employee_details(employee_details=employee_details)
+
+    if not isinstance(employee, EmployeeDetails):
+        flash(message="unable to add contact details to employee", category="danger")
+
+    flash(message="successfully updated employee details", category="success")
+    return redirect(url_for('employees.get_employee_details'))
+
+
+@employee_route.post('/admin/employee-details/update-postal')
+@login_required
+async def update_postal_address(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+        postal_details: PostalAddress = PostalAddress(**request.form)
+    except ValidationError as e:
+        employee_logger.error(str(e))
+        flash(message="unable to add postal address to employee", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    employee_details: EmployeeDetails = await company_controller.get_employee_by_uid(uid=user.uid)
+    if not isinstance(employee_details, EmployeeDetails):
+        flash(message="Employee details not found please try again later", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    postal_address: PostalAddress = await company_controller.add_postal_address(postal_address=postal_details)
+
+    if not isinstance(postal_address, PostalAddress):
+        flash(message="could not add/update postal address", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    employee_details.postal_id = postal_address.postal_id
+    employee = await employee_controller.add_update_employee_details(employee_details=employee_details)
+
+    if not isinstance(employee, EmployeeDetails):
+        flash(message="unable to add/update postal address to employee", category="danger")
+
     flash(message="successfully updated employee details", category="success")
     return redirect(url_for('employees.get_employee_details'))
 
@@ -122,7 +204,7 @@ async def get_attendance_register(user: User):
     :return:
     """
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
-    context = dict(user=user, employee_detail=employee_detail)
+    context: dict[str, User | EmployeeDetails] = dict(user=user, employee_detail=employee_detail)
     employee_logger.info(context)
     return render_template('hr/attendance-register.html', **context)
 
@@ -138,7 +220,7 @@ async def employee_clocking_in(user: User):
     employee_id: str = request.form.get('employee_id')
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
 
-    if not (employee_detail and employee_detail.is_active and user.is_employee):
+    if not employee_detail and not (employee_detail.is_active and (user.is_employee or user.is_company_admin)):
         message: str = "you have no proper employee record please inform admin"
         flash(message=message, category="danger")
         return redirect(url_for('employees.get_attendance_register'))

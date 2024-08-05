@@ -1,0 +1,80 @@
+<!-- Modal -->
+<div class="modal fade" id="ContactsModal" tabindex="-1" aria-labelledby="branchContactsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="branchContactsModalLabel">Add/Update Contacts</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal" action="{{ url_for('employees.update_contact_details') }}" method="POST">
+                    <!-- Add your form fields here -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {% if contact_details %}<input type="hidden" name="contact_id" value="{{ contact_details.contact_id }}" />{% endif %}
+                        <label for="cell" class="font-weight-bold text-info">Cell:</label>
+                        {% if contact_details %}
+                            <input type="tel" class="form-control" id="cell" name="cell" value="{{ contact_details.cell }}" required>
+                        {% else %}
+                            <input type="tel" class="form-control" id="cell" name="cell"   required>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="tel" class="font-weight-bold text-info">Tel:</label>
+                        {% if contact_details %}
+                            <input type="tel" class="form-control" id="tel" name="tel" value="{{ contact_details.tel }}">
+                        {% else %}
+                            <input type="tel" class="form-control" id="tel" name="tel">
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="email" class="font-weight-bold text-info">Email:</label>
+                        {% if contact_details %}
+                            <input type="email" class="form-control" id="email" name="email" value="{{ contact_details.email }}" required>
+                        {% else %}
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="facebook" class="font-weight-bold text-info">Facebook Handle:</label>
+                        {% if contact_details %}
+                            <input type="text" class="form-control" id="facebook" name="facebook" value="{{ contact_details.facebook }}" >
+                        {% else %}
+                            <input type="text" class="form-control" id="facebook" name="facebook">
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="twitter" class="font-weight-bold text-info">Twitter/X Handle:</label>
+                        {% if contact_details %}
+                            <input type="text" class="form-control" id="twitter" name="twitter" value="{{ contact_details.twitter }}">
+                        {% else %}
+                            <input type="text" class="form-control" id="twitter" name="twitter">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="whatsapp" class="font-weight-bold text-info">WhatsApp:</label>
+                        {% if contact_details %}
+                            <input type="tel" class="form-control" id="whatsapp" name="whatsapp" value="{{ contact_details.whatsapp }}">
+                        {% else %}
+                            <input type="tel" class="form-control" id="whatsapp" name="whatsapp">
+                        {% endif %}
+                    </div>
+                </div>
+                    {% if contact_details %}
+                            <button type="submit" class="btn btn-sm btn-primary">Update Contact</button>
+                    {% else %}
+                            <button type="submit" class="btn btn-sm btn-primary">Add Contact</button>
+                    {% endif %}
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

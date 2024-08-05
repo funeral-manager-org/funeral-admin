@@ -1,5 +1,3 @@
-
-
 <form method="post" action="{{ url_for('employees.update_employee_details') }}">
         {% if employee_details %}
             <input type="hidden" id="employee_id" name="employee_id" value="{{ employee_details.employee_id }}">
@@ -24,7 +22,6 @@
                 <input type="text" class="form-control" id="contact_number" name="contact_number" {% if employee_detail %} value="{{ employee_detail.contact_number }}"{% endif %} required>
             </div>
         </div>
-
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="position" class="form-label">Position</label>
@@ -35,7 +32,6 @@
                 <input type="number" class="form-control" id="salary" name="salary" {% if employee_detail %}value="{{ employee_detail.salary }}"{% endif %} required>
             </div>
         </div>
-
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="role" class="form-label">Role</label>
@@ -48,7 +44,6 @@
                     </select>
                 {% endif %}
             </div>
-
             <div class="col-md-6">
                 <label for="date_of_birth" class="form-label">Date of Birth</label>
                 <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" {% if employee_detail %}value="{{ employee_detail.date_of_birth }}"{% endif %} required>

@@ -1,12 +1,10 @@
 {% extends "layouts/page.html" %}
-
 {% block content %}
 <section id="main-content">
     <div class="card shadow-lg border-primary mb-4">
         <div class="card-header bg-facebook">
             <h3 class="card-title text-white">Employee Details</h3>
         </div>
-
         <div class="card shadow-lg border-primary">
             <div class="card-header bg-facebook">
                 <h3 class="card-title text-white">
@@ -29,7 +27,6 @@
                         {% else %}
                             <span class="pull-right badge badge-danger"><i class="fa fa-thumbs-down"> </i> {{ employee_detail.is_active }}</span>
                         {% endif %}
-
                     </li>
                     <li class="list-group-item">
                         <button type="button" class="btn btn-outline-success btn-rounded"
@@ -40,7 +37,6 @@
                     </li>
                 </ul>
             </div>
-
             <div class="card-footer">
                 {% if not contact_details %}
                     <button type="button" class="btn btn-outline-primary btn-rounded"
@@ -92,8 +88,6 @@
     </div>
 </section>
 {% endblock %}
-
-
 {% include 'admin/employees/modals/personal_editor.html' %}
 {% include 'admin/employees/modals/contact_editor.html' %}
 {% include 'admin/employees/modals/postal_address.html' %}

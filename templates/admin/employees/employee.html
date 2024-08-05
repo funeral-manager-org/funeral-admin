@@ -34,6 +34,7 @@
                     <li class="list-group-item">
                         <button type="button" class="btn btn-outline-success btn-rounded"
                                 data-toggle="modal" data-target="#employeeModal">
+                            <i class="fa fa-edit"> </i>
                             Editor
                         </button>
                     </li>
@@ -68,7 +69,9 @@
                 {% endif %}
 
                 {% if not  physical_address %}
-                    <button class="btn btn-outline-primary btn-rounded">
+                    <button class="btn btn-outline-primary btn-rounded"
+                            data-toggle="modal" data-target="#physicalModal"
+                    >
                         <i class="fa fa-map-marker"> </i>
                         Physical Address
                     </button>
@@ -82,12 +85,15 @@
         {% endif %}
         </div>
 
-        {% if contact_details and employee_detail %}
+        {% if employee_detail and contact_details %}
             {% include 'admin/employees/contacts.html' %}
         {% endif %}
 
-        {% if postal_address and employee_detail %}
+        {% if employee_detail and postal_address  %}
             {% include 'admin/employees/postal.html' %}
+        {% endif %}
+        {% if employee_detail and physical_address  %}
+            {% include 'admin/employees/physical.html' %}
         {% endif %}
 
     </div>
@@ -99,3 +105,4 @@
 {% include 'admin/employees/modals/personal_editor.html' %}
 {% include 'admin/employees/modals/contact_editor.html' %}
 {% include 'admin/employees/modals/postal_address.html' %}
+{% include 'admin/employees/modals/physical.html' %}

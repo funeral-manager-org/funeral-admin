@@ -1,7 +1,5 @@
 
 
-
-
 <form method="post" action="{{ url_for('employees.update_employee_details') }}">
         {% if employee_details %}
             <input type="hidden" id="employee_id" name="employee_id" value="{{ employee_details.employee_id }}">

@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from src.authentication import login_required
 from src.database.models.companies import EmployeeDetails, CompanyBranches
-from src.database.models.contacts import Contacts, PostalAddress
+from src.database.models.contacts import Contacts, PostalAddress, Address
 from src.database.models.users import User
 from src.logger import init_logger
 from src.main import company_controller, employee_controller
@@ -15,7 +15,6 @@ employee_logger = init_logger('employee_route')
 
 
 async def add_data_employee(context, employee_detail):
-
     if not employee_detail:
         return
 
@@ -53,7 +52,9 @@ async def get_employee_details(user: User):
         return redirect(url_for('home.get_home'))
 
     employee_roles: list[str] = await employee_controller.get_roles()
-    context: dict[str, list[str] | User | EmployeeDetails] = dict(user=user, employee_roles=employee_roles)
+    country_list: list[str] = await company_controller.get_countries()
+    context: dict[str, list[str] | User | EmployeeDetails] = dict(user=user, employee_roles=employee_roles,
+                                                                  country_list=country_list)
     employee_detail: EmployeeDetails | None = None
     employee_detail = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
     employee_logger.info(f"COMPARED TO THIS : {employee_detail}")
@@ -162,6 +163,41 @@ async def update_postal_address(user: User):
 
     if not isinstance(employee, EmployeeDetails):
         flash(message="unable to add/update postal address to employee", category="danger")
+
+    flash(message="successfully updated employee details", category="success")
+    return redirect(url_for('employees.get_employee_details'))
+
+
+@employee_route.post('/admin/employee-details/update-physical')
+@login_required
+async def update_physical_address(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+        physical_address: Address = Address(**request.form)
+    except ValidationError as e:
+        employee_logger.error(str(e))
+        flash(message="unable to add physical address to employee", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    employee_details: EmployeeDetails = await company_controller.get_employee_by_uid(uid=user.uid)
+    if not isinstance(employee_details, EmployeeDetails):
+        flash(message="Employee details not found please try again later", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    address: Address = await company_controller.add_update_address(address=physical_address)
+    if not isinstance(address, Address):
+        flash(message="could not add/update physical address", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    employee_details.address_id = address.address_id
+    employee = await employee_controller.add_update_employee_details(employee_details=employee_details)
+
+    if not isinstance(employee, EmployeeDetails):
+        flash(message="unable to add/update physical address to employee", category="danger")
 
     flash(message="successfully updated employee details", category="success")
     return redirect(url_for('employees.get_employee_details'))

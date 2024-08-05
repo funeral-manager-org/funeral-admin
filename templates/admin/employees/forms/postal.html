@@ -1,6 +1,5 @@
 
 
-
 <form class="form-horizontal" method="POST" action="{{ url_for('employees.update_postal_address') }}">
     {% if postal_address %}
     <input type="hidden" class="form-control" id="postal_id" name="postal_id" value="{{ postal_address.postal_id }}" readonly>

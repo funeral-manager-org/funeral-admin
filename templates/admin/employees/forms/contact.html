@@ -2,6 +2,7 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 {% if contact_details %}<input type="hidden" name="contact_id" value="{{ contact_details.contact_id }}" />{% endif %}
+
                 <label for="cell" class="font-weight-bold text-info">Cell:</label>
                 {% if contact_details %}
                     <input type="tel" class="form-control" id="cell" name="cell" value="{{ contact_details.cell }}" required>

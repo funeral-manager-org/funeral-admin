@@ -3,6 +3,7 @@ import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
 
+from src.database.models.bank_accounts import BankAccount
 from src.authentication import login_required
 from src.database.models.companies import EmployeeDetails, CompanyBranches
 from src.database.models.contacts import Contacts, PostalAddress, Address
@@ -198,6 +199,41 @@ async def update_physical_address(user: User):
 
     if not isinstance(employee, EmployeeDetails):
         flash(message="unable to add/update physical address to employee", category="danger")
+
+    flash(message="successfully updated employee details", category="success")
+    return redirect(url_for('employees.get_employee_details'))
+
+
+@employee_route.post('/admin/employee-details/update-banking')
+@login_required
+async def update_banking_details(user: User):
+    """
+        **update_banking_details**
+    :param user:
+    :return:
+    """
+    try:
+        bank_account: BankAccount = BankAccount(**request.form)
+    except ValidationError as e:
+        employee_logger.error(str(e))
+        flash(message="unable to add physical address to employee", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    employee_details: EmployeeDetails = await company_controller.get_employee_by_uid(uid=user.uid)
+    if not isinstance(employee_details, EmployeeDetails):
+        flash(message="Employee details not found please try again later", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    account: BankAccount = await company_controller.add_bank_account(bank_account=bank_account)
+    if not isinstance(account, BankAccount):
+        flash(message="could not add/update bank account", category="danger")
+        return redirect(url_for('employees.get_employee_details'))
+
+    employee_details.bank_account_id = account.bank_account_id
+    employee = await employee_controller.add_update_employee_details(employee_details=employee_details)
+
+    if not isinstance(employee, EmployeeDetails):
+        flash(message="unable to add/update bank account to employee record", category="danger")
 
     flash(message="successfully updated employee details", category="success")
     return redirect(url_for('employees.get_employee_details'))

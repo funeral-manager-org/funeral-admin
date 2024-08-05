@@ -1,14 +1,15 @@
-<div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
+
+<div class="modal fade" id="bankingModal" tabindex="-1" aria-labelledby="bankingModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="employeeModalLabel">Employee Details</h5>
+                <h5 class="modal-title" id="bankingModalLabel">Banking Details</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-             {% include "admin/employees/forms/personal_details.html" %}
+                {% include "admin/employees/forms/banking.html" %}
             </div>
         </div>
     </div>

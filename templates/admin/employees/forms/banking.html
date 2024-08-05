@@ -1,0 +1,44 @@
+<form class="form-horizontal" method="POST" action="{{ url_for('employees.update_banking_details') }}">
+{% if bank_account %}
+    <input type="hidden" class="form-control" id="bank_account_id"
+           name="bank_account_id" value="{{ bank_account.bank_account_id }}" readonly>
+{% endif %}
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label for="account_holder" class="control-label font-weight-bold">Account Holder</label>
+        <input type="text" class="form-control" id="account_holder"
+               name="account_holder" {% if bank_account %}value="{{ bank_account.account_holder }}"{% endif %} required>
+    </div>
+    <div class="col-md-6">
+        <label for="account_number" class="control-label font-weight-bold">Account Number</label>
+        <input type="text" class="form-control" id="account_number"
+               name="account_number" {% if bank_account %}value="{{ bank_account.account_number }}"{% endif %} required>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label for="bank_name" class="control-label font-weight-bold">Bank Name</label>
+        <input type="text" class="form-control" id="bank_name"
+               name="bank_name" {% if bank_account %} value="{{ bank_account.bank_name }}"{% endif %} required>
+    </div>
+    <div class="col-md-6">
+        <label for="branch" class="control-label font-weight-bold">Branch</label>
+        <input type="text" class="form-control" id="branch"
+               name="branch" {% if bank_account %}value="{{ bank_account.branch }}"{% endif %} required>
+    </div>
+</div>
+<div class="form-group">
+    <label for="account_type" class="control-label font-weight-bold">Account Type</label>
+    <select class="form-control" id="account_type" name="account_type" required>
+        <option value="" disabled selected>Select Account Type</option>
+        <option value="Checking" {% if bank_account and bank_account.account_type == 'Checking' %}selected{% endif %}>Checking</option>
+        <option value="Savings" {% if bank_account and bank_account.account_type == 'Savings' %}selected{% endif %}>Savings</option>
+        <!-- Add other account types as needed -->
+    </select>
+</div>
+<div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</div>
+</form>

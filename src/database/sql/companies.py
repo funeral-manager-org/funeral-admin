@@ -182,6 +182,7 @@ class EmployeeORM(Base):
         Convert the object to a dictionary representation.
         """
         return {
+            "uid": self.uid,
             "employee_id": self.employee_id,
             "company_id": self.company_id,
             "branch_id": self.branch_id,

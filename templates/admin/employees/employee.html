@@ -41,26 +41,39 @@
             </div>
 
             <div class="card-footer">
-            {% if not contact_details %}
-                <button type="button" class="btn btn-outline-primary btn-rounded"
-                        data-toggle="modal" data-target="#ContactsModal"
-                >
-                    <i class="fa fa-envelope-square"> </i>
-                    Contact Details
-                </button>
-            {% endif %}
-                <button class="btn btn-outline-primary btn-rounded">
-                    <i class="fa fa-bank"> </i>
-                    Banking Details
-                </button>
-                <button class="btn btn-outline-primary btn-rounded">
-                    <i class="fa fa-envelope-square"> </i>
-                    Postal Address
-                </button>
-                <button class="btn btn-outline-primary btn-rounded">
-                    <i class="fa fa-map-marker"> </i>
-                    Physical Address
-                </button>
+                {% if not contact_details %}
+                    <button type="button" class="btn btn-outline-primary btn-rounded"
+                            data-toggle="modal" data-target="#ContactsModal"
+                    >
+                        <i class="fa fa-envelope-square"> </i>
+                        Contact Details
+                    </button>
+                {% endif %}
+
+                {% if not bank_account %}
+                    <button class="btn btn-outline-primary btn-rounded">
+                        <i class="fa fa-bank"> </i>
+                        Banking Details
+                    </button>
+                {% endif %}
+
+                {% if not  postal_address %}
+
+                    <button class="btn btn-outline-primary btn-rounded"
+                            data-toggle="modal" data-target="#postalModal"
+                    >
+                        <i class="fa fa-envelope-square"> </i>
+                        Postal Address
+                    </button>
+                {% endif %}
+
+                {% if not  physical_address %}
+                    <button class="btn btn-outline-primary btn-rounded">
+                        <i class="fa fa-map-marker"> </i>
+                        Physical Address
+                    </button>
+                {% endif %}
+
             </div>
         {% else %}
             <div class="card-body">
@@ -68,6 +81,15 @@
             </div>
         {% endif %}
         </div>
+
+        {% if contact_details and employee_detail %}
+            {% include 'admin/employees/contacts.html' %}
+        {% endif %}
+
+        {% if postal_address and employee_detail %}
+            {% include 'admin/employees/postal.html' %}
+        {% endif %}
+
     </div>
 
 </section>
@@ -76,3 +98,4 @@
 
 {% include 'admin/employees/modals/personal_editor.html' %}
 {% include 'admin/employees/modals/contact_editor.html' %}
+{% include 'admin/employees/modals/postal_address.html' %}

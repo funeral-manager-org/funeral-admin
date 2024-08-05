@@ -1,0 +1,24 @@
+
+
+
+
+
+
+<div class="card shadow-lg border-primary">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-mobile-phone"> </i>
+            Postal Address
+        </h3>
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            <li class="list-group-item font-weight-bold">Employee Names:  <span class="font-weight-bold text-info pull-right">{{ employee_detail.full_names| title }} {{ employee_detail.last_name| title }}</span></li>
+            <li class="list-group-item font-weight-bold">Line 1: <span class="font-weight-bold text-info pull-right">{{ postal_address.address_line_1 }} </span></li>
+            <li class="list-group-item font-weight-bold">Town/City: <span class="font-weight-bold text-info pull-right">{{ postal_address.town_city| title }}</span></li>
+            <li class="list-group-item font-weight-bold">Province:  <span class="font-weight-bold text-info pull-right">{{ postal_address.province| title }}</span></li>
+            <li class="list-group-item font-weight-bold">Country: <span class="font-weight-bold text-info pull-right">{{ postal_address.country| title }}</span></li>
+            <li class="list-group-item font-weight-bold">Postal Code: <span class="font-weight-bold text-info pull-right">{{ postal_address.postal_code }}</span></li>
+        </ul>
+    </div>
+</div>

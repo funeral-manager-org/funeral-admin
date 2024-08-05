@@ -3,11 +3,11 @@ import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
 
+from src.authentication import login_required
+from src.database.models.companies import EmployeeDetails, CompanyBranches
 from src.database.models.contacts import Contacts, PostalAddress
-from src.logger import init_logger
-from src.authentication import login_required, admin_login
-from src.database.models.companies import EmployeeDetails, AttendanceSummary, CompanyBranches
 from src.database.models.users import User
+from src.logger import init_logger
 from src.main import company_controller, employee_controller
 
 employee_route = Blueprint('employees', __name__)
@@ -15,24 +15,26 @@ employee_logger = init_logger('employee_route')
 
 
 async def add_data_employee(context, employee_detail):
+
     if not employee_detail:
         return
+
+    employee_logger.info(employee_detail)
 
     if employee_detail.contact_id:
         contact_details = await company_controller.get_contact(contact_id=employee_detail.contact_id)
         context.update(contact_details=contact_details)
-
     if employee_detail.address_id:
         physical_address = await company_controller.get_address(address_id=employee_detail.address_id)
         context.update(physical_address=physical_address)
-
     if employee_detail.postal_id:
         postal_address = await company_controller.get_postal_address(postal_id=employee_detail.postal_id)
         context.update(postal_address=postal_address)
-
     if employee_detail.bank_account_id:
         bank_account = await company_controller.get_bank_account(bank_account_id=employee_detail.bank_account_id)
         context.update(bank_account=bank_account)
+
+    return context
 
 
 @employee_route.get('/admin/employee-details')
@@ -54,10 +56,10 @@ async def get_employee_details(user: User):
     context: dict[str, list[str] | User | EmployeeDetails] = dict(user=user, employee_roles=employee_roles)
     employee_detail: EmployeeDetails | None = None
     employee_detail = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
-
+    employee_logger.info(f"COMPARED TO THIS : {employee_detail}")
     if employee_detail:
         # this adds postal addresses and others
-        await add_data_employee(context=context, employee_detail=employee_detail)
+        context = await add_data_employee(context=context, employee_detail=employee_detail)
         context.update(employee_detail=employee_detail)
     # return render_template('admin/managers/employees/view.html', **context)
     return render_template('admin/employees/employee.html', **context)
@@ -117,7 +119,8 @@ async def update_contact_details(user: User):
         return redirect(url_for('employees.get_employee_details'))
 
     employee_details.contact_id = contact.contact_id
-    employee = await employee_controller.add_update_employee_details(employee_details=employee_details)
+    employee_logger.info(f'Contact ID: {contact}')
+    employee: EmployeeDetails = await employee_controller.add_update_employee_details(employee_details=employee_details)
 
     if not isinstance(employee, EmployeeDetails):
         flash(message="unable to add contact details to employee", category="danger")
@@ -136,7 +139,9 @@ async def update_postal_address(user: User):
     """
     try:
         postal_details: PostalAddress = PostalAddress(**request.form)
+
     except ValidationError as e:
+
         employee_logger.error(str(e))
         flash(message="unable to add postal address to employee", category="danger")
         return redirect(url_for('employees.get_employee_details'))
@@ -190,7 +195,7 @@ async def get_employee_detail(user: User, employee_id: str):
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
         employee_id=employee_id)
     context = dict(user=user, employee_detail=employee_detail)
-    await add_data_employee(context, employee_detail)
+    context = await add_data_employee(context, employee_detail)
 
     return render_template('admin/managers/employees/view.html', **context)
 

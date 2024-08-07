@@ -156,7 +156,6 @@ class TimeRecord(BaseModel):
     clock_in: datetime
     clock_out: datetime | None
 
-    note: str | None = ""
 
     @property
     def normal_minutes_worked(self) -> int:
@@ -282,7 +281,8 @@ class AttendanceSummary(BaseModel):
             bool: True if the employee has clocked in today, False otherwise.
         """
         today = datetime.now().date()
-        return any(record.clock_in.date() == today for record in self.records)
+        return any(True for record in self.records
+                   if (record.clock_in.date() == today) and not record.clock_out)
 
     @property
     def has_clocked_out_today(self) -> bool:
@@ -293,7 +293,20 @@ class AttendanceSummary(BaseModel):
             bool: True if the employee has clocked out today, False otherwise.
         """
         today = datetime.now().date()
-        return any(record.clock_out and record.clock_out.date() == today for record in self.records)
+        yesterday = today - relativedelta(day=1)
+
+        def has_clocked(record):
+            if not record.clock_in:
+                return False
+            if not record.clock_out:
+                return False
+            if (record.clock_in.date() != today) and (record.clock_in != yesterday):
+                return False
+            if record.clock_out.date() == today:
+                return True
+            return False
+
+        return any(True for record in self.records if has_clocked(record=record))
 
 
 class WorkSummary(BaseModel):

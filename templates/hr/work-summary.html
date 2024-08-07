@@ -1,8 +1,6 @@
-
 {% extends "layouts/page.html" %}
 
 {% block content %}
-
 <section id="main-content">
     <div class="card shadow-lg border-success">
         <div class="card-header bg-facebook">
@@ -12,8 +10,77 @@
             </h2>
         </div>
         <div class="card-body">
+            {% if employee_detail %}
+            <div class="card shadow-sm border-success">
+                <div class="card-header">
+                    <h3 class="card-title font-weight-bold text-primary">Employee Details</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">Employee Number: <span class="pull-right text-success"> {{ employee_detail.employee_id }}</span></li>
+                        <li class="list-group-item">Employee Names : <span class="pull-right text-info">{{ employee_detail.display_names|title }}</span></li>
+                        <li class="list-group-item">Email: <span class="pull-right text-info">{{ employee_detail.email }}</span></li>
+                        <li class="list-group-item">Contact Number: <span class="pull-right text-info">{{ employee_detail.contact_number }}</span></li>
+                        <li class="list-group-item">Position: <span class="pull-right text-info">{{ employee_detail.position }}</span></li>
+                        <li class="list-group-item">Salary: <span class="pull-right text-info">R {{  employee_detail.salary|number }}.00</span></li>
+                        <li class="list-group-item">Date Joined: <span class="pull-right text-info">{{ employee_detail.date_joined }}</span></li>
+                        <li class="list-group-item">Is Active: <span class="pull-right text-info">{{ "Yes" if employee_detail.is_active else "No" }}</span></li>
+                        <li class="list-group-item">Salary: <span class="pull-right text-info">R {{  employee_detail.salary|number }}.00</span></li>
+                    </ul>
+                </div>
+            </div>
 
+            {% if employee_detail.attendance_register %}
+                    <div class="card shadow-sm border-primary">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-primary">Attendance Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">Total Time Worked: <span class="pull-right text-info">{{ employee_detail.attendance_register.total_time_worked_minutes()|number }} minutes</span></li>
+                                <li class="list-group-item">Normal Time Worked: <span class="pull-right text-info">{{ employee_detail.attendance_register.normal_time_worked_minutes()|number }} minutes</span></li>
+                                <li class="list-group-item">Overtime Worked: <span class="pull-right text-info">{{ employee_detail.attendance_register.overtime_worked_minutes()|number }} minutes</span></li>
+                                <li class="list-group-item">Has Clocked In Today: <span class="pull-right text-info">{{ "Yes" if employee_detail.attendance_register.has_clocked_in_today else "No" }}</span></li>
+                                <li class="list-group-item">Has Clocked Out Today: <span class="pull-right text-info">{{ "Yes" if employee_detail.attendance_register.has_clocked_out_today else "No" }}</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card shadow-sm border-primary">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold text-primary">Time Record</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Day Worked</th>
+                                        <th>Clock In</th>
+                                        <th>Clock Out</th>
+                                        <th>Normal Minutes</th>
+                                        <th>Overtime Minutes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in employee_detail.attendance_register.records %}
+                                        <tr>
+                                            <td>{{ record.day_and_date_clocked_in() }}</td>
+                                            <td>{{ record.clock_in }}</td>
+                                            <td>{{ record.clock_out }}</td>
+                                            <td>{{ record.normal_minutes_worked }}</td>
+                                            <td>{{ record.overtime_worked }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
+                {% else %}
+                    <p>No attendance records found.</p>
+                {% endif %}
+            {% else %}
+                <p>No employee details available.</p>
+            {% endif %}
         </div>
     </div>
 </section>

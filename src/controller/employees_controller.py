@@ -41,10 +41,11 @@ class EmployeesController(Controllers):
         with self.get_session() as session:
             employee_orm: EmployeeORM = session.query(EmployeeORM).filter_by(uid=uid).options(
                 joinedload(EmployeeORM.attendance_register).joinedload(AttendanceSummaryORM.records)
-            ).one_or_none()
+            ).first()
 
             if isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
+
             return None
 
     @error_handler
@@ -66,35 +67,82 @@ class EmployeesController(Controllers):
     @error_handler
     async def sign_in_employee(self, employee_detail: EmployeeDetails) -> bool:
         """
-            :param employee_detail:
-            :return:
+        Sign in an employee if they have not already signed in.
+
+        :param employee_detail: Details of the employee to be signed in.
+        :return: True if the employee was successfully signed in, False otherwise.
         """
+        with self.get_session() as session:
 
-        if employee_detail.attendance_register is None:
-            attendance_register = AttendanceSummary(employee_id=employee_detail.employee_id,
-                                                    name=employee_detail.display_names)
-            with self.get_session() as session:
+            attendance_register_orm = session.query(AttendanceSummaryORM).filter_by(
+                employee_id=employee_detail.employee_id).first()
+            if isinstance(attendance_register_orm, AttendanceSummaryORM):
+                attendance_register = AttendanceSummary(**attendance_register_orm.to_dict(include_relationships=False))
+            else:
+                attendance_register = AttendanceSummary(employee_id=employee_detail.employee_id,
+                                                        name=employee_detail.display_names)
                 session.add(AttendanceSummaryORM(**attendance_register.dict(exclude={'records'})))
-                session.flush()
 
+        with self.get_session() as session:
+            # Check if there is an existing clock_in without a clock_out
+            existing_record = session.query(TimeRecordORM).filter(
+                TimeRecordORM.attendance_id == attendance_register.attendance_id,
+                TimeRecordORM.clock_in.isnot(None),
+                TimeRecordORM.clock_out.is_(None)
+            ).first()
+
+            if existing_record:
+                # Employee already signed in
+                self.logger.info("Already Signed IN")
+                return False
+
+            # Create new time record for clock in
             time_record = TimeRecord(attendance_id=attendance_register.attendance_id, clock_in=datetime.now())
+            session.add(TimeRecordORM(**time_record.dict()))
 
-            with self.get_session() as session:
-                session.add(TimeRecordORM(**time_record.dict(exclude={'summary'})))
+        self.logger.info("Successfully Signed In")
 
-            return True
-        else:
-            with self.get_session() as session:
-                attendance_register_orm = session.query(AttendanceSummaryORM).filter_by(
-                    employee_id=employee_detail.employee_id)
+        return True
 
-                if isinstance(attendance_register_orm, AttendanceSummaryORM):
-                    time_record = TimeRecord(attendance_id=attendance_register_orm.attendance_id,
-                                             clock_in=datetime.now())
-                    session.add(TimeRecordORM(**time_record.dict(exclude={'summary'})))
-            return True
+    @error_handler
+    async def sign_out_employee(self, employee_detail: EmployeeDetails) -> bool:
+        """
+        Sign out an employee if they are currently signed in.
 
-    async def get_roles(self) -> list[str]:
+        :param employee_detail: Details of the employee to be signed out.
+        :return: True if the employee was successfully signed out, False otherwise.
+        """
+        with self.get_session() as session:
+            attendance_register_orm = session.query(AttendanceSummaryORM).filter_by(
+                employee_id=employee_detail.employee_id).first()
+
+            if not isinstance(attendance_register_orm, AttendanceSummaryORM):
+                self.logger.info("Attendance Register not found")
+                return False
+
+            attendance_register = AttendanceSummary(**attendance_register_orm.to_dict(include_relationships=False))
+
+            # Check if there is an existing clock_in without a clock_out
+            existing_record = session.query(TimeRecordORM).filter(
+                TimeRecordORM.attendance_id == attendance_register.attendance_id,
+                TimeRecordORM.clock_in.isnot(None),
+                TimeRecordORM.clock_out.is_(None)
+            ).first()
+
+            if not existing_record:
+                # Employee not signed in
+                self.logger.info("Not Signed IN")
+                return False
+
+            # Update the existing time record with clock out time
+            existing_record.clock_out = datetime.now()
+
+        self.logger.info("Successfully Signed Out")
+
+        return True
+
+    @staticmethod
+    async def get_roles() -> list[str]:
         return EmployeeRoles.get_all_roles()
 
     # noinspection DuplicatedCode

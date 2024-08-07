@@ -54,8 +54,8 @@ async def get_employee_details(user: User):
 
     employee_roles: list[str] = await employee_controller.get_roles()
     country_list: list[str] = await company_controller.get_countries()
-    context: dict[str, list[str] | User | EmployeeDetails] = dict(user=user, employee_roles=employee_roles,
-                                                                  country_list=country_list)
+    context: dict[str, list[str] | User | EmployeeDetails | Salary] = dict(
+        user=user, employee_roles=employee_roles, country_list=country_list)
     employee_detail: EmployeeDetails | None = None
     employee_detail = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
     employee_logger.info(f"COMPARED TO THIS : {employee_detail}")
@@ -64,8 +64,8 @@ async def get_employee_details(user: User):
 
         context = await add_data_employee(context=context, employee_detail=employee_detail)
         salary_detail: Salary = await employee_controller.get_salary_details(employee_id=employee_detail.employee_id)
-        context.update(employee_detail=employee_detail)
         context.update(salary_detail=salary_detail)
+        context.update(employee_detail=employee_detail)
     # return render_template('admin/managers/employees/view.html', **context)
     return render_template('admin/employees/employee.html', **context)
 
@@ -286,10 +286,11 @@ async def get_attendance_register(user: User):
     """
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
     context: dict[str, User | EmployeeDetails] = dict(user=user, employee_detail=employee_detail)
-    employee_logger.info(context)
+
     return render_template('hr/attendance-register.html', **context)
 
 
+# noinspection DuplicatedCode
 @employee_route.post('/admin/employees/attendance-register/clock-in')
 @login_required
 async def employee_clocking_in(user: User):
@@ -307,7 +308,7 @@ async def employee_clocking_in(user: User):
         return redirect(url_for('employees.get_attendance_register'))
 
     if employee_id != employee_detail.employee_id:
-        message: str = "error clocking in"
+        message: str = "You are Not Authorized to Clock in for this Employee"
         flash(message=message, category="danger")
         return redirect(url_for('employees.get_attendance_register'))
 
@@ -317,7 +318,40 @@ async def employee_clocking_in(user: User):
         sign_in_time = datetime.datetime.now().strftime("%I:%M %p")
         flash(message=f"Successfully signed in at: {sign_in_time}", category="success")
     else:
-        flash(message="Error signing in. Please try again later.", category="danger")
+        flash(message="Error signing in. Or Employee Already Signed IN.", category="danger")
+
+    return redirect(url_for('employees.get_attendance_register'))
+
+
+# noinspection DuplicatedCode
+@employee_route.post('/admin/employees/attendance-register/clock-out')
+@login_required
+async def employee_clocking_out(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    employee_id: str = request.form.get('employee_id')
+    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
+
+    if not employee_detail and not (employee_detail.is_active and (user.is_employee or user.is_company_admin)):
+        message: str = "you have no proper employee record please inform admin"
+        flash(message=message, category="danger")
+        return redirect(url_for('employees.get_attendance_register'))
+
+    if employee_id != employee_detail.employee_id:
+        message: str = "You are Not Authorized to Clock in for this Employee"
+        flash(message=message, category="danger")
+        return redirect(url_for('employees.get_attendance_register'))
+
+    has_signed_out: bool = await employee_controller.sign_out_employee(employee_detail=employee_detail)
+
+    if has_signed_out:
+        sign_out_time = datetime.datetime.now().strftime("%I:%M %p")
+        flash(message=f"Successfully signed out at: {sign_out_time}", category="success")
+    else:
+        flash(message="Error signing out. try again later.", category="danger")
 
     return redirect(url_for('employees.get_attendance_register'))
 
@@ -361,17 +395,6 @@ async def update_salary_record(user: User):
     return redirect(url_for('employees.get_employee_detail', employee_id=salary.employee_id))
 
 
-@employee_route.post('/admin/employees/attendance-register/clock-out')
-@login_required
-async def employee_clocking_out(user: User):
-    """
-
-    :param user:
-    :return:
-    """
-    pass
-
-
 @employee_route.get('/admin/employees/work-summary')
 @login_required
 async def get_work_summary(user: User):
@@ -379,7 +402,9 @@ async def get_work_summary(user: User):
     :param user:
     :return:
     """
-    context = dict(user=user)
+    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
+
+    context = dict(user=user, employee_detail=employee_detail)
     return render_template('hr/work-summary.html', **context)
 
 

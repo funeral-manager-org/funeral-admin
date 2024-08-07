@@ -164,8 +164,8 @@ class EmployeeORM(Base):
     contact_id = Column(String(ID_LEN), nullable=True, index=True)
     postal_id = Column(String(ID_LEN), nullable=True, index=True)
     bank_account_id = Column(String(ID_LEN), nullable=True, index=True)
-    attendance_register = relationship('AttendanceSummaryORM', back_populates='employee', lazy=True,
-                                       cascade="all, delete-orphan")
+    attendance_register = relationship('AttendanceSummaryORM', back_populates='employee', lazy='joined',
+                                       cascade="all, delete-orphan", uselist=False)
 
     @classmethod
     def create_if_not_table(cls):
@@ -202,7 +202,7 @@ class EmployeeORM(Base):
             "postal_id": self.postal_id,
             "bank_account_id": self.bank_account_id,
             "attendance_register": self.attendance_register.to_dict(include_relationships=False)
-            if include_relationships and isinstance(self.attendance_register, AttendanceSummaryORM) else None
+            if include_relationships else None
         }
 
 

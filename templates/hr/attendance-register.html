@@ -20,18 +20,30 @@
                   <th>Time In</th>
                   <th>Time Out</th>
                   <th>Status</th>
-                  <th>Notes</th>
+                  <th></th>
                 </tr>
           </thead>
           <tbody>
-                {% if employee_detail and employee_detail.summary and employee_detail.summary.records %}
-                    {% for record in employee_detail.summary.records %}
+
+                {% if employee_detail and employee_detail.attendance_register and employee_detail.attendance_register.records %}
+                    {% for record in employee_detail.attendance_register.records %}
                         <tr>
                             <td>{{ record.day_and_date_clocked_in() }}</td>
                             <td>{{ record.clock_in }}</td>
                             <td>{{ record.clock_out }}</td>
-                            <td>{{ 'Present' if record.clock_out else 'Absent' }}</td>
-                            <td>{{ record.note }}</td>
+                            <td>
+                                {% if record.clock_in and not record.clock_out %}
+                                    <span class="badge badge-success">On Duty</span>
+                                {% endif %}
+                                {% if record.clock_in and record.clock_out %}
+                                    <span class="badge badge-danger">Off Duty</span>
+                                {% endif %}
+                                {% if not record.clock_in %}
+                                    <span class="badge badge-danger">Absent</span>
+                                {% endif %}
+                            </td>
+                            <td></td>
+
                         </tr>
                     {% endfor %}
                 {% else %}
@@ -55,7 +67,7 @@
                         <input type="hidden" id="employee_id" name="employee_id" value="{{ employee_detail.employee_id }}">
                     {% endif %}
 
-                    {% if employee_detail and employee_detail.summary  and employee_detail.summary.has_clocked_in_today %}
+                    {% if employee_detail.attendance_register.has_clocked_in_today %}
                         <button id="clocked_in" class="btn btn-lg btn-block btn-rounded btn-success btn-outline-success m-r-12" disabled>
                               <i class="fa fa-clock-o"></i>
                               Clocked In
@@ -66,19 +78,28 @@
                               Clocked In
                         </button>
                     {% endif %}
-
             </form>
 
             <form class="form-horizontal" method="POST" action="{{ url_for('employees.employee_clocking_out') }}">
+
                     {% if employee_detail %}
                         <input type="hidden" id="employee_id" name="employee_id" value="{{ employee_detail.employee_id }}">
                     {% endif %}
-                <button id="clocked_out" class="btn btn-lg btn-block btn-rounded btn-outline-danger">
-                  <i class="fa fa-clock-o"></i>
-                  Clocked Out
-                </button>
-            </form>
 
+
+                    {% if employee_detail.attendance_register.has_clocked_out_today %}
+                        <button id="clocked_out" class="btn btn-lg btn-block btn-rounded btn-outline-danger">
+                          <i class="fa fa-clock-o"></i>
+                          Clocked Out
+                        </button>
+                    {% else %}
+                        <button id="clocked_out" class="btn btn-lg btn-block btn-rounded btn-outline-danger" disabled>
+                          <i class="fa fa-clock-o"></i>
+                          Clocked Out
+                        </button>
+
+                    {% endif %}
+            </form>
         </div>
       </div>
 

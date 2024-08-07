@@ -4,16 +4,8 @@ from flask import Flask
 from sqlalchemy.orm import joinedload
 
 from src.controller import Controllers, error_handler
-from src.database.models.bank_accounts import BankAccount
-from src.database.models.companies import Company, CompanyBranches, EmployeeRoles, EmployeeDetails, CoverPlanDetails, \
-    AttendanceSummary, TimeRecord
-from src.database.models.contacts import Address, PostalAddress, Contacts
-from src.database.models.covers import PolicyRegistrationData, ClientPersonalInformation, PaymentMethods, InsuredParty
-from src.database.sql.bank_account import BankAccountORM
-from src.database.sql.companies import CompanyORM, CompanyBranchesORM, EmployeeORM, CoverPlanDetailsORM, \
-    AttendanceSummaryORM, TimeRecordORM
-from src.database.sql.contacts import AddressORM, PostalAddressORM, ContactsORM
-from src.database.sql.covers import PolicyRegistrationDataORM, ClientPersonalInformationORM
+from src.database.models.companies import EmployeeRoles, EmployeeDetails, AttendanceSummary, TimeRecord, Salary
+from src.database.sql.companies import EmployeeORM, AttendanceSummaryORM, TimeRecordORM, SalaryORM
 from src.main import system_cache
 
 cached_ttl = system_cache.cached_ttl
@@ -26,6 +18,7 @@ class EmployeesController(Controllers):
     def init_app(self, app: Flask):
         super().init_app(app=app)
 
+    @error_handler
     async def get_employee_attendance_register(self, employee_id: str) -> AttendanceSummary | None:
         """
 
@@ -37,6 +30,7 @@ class EmployeesController(Controllers):
             if isinstance(attendance_register_orm, AttendanceSummaryORM):
                 return AttendanceSummary(**attendance_register_orm.to_dict())
 
+    @error_handler
     async def get_employee_complete_details_uid(self, uid: str) -> EmployeeDetails | None:
         """
         Get complete details of an employee by UID, including attendance summaries and time records.
@@ -53,6 +47,7 @@ class EmployeesController(Controllers):
                 return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
             return None
 
+    @error_handler
     async def get_employee_complete_details_employee_id(self, employee_id: str) -> EmployeeDetails | None:
         """
 
@@ -76,7 +71,6 @@ class EmployeesController(Controllers):
         """
 
         if employee_detail.attendance_register is None:
-
             attendance_register = AttendanceSummary(employee_id=employee_detail.employee_id,
                                                     name=employee_detail.display_names)
             with self.get_session() as session:
@@ -99,7 +93,6 @@ class EmployeesController(Controllers):
                                              clock_in=datetime.now())
                     session.add(TimeRecordORM(**time_record.dict(exclude={'summary'})))
             return True
-        return False
 
     async def get_roles(self) -> list[str]:
         return EmployeeRoles.get_all_roles()
@@ -146,3 +139,36 @@ class EmployeesController(Controllers):
                 session.add(EmployeeORM(**employee_details.dict(exclude={'attendance_register'})))
 
             return employee_details
+
+    @error_handler
+    async def add_update_employee_salary(self, salary: Salary) -> Salary | None:
+        """
+            **add_update_employee_salary**
+        :return:
+        """
+        with self.get_session() as session:
+            salary_orm = session.query(SalaryORM).filter_by(employee_id=salary.employee_id).first()
+            if isinstance(salary_orm, SalaryORM):
+                salary_orm.salary_id = salary.salary_id
+                salary.company_id = salary.company_id
+                salary.branch_id = salary.branch_id
+                salary_orm.amount = salary.amount
+                salary_orm.pay_day = salary.pay_day
+                salary_orm.effective_date = salary.effective_pay_date
+                return salary
+            session.add(SalaryORM(**salary.dict(), effective_date=salary.effective_pay_date))
+
+            return salary
+
+    @error_handler
+    async def get_salary_details(self, employee_id: str) -> Salary | None:
+        """
+
+        :param employee_id:
+        :return:
+        """
+        with self.get_session() as session:
+            salary_orm = session.query(SalaryORM).filter_by(employee_id=employee_id).first()
+            if isinstance(salary_orm, SalaryORM):
+                return Salary(**salary_orm.to_dict())
+            return None

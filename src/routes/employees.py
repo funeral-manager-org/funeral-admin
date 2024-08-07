@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from src.database.models.bank_accounts import BankAccount
 from src.authentication import login_required
-from src.database.models.companies import EmployeeDetails, CompanyBranches
+from src.database.models.companies import EmployeeDetails, CompanyBranches, Salary
 from src.database.models.contacts import Contacts, PostalAddress, Address
 from src.database.models.users import User
 from src.logger import init_logger
@@ -266,7 +266,8 @@ async def get_employee_detail(user: User, employee_id: str):
     """
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
         employee_id=employee_id)
-    context = dict(user=user, employee_detail=employee_detail)
+    salary_detail: Salary = await employee_controller.get_salary_details(employee_id=employee_detail.employee_id)
+    context = dict(user=user, employee_detail=employee_detail, salary_detail=salary_detail)
     context = await add_data_employee(context, employee_detail)
 
     return render_template('admin/managers/employees/view.html', **context)
@@ -316,6 +317,45 @@ async def employee_clocking_in(user: User):
         flash(message="Error signing in. Please try again later.", category="danger")
 
     return redirect(url_for('employees.get_attendance_register'))
+
+
+@employee_route.post('/admin/employees/update-salary')
+@login_required
+async def update_salary_record(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+        salary: Salary = Salary(**request.form)
+        employee_logger.info(f"Salary : {salary}")
+    except ValidationError as e:
+        employee_id = request.form.get('employee_id')
+        if employee_id:
+            return redirect(url_for('employees.get_employee_detail', employee_id=employee_id))
+        return redirect(url_for('employees.get_employees'))
+
+    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
+        employee_id=salary.employee_id)
+
+    # TODO may need to remove this but this ensures that the salary record is equivalent to the employee record
+    employee_detail.salary = salary.amount
+    employee_detail = await employee_controller.add_update_employee_details(employee_details=employee_detail)
+
+    if not isinstance(employee_detail, EmployeeDetails):
+        mess: str = "unable to update employee salary details - employee not found please try again later"
+        flash(message=mess, category='danger')
+        return redirect(url_for('employees.get_employees'))
+
+    updated_salary: Salary = await employee_controller.add_update_employee_salary(salary=salary)
+    if not isinstance(updated_salary, Salary):
+        flash(message="Unable to Update Employee Salary please try again later", category='danger')
+        return redirect(url_for('employees.get_employee_detail', employee_id=salary.employee_id))
+
+    employee_logger.info(f"Updated Salary : {updated_salary}")
+    flash(message="successfully updated employee salary record", category='success')
+    return redirect(url_for('employees.get_employee_detail', employee_id=salary.employee_id))
 
 
 @employee_route.post('/admin/employees/attendance-register/clock-out')

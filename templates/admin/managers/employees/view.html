@@ -94,6 +94,7 @@
         {% endif %}
     </div>
 </div>
+
 <div class="card shadow-lg border-info">
     <div class="card-header bg-facebook">
         <h3 class="card-title text-white">
@@ -115,6 +116,23 @@
         {% endif %}
     </div>
 </div>
+{% if salary_detail %}
+<div class="card shadow-lg border-info">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-user-circle-o"> </i>
+            Salary
+        </h3>
+    </div>
+    <div class="card-body">
+            <ul class="list-group">
+                <li class="list-group-item font-weight-bold">Amount : <span class="pull-right text-info">R {{ salary_detail.amount|number }}.00</span></li>
+                <li class="list-group-item">Pay Date : <span class="pull-right text-info">{{ salary_detail.effective_pay_date }}</span></li>
+                <li class="list-group-item">Next Pay Date : <span class="pull-right text-success">{{ salary_detail.next_month_pay_date }}</span></li>
+            </ul>
+    </div>
+</div>
+{% endif %}
 {% if user and user.is_company_admin %}
     <div class="card shadow-lg border-danger">
         <div class="card-header bg-google-plus">
@@ -125,17 +143,14 @@
         </div>
         <div class="card-body">
 
-            <button class="btn btn-outline-primary btn-rounded btn-lg m-t-8">
+            <button class="btn btn-outline-primary btn-rounded m-t-8" data-toggle="modal" data-target="#salaryModal">
                 <i class="fa fa-user-circle-o"></i>
-                Create PaySlip
-            </button>
-            
-            <button class="btn btn-outline-info btn-rounded btn-lg m-t-8">
-                <i class="fa fa-user-circle-o"></i>
-                Employee Editor
+                Salary
             </button>
         </div>
     </div>
 {% endif %}
 </section>
 {% endblock %}
+
+{% include 'admin/managers/employees/modals/salary.html' %}

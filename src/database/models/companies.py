@@ -415,6 +415,47 @@ class Payslip(BaseModel):
     deductions: int
 
 
+class Salary(BaseModel):
+    salary_id: str = Field(default_factory=create_id)
+    employee_id: str
+    company_id: str
+    branch_id: str
+    amount: int
+    pay_day: int
+
+    @property
+    def effective_pay_date(self) -> date:
+        """
+        Calculate the effective pay date for the current month.
+        Adjust the date if the pay_day falls on a weekend.
+        :return: The effective pay date as a datetime.date object.
+        """
+        today = datetime.today()
+        effective_date = datetime(today.year, today.month, self.pay_day)
+
+        if effective_date.weekday() == 5:  # Saturday
+            effective_date -= timedelta(days=1)
+        elif effective_date.weekday() == 6:  # Sunday
+            effective_date += timedelta(days=1)
+
+        return effective_date.date()
+    @property
+    def next_month_pay_date(self) -> date:
+        """
+        Calculate the effective pay date for the next month.
+        Adjust the date if the pay_day falls on a weekend.
+        :return: The effective pay date for the next month as a datetime.date object.
+        """
+        next_month_effective_date = self.effective_pay_date + relativedelta(months=1)
+
+        if next_month_effective_date.weekday() == 5:  # Saturday
+            next_month_effective_date -= timedelta(days=1)
+        elif next_month_effective_date.weekday() == 6:  # Sunday
+            next_month_effective_date += timedelta(days=1)
+
+        return next_month_effective_date
+
+
 class EmployeeDetails(BaseModel):
     """
     Represents details about an employee.

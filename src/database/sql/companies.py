@@ -209,12 +209,13 @@ class EmployeeORM(Base):
 class SalaryORM(Base):
     __tablename__ = 'salaries'
 
-    salary_id = Column(Integer, primary_key=True, index=True)
+    salary_id = Column(String(ID_LEN), primary_key=True, index=True)
     employee_id = Column(String(ID_LEN), index=True)
-    amount = Column(Integer)
-    effective_date = Column(Date)
     company_id = Column(String(ID_LEN), index=True)
     branch_id = Column(String(ID_LEN), index=True)
+    amount = Column(Integer)
+    pay_day = Column(Integer)
+    effective_date = Column(Date)
 
     @classmethod
     def create_if_not_table(cls):
@@ -234,6 +235,7 @@ class SalaryORM(Base):
             'salary_id': self.salary_id,
             'employee_id': self.employee_id,
             'amount': self.amount,
+            'pay_day': self.pay_day,
             'effective_date': str(self.effective_date),
             'company_id': self.company_id,
             'branch_id': self.branch_id

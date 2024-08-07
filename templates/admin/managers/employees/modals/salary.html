@@ -1,0 +1,40 @@
+
+
+
+<div class="modal fade" id="salaryModal" tabindex="-1" aria-labelledby="salaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="salaryModalLabel">
+                    <i class="fa fa-mobile-phone"> </i>
+                    Salary
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+               <form class="form-horizontal" method="POST" action="{{ url_for('employees.update_salary_record') }}">
+                    <input type="hidden" name="employee_id" id="employee_id" value="{{ employee_detail.employee_id }}"/>
+                    <input type="hidden" name="company_id" id="company_id" value="{{ employee_detail.company_id }}">
+                    <input type="hidden" name="branch_id" id="branch_id" value="{{ employee_detail.branch_id }}">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                           <label for="amount">Monthly Salary</label>
+                           <input type="number" name="amount" id="amount" class="form-control-lg" {% if salary_detail %}value="{{ salary_detail.amount }}"{% endif %}>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="pay_day">Pay Day</label>
+                            <input type="number" name="pay_day" id="pay_day" class="form-control-lg" {% if salary_detail %}value="{{ salary_detail.pay_day }}"{% endif %}>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <button type="submit" class="btn btn-outline-primary btn-rounded btn-block">
+                            Update
+                        </button>
+                    </div>
+               </form>
+            </div>
+        </div>
+    </div>
+</div>

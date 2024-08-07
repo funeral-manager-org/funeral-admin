@@ -1,0 +1,19 @@
+
+
+
+
+<div class="card shadow-lg border-info">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-user-circle-o"> </i>
+            Salary
+        </h3>
+    </div>
+    <div class="card-body">
+            <ul class="list-group">
+                <li class="list-group-item font-weight-bold">Amount : <span class="pull-right text-info">R {{ salary_detail.amount|number }}.00</span></li>
+                <li class="list-group-item">Pay Date : <span class="pull-right text-info">{{ salary_detail.effective_pay_date }}</span></li>
+                <li class="list-group-item">Next Pay Date : <span class="pull-right text-success">{{ salary_detail.next_month_pay_date }}</span></li>
+            </ul>
+    </div>
+</div>

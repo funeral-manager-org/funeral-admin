@@ -61,8 +61,11 @@ async def get_employee_details(user: User):
     employee_logger.info(f"COMPARED TO THIS : {employee_detail}")
     if employee_detail:
         # this adds postal addresses and others
+
         context = await add_data_employee(context=context, employee_detail=employee_detail)
+        salary_detail: Salary = await employee_controller.get_salary_details(employee_id=employee_detail.employee_id)
         context.update(employee_detail=employee_detail)
+        context.update(salary_detail=salary_detail)
     # return render_template('admin/managers/employees/view.html', **context)
     return render_template('admin/employees/employee.html', **context)
 

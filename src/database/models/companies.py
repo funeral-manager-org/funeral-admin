@@ -439,6 +439,7 @@ class Salary(BaseModel):
             effective_date += timedelta(days=1)
 
         return effective_date.date()
+
     @property
     def next_month_pay_date(self) -> date:
         """

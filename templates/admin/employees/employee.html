@@ -81,6 +81,9 @@
     {% if employee_detail and bank_account %}
         {% include 'admin/employees/banking.html' %}
     {% endif %}
+    {% if employee_detail and salary_detail %}
+        {% include 'admin/employees/salary.html' %}
+    {% endif %}
     {% if employee_detail and contact_details %}
         {% include 'admin/employees/contacts.html' %}
     {% endif %}
@@ -90,6 +93,7 @@
     {% if employee_detail and physical_address  %}
         {% include 'admin/employees/physical.html' %}
     {% endif %}
+
     </div>
 </section>
 {% endblock %}

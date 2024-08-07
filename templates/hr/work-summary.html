@@ -66,8 +66,8 @@
                                             <td>{{ record.day_and_date_clocked_in() }}</td>
                                             <td>{{ record.clock_in }}</td>
                                             <td>{{ record.clock_out }}</td>
-                                            <td>{{ record.normal_minutes_worked }}</td>
-                                            <td>{{ record.overtime_worked }}</td>
+                                            <td>{{ record.normal_minutes_worked|number }}</td>
+                                            <td>{{ record.overtime_worked|number }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>

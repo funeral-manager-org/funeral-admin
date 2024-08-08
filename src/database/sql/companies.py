@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, date
 
-from sqlalchemy import Column, String, inspect, Integer, Boolean, JSON, Date, Text, DateTime, ForeignKey
+from sqlalchemy import Column, String, inspect, Integer, Boolean, JSON, Date, Text, DateTime, ForeignKey, Float
 from sqlalchemy.orm import relationship
 
 from src.database.constants import ID_LEN, NAME_LEN, SHORT_DESCRIPTION_lEN
@@ -336,4 +336,39 @@ class AttendanceSummaryORM(Base):
             'records': [record.to_dict(include_relationships=False) for record in self.records or []
                         if isinstance(record, TimeRecordORM)],
             'employee': self.employee.to_dict(include_relationships=False) if include_relationships else {}
+        }
+
+
+class WorkSummaryORM(Base):
+    """
+
+    """
+    work_id: str = Column(String(ID_LEN), primary_key=True)
+    payslip_id: str = Column(String(ID_LEN))
+    employee_id: str = Column(String(ID_LEN))
+    period_start: date = Column(Date)
+    period_end: date = Column(Date)
+
+    normal_minutes_per_week: int = Column(Integer)
+    normal_weeks_in_months: int = Column(Integer)
+    normal_overtime_multiplier: int = Column(Float)
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self, include_relationships: bool = False):
+        """
+
+        :param include_relationships:
+        :return:
+        """
+        return {
+            
         }

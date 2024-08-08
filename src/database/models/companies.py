@@ -156,7 +156,6 @@ class TimeRecord(BaseModel):
     clock_in: datetime
     clock_out: datetime | None
 
-
     @property
     def normal_minutes_worked(self) -> int:
         """
@@ -317,9 +316,9 @@ class WorkSummary(BaseModel):
 
     normal_minutes_per_week: int = Field(default=40 * 60)
     base_salary_cents_in_month: int = Field(default=3500 * 100)
-    attendance: list[AttendanceSummary]
     normal_weeks_in_month: int = Field(default=4)
     normal_overtime_multiplier: float = Field(default=1.5)
+    attendance: AttendanceSummary | None
 
     @property
     def weeks_in_period(self) -> float:
@@ -415,61 +414,6 @@ class WorkSummary(BaseModel):
         return self.overtime_in_cents + self.normal_pay_cents
 
 
-class Payslip(BaseModel):
-    payslip_id: str
-    employee_id: str
-    employee_name: str
-    pay_period_start: date
-    pay_period_end: date
-    base_salary: int
-    total_minutes_worked: int
-    overtime_minutes: int
-    overtime_amount: int
-    deductions: int
-
-
-class Salary(BaseModel):
-    salary_id: str = Field(default_factory=create_id)
-    employee_id: str
-    company_id: str
-    branch_id: str
-    amount: int
-    pay_day: int
-
-    @property
-    def effective_pay_date(self) -> date:
-        """
-        Calculate the effective pay date for the current month.
-        Adjust the date if the pay_day falls on a weekend.
-        :return: The effective pay date as a datetime.date object.
-        """
-        today = datetime.today()
-        effective_date = datetime(today.year, today.month, self.pay_day)
-
-        if effective_date.weekday() == 5:  # Saturday
-            effective_date -= timedelta(days=1)
-        elif effective_date.weekday() == 6:  # Sunday
-            effective_date += timedelta(days=1)
-
-        return effective_date.date()
-
-    @property
-    def next_month_pay_date(self) -> date:
-        """
-        Calculate the effective pay date for the next month.
-        Adjust the date if the pay_day falls on a weekend.
-        :return: The effective pay date for the next month as a datetime.date object.
-        """
-        next_month_effective_date = self.effective_pay_date + relativedelta(months=1)
-
-        if next_month_effective_date.weekday() == 5:  # Saturday
-            next_month_effective_date -= timedelta(days=1)
-        elif next_month_effective_date.weekday() == 6:  # Sunday
-            next_month_effective_date += timedelta(days=1)
-
-        return next_month_effective_date
-
-
 class EmployeeDetails(BaseModel):
     """
     Represents details about an employee.
@@ -516,3 +460,88 @@ class EmployeeDetails(BaseModel):
     @property
     def display_names(self) -> str:
         return f"{self.full_names} {self.last_name}"
+
+
+class Salary(BaseModel):
+    salary_id: str = Field(default_factory=create_id)
+    employee_id: str
+    company_id: str
+    branch_id: str
+    amount: int
+    pay_day: int
+
+    @property
+    def effective_pay_date(self) -> date:
+        """
+        Calculate the effective pay date for the current month.
+        Adjust the date if the pay_day falls on a weekend.
+        :return: The effective pay date as a datetime.date object.
+        """
+        today = datetime.today()
+        effective_date = datetime(today.year, today.month, self.pay_day)
+
+        if effective_date.weekday() == 5:  # Saturday
+            effective_date -= timedelta(days=1)
+        elif effective_date.weekday() == 6:  # Sunday
+            effective_date += timedelta(days=1)
+
+        return effective_date.date()
+
+    @property
+    def next_month_pay_date(self) -> date:
+        """
+        Calculate the effective pay date for the next month.
+        Adjust the date if the pay_day falls on a weekend.
+        :return: The effective pay date for the next month as a datetime.date object.
+        """
+        next_month_effective_date = self.effective_pay_date + relativedelta(months=1)
+
+        if next_month_effective_date.weekday() == 5:  # Saturday
+            next_month_effective_date -= timedelta(days=1)
+        elif next_month_effective_date.weekday() == 6:  # Sunday
+            next_month_effective_date += timedelta(days=1)
+
+        return next_month_effective_date
+
+
+class Deductions(BaseModel):
+    deduction_id: str
+    payslip_id: str
+    amount_in_cents: int
+    reason: str
+
+
+class BonusPay(BaseModel):
+    bonus_id: str
+    payslip_id: str
+    amount_in_cents: int
+    reason: str
+
+
+class Payslip(BaseModel):
+    payslip_id: str
+    employee_id: str
+    salary_id: str
+    pay_period_start: date
+    pay_period_end: date
+
+    employee: EmployeeDetails
+    salary: Salary
+
+    applied_deductions: list[Deductions]
+    bonus_pay: list[BonusPay]
+    work_sheets: WorkSummary
+
+    @property
+    def total_bonus(self) -> int:
+        return sum(bonus.amount_in_cents for bonus in self.bonus_pay)
+
+    @property
+    def total_deductions(self) -> int:
+        return sum(deduct.amount_in_cents for deduct in self.applied_deductions)
+
+    @property
+    def net_salary(self) -> int:
+        return self.work_sheet.net_salary_cents
+
+

@@ -26,6 +26,7 @@ class CompanyORM(Base):
         if not inspect(engine).has_table(cls.__tablename__):
             cls.__table__.create(bind=engine)
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
@@ -68,6 +69,7 @@ class CompanyBranchesORM(Base):
         if not inspect(engine).has_table(cls.__tablename__):
             cls.__table__.create(bind=engine)
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
@@ -116,6 +118,7 @@ class CoverPlanDetailsORM(Base):
         if not inspect(engine).has_table(cls.__tablename__):
             cls.__table__.create(bind=engine)
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
@@ -147,6 +150,7 @@ class EmployeeORM(Base):
     employee_id = Column(String(9), primary_key=True, index=True)
     company_id = Column(String(ID_LEN), index=True)
     branch_id = Column(String(ID_LEN), index=True)
+
     uid = Column(String(ID_LEN), index=True)
     full_names = Column(String(255))
     last_name = Column(String(255))
@@ -164,14 +168,21 @@ class EmployeeORM(Base):
     contact_id = Column(String(ID_LEN), nullable=True, index=True)
     postal_id = Column(String(ID_LEN), nullable=True, index=True)
     bank_account_id = Column(String(ID_LEN), nullable=True, index=True)
+
     attendance_register = relationship('AttendanceSummaryORM', back_populates='employee', lazy='joined',
                                        cascade="all, delete-orphan", uselist=False)
+
+    work_summary = relationship('WorkSummaryORM', back_populates='employee', cascade='all, delete-orphan',
+                                uselist=True)
+    payslip = relationship('PaySlipORM', back_populates='employee', lazy=True, cascade='all, delete-orphan',
+                           uselist=True)
 
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
             cls.__table__.create(bind=engine)
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
@@ -210,18 +221,20 @@ class SalaryORM(Base):
     __tablename__ = 'salaries'
 
     salary_id = Column(String(ID_LEN), primary_key=True, index=True)
-    employee_id = Column(String(ID_LEN), index=True)
+    employee_id = Column(String(ID_LEN), ForeignKey('employee.employee_id'), index=True)
     company_id = Column(String(ID_LEN), index=True)
     branch_id = Column(String(ID_LEN), index=True)
     amount = Column(Integer)
     pay_day = Column(Integer)
     effective_date = Column(Date)
+    payslip = relationship('PaySlipORM', back_populates='salary', lazy=True)
 
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
             cls.__table__.create(bind=engine)
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
@@ -255,6 +268,7 @@ class SalaryPaymentORM(Base):
         if not inspect(engine).has_table(cls.__tablename__):
             cls.__table__.create(bind=engine)
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
@@ -277,7 +291,7 @@ class TimeRecordORM(Base):
     time_id: str = Column(String(ID_LEN), primary_key=True, index=True)
     attendance_id: str = Column(String(ID_LEN), ForeignKey('employee_attendance_summary.attendance_id'))
     normal_minutes_per_session: int = Column(Integer, nullable=False)
-    clock_in: datetime = Column(DateTime)
+    clock_in: datetime = Column(DateTime, index=True)
     clock_out: datetime = Column(DateTime, nullable=True)
     summary = relationship('AttendanceSummaryORM', back_populates='records')
 
@@ -286,6 +300,7 @@ class TimeRecordORM(Base):
         if not inspect(engine).has_table(cls.__tablename__):
             cls.__table__.create(bind=engine)
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
@@ -311,13 +326,15 @@ class AttendanceSummaryORM(Base):
     employee_id: str = Column(String(ID_LEN), ForeignKey('employee.employee_id'))
     name: str = Column(String(NAME_LEN))
     records = relationship("TimeRecordORM", back_populates="summary", lazy=True, cascade="all, delete-orphan")
-    employee = relationship("EmployeeORM", back_populates="attendance_register")
+    employee = relationship("EmployeeORM", back_populates="attendance_register", uselist=False)
+    work_summary = relationship('WorkSummaryORM', uselist=False)
 
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
             cls.__table__.create(bind=engine)
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
@@ -343,21 +360,29 @@ class WorkSummaryORM(Base):
     """
 
     """
+    __tablename__ = "work_summary"
     work_id: str = Column(String(ID_LEN), primary_key=True)
-    payslip_id: str = Column(String(ID_LEN))
-    employee_id: str = Column(String(ID_LEN))
-    period_start: date = Column(Date)
-    period_end: date = Column(Date)
+    attendance_id: str = Column(String(ID_LEN), ForeignKey('employee_attendance_summary.attendance_id'))
+    payslip_id: str = Column(String(ID_LEN), ForeignKey('payslip.payslip_id'))
+    employee_id: str = Column(String(ID_LEN), ForeignKey('employee.employee_id'))
+
+    period_start: date = Column(Date, index=True)
+    period_end: date = Column(Date, index=True)
 
     normal_minutes_per_week: int = Column(Integer)
-    normal_weeks_in_months: int = Column(Integer)
+    normal_weeks_in_month: int = Column(Integer)
     normal_overtime_multiplier: int = Column(Float)
+    attendance = relationship("AttendanceSummaryORM", back_populates="work_summary",
+                              lazy=True, uselist=False)
+    employee = relationship("EmployeeORM", back_populates="work_summary", uselist=False)
+    payslip = relationship("PaySlipORM", back_populates="work_sheet", uselist=False)
 
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
             cls.__table__.create(bind=engine)
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def delete_table(cls):
         if inspect(engine).has_table(cls.__tablename__):
@@ -370,5 +395,119 @@ class WorkSummaryORM(Base):
         :return:
         """
         return {
-            
+            "work_id": self.work_id,
+            "payslip_id": self.payslip_id,
+            "employee_id": self.employee_id,
+            "period_start": self.period_start,
+            "period_end": self.period_end,
+            "normal_minutes_per_week": self.normal_minutes_per_week,
+            "normal_weeks_in_month": self.normal_weeks_in_month,
+            "normal_overtime_multiplier": self.normal_overtime_multiplier,
+            "attendance": self.attendance.to_dict(include_relationships=True) if include_relationships else {},
+            "employee": self.employee.to_dict(include_relationships=False) if include_relationships else {}
+        }
+
+
+class DeductionsORM(Base):
+    __tablename__ = "applied_deductions"
+    deduction_id: str = Column(String(ID_LEN), primary_key=True)
+    payslip_id: str = Column(String(ID_LEN), ForeignKey('payslip.payslip_id'))
+    amount_in_cents: int = Column(Integer)
+    reason: str = Column(String(255))
+    payslip = relationship('PaySlipORM', back_populates='applied_deductions', uselist=False)
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    # noinspection PyUnresolvedReferences
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        return {
+            "deduction_id": self.deduction_id,
+            "payslip_id": self.payslip_id,
+            "amount_in_cents": self.amount_in_cents,
+            "reason": self.reason,
+        }
+
+
+class BonusPayORM(Base):
+    __tablename__ = "bonus_pay"
+    bonus_id: str = Column(String(ID_LEN), primary_key=True)
+    payslip_id: str = Column(String(ID_LEN), ForeignKey('payslip.payslip_id'))
+    amount_in_cents: int = Column(Integer)
+    reason: str = Column(String(255))
+    payslip = relationship('PaySlipORM', back_populates='bonus_pay', uselist=False)
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    # noinspection PyUnresolvedReferences
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        return {
+            "bonus_id": self.bonus_id,
+            "payslip_id": self.payslip_id,
+            "amount_in_cents": self.amount_in_cents,
+            "reason": self.reason,
+        }
+
+
+class PaySlipORM(Base):
+    __tablename__ = 'payslip'
+    payslip_id: str = Column(String(ID_LEN), primary_key=True)
+    employee_id: str = Column(String(ID_LEN), ForeignKey('employee.employee_id'))
+    salary_id: str = Column(String(ID_LEN), ForeignKey('salaries.salary_id'))
+
+    pay_period_start: date = Column(Date, index=True)
+    pay_period_end: date = Column(Date, index=True)
+
+    employee = relationship('EmployeeORM', back_populates='payslip', lazy=True, uselist=False)
+    salary = relationship('SalaryORM', back_populates="payslip", lazy=True, uselist=False)
+
+    applied_deductions = relationship('DeductionsORM', back_populates="payslip", lazy=True,
+                                      cascade="all, delete-orphan", uselist=True)
+    bonus_pay = relationship('BonusPayORM', back_populates='payslip', lazy=True,
+                             cascade='all, delete-orphan', uselist=True)
+
+    work_sheet = relationship('WorkSummaryORM', back_populates='payslip', lazy=True,
+                              uselist=False)
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    # noinspection PyUnresolvedReferences
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self, include_relationships: bool = False):
+        return {
+            "payslip_id": self.payslip_id,
+            "employee_id": self.employee_id,
+            "salary_id": self.salary_id,
+            "pay_period_start": self.pay_period_start.isoformat() if self.pay_period_start else None,
+            "pay_period_end": self.pay_period_end.isoformat() if self.pay_period_end else None,
+            "employee": self.employee.to_dict(
+                include_relationships=False) if self.employee and include_relationships else None,
+            "salary": self.salary.to_dict() if self.salary else None,
+            "applied_deductions": [deduction.to_dict() for deduction in
+                                   self.applied_deductions] if self.applied_deductions else [],
+            "bonus_pay": [bonus.to_dict() for bonus in self.bonus_pay] if self.bonus_pay else [],
+            "work_sheet": self.work_sheet.to_dict(
+                include_relationships=True) if self.work_sheet and include_relationships else None,
         }

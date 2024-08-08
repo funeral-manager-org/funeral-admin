@@ -361,6 +361,7 @@ class WorkSummaryORM(Base):
 
     """
     __tablename__ = "work_summary"
+
     work_id: str = Column(String(ID_LEN), primary_key=True)
     attendance_id: str = Column(String(ID_LEN), ForeignKey('employee_attendance_summary.attendance_id'))
     payslip_id: str = Column(String(ID_LEN), ForeignKey('payslip.payslip_id'))
@@ -369,7 +370,11 @@ class WorkSummaryORM(Base):
     period_start: date = Column(Date, index=True)
     period_end: date = Column(Date, index=True)
 
+    normal_sign_in_hour: int = Column(Integer)
+    normal_sign_off_hour: int = Column(Integer)
+
     normal_minutes_per_week: int = Column(Integer)
+
     normal_weeks_in_month: int = Column(Integer)
     normal_overtime_multiplier: int = Column(Float)
     attendance = relationship("AttendanceSummaryORM", back_populates="work_summary",

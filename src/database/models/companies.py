@@ -314,6 +314,9 @@ class WorkSummary(BaseModel):
     period_start: date
     period_end: date
 
+    normal_sign_in_hour: int = Field(default_factory=7)
+    normal_sign_off_hour: int = Field(default_factory=17)
+
     normal_minutes_per_week: int = Field(default=40 * 60)
     base_salary_cents_in_month: int = Field(default=3500 * 100)
     normal_weeks_in_month: int = Field(default=4)
@@ -543,5 +546,24 @@ class Payslip(BaseModel):
     @property
     def net_salary(self) -> int:
         return self.work_sheet.net_salary_cents
+
+
+class WorkOrder(BaseModel):
+    order_id: str = Field(default_factory=create_id)
+
+    job_title: str
+    description: str
+    assigned_roles: list[str]
+
+    job_scheduled_start_time: datetime
+    job_scheduled_time_completion: datetime
+
+    work_address_id: str
+    contact_person_name: str
+    contact_person_contact_id: str
+
+    @property
+    def total_scheduled_work_minutes(self) -> int:
+        return int((self.job_scheduled_time_completion - self.job_scheduled_start_time).total_seconds() * 60)
 
 

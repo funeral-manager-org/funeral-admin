@@ -7,8 +7,6 @@ app, message_controller, notifications_controller, subscriptions_controller = cr
     config=config_instance())
 
 
-# app, chat_io, message_controller = create_app(config=config_instance())
-
 def run_loops():
     """running message loops"""
     loops = [

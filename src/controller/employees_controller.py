@@ -43,7 +43,7 @@ class EmployeesController(Controllers):
                 joinedload(EmployeeORM.attendance_register).joinedload(AttendanceSummaryORM.records)
             ).first()
 
-            if isinstance(employee_orm, EmployeeORM):
+            if employee_orm and isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
 
             return None

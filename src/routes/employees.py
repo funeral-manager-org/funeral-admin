@@ -79,7 +79,7 @@ async def update_employee_details(user: User):
     :return:
     """
     employee_details: EmployeeDetails = EmployeeDetails(**request.form, uid=user.uid)
-
+    employee_logger.info(f"Employee Logger : {employee_details}")
     if user.branch_id:
         employee_details.branch_id = user.branch_id
     if user.company_id:
@@ -269,6 +269,7 @@ async def get_employee_detail(user: User, employee_id: str):
     """
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
         employee_id=employee_id)
+    employee_logger.info(f"Employee Detail : {employee_detail}")
     salary_detail: Salary = await employee_controller.get_salary_details(employee_id=employee_detail.employee_id)
     context = dict(user=user, employee_detail=employee_detail, salary_detail=salary_detail)
     context = await add_data_employee(context, employee_detail)

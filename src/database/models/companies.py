@@ -459,6 +459,8 @@ class EmployeeDetails(BaseModel):
     postal_id: str | None
     bank_account_id: str | None
     attendance_register: AttendanceSummary | None
+    work_summary: WorkSummary | None
+    payslip: list["Payslip"] = Field(default_factory=list)
 
     @property
     def display_names(self) -> str:
@@ -567,3 +569,4 @@ class WorkOrder(BaseModel):
         return int((self.job_scheduled_time_completion - self.job_scheduled_start_time).total_seconds() * 60)
 
 
+EmployeeDetails.update_forward_refs()

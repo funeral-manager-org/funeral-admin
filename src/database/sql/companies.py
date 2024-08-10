@@ -173,7 +173,7 @@ class EmployeeORM(Base):
                                        cascade="all, delete-orphan", uselist=False)
 
     work_summary = relationship('WorkSummaryORM', back_populates='employee', cascade='all, delete-orphan',
-                                uselist=True)
+                                uselist=False)
     payslip = relationship('PaySlipORM', back_populates='employee', lazy=True, cascade='all, delete-orphan',
                            uselist=True)
 
@@ -212,8 +212,12 @@ class EmployeeORM(Base):
             "contact_id": self.contact_id,
             "postal_id": self.postal_id,
             "bank_account_id": self.bank_account_id,
-            "attendance_register": self.attendance_register.to_dict(include_relationships=False)
-            if include_relationships else None
+            "attendance_register": self.attendance_register.to_dict(
+                include_relationships=False) if include_relationships and self.attendance_register else None,
+            "work_summary": self.work_summary.to_dict(
+                include_relationships=False) if include_relationships and self.work_summary else None,
+            "payslip": [payslip.to_dict(include_relationships=False) for payslip in
+                        self.payslip or []] if include_relationships and self.payslip else []
         }
 
 
@@ -316,7 +320,8 @@ class TimeRecordORM(Base):
             'normal_minutes_per_session': self.normal_minutes_per_session,
             'clock_in': self.clock_in,
             'clock_out': self.clock_out,
-            'summary': self.summary.to_dict(include_relationships=False) if include_relationships else {}
+            'summary': self.summary.to_dict(
+                include_relationships=False) if include_relationships and self.summary else {}
         }
 
 
@@ -352,7 +357,8 @@ class AttendanceSummaryORM(Base):
             'name': self.name,
             'records': [record.to_dict(include_relationships=False) for record in self.records or []
                         if isinstance(record, TimeRecordORM)],
-            'employee': self.employee.to_dict(include_relationships=False) if include_relationships else {}
+            'employee': self.employee.to_dict(include_relationships=False)
+            if include_relationships and self.employee else {}
         }
 
 
@@ -408,8 +414,10 @@ class WorkSummaryORM(Base):
             "normal_minutes_per_week": self.normal_minutes_per_week,
             "normal_weeks_in_month": self.normal_weeks_in_month,
             "normal_overtime_multiplier": self.normal_overtime_multiplier,
-            "attendance": self.attendance.to_dict(include_relationships=True) if include_relationships else {},
-            "employee": self.employee.to_dict(include_relationships=False) if include_relationships else {}
+            "attendance": self.attendance.to_dict(include_relationships=True)
+            if include_relationships and self.attendance else {},
+            "employee": self.employee.to_dict(include_relationships=False)
+            if include_relationships and self.employee else {}
         }
 
 

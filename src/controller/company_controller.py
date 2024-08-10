@@ -423,7 +423,7 @@ class CompanyController(Controllers):
             if not branch_id:
                 return []
             employees_orm_list = session.query(EmployeeORM).filter_by(branch_id=branch_id).all()
-            return [EmployeeDetails(**employee.to_dict()) for employee in employees_orm_list if
+            return [EmployeeDetails(**employee.to_dict(include_relationships=False)) for employee in employees_orm_list or [] if
                     isinstance(employee, EmployeeORM)]
 
     @cached_ttl()
@@ -433,7 +433,7 @@ class CompanyController(Controllers):
             policy_holder = InsuredParty.POLICY_HOLDER.value
             clients_orm_list = session.query(ClientPersonalInformationORM).filter_by(branch_id=branch_id,
                                                                                      insured_party=policy_holder).all()
-            return [ClientPersonalInformation(**client.to_dict()) for client in clients_orm_list]
+            return [ClientPersonalInformation(**client.to_dict()) for client in clients_orm_list or []]
 
     @cached_ttl()
     @error_handler
@@ -473,7 +473,7 @@ class CompanyController(Controllers):
         with self.get_session() as session:
             employee_orm = session.query(EmployeeORM).filter_by(employee_id=employee_id).first()
             if isinstance(employee_orm, EmployeeORM):
-                return EmployeeDetails(**employee_orm.to_dict())
+                return EmployeeDetails(**employee_orm.to_dict(include_relationships=False))
             return None
 
     @cached_ttl()
@@ -487,7 +487,7 @@ class CompanyController(Controllers):
         with self.get_session() as session:
             employee_orm = session.query(EmployeeORM).filter_by(uid=uid).first()
             if isinstance(employee_orm, EmployeeORM):
-                return EmployeeDetails(**employee_orm.to_dict())
+                return EmployeeDetails(**employee_orm.to_dict(include_relationships=False))
             return None
 
     @cached_ttl()

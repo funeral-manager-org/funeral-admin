@@ -20,9 +20,9 @@ def bootstrapper():
                          ClaimsORM, PremiumReceiptORM, PremiumsORM, PolicyRegistrationDataORM, SMSComposeORM,
                          SMSInboxORM, EmailComposeORM, SubscriptionsORM, PackageORM, PaymentORM, SubscriptionStatusORM,
                          PaymentNoticeIntervalORM, TicketMessageORM, TicketORM, SMSSettingsORM, TimeRecordORM,
-                         AttendanceSummaryORM, SalaryORM, WorkSummaryORM, DeductionsORM, BonusPayORM, PaySlipORM]
+                         AttendanceSummaryORM,DeductionsORM, BonusPayORM, PaySlipORM, WorkSummaryORM, SalaryORM]
 
-    classes_to_create.reverse()
+    # classes_to_create.reverse()
     for cls in classes_to_create:
         try:
             cls.create_if_not_table()

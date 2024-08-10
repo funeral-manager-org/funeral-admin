@@ -117,7 +117,7 @@ class Settings(BaseSettings):
     MYSQL_SETTINGS: MySQLSettings = MySQLSettings()
     CLOUDFLARE_SETTINGS: CloudFlareSettings = CloudFlareSettings()
     EMAIL_SETTINGS: EmailSettings = EmailSettings()
-    DEVELOPMENT_SERVER_NAME: str = Field(default="DESKTOP-T9V7F59")
+    DEVELOPMENT_SERVER_NAME: str = Field(default="mothetho")
     LOGGING: Logging = Logging()
     HOST_ADDRESSES: str = Field(..., env='HOST_ADDRESSES')
     PAY_FAST_SECRET_KEY: str = Field(..., env="PAYFAST_SECRET_KEY")

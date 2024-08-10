@@ -6,7 +6,8 @@ __pycache__/
 .env.development
 # C extensions
 *.so
-
+*.xml
+.idea/
 # Distribution / packaging
 .Python
 build/

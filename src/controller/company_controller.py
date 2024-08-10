@@ -82,14 +82,15 @@ class CompanyController(Controllers):
         """
 
         with self.get_session() as session:
-            _branch_name = company_branch.branch_name.lower().strip()
-            self.logger.info(f"Adding company branch: {_branch_name}")
-            company_branches_orm = session.query(CompanyBranchesORM).filter_by(
-                branch_name=_branch_name.casefold()).first()
-            if isinstance(company_branches_orm, CompanyBranchesORM):
-                self.logger.warning(f"Company Branch Name Already Exists : {company_branch}")
-
-                return None
+            # _branch_name = company_branch.branch_name.lower().strip()
+            # self.logger.info(f"Adding company branch: {_branch_name}")
+            # company_branches_orm = session.query(CompanyBranchesORM).filter_by(
+            #     branch_name=_branch_name.casefold()).first()
+            # if isinstance(company_branches_orm, CompanyBranchesORM):
+            #     self.logger.warning(f"Company Branch Name Already Exists : {company_branch}")
+            #
+            #     return None
+            # NOTE there is a problem here where people cannot add branches with the same name
             company_branch_orm = CompanyBranchesORM(**company_branch.dict())
             self.logger.info(f"company branch added : {company_branch}")
             session.add(company_branch_orm)

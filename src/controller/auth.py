@@ -197,14 +197,24 @@ class UserController(Controllers):
             if not user_data:
                 return None
 
-            # Update user_data with the values from the user Pydantic BaseModel
-            for field in user_data.__table__.columns.keys():
-                if hasattr(user, field):
-                    setattr(user_data, field, getattr(user, field))
+            user_data.is_company_admin = user.is_company_admin
+            user_data.branch_id = user.branch_id
+            user_data.company_id = user.company_id
+            user_data.is_system_admin = user.is_system_admin
+            user_data.is_employee = user.is_employee
+            user_data.is_client = user.is_client
 
-            # Save the updated user_data back to the session
-            # session.add(user_data)
-            
+            # TODO we need a separate method to verify account
+            if not user_data.account_verified and user.account_verified:
+                user_data.account_verified = True
+
+            if user.username:
+                user_data.username = user.username
+            if user.password_hash:
+                user_data.password_hash = user.password_hash
+            if user.email:
+                user_data.email = user.email
+
             self.logger.info(f"User Updated : {user_data}")
             self.users[user_data.uid] = User(**user_data.to_dict())
 

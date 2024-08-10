@@ -46,6 +46,7 @@ async def get_employee_details(user: User):
     :return:
     """
     employee_logger.info(user)
+    employee_logger.info(f"IS COMPANY ADMIN : {user.is_company_admin}")
 
     if not user.can_access_employee_record:
         message: str = "you have no proper employee record please inform admin"
@@ -302,6 +303,12 @@ async def employee_clocking_in(user: User):
     """
     employee_id: str = request.form.get('employee_id')
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
+    employee_logger.info(f"IS Company ADMIN : {user.is_company_admin}")
+    # TODO - this is bad logic rather create an employee record if user is admin
+    if user.is_company_admin:
+        flash(message="please update your employee record", category="success")
+        # TODO display a form to create an admin employee record
+        return redirect(url_for('employees.get_attendance_register'))
 
     if not employee_detail and not (employee_detail.is_active and (user.is_employee or user.is_company_admin)):
         message: str = "you have no proper employee record please inform admin"

@@ -71,7 +71,9 @@
                 <select class="form-control" id="branch_id" name="branch_id">
                     <option value="" disabled selected> Please Select Company Branch</option>
                         {% for branch in company_branches %}
-                            <option value="{{ branch.branch_id }}">{{ branch.branch_name| title }}</option>
+                            <option value="{{ branch.branch_id }}"
+                            {% if branch.branch_id == admin_details.branch_id %}selected{% endif %}
+                            >{{ branch.branch_name| title }}</option>
                         {% endfor %}
                     </option>
                 </select>

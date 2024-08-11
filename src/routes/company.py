@@ -85,8 +85,12 @@ async def update_company_administrator(user: User):
     :return:
     """
     try:
-        admin_employee_detail: EmployeeDetails = EmployeeDetails(**request.form,
-                                                                 uid=user.uid, company_id=user.company_id)
+        if not request.form.get('uid'):
+            admin_employee_detail: EmployeeDetails = EmployeeDetails(**request.form,
+                                                                     uid=user.uid, company_id=user.company_id)
+        else:
+            admin_employee_detail: EmployeeDetails = EmployeeDetails(**request.form)
+
     except ValidationError as e:
         error_logger.error(str(e))
         flash(message="Unable to update Administrator Detail please see log files", category="danger")

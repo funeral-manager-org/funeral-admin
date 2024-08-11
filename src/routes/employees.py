@@ -271,6 +271,10 @@ async def get_employee_detail(user: User, employee_id: str):
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
         employee_id=employee_id)
     employee_logger.info(f"Employee Detail : {employee_detail}")
+    if not employee_detail:
+        flash(message="catastrophic failure", category="danger")
+        return redirect(url_for('employees.get_employees'))
+
     salary_detail: Salary = await employee_controller.get_salary_details(employee_id=employee_detail.employee_id)
     context = dict(user=user, employee_detail=employee_detail, salary_detail=salary_detail)
     context = await add_data_employee(context, employee_detail)

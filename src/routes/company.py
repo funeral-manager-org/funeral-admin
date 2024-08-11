@@ -155,15 +155,6 @@ async def do_register(user: User):
     return redirect(url_for('company.get_admin'))
 
 
-async def add_admin_as_company_employee(user: User):
-    """
-
-    :param user:
-    :return:
-    """
-    pass
-
-
 @company_route.post('/admin/company/update')
 @admin_login
 async def update_company_details(user: User):

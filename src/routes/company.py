@@ -101,6 +101,21 @@ async def update_company_administrator(user: User):
         flash(message="Error Adding new company Administrator", category="danger")
         return redirect(url_for('company.get_admin'))
 
+    old_salary: Salary = await employee_controller.get_salary_details(employee_id=admin_employee_detail.employee_id)
+    if not old_salary:
+        #
+        new_salary = Salary(employee_id=admin_employee_detail.employee_id, company_id=admin_employee_detail.company_id,
+                            branch_id=admin_employee_detail.branch_id,
+                            amount=admin_employee_detail.salary,
+                            pay_day=1)
+
+        _ = await employee_controller.add_update_employee_salary(salary=new_salary)
+    else:
+        # should update salary record if old salary amount is not the same as new salary amount
+        if old_salary.amount != admin_employee_detail.salary:
+            old_salary.amount = admin_employee_detail.salary
+            _ = await employee_controller.add_update_employee_salary(salary=old_salary)
+
     flash(message="Successfully updated company administrator details", category="success")
     return redirect(url_for('company.get_admin'))
 

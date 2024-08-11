@@ -1,8 +1,5 @@
-import uuid
-
 from pydantic import BaseModel, Field, validator
-
-from utils import create_id
+from src.utils import create_id
 
 
 class Auth(BaseModel):

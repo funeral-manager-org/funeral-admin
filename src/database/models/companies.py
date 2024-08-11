@@ -508,6 +508,11 @@ class Salary(BaseModel):
 
         return next_month_effective_date
 
+    @property
+    def amount_in_cents(self) -> int:
+        """converts salary amount which is in rands to cents"""
+        return int(self.amount * 100)
+
 
 class Deductions(BaseModel):
     deduction_id: str
@@ -547,7 +552,7 @@ class Payslip(BaseModel):
 
     @property
     def net_salary(self) -> int:
-        return self.work_sheet.net_salary_cents
+        return self.work_sheets.net_salary_cents
 
 
 class WorkOrder(BaseModel):

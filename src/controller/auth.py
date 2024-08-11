@@ -237,7 +237,7 @@ class UserController(Controllers):
             return is_login
 
     @error_handler
-    async def add_employee(self, user: User) -> User | None:
+    async def update_employee_user_record(self, user: User) -> User | None:
         """
         Add or update a user in the database.
 

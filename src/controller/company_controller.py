@@ -399,20 +399,29 @@ class CompanyController(Controllers):
     # noinspection DuplicatedCode
 
     @error_handler
-    async def add_employee(self, employee: EmployeeDetails) -> tuple[bool, EmployeeDetails | None]:
+    async def add_update_employee(self, employee: EmployeeDetails) -> tuple[bool, EmployeeDetails | None]:
         """
         **add_employee**
-
+            add or update new employee details
         :param employee:
         :return:
         """
         with self.get_session() as session:
+
             _id_number = employee.id_number
             employee_orm = session.query(EmployeeORM).filter_by(id_number=_id_number).first()
 
             await system_cache.clear_mem_cache()
 
             if isinstance(employee_orm, EmployeeORM):
+
+                if employee.uid:
+                    employee_orm.uid = employee.uid
+                if employee.company_id:
+                    employee_orm.company_id = employee.company_id
+                if employee.branch_id:
+                    employee_orm.branch_id = employee.branch_id
+
                 if employee.full_names:
                     employee_orm.full_names = employee.full_names
                 if employee.last_name:
@@ -450,7 +459,7 @@ class CompanyController(Controllers):
                     employee.employee_id = create_employee_id()
                 session.add(EmployeeORM(**employee.dict(exclude={'attendance_register'})))
             except Exception as e:
-                print(str(e))
+                self.logger.warning(str(e))
             return True, employee
 
     @cached_ttl()

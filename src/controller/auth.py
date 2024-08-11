@@ -57,7 +57,7 @@ class UserController(Controllers):
                     paypal_account.paypal_email = paypal_email
                     paypal_account.uid = user.uid
                     session.merge(paypal_account)
-                    
+
                     return PayPal(**paypal_account.to_dict())
                 else:
                     return None
@@ -183,7 +183,7 @@ class UserController(Controllers):
             new_user: UserORM = UserORM(**user.to_dict())
             session.add(new_user)
             new_user_dict = new_user.to_dict()
-            
+
             _user_data = User(**new_user_dict) if isinstance(new_user, UserORM) else None
             self.logger.info(f"Created New User : {_user_data}")
             self.users[_user_data.uid] = _user_data
@@ -267,12 +267,20 @@ class UserController(Controllers):
                 session.add(new_user)
                 self.logger.info(f"Created a New Employee : {user}")
             try:
-                
+
                 return user
             except IntegrityError:
                 # Handle integrity error (e.g., duplicate email)
                 session.rollback()
                 return None
+
+    @error_handler
+    async def create_new_employee_user(self):
+        """
+            modify user record so that user is an employee of a particular company
+        :return:
+        """
+        pass
 
     @error_handler
     async def send_verification_email(self, user: User, password: str) -> EmailModel:

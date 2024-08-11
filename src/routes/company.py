@@ -344,13 +344,14 @@ async def add_employee(user: User, branch_id: str):
     """
     try:
         new_employee = EmployeeDetails(**request.form)
-        print(new_employee)
+
+        # Employee is added to the company of the Company Admin and to the branch presently opened
         new_employee.company_id = user.company_id
         new_employee.branch_id = branch_id
         new_employee.email = new_employee.email.lower().strip()
 
     except ValidationError as e:
-        print(str(e))
+        error_logger.warning(str(e))
         flash(message="Please fill in all required employee details", category='danger')
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
@@ -358,7 +359,7 @@ async def add_employee(user: User, branch_id: str):
     if new_employee:
         branch = await company_controller.get_branch_by_id(branch_id=branch_id)
         branch.total_employees += 1
-        updated_branch = await company_controller.update_company_branch(company_branch=branch)
+        _ = await company_controller.update_company_branch(company_branch=branch)
 
         if employee_.email:
 
@@ -367,25 +368,9 @@ async def add_employee(user: User, branch_id: str):
             if new_user:
                 pass
             else:
-                password = await user_controller.create_employee_password()
-                password_hash = encryptor.create_hash(password=password)
 
-                _new_user = User(uid=create_id(),
-                                 branch_id=branch_id,
-                                 company_id=user.company_id,
-                                 username=employee_.email,
-                                 email=employee_.email,
-                                 password_hash=password_hash,
-                                 is_employee=True)
+                await create_new_employee_user_detail(branch_id=branch_id, employee_=employee_, user=user)
 
-                new_employee_user = await user_controller.add_employee(user=_new_user)
-                # Updating UID for Employee
-                employee_.uid = new_employee_user.uid
-                new_employee, employee_ = await company_controller.add_employee(employee=employee_)
-
-                # Sending Verification Email for New Employees
-                send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user,
-                                                                                             password=password)
             message = """
             Your Employee has successfully been added.
                 We have sent an Email to your employee with their login details
@@ -402,6 +387,34 @@ async def add_employee(user: User, branch_id: str):
         flash(message=message, category="danger")
 
     return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+
+async def create_new_employee_user_detail(branch_id: str, employee_: EmployeeDetails, user: User):
+    """
+        when adding a new employee use this to create a new user record for the employee
+        and then send a verification email
+    :param branch_id:
+    :param employee_:
+    :param user:
+    :return:
+    """
+    password = await user_controller.create_employee_password()
+    password_hash = encryptor.create_hash(password=password)
+    _new_user = User(uid=create_id(),
+                     branch_id=branch_id,
+                     company_id=user.company_id,
+                     username=employee_.email,
+                     email=employee_.email,
+                     password_hash=password_hash,
+                     is_employee=True)
+
+    new_employee_user = await user_controller.add_employee(user=_new_user)
+    # Updating UID for Employee
+    employee_.uid = new_employee_user.uid
+    new_employee, employee_ = await company_controller.add_employee(employee=employee_)
+    # Sending Verification Email for New Employees
+    send_email_verification_link = await user_controller.send_verification_email(user=new_employee_user,
+                                                                                 password=password)
 
 
 @company_route.get('/admin/company/branch/employee/get/<string:branch_id>/<string:employee_id>')

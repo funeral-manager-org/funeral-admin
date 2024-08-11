@@ -10,24 +10,33 @@
 
         <div class="modal-body">
             <div class="card-footer">
-                <form action="{{ url_for('company.add_company_branch') }}" method="POST">
 
+                <form {% if branch %} action="{{ url_for('company.update_company_branch') }}" {% else %} action="{{ url_for('company.add_company_branch') }}" {% endif %} method="POST">
+                    {% if branch %}
+                        <input type="hidden" name="branch_id"  value="{{ branch.branch_id }}" />
+                        <input type="hidden" name="company_id"  value="{{ branch.company_id }}" />
+                    {% endif %}
                     <div class="form-group">
                         <label for="branch_name" class="font-weight-bold text-info">Branch Name:</label>
-                        <input type="text" class="form-control" id="branch_name" name="branch_name" required>
+                        <input type="text" class="form-control" id="branch_name" name="branch_name"
+                               {% if branch %}value="{{ branch.branch_name }}"{% endif %} required>
                     </div>
                     <div class="form-group">
                         <label for="branch_description" class="font-weight-bold text-info">Description:</label>
                         <textarea type="text"
                                   class="form-control"
                                   id="branch_description"
-                                  name="branch_description" required></textarea>
+                                  name="branch_description" required>{% if branch %}{{ branch.branch_description }}{% endif %}</textarea>
                     </div>
 
                     <!-- Add more form fields as needed -->
                     <button type="submit" class="btn btn-rounded btn-primary">
                         <i class="fa fa-save"> </i>
-                        Add Branch
+                        {% if branch %}
+                            Update Branch
+                        {% else %}
+                            Add Branch
+                        {% endif %}
                     </button>
                 </form>
             </div>

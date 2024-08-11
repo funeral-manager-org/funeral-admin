@@ -150,6 +150,38 @@ async def add_company_branch(user: User):
     return redirect(url_for('company.get_admin'))
 
 
+@company_route.post('/admin/company/edit-branch')
+@admin_login
+async def update_company_branch(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+        branch_detail = CompanyBranches(**request.form)
+        if branch_detail.company_id != user.company_id:
+            flash(message="You are not authorized to update this branch details")
+    except ValidationError as e:
+        error_logger.warning(str(e))
+        flash(message="cannot update branch details please complete the details", category='danger')
+        return redirect(url_for('company.get_admin'))
+
+    branch_company_details: Company = await company_controller.get_company_details(company_id=branch_detail.company_id)
+    if branch_company_details.admin_uid != user.uid:
+        flash(message="You Are not Authorized to Update this company branch details please contact admin",
+              category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    updated_branch = await company_controller.update_company_branch(company_branch=branch_detail)
+    if not updated_branch:
+        flash(message="Error updating Branch - please try again later", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    flash(message="branch successfully updated", category="success")
+    return redirect(url_for('company.get_admin'))
+
+
 @company_route.get('/admin/company/branch/<string:branch_id>')
 @login_required
 async def get_branch(user: User, branch_id: str):
@@ -208,6 +240,10 @@ async def add_branch_address(user: User, branch_id: str):
     branch.address_id = branch_address_.address_id
 
     updated_branch = await company_controller.update_company_branch(company_branch=branch)
+    if not updated_branch:
+        flash(message="Error Adding company branch physical address", category="danger")
+        return redirect(url_for('company.get_branch', branch_id=branch_id))
+
     flash(message="successfully updated branch physical address", category="success")
     return redirect(url_for('company.get_branch', branch_id=branch_id))
 
@@ -232,6 +268,11 @@ async def add_postal_address(user: User, branch_id: str):
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     branch.postal_id = branch_postal_address_.postal_id
     updated_branch = await company_controller.update_company_branch(company_branch=branch)
+
+    if not updated_branch:
+        flash(message="Error Adding Company Branch Postal Address", category="danger")
+        return redirect(url_for('company.get_branch', branch_id=branch_id))
+
     flash(message="successfully updated branch postal address", category="success")
     return redirect(url_for('company.get_branch', branch_id=branch_id))
 
@@ -257,6 +298,10 @@ async def add_update_branch_contacts(user: User, branch_id: str):
     branch.contact_id = branch_contacts_.contact_id
 
     updated_branch = await company_controller.update_company_branch(company_branch=branch)
+
+    if not updated_branch:
+        flash(message="Error Adding Company Branch Contact Details", category="danger")
+        return redirect(url_for('company.get_branch', branch_id=branch_id))
 
     flash(message="successfully updated branch contact details", category="success")
     return redirect(url_for('company.get_branch', branch_id=branch_id))

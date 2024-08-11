@@ -1,0 +1,48 @@
+{% extends "layouts/page.html" %}
+
+{% block custom_css %}
+<style>
+    /* styles.css */
+    textarea.custom-textarea {
+        width: auto;  /* 3 columns */
+        height: auto; /* 12 rows */
+        padding: 0.5em; /* Optional: padding for better visual */
+        box-sizing: border-box; /* Include padding in size */
+        resize: vertical; /* Disable manual resizing if needed */
+        font-family: inherit; /* Use the same font as the rest of the page */
+    }
+
+</style>
+{% endblock %}
+{% block content %}
+    <section id="main-content">
+        <div class="card shadow-lg border-info">
+            <div class="card-header bg-facebook">
+                <h3 class="card-title text-white">
+                    <i class="ti-user"> </i>
+                    Company Admin
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if admin_details %}
+                <ul class="list-group">
+                    <li class="list-group-item">Full Names : {{ admin_details.display_names }}</li>
+                    <li class="list-group-item">Position : {{ admin_details.position }}</li>
+                </ul>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                {% if user.is_company_admin %}
+                    <button class="btn btn-block btn-outline-success btn-rounded"
+                    data-toggle="modal" data-target="#adminEditorModal"
+                    >
+                        <i class="ti-user"> </i>
+                        Edit Admin Details
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% include "admin/tasks/company/admin_editor.html" %}

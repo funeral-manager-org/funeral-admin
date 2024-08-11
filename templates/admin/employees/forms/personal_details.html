@@ -1,6 +1,9 @@
 <form method="post" action="{{ url_for('employees.update_employee_details') }}">
-        {% if employee_details %}
-            <input type="hidden" id="employee_id" name="employee_id" value="{{ employee_details.employee_id }}">
+        {% if employee_detail %}
+            <input type="hidden" id="employee_id" name="employee_id" value="{{ employee_detail.employee_id }}">
+            <input type="hidden" id="uid" name="uid" value="{{ employee_detail.uid }}">
+            <input type="hidden" id="company_id" name="company_id" value="{{ employee_detail.company_id }}">
+            <input type="hidden" id="branch_id" name="branch_id" value="{{ employee_detail.branch_id }}">
         {% endif %}
         <div class="row mb-3">
             <div class="col-md-6">

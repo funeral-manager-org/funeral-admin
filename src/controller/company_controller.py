@@ -72,6 +72,26 @@ class CompanyController(Controllers):
             self.logger.info(f"Company Not found: {company_id}")
 
             return None
+
+    async def get_company_administrator(self, company_id: str) -> EmployeeDetails | None:
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            company_detail_orm = session.query(CompanyORM).filter_by(company_id=company_id).first()
+            if isinstance(company_detail_orm, CompanyORM):
+                self.logger.info(f"Company Detail ORM : {company_detail_orm.to_dict()}")
+                company_detail = Company(**company_detail_orm.to_dict())
+                if company_detail.admin_uid:
+                    employee_detail_orm = session.query(EmployeeORM).filter_by(uid=company_detail.admin_uid).first()
+                    if isinstance(employee_detail_orm, EmployeeORM):
+                        self.logger.info(f"Employee Detail ORM : {employee_detail_orm.to_dict(include_relationships=False)}")
+                        return EmployeeDetails(**employee_detail_orm.to_dict(include_relationships=False))
+
+            return None
+
     @error_handler
     async def update_company_details(self, company_details: Company) -> Company | None:
         """

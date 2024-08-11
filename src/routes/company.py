@@ -49,6 +49,58 @@ async def get_admin(user: User):
     return render_template('admin/managers/manager.html', **context)
 
 
+@company_route.get('/admin/company/company-administrator')
+@login_required
+async def get_company_administrator(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    _user: User = await user_controller.get_account_by_uid(uid=user.uid)
+    if not _user.company_id:
+        flash(message="You are not registered in any company", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    admin_details: EmployeeDetails = await company_controller.get_company_administrator(company_id=user.company_id)
+    error_logger.info(f"Company Admin : {admin_details}")
+    error_logger.info(f"user Info : {_user}")
+    company_branches = await company_controller.get_company_branches(company_id=_user.company_id)
+    employee_roles = await company_controller.get_employee_roles(company_id=_user.company_id)
+    context = dict(
+        user=user,
+        admin_details=admin_details,
+        employee_roles=employee_roles,
+        company_branches=company_branches
+    )
+    return render_template('admin/tasks/company/register_me.html', **context)
+
+
+@company_route.post('/admin/company/update-company-administrator')
+@admin_login
+async def update_company_administrator(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+        admin_employee_detail: EmployeeDetails = EmployeeDetails(**request.form,
+                                                                 uid=user.uid, company_id=user.company_id)
+    except ValidationError as e:
+        error_logger.error(str(e))
+        flash(message="Unable to update Administrator Detail please see log files", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    admin_added, _ = await company_controller.add_update_employee(employee=admin_employee_detail)
+    if not admin_added:
+        flash(message="Error Adding new company Administrator", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    flash(message="Successfully updated company administrator details", category="success")
+    return redirect(url_for('company.get_admin'))
+
+
 @company_route.get('/admin/company/register')
 @login_required
 async def get_register(user: User):
@@ -97,6 +149,15 @@ async def do_register(user: User):
     flash(message="company successfully registered", category="success")
     # context = dict(user=updated_user, company_data=registered_company)
     return redirect(url_for('company.get_admin'))
+
+
+async def add_admin_as_company_employee(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    pass
 
 
 @company_route.post('/admin/company/update')
@@ -425,7 +486,7 @@ async def create_new_employee_user_detail(branch_id: str, employee_: EmployeeDet
 
     # Sending Verification Email for New Employees
     _ = await user_controller.send_verification_email(user=new_employee_user,
-                                                                                 password=password)
+                                                      password=password)
 
 
 @company_route.get('/admin/company/branch/employee/get/<string:branch_id>/<string:employee_id>')

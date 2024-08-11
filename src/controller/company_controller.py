@@ -72,6 +72,56 @@ class CompanyController(Controllers):
             self.logger.info(f"Company Not found: {company_id}")
 
             return None
+    @error_handler
+    async def update_company_details(self, company_details: Company) -> Company | None:
+        """
+
+        :param company_details:
+        :return:
+        """
+        with self.get_session() as session:
+            company_orm = session.query(CompanyORM).filter_by(company_id=company_details.company_id).first()
+            if not isinstance(company_orm, CompanyORM):
+                self.logger.warning("Company Not Found cannot Update")
+                return None
+            if company_details.company_name:
+                company_orm.company_name = company_details.company_name
+            if company_details.admin_uid:
+                company_orm.admin_uid = company_details.admin_uid
+            if company_details.reg_ck:
+                company_orm.reg_ck = company_details.reg_ck
+            if company_details.vat_number:
+                company_orm.vat_number = company_details.vat_number
+
+            if company_details.company_description:
+                company_orm.company_description = company_details.company_description
+
+            if company_details.company_slogan:
+                company_orm.company_slogan = company_details.company_slogan
+
+            if company_details.total_users:
+                company_orm.total_users = company_details.total_users
+
+            if company_details.total_clients:
+                company_orm.total_clients = company_details.total_clients
+            await system_cache.clear_mem_cache()
+            return company_details
+
+    @error_handler
+    async def delete_company_details(self, company_id: str) -> bool:
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            company_details = session.query(CompanyORM).filter_by(company_id=company_id).first()
+            if isinstance(company_details, CompanyORM):
+                # TODO Actucally delete company here
+                session.delete(company_details)
+
+                return True
+            return False
 
     @error_handler
     async def add_company_branch(self, company_branch: CompanyBranches) -> CompanyBranches | None:
@@ -424,7 +474,8 @@ class CompanyController(Controllers):
             if not branch_id:
                 return []
             employees_orm_list = session.query(EmployeeORM).filter_by(branch_id=branch_id).all()
-            return [EmployeeDetails(**employee.to_dict(include_relationships=False)) for employee in employees_orm_list or [] if
+            return [EmployeeDetails(**employee.to_dict(include_relationships=False)) for employee in
+                    employees_orm_list or [] if
                     isinstance(employee, EmployeeORM)]
 
     @cached_ttl()

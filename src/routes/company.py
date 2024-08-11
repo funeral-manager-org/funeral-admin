@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from src.logger import init_logger
 from src.database.models.bank_accounts import BankAccount
 from src.database.models.contacts import Address, PostalAddress, Contacts
-from src.authentication import login_required
+from src.authentication import login_required, admin_login
 from src.database.models.companies import Company, CompanyBranches, EmployeeDetails
 from src.database.models.users import User
 from src.main import company_controller, user_controller, encryptor
@@ -80,11 +80,50 @@ async def do_register(user: User):
                       admin_uid=user.uid)
 
     registered_company = await company_controller.register_company(company=company)
+    if not registered_company:
+        flash(message="Unable to Register Company please try again later", category="danger")
+        return redirect(url_for('company.get_register'))
+
     user.is_company_admin = True
     user.company_id = registered_company.company_id
+    # Updating User as Admin of the New Company
     updated_user = await user_controller.put(user=user)
+
+    if not updated_user:
+        # will remove the company as there was an error updating the new user to own the company
+        flash(message="Company Registered with Errors please contact admin", category="danger")
+        is_deleted = await company_controller.delete_company_details(company_id=registered_company.company_id)
+
     flash(message="company successfully registered", category="success")
     # context = dict(user=updated_user, company_data=registered_company)
+    return redirect(url_for('company.get_admin'))
+
+
+@company_route.post('/admin/company/update')
+@admin_login
+async def update_company_details(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    try:
+        company_details = Company(**request.form)
+    except ValidationError as e:
+        error_logger.warning(str(e))
+        flash(message="Unable to Update Company as some values are not filled in", category='danger')
+        return redirect(url_for('company.get_register'))
+
+    if user.uid != company_details.admin_uid:
+        flash(message="You are not authorized to update this company details please inform admin", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    updated_company = await company_controller.update_company_details(company_details=company_details)
+    if not updated_company:
+        flash(message="Unable to update company please try again later", category="danger")
+        return redirect(url_for('company.get_register'))
+
+    flash(message="Company Successfully updated", category="success")
     return redirect(url_for('company.get_admin'))
 
 

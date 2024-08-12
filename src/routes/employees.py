@@ -411,7 +411,7 @@ async def get_work_summary(user: User):
     :return:
     """
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
-
+    employee_logger.info(f'Complete Employee Records : {employee_detail}')
     context = dict(user=user, employee_detail=employee_detail)
     return render_template('hr/work-summary.html', **context)
 

@@ -70,7 +70,7 @@
                     {% if employee_detail and employee_detail.attendance_register.has_clocked_in_today %}
                         <button id="clocked_in" class="btn btn-lg btn-block btn-rounded btn-success btn-outline-success m-r-12" disabled>
                               <i class="fa fa-clock-o"></i>
-                              Clocked In
+                              Clock In
                         </button>
                     {% else %}
                         <button id="clocked_in" class="btn btn-lg btn-block btn-rounded btn-outline-success m-r-12">
@@ -87,10 +87,10 @@
                     {% endif %}
 
 
-                    {% if employee_detail and employee_detail.attendance_register.has_clocked_out_today %}
+                    {% if employee_detail and not employee_detail.attendance_register.has_clocked_out_today %}
                         <button id="clocked_out" class="btn btn-lg btn-block btn-rounded btn-outline-danger">
                           <i class="fa fa-clock-o"></i>
-                          Clocked Out
+                          Clock Out
                         </button>
                     {% else %}
                         <button id="clocked_out" class="btn btn-lg btn-block btn-rounded btn-outline-danger" disabled>

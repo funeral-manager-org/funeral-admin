@@ -217,6 +217,7 @@ class AttendanceSummary(BaseModel):
     name: str
     records: list[TimeRecord] | None
 
+
     def total_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
         """
         Calculates the total minutes worked by summing up the minutes worked from all records within the specified date range.

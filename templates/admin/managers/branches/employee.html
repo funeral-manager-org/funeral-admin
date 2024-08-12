@@ -187,14 +187,14 @@
                                 <div class="form-group">
                                     {% if user_employee and not user_employee.account_verified %}
 
-                                        <form class="form-horizontal" method="post" action="{{ url_for('auth.resend_verification_email', uid=user_employee.uid) }}">
+                                        <form class="form-horizontal" method="POST" action="{{ url_for('auth.resend_verification_email', uid=user_employee.uid) }}">
                                             <button type="submit"  class="btn btn-rounded btn-outline-success">
                                                 <i class="fa fa-envelope"> </i>
                                                 Resend Verification Email
                                             </button>
                                         </form>
 
-                                        <form class="form-horizontal" method="post" action="{{ url_for('auth.manual_verification_admin', uid=user_employee.uid) }}">
+                                        <form class="form-horizontal" method="POST" action="{{ url_for('auth.manual_verification_admin', uid=user_employee.uid) }}">
                                             <button type="submit"  class="btn btn-rounded btn-outline-success">
                                                 <i class="fa fa-envelope"> </i>
                                                 Manual Verification
@@ -203,7 +203,7 @@
 
                                     {% else %}
                                        {% if user_employee %}
-                                       <form class="form-horizontal" method="post" action="{{ url_for('auth.deactivate_employee_account_admin', uid=user_employee.uid) }}">
+                                       <form class="form-horizontal" method="POST" action="{{ url_for('auth.deactivate_employee_account_admin', uid=user_employee.uid) }}">
                                             <button type="submit" class="btn btn-rounded btn-outline-danger">
                                                 <i class="fa fa-envelope"> </i>
                                                 De-Activate

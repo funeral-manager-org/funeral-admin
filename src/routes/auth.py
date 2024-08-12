@@ -130,7 +130,7 @@ async def do_register():
     return await create_response(url_for('home.get_home'))
 
 
-@auth_route.get('/dashboard/resend-email/<string:uid>')
+@auth_route.post('/dashboard/resend-email/<string:uid>')
 @admin_login
 async def resend_verification_email(user: User, uid: str):
     """
@@ -150,7 +150,7 @@ async def resend_verification_email(user: User, uid: str):
     return redirect(url_for('company.get_admin'))
 
 
-@auth_route.get('/dashboard/manual-employee-account-verification/<string:uid>')
+@auth_route.post('/dashboard/manual-employee-account-verification/<string:uid>')
 @admin_login
 async def manual_verification_admin(user: User, uid: str):
     """
@@ -170,7 +170,7 @@ async def manual_verification_admin(user: User, uid: str):
     return redirect(url_for('company.get_admin'))
 
 
-@auth_route.get('/dashboard/manual-employee-account-deactivation/<string:uid>')
+@auth_route.post('/dashboard/manual-employee-account-deactivation/<string:uid>')
 @admin_login
 async def deactivate_employee_account_admin(user: User, uid: str):
     """

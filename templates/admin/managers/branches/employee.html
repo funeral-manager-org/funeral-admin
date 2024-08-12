@@ -177,25 +177,42 @@
                                 <li class="list-group-item font-weight-bold"><i class="fa fa-user"> </i> Surname: <span class="font-italic text-info pull-right">{{ employee_detail.last_name| title  }}</span></li>
                                 <li class="list-group-item font-weight-bold m-t-12"><i class="fa fa-mobile-phone"> </i> Cell: <a href="tel:{{ employee_detail.contact_number }}" class="font-italic text-info pull-right">{{ employee_detail.contact_number }}</a></li>
                                 <li class="list-group-item font-weight-bold"><i class="fa fa-envelope"> </i> Email: <a href="email:{{ employee_detail.email }}" class="font-italic text-info pull-right">{{ employee_detail.email }}</a></li>
+                                {% if user_employee and user_employee.account_verified %}
+                                <li class="list-group-item font-weight-bold"><i class="ti-user"> </i> Account Verified : <span class="badge badge-success pull-right"> Yes </span> </li>
+                                {% else %}
+                                <li class="list-group-item font-weight-bold"><i class="ti-user"> </i> Account Verified: <span class="badge badge-danger pull-right"> No </span> </li>
+                                {% endif %}
                             </ul>
                             <form class="form-horizontal m-t-8" action="">
                                 <div class="form-group">
+                                    {% if user_employee and not user_employee.account_verified %}
 
-                                    <button class="btn btn-rounded btn-default btn-outline-success btn-sm">
-                                        <i class="fa fa-file"> </i>
-                                        Create Payslip
-                                    </button>
+                                        <form class="form-horizontal" method="post" action="{{ url_for('auth.resend_verification_email', uid=user_employee.uid) }}">
+                                            <button type="submit"  class="btn btn-rounded btn-outline-success">
+                                                <i class="fa fa-envelope"> </i>
+                                                Resend Verification Email
+                                            </button>
+                                        </form>
 
-                                    <button class="btn btn-rounded btn-default btn-outline-success btn-sm">
-                                        <i class="fa fa-file"> </i>
-                                        Set Annual Leave
-                                    </button>
+                                        <form class="form-horizontal" method="post" action="{{ url_for('auth.manual_verification_admin', uid=user_employee.uid) }}">
+                                            <button type="submit"  class="btn btn-rounded btn-outline-success">
+                                                <i class="fa fa-envelope"> </i>
+                                                Manual Verification
+                                            </button>
+                                        </form>
 
-                                    <button class="btn btn-rounded btn-default btn-outline-success btn-sm">
-                                        <i class="fa fa-file"> </i>
-                                        Set Sick Leave
-                                    </button>
-
+                                    {% else %}
+                                       {% if user_employee %}
+                                       <form class="form-horizontal" method="post" action="{{ url_for('auth.deactivate_employee_account_admin', uid=user_employee.uid) }}">
+                                            <button type="submit" class="btn btn-rounded btn-outline-danger">
+                                                <i class="fa fa-envelope"> </i>
+                                                De-Activate
+                                            </button>
+                                        </form>
+                                       {% else %}
+                                           <span class="font-weight-bold  text-danger">This Employee has no User Account therefore cannot login into the system</span>
+                                       {% endif %}
+                                    {% endif %}
                                 </div>
                             </form>
                         </div>

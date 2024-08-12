@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, flash, request, make_response, red
     url_for
 from pydantic import ValidationError
 
+from src.authentication import admin_login
 from src.database.models.auth import Auth, RegisterUser
 from src.database.models.users import User, CreateUser
 from src.logger import init_logger
@@ -127,6 +128,66 @@ async def do_register():
 
     flash(message='failed to create new user try again later', category='danger')
     return await create_response(url_for('home.get_home'))
+
+
+@auth_route.get('/dashboard/resend-email/<string:uid>')
+@admin_login
+async def resend_verification_email(user: User, uid: str):
+    """
+
+    :return:
+    """
+    employee_user: User = await user_controller.get_account_by_uid(uid=uid)
+    if employee_user.company_id != user.company_id:
+        flash(message="You are not Authorized to perform this action", category="danger")
+        return redirect(url_for('home.get_home'))
+
+    _ = await user_controller.resend_verification_email(user=employee_user)
+    mes = f"""A verification email has been sent please inform the employee to 
+    verify his/her email address : {employee_user.email}"""
+
+    flash(message=mes, category="success")
+    return redirect(url_for('company.get_admin'))
+
+
+@auth_route.get('/dashboard/manual-employee-account-verification/<string:uid>')
+@admin_login
+async def manual_verification_admin(user: User, uid: str):
+    """
+
+    :param user:
+    :param uid:
+    :return:
+    """
+    employee_user: User = await user_controller.get_account_by_uid(uid=uid)
+    if employee_user.company_id != user.company_id:
+        flash(message="You are not Authorized to perform this action", category="danger")
+        return redirect(url_for('home.get_home'))
+    employee_user.account_verified = True
+    _ = await user_controller.put(user=employee_user)
+    mes = f"Your Employee User Account has Been Verified"
+    flash(message=mes, category="danger")
+    return redirect(url_for('company.get_admin'))
+
+
+@auth_route.get('/dashboard/manual-employee-account-deactivation/<string:uid>')
+@admin_login
+async def deactivate_employee_account_admin(user: User, uid: str):
+    """
+
+    :param user:
+    :param uid:
+    :return:
+    """
+    employee_user: User = await user_controller.get_account_by_uid(uid=uid)
+    if employee_user.company_id != user.company_id:
+        flash(message="You are not Authorized to perform this action", category="danger")
+        return redirect(url_for('home.get_home'))
+    employee_user.account_verified = False
+    _ = await user_controller.put(user=employee_user)
+    mes = f"Your Employee User Account has Been Verified"
+    flash(message=mes, category="danger")
+    return redirect(url_for('company.get_admin'))
 
 
 @auth_route.get('/dashboard/verify-email')

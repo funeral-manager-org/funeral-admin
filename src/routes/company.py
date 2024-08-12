@@ -504,6 +504,7 @@ async def create_new_employee_user_detail(branch_id: str, employee_: EmployeeDet
                                                       password=password)
 
 
+# noinspection DuplicatedCode
 @company_route.get('/admin/company/branch/employee/get/<string:branch_id>/<string:employee_id>')
 @login_required
 async def get_employee(user: User, branch_id: str, employee_id: str):
@@ -520,6 +521,10 @@ async def get_employee(user: User, branch_id: str, employee_id: str):
     if employee_detail:
         branch = await company_controller.get_branch_by_id(branch_id=branch_id)
         context = dict(user=user, employee_detail=employee_detail, branch=branch, employee_roles=employee_roles)
+
+        if employee_detail.uid:
+            user_employee: User = await user_controller.get_account_by_uid(uid=employee_detail.uid)
+            context.update(user_employee=user_employee)
 
         if employee_detail.address_id:
             address = await company_controller.get_address(address_id=employee_detail.address_id)

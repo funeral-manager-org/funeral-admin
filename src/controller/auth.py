@@ -265,7 +265,7 @@ class UserController(Controllers):
                 # Create new user if user does not exist
                 new_user = UserORM(**user.dict(exclude_unset=True))  # Exclude unset fields
                 session.add(new_user)
-                self.logger.info(f"Created a New Employee : {user}")
+                self.logger.info(f"Created a New Employee User : {user}")
             try:
 
                 return user
@@ -296,6 +296,27 @@ class UserController(Controllers):
         # Render the email template
         email_html = render_template("email_templates/verification_email.html", user=user,
                                      verification_link=verification_link, password=password)
+
+        msg = EmailModel(subject_="funeral-manager.org Email Verification",
+                         to_=user.email,
+                         html_=email_html)
+
+        response, email = await send_mail.send_mail_resend(email=msg)
+        self.logger.info(f"Sent Account Verification Email : {email}")
+        return email
+    @error_handler
+    async def resend_verification_email(self, user: User):
+        """
+
+        :param user:
+        :return:
+        """
+        token = str(uuid.uuid4())  # Assuming you have a function to generate a verification token
+        verification_link = f"https://funeral-manager.org/dashboard/verify-email?token={token}&email={user.email}"
+        self._verification_tokens[token] = dict(email=user.email, timestamp=int(time.time()))
+        # Render the email template
+        email_html = render_template("email_templates/verification_email.html", user=user,
+                                     verification_link=verification_link, password="XXXXXXXX")
 
         msg = EmailModel(subject_="funeral-manager.org Email Verification",
                          to_=user.email,

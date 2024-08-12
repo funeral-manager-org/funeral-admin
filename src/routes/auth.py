@@ -166,7 +166,7 @@ async def manual_verification_admin(user: User, uid: str):
     employee_user.account_verified = True
     _ = await user_controller.put(user=employee_user)
     mes = f"Your Employee User Account has Been Verified"
-    flash(message=mes, category="danger")
+    flash(message=mes, category="success")
     return redirect(url_for('company.get_admin'))
 
 
@@ -185,8 +185,8 @@ async def deactivate_employee_account_admin(user: User, uid: str):
         return redirect(url_for('home.get_home'))
     employee_user.account_verified = False
     _ = await user_controller.put(user=employee_user)
-    mes = f"Your Employee User Account has Been Verified"
-    flash(message=mes, category="danger")
+    mes = f"Your Employee User Account has Been De-Activated"
+    flash(message=mes, category="success")
     return redirect(url_for('company.get_admin'))
 
 

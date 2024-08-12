@@ -49,7 +49,7 @@ async def get_employee_details(user: User):
     employee_logger.info(f"IS COMPANY ADMIN : {user.is_company_admin}")
 
     if not user.can_access_employee_record:
-        message: str = "you have no proper employee record please inform admin"
+        message: str = "Please ensure that you are a company employee and have properly verified your email account"
         flash(message=message, category="danger")
         return redirect(url_for('home.get_home'))
 
@@ -308,18 +308,14 @@ async def employee_clocking_in(user: User):
     employee_id: str = request.form.get('employee_id')
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
     employee_logger.info(f"IS Company ADMIN : {user.is_company_admin}")
-    # TODO - this is bad logic rather create an employee record if user is admin
-    if user.is_company_admin:
-        flash(message="please update your employee record", category="success")
-        # TODO display a form to create an admin employee record
-        return redirect(url_for('employees.get_attendance_register'))
 
-    if not employee_detail and not (employee_detail.is_active and (user.is_employee or user.is_company_admin)):
-        message: str = "you have no proper employee record please inform admin"
+    if not employee_detail and not (employee_detail.is_active and user.can_access_employee_record):
+        message: str = "Either your account is De Activated or you have not verified your User Account"
         flash(message=message, category="danger")
         return redirect(url_for('employees.get_attendance_register'))
 
-    if employee_id != employee_detail.employee_id:
+    # The Fact that Company Admin could proceed and Sign In Maybe Bad Logic
+    if employee_id != employee_detail.employee_id and not user.is_company_admin:
         message: str = "You are Not Authorized to Clock in for this Employee"
         flash(message=message, category="danger")
         return redirect(url_for('employees.get_attendance_register'))

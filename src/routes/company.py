@@ -96,6 +96,11 @@ async def update_company_administrator(user: User):
         flash(message="Unable to update Administrator Detail please see log files", category="danger")
         return redirect(url_for('company.get_admin'))
 
+    # This is because user may not have the same branch id as in employee record
+    if admin_employee_detail.branch_id and not user.branch_id:
+        user.branch_id = admin_employee_detail.branch_id
+        _ = await user_controller.put(user=user)
+
     admin_added, _ = await company_controller.add_update_employee(employee=admin_employee_detail)
     if not admin_added:
         flash(message="Error Adding new company Administrator", category="danger")

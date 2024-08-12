@@ -14,13 +14,13 @@ def bootstrapper():
     from src.database.sql.subscriptions import (SubscriptionsORM, PackageORM, PaymentORM, SubscriptionStatusORM,
                                                 PaymentNoticeIntervalORM)
     from src.database.sql.support import TicketORM, TicketMessageORM
-
+    # TODO fix the bug that prevents tables from being created at once
     classes_to_create = [UserORM, PayPalORM, CompanyORM, EmployeeORM, CompanyBranchesORM, CoverPlanDetailsORM,
                          BankAccountORM, AddressORM, PostalAddressORM, ContactsORM, ClientPersonalInformationORM,
                          ClaimsORM, PremiumReceiptORM, PremiumsORM, PolicyRegistrationDataORM, SMSComposeORM,
                          SMSInboxORM, EmailComposeORM, SubscriptionsORM, PackageORM, PaymentORM, SubscriptionStatusORM,
                          PaymentNoticeIntervalORM, TicketMessageORM, TicketORM, SMSSettingsORM, TimeRecordORM,
-                         AttendanceSummaryORM,DeductionsORM, BonusPayORM, PaySlipORM, WorkSummaryORM, SalaryORM]
+                         AttendanceSummaryORM,WorkSummaryORM, DeductionsORM, BonusPayORM, PaySlipORM, SalaryORM]
 
     # classes_to_create.reverse()
     for cls in classes_to_create:

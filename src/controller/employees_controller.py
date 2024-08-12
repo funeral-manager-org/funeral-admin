@@ -1,11 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+import calendar
 
 from flask import Flask
 from sqlalchemy.orm import joinedload
 
 from src.controller import Controllers, error_handler
-from src.database.models.companies import EmployeeRoles, EmployeeDetails, AttendanceSummary, TimeRecord, Salary
-from src.database.sql.companies import EmployeeORM, AttendanceSummaryORM, TimeRecordORM, SalaryORM
+from src.database.models.companies import EmployeeRoles, EmployeeDetails, AttendanceSummary, TimeRecord, Salary, \
+    WorkSummary, Payslip
+from src.database.sql.companies import EmployeeORM, AttendanceSummaryORM, TimeRecordORM, SalaryORM, WorkSummaryORM, \
+    PaySlipORM
 from src.main import system_cache
 
 cached_ttl = system_cache.cached_ttl
@@ -220,3 +223,90 @@ class EmployeesController(Controllers):
             if isinstance(salary_orm, SalaryORM):
                 return Salary(**salary_orm.to_dict())
             return None
+
+    async def create_employee_payslip(self, payslip: Payslip) -> Payslip | None:
+        """
+
+        :param payslip:
+        :return:
+        """
+        with self.get_session() as session:
+            session.add(PaySlipORM(**payslip.dict(exclude={'employee', 'salary', 'applied_deductions', 'bonus_pay',
+                                                           'work_sheets'})))
+            return payslip
+
+    async def get_employee_complete_work_summary(self, employee_id: str) -> list[WorkSummary]:
+        """
+
+        :param employee_id:
+        :return:
+        """
+        with self.get_session() as session:
+            work_summary_orm_list = session.query(WorkSummaryORM).filter_by(employee_id=employee_id).all()
+            return [work.to_dict(include_relationships=False) for work in work_summary_orm_list or []
+                    if isinstance(work, WorkSummaryORM)]
+
+    async def get_employee_current_work_summary(self, employee_id: str) -> WorkSummary | None:
+        """
+
+        :param employee_id:
+        :return:
+        """
+        with self.get_session() as session:
+            start_of_this_month = datetime.now().date().replace(day=1)
+            self.logger.info(f"Current Work Summary Start Date : {start_of_this_month}")
+            work_summary_orm = session.query(WorkSummaryORM).filter_by(employee_id=employee_id,
+                                                                       period_start=start_of_this_month)
+
+            return WorkSummary(**work_summary_orm.to_dict()) if isinstance(work_summary_orm, WorkSummaryORM) else None
+
+    async def add_update_current_work_summary(self, work_summary: WorkSummary) -> WorkSummary | None:
+        """
+
+        :param work_summary:
+        :return:
+        """
+        with self.get_session() as session:
+            work_summary_orm = session.query(WorkSummaryORM).filter_by(work_id=work_summary.work_id).first()
+            if isinstance(work_summary_orm, WorkSummaryORM):
+                work_summary_orm.attendance_id = work_summary.attendance_id
+                work_summary_orm.payslip_id = work_summary.payslip_id
+                work_summary_orm.employee_id = work_summary.employee_id
+                work_summary_orm.normal_minutes_per_week = work_summary.normal_minutes_per_week
+                work_summary_orm.normal_sign_in_hour = work_summary.normal_sign_in_hour
+                work_summary_orm.normal_sign_off_hour = work_summary.normal_sign_off_hour
+                work_summary_orm.normal_weeks_in_month = work_summary.normal_weeks_in_month
+                work_summary_orm.normal_overtime_multiplier = work_summary.normal_overtime_multiplier
+                work_summary_orm.period_start = work_summary.period_start
+                work_summary_orm.period_end = work_summary.period_end
+
+            else:
+                work_summary_orm = WorkSummaryORM(**work_summary.dict(exclude={'attendance', 'employee',
+                                                                               'payslip', 'salary'}),
+                                                  period_start=work_summary.period_start, period_end=work_summary.period_end)
+                session.add(work_summary_orm)
+
+            return work_summary
+
+    async def get_employee_last_month_work_summary(self, employee_id: str) -> WorkSummary | None:
+        """
+        Retrieves the work summary for the previous month.
+
+        :param employee_id: The ID of the employee.
+        :return: The work summary of the employee for the last month, or None if not found.
+        """
+        with self.get_session() as session:
+            # Calculate the start date of the current month
+            start_of_this_month = datetime.now().date().replace(day=1)
+
+            # Calculate the start date of the previous month
+            last_month = start_of_this_month - timedelta(days=1)
+            start_of_last_month = last_month.replace(day=1)
+
+            self.logger.info(f"Last Month Work Summary Start Date: {start_of_last_month}")
+
+            # Query the work summary for the last month
+            work_summary_orm = session.query(WorkSummaryORM).filter_by(employee_id=employee_id,
+                                                                       period_start=start_of_last_month).first()
+
+            return WorkSummary(**work_summary_orm.to_dict()) if isinstance(work_summary_orm, WorkSummaryORM) else None

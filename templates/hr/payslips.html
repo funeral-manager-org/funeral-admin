@@ -12,8 +12,26 @@
             </h2>
         </div>
         <div class="card-body">
-
-
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <td>Month</td>
+                    <td>Salary</td>
+                    <td>Time Worked</td>
+                    <td>Overtime</td>
+                    <td>Net Salary</td>
+                </thead>
+                <tbody>
+                    {% for payslip in employee_detail.payslip %}
+                        <tr>
+                            <td>{{ payslip.month_of|title }}</td>
+                             <td>R {{ payslip.salary.amount|number }}.00</td>
+                            <td>{{ payslip.work_sheets.total_minutes_worked }}</td>
+                        <td>{{ payslip.work_sheets.overtime_worked_minutes }}</td>
+                        <td>R {{ payslip.net_salary|number }}.00</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </section>

@@ -2,10 +2,11 @@ import datetime
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
+from twilio.twiml.voice_response import Pay
 
 from src.database.models.bank_accounts import BankAccount
 from src.authentication import login_required
-from src.database.models.companies import EmployeeDetails, CompanyBranches, Salary
+from src.database.models.companies import EmployeeDetails, CompanyBranches, Salary, WorkSummary, Payslip
 from src.database.models.contacts import Contacts, PostalAddress, Address
 from src.database.models.users import User
 from src.logger import init_logger
@@ -325,10 +326,35 @@ async def employee_clocking_in(user: User):
     if has_signed_in:
         sign_in_time = datetime.datetime.now().strftime("%I:%M %p")
         flash(message=f"Successfully signed in at: {sign_in_time}", category="success")
+
+        employee_id = employee_detail.employee_id
+        current_work_summary = await employee_controller.get_employee_current_work_summary(employee_id=employee_id)
+
+        if not isinstance(current_work_summary, WorkSummary):
+            # without current month work summary lets create a default one the manager can still edit the work summary
+            await create_work_documents(employee_detail=employee_detail)
+
     else:
         flash(message="Error signing in. Or Employee Already Signed IN.", category="danger")
 
     return redirect(url_for('employees.get_attendance_register'))
+
+
+async def create_work_documents(employee_detail: EmployeeDetails):
+    """this creates payslips and Work Summary for the Current Month for the Employee"""
+    employee_id: str = employee_detail.employee_id
+    salary: Salary = await employee_controller.get_salary_details(employee_id=employee_id)
+    if not salary:
+        return
+    # creating a new payslip for the current pay period
+    payslip = Payslip(employee_id=employee_id, salary_id=salary.salary_id)
+    _ = await employee_controller.create_employee_payslip(payslip=payslip)
+
+    # creating current pay period work summary
+    current_work_summary = WorkSummary(
+        attendance_id=employee_detail.attendance_register.attendance_id, payslip_id=payslip.payslip_id,
+        employee_id=employee_id)
+    _ = await employee_controller.add_update_current_work_summary(work_summary=current_work_summary)
 
 
 # noinspection DuplicatedCode
@@ -424,7 +450,9 @@ async def get_payslips(user: User):
     :param user:
     :return:
     """
-    context = dict(user=user)
+    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
+
+    context = dict(user=user, employee_detail=employee_detail)
     return render_template('hr/payslips.html', **context)
 
 

@@ -383,6 +383,7 @@ class WorkSummaryORM(Base):
 
     normal_weeks_in_month: int = Column(Integer)
     normal_overtime_multiplier: int = Column(Float)
+
     attendance = relationship("AttendanceSummaryORM", back_populates="work_summary",
                               lazy=True, uselist=False)
     employee = relationship("EmployeeORM", back_populates="work_summary", uselist=False)

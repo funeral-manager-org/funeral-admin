@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime, date, timedelta
 
 from dateutil.relativedelta import relativedelta
@@ -217,7 +218,6 @@ class AttendanceSummary(BaseModel):
     name: str
     records: list[TimeRecord] | None
 
-
     def total_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
         """
         Calculates the total minutes worked by summing up the minutes worked from all records within the specified date range.
@@ -310,19 +310,35 @@ class AttendanceSummary(BaseModel):
 
 
 class WorkSummary(BaseModel):
-    payslip_id: str = Field(default_factory=create_id)
+    work_id: str = Field(default_factory=create_id)
+    attendance_id: str | None
+    payslip_id: str | None
     employee_id: str
-    period_start: date
-    period_end: date
 
     normal_sign_in_hour: int = Field(default_factory=7)
     normal_sign_off_hour: int = Field(default_factory=17)
 
     normal_minutes_per_week: int = Field(default=40 * 60)
-    base_salary_cents_in_month: int = Field(default=3500 * 100)
+
     normal_weeks_in_month: int = Field(default=4)
     normal_overtime_multiplier: float = Field(default=1.5)
     attendance: AttendanceSummary | None
+    employee: "EmployeeDetails"
+    payslip: "Payslip"
+    salary: "Salary"
+
+    @property
+    def period_start(self):
+        if not self.payslip:
+            return datetime.now().date().replace(day=1)
+        return self.payslip.pay_period_start
+
+    @property
+    def period_end(self):
+        if not self.payslip:
+            period_start = self.period_start
+            next_month = period_start + relativedelta(month=1)
+            return next_month - relativedelta(day=1)
 
     @property
     def weeks_in_period(self) -> float:
@@ -331,7 +347,7 @@ class WorkSummary(BaseModel):
         Returns:
             float: Number of weeks_in_period.
         """
-        delta = (self.period_end - self.period_start).days
+        delta = (self.payslip.pay_period_start - self.payslip.pay_period_end).days
         return delta / 7
 
     def overtime_rate_cents_per_minute(self) -> float:
@@ -344,16 +360,19 @@ class WorkSummary(BaseModel):
     @property
     def normal_rate_cents_per_minute(self) -> float:
         """Amount of Money made in cents per minute when normal time is worked"""
-        return self.base_salary_cents_in_month / (self.normal_minutes_per_week * self.normal_weeks_in_month)
+        if not self.salary:
+            return 0
+        return self.salary.amount_in_cents / (self.normal_minutes_per_week * self.normal_weeks_in_month)
 
     @property
     def total_minutes_worked(self) -> int:
         """absolute total of minutes worked per period"""
-        if self.period_start is None or self.period_end is None:
+        if self.payslip.pay_period_start is None or self.payslip.pay_period_end is None:
             return 0
 
         return sum(
-            summary.total_time_worked_minutes(from_date=self.period_start, to_date=self.period_end) for summary in
+            summary.total_time_worked_minutes(from_date=self.payslip.pay_period_start,
+                                              to_date=self.payslip.pay_period_end) for summary in
             self.attendance)
 
     @property
@@ -370,7 +389,8 @@ class WorkSummary(BaseModel):
         if self.total_minutes_worked < (self.normal_minutes_per_week * self.weeks_in_period):
             return 0
 
-        return sum(summary.overtime_worked_minutes(from_date=self.period_start, to_date=self.period_end) for summary in
+        return sum(summary.overtime_worked_minutes(from_date=self.payslip.pay_period_start,
+                                                   to_date=self.payslip.pay_period_end) for summary in
                    self.attendance)
 
     @property
@@ -381,11 +401,12 @@ class WorkSummary(BaseModel):
         Returns:
             int: Total overtime minutes worked.
         """
-        if self.period_start is None or self.period_end is None:
+        if self.payslip.pay_period_start is None or self.payslip.pay_period_end is None:
             return 0
 
         return sum(
-            summary.normal_time_worked_minutes(from_date=self.period_start, to_date=self.period_end) for summary in
+            summary.normal_time_worked_minutes(from_date=self.payslip.pay_period_start,
+                                               to_date=self.payslip.pay_period_end) for summary in
             self.attendance)
 
     @property
@@ -529,19 +550,33 @@ class BonusPay(BaseModel):
     reason: str
 
 
+def pay_period_start() -> date:
+    return datetime.now().date().replace(day=1)
+
+
+def pay_period_end() -> date:
+    next_month = pay_period_start() + relativedelta(month=1)
+    return next_month - relativedelta(day=1)
+
+
 class Payslip(BaseModel):
-    payslip_id: str
+    payslip_id: str = Field(default_factory=create_id)
     employee_id: str
     salary_id: str
-    pay_period_start: date
-    pay_period_end: date
+    pay_period_start: date = Field(default_factory=pay_period_start)
+    pay_period_end: date = Field(default_factory=pay_period_end)
 
-    employee: EmployeeDetails
-    salary: Salary
+    employee: EmployeeDetails | None
+    salary: Salary | None
 
     applied_deductions: list[Deductions]
     bonus_pay: list[BonusPay]
     work_sheets: WorkSummary
+
+    @property
+    def month_of(self):
+        # Return the name of the month
+        return calendar.month_name[self.pay_period_start.month]
 
     @property
     def total_bonus(self) -> int:
@@ -553,7 +588,7 @@ class Payslip(BaseModel):
 
     @property
     def net_salary(self) -> int:
-        return self.work_sheets.net_salary_cents
+        return int(self.work_sheets.net_salary_cents/100)
 
 
 class WorkOrder(BaseModel):
@@ -576,3 +611,4 @@ class WorkOrder(BaseModel):
 
 
 EmployeeDetails.update_forward_refs()
+WorkSummary.update_forward_refs()

@@ -77,6 +77,8 @@ class User(BaseModel):
         """will allow employee or admin to access employee file only if it's an employee and account is verified"""
         return (self.is_employee or self.is_company_admin) and self.account_verified
 
+    def can_edit_employee_record(self, company_id: str):
+        return (self.company_id == company_id) and self.is_company_admin
 
 class CreateUser(BaseModel):
     uid: str

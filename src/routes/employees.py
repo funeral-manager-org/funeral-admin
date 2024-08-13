@@ -3,11 +3,10 @@ from collections import defaultdict
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
-from twilio.twiml.voice_response import Pay
 
-from src.database.models.bank_accounts import BankAccount
 from src.authentication import login_required, admin_login
-from src.database.models.companies import EmployeeDetails, CompanyBranches, Salary, WorkSummary, Payslip, Company, \
+from src.database.models.bank_accounts import BankAccount
+from src.database.models.companies import EmployeeDetails, CompanyBranches, Salary, WorkSummary, Payslip, \
     AttendanceSummary
 from src.database.models.contacts import Contacts, PostalAddress, Address
 from src.database.models.users import User
@@ -24,7 +23,6 @@ LatestPaySlipType = list[tuple[EmployeeDetails, Payslip]]
 
 # route utils
 async def retrieve_create_this_month_payslip(employee_id: str, salary: Salary) -> Payslip | None:
-
     # creating a new payslip for the current pay period
     payslip: Payslip | None = await employee_controller.get_present_employee_payslip(employee_id=employee_id)
     if not payslip:
@@ -51,13 +49,14 @@ async def create_retrieve_salary(employee_detail: EmployeeDetails):
     salary: Salary = await employee_controller.get_salary_details(employee_id=employee_id)
     if not salary:
         new_salary: Salary = Salary(employee_id=employee_detail.employee_id, company_id=employee_detail.company_id,
-                           branch_id=employee_detail.branch_id, amount=employee_detail.salary, pay_day=1)
+                                    branch_id=employee_detail.branch_id, amount=employee_detail.salary, pay_day=1)
 
         salary: Salary = await employee_controller.add_update_employee_salary(salary=new_salary)
 
     employee_logger.info(f"Successfully Created or Retrieved Employee Salary Record : {salary}")
 
     return salary
+
 
 async def retrieve_create_attendance_register(employee_detail: EmployeeDetails) -> AttendanceSummary | None:
     employee_id: str = employee_detail.employee_id
@@ -68,7 +67,8 @@ async def retrieve_create_attendance_register(employee_detail: EmployeeDetails) 
         try:
             new_register = AttendanceSummary(employee_id=employee_id, name=employee_detail.display_names)
             employee_logger.info(f"New Attendance Register: {new_register}")
-            attendance_register = await employee_controller.add_update_attendance_register(attendance_register=new_register)
+            attendance_register = await employee_controller.add_update_attendance_register(
+                attendance_register=new_register)
 
         except ValidationError as e:
             employee_logger.warning(str(e))
@@ -84,7 +84,8 @@ async def retrieve_create_work_summary(attendance_id: str, payslip_id: str, empl
         work_summary = await employee_controller.get_employee_current_work_summary(employee_id=employee_id)
         if not work_summary:
             # creating current pay period work summary
-            current_work_summary = WorkSummary(attendance_id=attendance_id, payslip_id=payslip_id, employee_id=employee_id)
+            current_work_summary = WorkSummary(attendance_id=attendance_id, payslip_id=payslip_id,
+                                               employee_id=employee_id)
 
             work_summary = await employee_controller.add_update_current_work_summary(work_summary=current_work_summary)
         if not work_summary:
@@ -103,7 +104,6 @@ async def create_work_documents(employee_detail: EmployeeDetails):
     salary = await create_retrieve_salary(employee_detail=employee_detail)
 
     employee_logger.info(f"Salary Details Found : {salary}")
-
 
     attendance_register = await retrieve_create_attendance_register(employee_detail=employee_detail)
 
@@ -125,6 +125,7 @@ async def create_work_documents(employee_detail: EmployeeDetails):
 
 # Routes
 
+# noinspection DuplicatedCode
 async def add_data_employee(context, employee_detail):
     if not employee_detail:
         return
@@ -167,8 +168,8 @@ async def get_employee_details(user: User):
     country_list: list[str] = await company_controller.get_countries()
     context: dict[str, list[str] | User | EmployeeDetails | Salary] = dict(
         user=user, employee_roles=employee_roles, country_list=country_list)
-    employee_detail: EmployeeDetails | None = None
-    employee_detail = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
+
+    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
     employee_logger.info(f"COMPARED TO THIS : {employee_detail}")
     if employee_detail:
         # this adds postal addresses and others
@@ -176,7 +177,7 @@ async def get_employee_details(user: User):
         context = await add_data_employee(context=context, employee_detail=employee_detail)
         salary_detail: Salary = await employee_controller.get_salary_details(employee_id=employee_detail.employee_id)
         context.update(salary_detail=salary_detail)
-        context.update(employee_detail=employee_detail)
+    context.update(employee_detail=employee_detail)
     # return render_template('admin/managers/employees/view.html', **context)
     return render_template('admin/employees/employee.html', **context)
 
@@ -443,16 +444,16 @@ async def employee_clocking_in(user: User):
             # without current month work summary lets create a default one the manager can still edit the work summary
             work_documents_created = await create_work_documents(employee_detail=employee_detail)
             if not work_documents_created:
-                employee_signed_out = await employee_controller.sign_out_employee(employee_detail=employee_detail)
+                _ = await employee_controller.sign_out_employee(employee_detail=employee_detail)
                 employee_logger.error("Unable to sign in Employee - we have signed out the Employee")
-                flash(message="Employee Could not Sign In Due to Errors creating work documents please inform admin", category="danger")
+                message = "Employee Could not Sign In Due to Errors creating work documents please inform admin"
+                flash(message=message, category="danger")
             else:
                 flash(message="Employee Signed In Please Remember to sign off Employee when Off Duty")
     else:
         flash(message="Error signing in. Or Employee Already Signed IN.", category="danger")
 
     return redirect(url_for('employees.get_attendance_register'))
-
 
 
 # noinspection DuplicatedCode
@@ -500,6 +501,7 @@ async def update_salary_record(user: User):
         salary: Salary = Salary(**request.form)
         employee_logger.info(f"Salary : {salary}")
     except ValidationError as e:
+        employee_logger.warning(str(e))
         employee_id = request.form.get('employee_id')
         if employee_id:
             return redirect(url_for('employees.get_employee_detail', employee_id=employee_id))
@@ -507,6 +509,12 @@ async def update_salary_record(user: User):
 
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
         employee_id=salary.employee_id)
+
+    if (user.uid != employee_detail.uid) and not user.can_edit_employee_record(company_id=employee_detail.company_id):
+        message: str = "You are not authorized to edit this salary record"
+        flash(message=message, category="danger")
+        employee_id = employee_detail.employee_id
+        return redirect(url_for('employees.get_employee_detail', employee_id=employee_id))
 
     # TODO may need to remove this but this ensures that the salary record is equivalent to the employee record
     employee_detail.salary = salary.amount
@@ -558,7 +566,6 @@ async def get_historical_payslips(employee_list: list[EmployeeDetails]) -> Histo
     """
     Retrieves historical payslips for a user, organized by year and month.
 
-    :param user: The user requesting historical payslips.
     :return: A dictionary with keys formatted as "YYYY-month" and values as lists of (EmployeeDetails, Payslip) tuples.
     """
 
@@ -573,23 +580,17 @@ async def get_historical_payslips(employee_list: list[EmployeeDetails]) -> Histo
 
     return payslips_by_month
 
+
 async def get_latest_payslips(employee_list) -> LatestPaySlipType:
-    async def latest_payslip(payslips: list[Payslip]) -> Payslip:
-        """
-        Finds the latest payslip from a list of payslips based on the pay period end date.
+    """returns a list of tuples of employee and latest payslip"""
 
-        :param payslips: List of payslips to check.
-        :return: The latest payslip.
-        """
-        if not payslips:
-            return None  # Handle case with no payslips
+    async def find_latest(payslips: list[Payslip]) -> Payslip | None:
+        """Sort payslips by pay_period_end and return the last one or None if there are no payslips"""
+        return sorted(payslips, key=lambda x: x.pay_period_end)[-1] if payslips else None
 
-        # Sort payslips by pay_period_end and return the last one
-        sorted_payslips = sorted(payslips, key=lambda x: x.pay_period_end)
-        return sorted_payslips[-1]
+    # Main Function Call here
+    return [(employee, await find_latest(payslips=employee.payslip)) for employee in employee_list if employee.payslip]
 
-    return [(employee, await latest_payslip(payslips=employee.payslip))
-            for employee in employee_list if employee.payslip]
 
 @employee_route.get('/admin/employees/payroll')
 @admin_login
@@ -608,18 +609,11 @@ async def get_payroll(user: User):
     employee_list: list[EmployeeDetails] = await employee_controller.get_complete_employee_details_for_company(
         company_id=user.company_id)
 
-    latest_payslips: list[tuple[EmployeeDetails, Payslip]] = await get_latest_payslips(employee_list=employee_list)
-    historical_payslips:HistorocalPaySlipType = await get_historical_payslips(employee_list=employee_list)
-    # Do something with latest_employee_payslip
-    # For example, you could render a template with this information:
-    # return render_template('payroll.html', latest_employee_payslip=latest_employee_payslip)
-    # employee_logger.info(latest_payslips)
-    # employee_logger.info("++++++++++++++++++++++++++++++++++++++++")
-    # employee_logger.info(historical_payslips)
+    latest_payslips: LatestPaySlipType = await get_latest_payslips(employee_list=employee_list)
+    historical_payslips: HistorocalPaySlipType = await get_historical_payslips(employee_list=employee_list)
+
     context = dict(user=user, latest_payslips=latest_payslips, historical_payslips=historical_payslips)
     return render_template('hr/payroll.html', **context)
-
-
 
 
 @employee_route.get('/admin/employees/work-docs/<string:employee_id>')
@@ -631,23 +625,26 @@ async def create_work_docs(user: User, employee_id: str):
     :param employee_id:
     :return:
     """
-    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(employee_id=employee_id)
+    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
+        employee_id=employee_id)
 
     if not isinstance(employee_detail, EmployeeDetails):
         message: str = "This is not a Valid Employee"
         flash(message=message, category="danger")
         return redirect(url_for("employees.get_employees"))
 
+    if not user.can_edit_employee_record(company_id=employee_detail.company_id):
+        flash(message="You are not authorized to edit this records", category="danger")
+        return redirect(url_for('employees.get_employee_detail', employee_id=employee_id))
+
     # checking if employee lacks any of the needed documents if yes then create them
     if not all(getattr(employee_detail, attr) for attr in ['attendance_register', 'work_summary', 'payslip']):
         employee_logger.info("Started Creating Work Documents for Employee")
         if await create_work_documents(employee_detail=employee_detail):
             message: str = "Successfully created work documents"
-            flash(message=message,category="success")
+            flash(message=message, category="success")
         else:
             message: str = "Unable to create work documents"
             flash(message=message, category="danger")
-
-
 
     return redirect(url_for('employees.get_employee_detail', employee_id=employee_id))

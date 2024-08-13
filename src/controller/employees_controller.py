@@ -383,5 +383,5 @@ class EmployeesController(Controllers):
                 joinedload(EmployeeORM.payslip)
             ).all()
 
-            return [employee.to_dict(include_relationships=True) for employee in company_employees or []
+            return [EmployeeDetails(**employee.to_dict(include_relationships=True)) for employee in company_employees or []
                     if isinstance(employee, EmployeeORM)]

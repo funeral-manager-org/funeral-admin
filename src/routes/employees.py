@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from pydantic import ValidationError
@@ -548,29 +549,75 @@ async def get_payslips(user: User):
     context = dict(user=user, employee_detail=employee_detail)
     return render_template('hr/payslips.html', **context)
 
+HistorocalPaySlipType = dict[str, list[tuple[EmployeeDetails, Payslip]]]
+LatestPaySlipType = list[tuple[EmployeeDetails, Payslip]]
+
+async def get_historical_payslips(employee_list: list[EmployeeDetails]) -> HistorocalPaySlipType:
+    """
+    Retrieves historical payslips for a user, organized by year and month.
+
+    :param user: The user requesting historical payslips.
+    :return: A dictionary with keys formatted as "YYYY-month" and values as lists of (EmployeeDetails, Payslip) tuples.
+    """
+
+    # Initialize the dictionary with default list
+    payslips_by_month: dict[str, list[tuple[EmployeeDetails, Payslip]]] = defaultdict(list)
+
+    for employee in employee_list:
+        for payslip in employee.payslip:
+            # Format the key as "YYYY-month"
+            key = payslip.pay_period_start.strftime("%Y-%B").title()
+            payslips_by_month[key].append((employee, payslip))
+
+    return payslips_by_month
+
+async def get_latest_payslips(employee_list) -> LatestPaySlipType:
+    async def latest_payslip(payslips: list[Payslip]) -> Payslip:
+        """
+        Finds the latest payslip from a list of payslips based on the pay period end date.
+
+        :param payslips: List of payslips to check.
+        :return: The latest payslip.
+        """
+        if not payslips:
+            return None  # Handle case with no payslips
+
+        # Sort payslips by pay_period_end and return the last one
+        sorted_payslips = sorted(payslips, key=lambda x: x.pay_period_end)
+        return sorted_payslips[-1]
+
+    return [(employee, await latest_payslip(payslips=employee.payslip))
+            for employee in employee_list if employee.payslip]
 
 @employee_route.get('/admin/employees/payroll')
 @admin_login
 async def get_payroll(user: User):
     """
+    Retrieves the payroll information for a given user.
 
-    :param user:
-    :return:
+    :param user: The user requesting payroll information.
+    :return: Redirects to the admin page if the user is not registered, otherwise provides payroll details.
     """
     if user and not user.company_id:
         message: str = "Not registered on any company"
         flash(message=message, category='danger')
-
         return redirect(url_for('company.get_admin'))
 
     employee_list: list[EmployeeDetails] = await employee_controller.get_complete_employee_details_for_company(
         company_id=user.company_id)
 
-    for employee in employee_list:
-        employee_logger.info(employee)
-
-    context = dict(user=user)
+    latest_payslips: list[tuple[EmployeeDetails, Payslip]] = await get_latest_payslips(employee_list=employee_list)
+    historical_payslips:HistorocalPaySlipType = await get_historical_payslips(employee_list=employee_list)
+    # Do something with latest_employee_payslip
+    # For example, you could render a template with this information:
+    # return render_template('payroll.html', latest_employee_payslip=latest_employee_payslip)
+    employee_logger.info(latest_payslips)
+    employee_logger.info("++++++++++++++++++++++++++++++++++++++++")
+    employee_logger.info(historical_payslips)
+    context = dict(user=user, latest_payslips=latest_payslips, historical_payslips=historical_payslips)
     return render_template('hr/payroll.html', **context)
+
+
 
 
 @employee_route.get('/admin/employees/work-docs/<string:employee_id>')

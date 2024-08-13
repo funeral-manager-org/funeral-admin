@@ -146,6 +146,7 @@ class CoverPlanDetailsORM(Base):
 
 
 class EmployeeORM(Base):
+    """Please Be verycareful when loading this Class"""
     __tablename__ = "employee"
     employee_id = Column(String(9), primary_key=True, index=True)
     company_id = Column(String(ID_LEN), index=True)

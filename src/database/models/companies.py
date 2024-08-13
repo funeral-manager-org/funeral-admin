@@ -214,6 +214,8 @@ class TimeRecord(BaseModel):
 
 TypeEMployeeDetails = TypeVar('EmployeeDetails')
 TypeWorkSummary = TypeVar('WorkSummary')
+TypePaySlip = TypeVar("Payslip")
+TypeSalary = TypeVar("Salary")
 class AttendanceSummary(BaseModel):
     attendance_id: str = Field(default_factory=create_id)
     employee_id: str
@@ -327,9 +329,9 @@ class WorkSummary(BaseModel):
     normal_weeks_in_month: int = Field(default=4)
     normal_overtime_multiplier: float = Field(default=1.5)
     attendance: AttendanceSummary | None
-    employee: "EmployeeDetails"
-    payslip: "Payslip"
-    salary: "Salary"
+    employee: TypeEMployeeDetails | None
+    payslip: TypePaySlip | None
+    salary: TypeSalary | None
 
     @property
     def period_start(self):

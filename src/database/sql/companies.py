@@ -245,7 +245,7 @@ class SalaryORM(Base):
         if inspect(engine).has_table(cls.__tablename__):
             cls.__table__.drop(bind=engine)
 
-    def to_dict(self):
+    def to_dict(self, include_relationships=False):
         """
         Convert the object to a dictionary representation.
         """
@@ -256,7 +256,8 @@ class SalaryORM(Base):
             'pay_day': self.pay_day,
             'effective_date': str(self.effective_date),
             'company_id': self.company_id,
-            'branch_id': self.branch_id
+            'branch_id': self.branch_id,
+            'payslip': self.payslip.to_dict(include_relationships=False) if self.payslip and include_relationships else None
         }
 
 
@@ -359,7 +360,9 @@ class AttendanceSummaryORM(Base):
             'records': [record.to_dict(include_relationships=False) for record in self.records or []
                         if isinstance(record, TimeRecordORM)],
             'employee': self.employee.to_dict(include_relationships=False)
-            if include_relationships and self.employee else {}
+            if include_relationships and self.employee else None,
+            'work_summary': self.work_summary.to_dict(include_relationships=False)
+            if include_relationships and self.work_summary else None
         }
 
 
@@ -409,6 +412,7 @@ class WorkSummaryORM(Base):
         """
         return {
             "work_id": self.work_id,
+            "attendance_id": self.attendance_id,
             "payslip_id": self.payslip_id,
             "employee_id": self.employee_id,
             "period_start": self.period_start,
@@ -417,9 +421,11 @@ class WorkSummaryORM(Base):
             "normal_weeks_in_month": self.normal_weeks_in_month,
             "normal_overtime_multiplier": self.normal_overtime_multiplier,
             "attendance": self.attendance.to_dict(include_relationships=True)
-            if include_relationships and self.attendance else {},
+            if include_relationships and self.attendance else None,
             "employee": self.employee.to_dict(include_relationships=False)
-            if include_relationships and self.employee else {}
+            if include_relationships and self.employee else None,
+            "payslip": self.payslip.to_dict(include_relationships=False)
+            if include_relationships and self.payslip else None
         }
 
 
@@ -447,7 +453,8 @@ class DeductionsORM(Base):
             "deduction_id": self.deduction_id,
             "payslip_id": self.payslip_id,
             "amount_in_cents": self.amount_in_cents,
-            "reason": self.reason,
+            "reason": self.reason
+
         }
 
 
@@ -519,7 +526,7 @@ class PaySlipORM(Base):
             "pay_period_end": self.pay_period_end.isoformat() if self.pay_period_end else None,
             "employee": self.employee.to_dict(
                 include_relationships=False) if self.employee and include_relationships else None,
-            "salary": self.salary.to_dict() if self.salary else None,
+            "salary": self.salary.to_dict(include_relationships=False) if self.salary else None,
             "applied_deductions": [deduction.to_dict() for deduction in
                                    self.applied_deductions] if self.applied_deductions else [],
             "bonus_pay": [bonus.to_dict() for bonus in self.bonus_pay] if self.bonus_pay else [],

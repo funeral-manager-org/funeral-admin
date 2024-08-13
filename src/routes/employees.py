@@ -17,6 +17,10 @@ from src.main import company_controller, employee_controller
 employee_route = Blueprint('employees', __name__)
 employee_logger = init_logger('employee_route')
 
+# Type Vars for Payslip Compilation adn Formatting
+HistorocalPaySlipType = dict[str, list[tuple[EmployeeDetails, Payslip]]]
+LatestPaySlipType = list[tuple[EmployeeDetails, Payslip]]
+
 
 # route utils
 async def retrieve_create_this_month_payslip(employee_id: str, salary: Salary) -> Payslip | None:
@@ -549,8 +553,6 @@ async def get_payslips(user: User):
     context = dict(user=user, employee_detail=employee_detail)
     return render_template('hr/payslips.html', **context)
 
-HistorocalPaySlipType = dict[str, list[tuple[EmployeeDetails, Payslip]]]
-LatestPaySlipType = list[tuple[EmployeeDetails, Payslip]]
 
 async def get_historical_payslips(employee_list: list[EmployeeDetails]) -> HistorocalPaySlipType:
     """
@@ -611,9 +613,9 @@ async def get_payroll(user: User):
     # Do something with latest_employee_payslip
     # For example, you could render a template with this information:
     # return render_template('payroll.html', latest_employee_payslip=latest_employee_payslip)
-    employee_logger.info(latest_payslips)
-    employee_logger.info("++++++++++++++++++++++++++++++++++++++++")
-    employee_logger.info(historical_payslips)
+    # employee_logger.info(latest_payslips)
+    # employee_logger.info("++++++++++++++++++++++++++++++++++++++++")
+    # employee_logger.info(historical_payslips)
     context = dict(user=user, latest_payslips=latest_payslips, historical_payslips=historical_payslips)
     return render_template('hr/payroll.html', **context)
 

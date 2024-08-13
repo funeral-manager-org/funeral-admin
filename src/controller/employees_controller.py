@@ -302,17 +302,21 @@ class EmployeesController(Controllers):
 
     async def get_employee_current_work_summary(self, employee_id: str) -> WorkSummary | None:
         """
+        Retrieves the current work summary for the given employee based on the start date of the current month.
 
-        :param employee_id:
-        :return:
+        :param employee_id: The ID of the employee.
+        :return: A WorkSummary instance representing the current work summary, or None if not found.
         """
-        with self.get_session() as session:
-            start_of_this_month = datetime.now().date().replace(day=1)
-            self.logger.info(f"Current Work Summary Start Date : {start_of_this_month}")
-            work_summary_orm = session.query(WorkSummaryORM).filter_by(employee_id=employee_id,
-                                                                       period_start=start_of_this_month)
+        start_of_this_month = datetime.now().date().replace(day=1)
+        self.logger.info(f"Current Work Summary Start Date: {start_of_this_month}")
 
-            return WorkSummary(**work_summary_orm.to_dict()) if isinstance(work_summary_orm, WorkSummaryORM) else None
+        with self.get_session() as session:
+            work_summary_orm = session.query(WorkSummaryORM).filter_by(
+                employee_id=employee_id,
+                period_start=start_of_this_month
+            ).one_or_none()
+            return WorkSummary(**work_summary_orm.to_dict(include_relationships=False)) if work_summary_orm else None
+
 
     async def add_update_current_work_summary(self, work_summary: WorkSummary) -> WorkSummary | None:
         """

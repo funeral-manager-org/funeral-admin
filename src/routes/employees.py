@@ -71,6 +71,27 @@ async def retrieve_create_attendance_register(employee_detail: EmployeeDetails) 
 
     return attendance_register
 
+
+async def retrieve_create_work_summary(attendance_id: str, payslip_id: str, employee_id: str):
+    """"""
+
+    try:
+        work_summary = await employee_controller.get_employee_current_work_summary(employee_id=employee_id)
+        if not work_summary:
+            # creating current pay period work summary
+            current_work_summary = WorkSummary(attendance_id=attendance_id, payslip_id=payslip_id, employee_id=employee_id)
+
+            work_summary = await employee_controller.add_update_current_work_summary(work_summary=current_work_summary)
+        if not work_summary:
+            employee_logger.error("Unable to create Employee Work Summary")
+            return None
+    except ValidationError as e:
+        employee_logger.warning(str(e))
+        return None
+
+    return work_summary
+
+
 async def create_work_documents(employee_detail: EmployeeDetails):
     """this creates payslips and Work Summary for the Current Month for the Employee"""
     employee_id: str = employee_detail.employee_id
@@ -89,22 +110,12 @@ async def create_work_documents(employee_detail: EmployeeDetails):
     payslip = await retrieve_create_this_month_payslip(employee_id=employee_id, salary=salary)
     if not payslip:
         employee_logger.error("Unable to obtain or create the latest payslip")
+    attendance_id = attendance_register.attendance_id
+    payslip_id = payslip.payslip_id
+    work_summary = await retrieve_create_work_summary(attendance_id=attendance_id, payslip_id=payslip_id,
+                                                      employee_id=employee_id)
 
-    try:
-        # creating current pay period work summary
-        current_work_summary = WorkSummary(
-            attendance_id=attendance_register.attendance_id, payslip_id=payslip.payslip_id,
-            employee_id=employee_id)
-
-        update_work_summary = await employee_controller.add_update_current_work_summary(work_summary=current_work_summary)
-        if not update_work_summary:
-            employee_logger.error("Unable to create Employee Work Summary")
-            return False
-    except ValidationError as e:
-        employee_logger.warning(str(e))
-        return False
-
-    return True
+    return work_summary
 
 
 # Routes

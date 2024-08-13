@@ -5,8 +5,9 @@ from pydantic import ValidationError
 from twilio.twiml.voice_response import Pay
 
 from src.database.models.bank_accounts import BankAccount
-from src.authentication import login_required
-from src.database.models.companies import EmployeeDetails, CompanyBranches, Salary, WorkSummary, Payslip
+from src.authentication import login_required, admin_login
+from src.database.models.companies import EmployeeDetails, CompanyBranches, Salary, WorkSummary, Payslip, Company, \
+    AttendanceSummary
 from src.database.models.contacts import Contacts, PostalAddress, Address
 from src.database.models.users import User
 from src.logger import init_logger
@@ -15,6 +16,98 @@ from src.main import company_controller, employee_controller
 employee_route = Blueprint('employees', __name__)
 employee_logger = init_logger('employee_route')
 
+
+# route utils
+async def retrieve_create_this_month_payslip(employee_id: str, salary: Salary) -> Payslip | None:
+
+    # creating a new payslip for the current pay period
+    payslip: Payslip | None = await employee_controller.get_present_employee_payslip(employee_id=employee_id)
+    if not payslip:
+        try:
+            payslip = Payslip(employee_id=employee_id, salary_id=salary.salary_id)
+        except ValidationError as e:
+            employee_logger.warning(str(e))
+            return None
+
+        payslip = await employee_controller.create_employee_payslip(payslip=payslip)
+
+    employee_logger.info(f"Employee Payslip Found: {payslip}")
+    return payslip
+
+
+async def create_retrieve_salary(employee_detail: EmployeeDetails):
+    """
+        **create_salary**
+             create salary model and save to database
+    :param employee_detail:
+    :return:
+    """
+    employee_id = employee_detail.employee_id
+    salary: Salary = await employee_controller.get_salary_details(employee_id=employee_id)
+    if not salary:
+        new_salary: Salary = Salary(employee_id=employee_detail.employee_id, company_id=employee_detail.company_id,
+                           branch_id=employee_detail.branch_id, amount=employee_detail.salary, pay_day=1)
+
+        salary: Salary = await employee_controller.add_update_employee_salary(salary=new_salary)
+
+    employee_logger.info(f"Successfully Created or Retrieved Employee Salary Record : {salary}")
+
+    return salary
+
+async def retrieve_create_attendance_register(employee_detail: EmployeeDetails) -> AttendanceSummary | None:
+    employee_id: str = employee_detail.employee_id
+    attendance_register = await employee_controller.get_employee_attendance_register(employee_id=employee_id)
+    if not attendance_register:
+        employee_logger.info(f"Started Creating Attendance Register")
+
+        try:
+            new_register = AttendanceSummary(employee_id=employee_id, name=employee_detail.display_names)
+            employee_logger.info(f"New Attendance Register: {new_register}")
+            attendance_register = await employee_controller.add_update_attendance_register(attendance_register=new_register)
+
+        except ValidationError as e:
+            employee_logger.warning(str(e))
+            return None
+
+    return attendance_register
+
+async def create_work_documents(employee_detail: EmployeeDetails):
+    """this creates payslips and Work Summary for the Current Month for the Employee"""
+    employee_id: str = employee_detail.employee_id
+    salary = await create_retrieve_salary(employee_detail=employee_detail)
+
+    employee_logger.info(f"Salary Details Found : {salary}")
+
+
+    attendance_register = await retrieve_create_attendance_register(employee_detail=employee_detail)
+
+    if not attendance_register:
+        employee_logger.error("Unable to create or retrieve Attendance Register")
+        return False
+
+    employee_logger.info(f"Employee Attendance Register Found: {attendance_register}")
+    payslip = await retrieve_create_this_month_payslip(employee_id=employee_id, salary=salary)
+    if not payslip:
+        employee_logger.error("Unable to obtain or create the latest payslip")
+
+    try:
+        # creating current pay period work summary
+        current_work_summary = WorkSummary(
+            attendance_id=attendance_register.attendance_id, payslip_id=payslip.payslip_id,
+            employee_id=employee_id)
+
+        update_work_summary = await employee_controller.add_update_current_work_summary(work_summary=current_work_summary)
+        if not update_work_summary:
+            employee_logger.error("Unable to create Employee Work Summary")
+            return False
+    except ValidationError as e:
+        employee_logger.warning(str(e))
+        return False
+
+    return True
+
+
+# Routes
 
 async def add_data_employee(context, employee_detail):
     if not employee_detail:
@@ -344,52 +437,6 @@ async def employee_clocking_in(user: User):
 
     return redirect(url_for('employees.get_attendance_register'))
 
-async def create_salary(employee_detail: EmployeeDetails):
-    """
-        **create_salary**
-             create salary model and save to database
-    :param employee_detail:
-    :return:
-    """
-    new_salary: Salary(employee_id=employee_detail.employee_id, company_id=employee_detail.company_id,
-                       branch_id=employee_detail.branch_id, amount=employee_detail.salary, pay_day=1)
-
-    updated_salary: Salary = await employee_controller.add_update_employee_salary(salary=new_salary)
-    employee_logger.info(f"Successfully Created New Employee Salary Record : {updated_salary}")
-    return updated_salary
-
-async def create_work_documents(employee_detail: EmployeeDetails):
-    """this creates payslips and Work Summary for the Current Month for the Employee"""
-    employee_id: str = employee_detail.employee_id
-    salary: Salary = await employee_controller.get_salary_details(employee_id=employee_id)
-    if not salary:
-        salary = await create_salary(employee_detail=employee_detail)
-
-    try:
-        # creating a new payslip for the current pay period
-        payslip = Payslip(employee_id=employee_id, salary_id=salary.salary_id)
-        update_payslip = await employee_controller.create_employee_payslip(payslip=payslip)
-        if not update_payslip:
-            employee_logger.error("Unable to create Employee Payslip")
-            return False
-    except ValidationError as e:
-        employee_logger.warning(str(e))
-        return False
-
-    try:
-        # creating current pay period work summary
-        current_work_summary = WorkSummary(
-            attendance_id=employee_detail.attendance_register.attendance_id, payslip_id=payslip.payslip_id,
-            employee_id=employee_id)
-        update_work_summary = await employee_controller.add_update_current_work_summary(work_summary=current_work_summary)
-        if not update_work_summary:
-            employee_logger.error("Unable to create Employee Work Summary")
-            return False
-    except ValidationError as e:
-        employee_logger.warning(str(e))
-        return False
-
-    return True
 
 
 # noinspection DuplicatedCode
@@ -397,7 +444,7 @@ async def create_work_documents(employee_detail: EmployeeDetails):
 @login_required
 async def employee_clocking_out(user: User):
     """
-
+        **employee_clocking_out**
     :param user:
     :return:
     """
@@ -492,12 +539,55 @@ async def get_payslips(user: User):
 
 
 @employee_route.get('/admin/employees/payroll')
-@login_required
+@admin_login
 async def get_payroll(user: User):
     """
 
     :param user:
     :return:
     """
+    if user and not user.company_id:
+        message: str = "Not registered on any company"
+        flash(message=message, category='danger')
+
+        return redirect(url_for('company.get_admin'))
+
+    employee_list: list[EmployeeDetails] = await employee_controller.get_complete_employee_details_for_company(
+        company_id=user.company_id)
+
+    for employee in employee_list:
+        employee_logger.info(employee)
+
     context = dict(user=user)
     return render_template('hr/payroll.html', **context)
+
+
+@employee_route.get('/admin/employees/work-docs/<string:employee_id>')
+@admin_login
+async def create_work_docs(user: User, employee_id: str):
+    """
+
+    :param user:
+    :param employee_id:
+    :return:
+    """
+    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(employee_id=employee_id)
+
+    if not isinstance(employee_detail, EmployeeDetails):
+        message: str = "This is not a Valid Employee"
+        flash(message=message, category="danger")
+        return redirect(url_for("employees.get_employees"))
+
+    # checking if employee lacks any of the needed documents if yes then create them
+    if not all(getattr(employee_detail, attr) for attr in ['attendance_register', 'work_summary', 'payslip']):
+        employee_logger.info("Started Creating Work Documents for Employee")
+        if await create_work_documents(employee_detail=employee_detail):
+            message: str = "Successfully created work documents"
+            flash(message=message,category="success")
+        else:
+            message: str = "Unable to create work documents"
+            flash(message=message, category="danger")
+
+
+
+    return redirect(url_for('employees.get_employee_detail', employee_id=employee_id))

@@ -1,5 +1,6 @@
 import calendar
 from datetime import datetime, date, timedelta
+from typing import Optional, Union, TypeVar
 
 from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel, Field, EmailStr
@@ -211,12 +212,15 @@ class TimeRecord(BaseModel):
         date_worked = self.clock_out.strftime("%d %B %Y")
         return f"{day_of_week}, {date_worked}"
 
-
+TypeEMployeeDetails = TypeVar('EmployeeDetails')
+TypeWorkSummary = TypeVar('WorkSummary')
 class AttendanceSummary(BaseModel):
     attendance_id: str = Field(default_factory=create_id)
     employee_id: str
     name: str
     records: list[TimeRecord] | None
+    employee: TypeEMployeeDetails | None
+    work_summary: TypeWorkSummary | None
 
     def total_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
         """
@@ -315,8 +319,8 @@ class WorkSummary(BaseModel):
     payslip_id: str | None
     employee_id: str
 
-    normal_sign_in_hour: int = Field(default_factory=7)
-    normal_sign_off_hour: int = Field(default_factory=17)
+    normal_sign_in_hour: int = Field(default=7)
+    normal_sign_off_hour: int = Field(default=17)
 
     normal_minutes_per_week: int = Field(default=40 * 60)
 
@@ -612,3 +616,4 @@ class WorkOrder(BaseModel):
 
 EmployeeDetails.update_forward_refs()
 WorkSummary.update_forward_refs()
+AttendanceSummary.update_forward_refs()

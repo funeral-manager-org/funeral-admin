@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import calendar
 
 from flask import Flask
+from sqlalchemy import desc
 from sqlalchemy.orm import joinedload
 
 from src.controller import Controllers, error_handler
@@ -32,6 +33,24 @@ class EmployeesController(Controllers):
             attendance_register_orm = session.query(AttendanceSummaryORM).filter_by(employee_id=employee_id).first()
             if isinstance(attendance_register_orm, AttendanceSummaryORM):
                 return AttendanceSummary(**attendance_register_orm.to_dict())
+    async def add_update_attendance_register(self, attendance_register: AttendanceSummary) -> AttendanceSummary | None:
+        """
+
+        :param attendance_register:
+        :return:
+        """
+        with self.get_session() as session:
+
+            attendance_register_orm = session.query(AttendanceSummaryORM).filter_by(
+                employee_id=attendance_register.employee_id).first()
+
+            if isinstance(attendance_register_orm, AttendanceSummaryORM):
+                attendance_register_orm.attendance_id = attendance_register.attendance_id
+                attendance_register_orm.name = attendance_register.name
+            else:
+                session.add(AttendanceSummaryORM(**attendance_register.dict(exclude={'records', 'employee', 'work_summary'})))
+
+            return attendance_register
 
     @error_handler
     async def get_employee_complete_details_uid(self, uid: str) -> EmployeeDetails | None:
@@ -42,9 +61,17 @@ class EmployeesController(Controllers):
         :return: EmployeeDetails instance or None
         """
         with self.get_session() as session:
-            employee_orm: EmployeeORM = session.query(EmployeeORM).filter_by(uid=uid).options(
-                joinedload(EmployeeORM.attendance_register).joinedload(AttendanceSummaryORM.records)
-            ).first()
+            employee_orm: EmployeeORM | None = (
+                session.query(EmployeeORM)
+                .filter_by(uid=uid)
+                .options(
+                    joinedload(EmployeeORM.attendance_register)
+                    .joinedload(AttendanceSummaryORM.records),
+                    joinedload(EmployeeORM.work_summary),
+                    joinedload(EmployeeORM.payslip)
+                )
+                .one_or_none()
+            )
 
             if employee_orm and isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
@@ -59,10 +86,17 @@ class EmployeesController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            employee_orm: EmployeeORM | None = session.query(EmployeeORM).filter_by(employee_id=employee_id).options(
-                joinedload(EmployeeORM.attendance_register).joinedload(AttendanceSummaryORM.records)
-            ).one_or_none()
-
+            employee_orm: EmployeeORM | None = (
+                session.query(EmployeeORM)
+                .filter_by(employee_id=employee_id)
+                .options(
+                    joinedload(EmployeeORM.attendance_register)
+                    .joinedload(AttendanceSummaryORM.records),
+                    joinedload(EmployeeORM.work_summary),
+                    joinedload(EmployeeORM.payslip)
+                )
+                .one_or_none()
+            )
             if isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
             return None
@@ -235,6 +269,26 @@ class EmployeesController(Controllers):
                                                            'work_sheets'})))
             return payslip
 
+    async def get_present_employee_payslip(self, employee_id: str) -> Payslip | None:
+        """
+        Get the latest payslip for the specified employee.
+
+        :param employee_id: The ID of the employee whose payslip is being retrieved.
+        :return: The latest PayslipORM instance or None if no payslip is found.
+        """
+        with self.get_session() as session:
+            payslip_orm: PaySlipORM = session.query(PaySlipORM).filter_by(employee_id=employee_id).order_by(
+                desc(PaySlipORM.pay_period_end)
+            ).first()
+            if not isinstance(payslip_orm, PaySlipORM):
+                return None
+
+            this_month = datetime.now().month
+            payslip = Payslip(**payslip_orm.to_dict(include_relationships=False))
+            if (payslip.pay_period_end.month == this_month) or (payslip.pay_period_start.month == this_month):
+                return payslip
+        return None
+
     async def get_employee_complete_work_summary(self, employee_id: str) -> list[WorkSummary]:
         """
 
@@ -310,3 +364,20 @@ class EmployeesController(Controllers):
                                                                        period_start=start_of_last_month).first()
 
             return WorkSummary(**work_summary_orm.to_dict()) if isinstance(work_summary_orm, WorkSummaryORM) else None
+
+
+    async def get_complete_employee_details_for_company(self, company_id: str) -> list[EmployeeDetails]:
+        """
+
+        :param company_id:
+        :return:
+        """
+        with self.get_session() as session:
+            company_employees = session.query(EmployeeORM).filter_by(company_id=company_id).options(
+                joinedload(EmployeeORM.attendance_register),
+                joinedload(EmployeeORM.work_summary),
+                joinedload(EmployeeORM.payslip)
+            ).all()
+
+            return [employee.to_dict(include_relationships=True) for employee in company_employees or []
+                    if isinstance(employee, EmployeeORM)]

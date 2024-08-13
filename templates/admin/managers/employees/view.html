@@ -147,6 +147,11 @@
                 <i class="fa fa-user-circle-o"></i>
                 Salary
             </button>
+            {% if employee_detail and not employee_detail.attendance_register %}
+                <a href="{{ url_for('employees.create_work_docs', employee_id=employee_detail.employee_id) }}" class="btn btn-rounded btn-outline-success">
+                    Create Employee Work Docs (Payslips, TimeSheets , etc)
+                </a>
+            {% endif %}
         </div>
     </div>
 {% endif %}

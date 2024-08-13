@@ -17,6 +17,7 @@
                             <li><a href="{{ url_for('company.get_admin') }}"><span class="text-success"><i class="ti-briefcase"></i> Company</span></a></li>
                             <li><a href="{{ url_for('covers.get_covers') }}"><span class="text-success"><i class="fa fa-user-plus"></i> Covers</span></a></li>
                             <li><a href="{{ url_for('employees.get_employees') }}"><span class="text-success"><i class="ti-briefcase"></i> Employees</span></a></li>
+                            <li><a href="{{ url_for('employees.get_payroll') }}"><i class="fa fa-folder-o"></i> Payroll </a></li>
                             <li><a href="{{ url_for('messaging.get_admin') }}"><span class="text-danger"><i class="fa fa-cogs"></i> Settings & Stats</span></a></li>
                         </ul>
                     </li>
@@ -54,7 +55,7 @@
                             <li><a href="{{ url_for('employees.get_attendance_register') }}"><i class="fa fa-registered"></i> Attendance Register </a></li>
                             <li><a href="{{ url_for('employees.get_work_summary') }}"><i class="fa fa-file-excel-o"></i> Work Summary </a></li>
                             <li><a href="{{ url_for('employees.get_payslips') }}"><i class="fa fa-credit-card-alt"></i> Payslips </a></li>
-                            <li><a href="{{ url_for('employees.get_payroll') }}"><i class="fa fa-folder-o"></i> Payroll </a></li>
+
                         </ul>
                     </li>
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span

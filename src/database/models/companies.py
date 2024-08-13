@@ -561,8 +561,8 @@ def pay_period_start() -> date:
 
 
 def pay_period_end() -> date:
-    next_month = pay_period_start() + relativedelta(month=1)
-    return next_month - relativedelta(day=1)
+    return datetime.now().date().replace(day=1) + relativedelta(months=1) - relativedelta(days=1)
+
 
 
 class Payslip(BaseModel):

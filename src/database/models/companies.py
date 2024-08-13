@@ -569,9 +569,9 @@ class Payslip(BaseModel):
     employee: EmployeeDetails | None
     salary: Salary | None
 
-    applied_deductions: list[Deductions]
-    bonus_pay: list[BonusPay]
-    work_sheets: WorkSummary
+    applied_deductions: list[Deductions] | None
+    bonus_pay: list[BonusPay] | None
+    work_sheets: WorkSummary | None
 
     @property
     def month_of(self):

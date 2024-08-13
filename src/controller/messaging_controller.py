@@ -375,7 +375,7 @@ class MessagingController(Controllers):
 
         self.loop = asyncio.get_event_loop()
         self.burst_delay = 2
-        self.timer_multiplier = 60
+        self.timer_multiplier = 1
         self.timer_limit = 60 * 60 * 1
         self.event_triggered_time = 0
         self.stop_event = asyncio.Event()
@@ -432,7 +432,8 @@ class MessagingController(Controllers):
         total_emails_sent = 0
         while not self.email_queue.empty():
             email: EmailCompose = await self.email_queue.get()
-            await self.email_service.send_email(email=email)
+            if email:
+                await self.email_service.send_email(email=email)
             await asyncio.sleep(delay=self.burst_delay)
             self.email_queue.task_done()
             total_emails_sent += 1
@@ -447,7 +448,8 @@ class MessagingController(Controllers):
         self.logger.info("started processing SMS Queue")
         while not self.sms_queue.empty():
             composed_sms: SMSCompose = await self.sms_queue.get()
-            response = await self.sms_service.send_sms(composed_sms=composed_sms)
+            if composed_sms:
+                _ = await self.sms_service.send_sms(composed_sms=composed_sms)
             await asyncio.sleep(delay=self.burst_delay)  # sleep for
             # response will carry a response message from the api provider at this point
             # TO

@@ -332,29 +332,64 @@ async def employee_clocking_in(user: User):
 
         if not isinstance(current_work_summary, WorkSummary):
             # without current month work summary lets create a default one the manager can still edit the work summary
-            await create_work_documents(employee_detail=employee_detail)
-
+            work_documents_created = await create_work_documents(employee_detail=employee_detail)
+            if not work_documents_created:
+                employee_signed_out = await employee_controller.sign_out_employee(employee_detail=employee_detail)
+                employee_logger.error("Unable to sign in Employee - we have signed out the Employee")
+                flash(message="Employee Could not Sign In Due to Errors creating work documents please inform admin", category="danger")
+            else:
+                flash(message="Employee Signed In Please Remember to sign off Employee when Off Duty")
     else:
         flash(message="Error signing in. Or Employee Already Signed IN.", category="danger")
 
     return redirect(url_for('employees.get_attendance_register'))
 
+async def create_salary(employee_detail: EmployeeDetails):
+    """
+        **create_salary**
+             create salary model and save to database
+    :param employee_detail:
+    :return:
+    """
+    new_salary: Salary(employee_id=employee_detail.employee_id, company_id=employee_detail.company_id,
+                       branch_id=employee_detail.branch_id, amount=employee_detail.salary, pay_day=1)
+
+    updated_salary: Salary = await employee_controller.add_update_employee_salary(salary=new_salary)
+    employee_logger.info(f"Successfully Created New Employee Salary Record : {updated_salary}")
+    return updated_salary
 
 async def create_work_documents(employee_detail: EmployeeDetails):
     """this creates payslips and Work Summary for the Current Month for the Employee"""
     employee_id: str = employee_detail.employee_id
     salary: Salary = await employee_controller.get_salary_details(employee_id=employee_id)
     if not salary:
-        return
-    # creating a new payslip for the current pay period
-    payslip = Payslip(employee_id=employee_id, salary_id=salary.salary_id)
-    _ = await employee_controller.create_employee_payslip(payslip=payslip)
+        salary = await create_salary(employee_detail=employee_detail)
 
-    # creating current pay period work summary
-    current_work_summary = WorkSummary(
-        attendance_id=employee_detail.attendance_register.attendance_id, payslip_id=payslip.payslip_id,
-        employee_id=employee_id)
-    _ = await employee_controller.add_update_current_work_summary(work_summary=current_work_summary)
+    try:
+        # creating a new payslip for the current pay period
+        payslip = Payslip(employee_id=employee_id, salary_id=salary.salary_id)
+        update_payslip = await employee_controller.create_employee_payslip(payslip=payslip)
+        if not update_payslip:
+            employee_logger.error("Unable to create Employee Payslip")
+            return False
+    except ValidationError as e:
+        employee_logger.warning(str(e))
+        return False
+
+    try:
+        # creating current pay period work summary
+        current_work_summary = WorkSummary(
+            attendance_id=employee_detail.attendance_register.attendance_id, payslip_id=payslip.payslip_id,
+            employee_id=employee_id)
+        update_work_summary = await employee_controller.add_update_current_work_summary(work_summary=current_work_summary)
+        if not update_work_summary:
+            employee_logger.error("Unable to create Employee Work Summary")
+            return False
+    except ValidationError as e:
+        employee_logger.warning(str(e))
+        return False
+
+    return True
 
 
 # noinspection DuplicatedCode

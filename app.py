@@ -32,4 +32,4 @@ if __name__ == '__main__':
     # Start the message loop in a separate thread
     loop_threads = threading.Thread(target=run_loops, daemon=True)
     loop_threads.start()
-    app.run(debug=True, port=8000)
+    app.run(host='0.0.0.0', debug=True, port=8000)

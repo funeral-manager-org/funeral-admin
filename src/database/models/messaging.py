@@ -59,7 +59,7 @@ class EmailCompose(BaseModel):
     to_email: str | None
     subject: str
     message: str
-    to_branch: str
+    to_branch: str | None
     recipient_type: str
     is_sent: bool = Field(default=False)
     date_time_sent: str | None

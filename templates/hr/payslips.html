@@ -12,27 +12,55 @@
             </h2>
         </div>
         <div class="card-body">
+            {% set total_salary = 0 %}
+            {% set total_time_worked = 0 %}
+            {% set total_overtime = 0 %}
+            {% set total_net_salary = 0 %}
+
             <table class="table table-bordered table-striped">
                 <thead>
-                    <td>Month</td>
-                    <td>Salary</td>
-                    <td>Time Worked</td>
-                    <td>Overtime</td>
-                    <td>Net Salary</td>
+                    <tr>
+                        <th>Month</th>
+                        <th>Salary</th>
+                        <th>Time Worked (Minutes)</th>
+                        <th>Overtime (Minutes)</th>
+                        <th>Net Salary</th>
+                    </tr>
                 </thead>
                 <tbody>
+
                     {% for payslip in employee_detail.payslip %}
                         <tr>
                             <td>{{ payslip.month_of|title }}</td>
-                             <td>R {{ payslip.salary.amount|number }}.00</td>
+                            <td>R {{ payslip.salary.amount|number }}.00</td>
                             <td>{{ payslip.work_sheets.total_minutes_worked }}</td>
-                        <td>{{ payslip.work_sheets.overtime_worked_minutes }}</td>
-                        <td>R {{ payslip.net_salary|number }}.00</td>
+                            <td>{{ payslip.work_sheets.overtime_worked_minutes }}</td>
+                            <td>R {{ payslip.net_salary|number }}.00</td>
                         </tr>
+                        {% if payslip.salary %}
+                            {% set total_salary = total_salary + payslip.salary.amount %}
+                        {% endif %}
+                        {% if payslip.work_sheets %}
+                            {% set total_time_worked = total_time_worked + payslip.work_sheets.total_minutes_worked %}
+                            {% set total_overtime = total_overtime + payslip.work_sheets.overtime_worked_minutes %}
+                        {% endif %}
+                        {% if payslip.net_salary %}
+                            {% set total_net_salary = total_net_salary + payslip.net_salary %}
+                        {% endif %}
                     {% endfor %}
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Total</th>
+                        <th>R {{ total_salary|number }}.00</th>
+                        <th>{{ total_time_worked }}</th>
+                        <th>{{ total_overtime }}</th>
+                        <th>R {{ total_net_salary|number }}.00</th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
 </section>
+
 {% endblock %}

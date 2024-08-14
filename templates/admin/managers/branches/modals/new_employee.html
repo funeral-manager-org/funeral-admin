@@ -7,49 +7,59 @@
             <div class="modal-body">
                 <form class="form-horizontal" action="{{ url_for('company.add_employee', branch_id=branch.branch_id) }}" method="POST">
                     <!-- Full Names -->
-                    <div class="form-group">
-{#                        <label class="control-label" for="full_names">Full Names:</label>#}
-                        <input type="text" class="form-control" id="full_names" name="full_names" placeholder="Full Names" required>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="full_names" class="form-label">Full Names</label>
+                            <input type="text" class="form-control" id="full_names" name="full_names" {% if employee_detail %}value="{{ employee_detail.full_names }}"{% endif %} required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" {% if employee_detail %}value="{{ employee_detail.last_name }}"{% endif %} required>
+                        </div>
                     </div>
-                    <!-- Last Name -->
-                    <div class="form-group">
-{#                        <label class="control-label" for="last_name">Last Name:</label>#}
-                        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Surname" required>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" {% if employee_detail %}value="{{ employee_detail.email }}"{% endif %} required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="contact_number" class="form-label">Contact Number</label>
+                            <input type="text" class="form-control" id="contact_number" name="contact_number" {% if employee_detail %} value="{{ employee_detail.contact_number }}"{% endif %} required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="position" class="form-label">Position</label>
+                            <input type="text" class="form-control" id="position" name="position" {% if employee_detail %}value="{{ employee_detail.position }}"{% endif %} required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="salary" class="form-label">Salary</label>
+                            <input type="number" class="form-control" id="salary" name="salary" {% if employee_detail %}value="{{ employee_detail.salary }}"{% endif %} required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="role" class="form-label">Role</label>
+                            {% if employee_roles %}
+                                <select name="role" id="role" class="form-control">
+                                    <option value="" disabled {% if not employee_detail %} selected {% endif %}>Select Employee Role</option>
+                                    {% for role in employee_roles %}
+                                        <option value="{{ role }}" {% if employee_detail and employee_detail.role == role %} selected {% endif %}>{{ role|title }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="date_of_birth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" {% if employee_detail %}value="{{ employee_detail.date_of_birth }}"{% endif %} required>
+                        </div>
                     </div>
                     <div class="form-group">
-{#                        <label class="control-label" for="id_number">ID Number:</label>#}
-                        <input type="text" class="form-control" id="id_number" name="id_number" placeholder="ID Number" required>
+                        <label for="id_number" class="form-label">ID Number</label>
+                        <input type="text" class="form-control" id="id_number" name="id_number" {% if employee_detail %}value="{{ employee_detail.id_number }}"{% endif %} required>
                     </div>
 
-                    <div class="form-group">
-{#                        <label class="control-label" for="email">Email:</label>#}
-                        <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
-                    </div>
-                    <div class="form-group">
-{#                        <label class="control-label" for="contact_number">Contact Number:</label>#}
-                        <input type="text" class="form-control" id="contact_number" name="contact_number" placeholder="Contact Number" required>
-                    </div>
-                    <div class="form-group">
-{#                        <label class="control-label" for="position">Position:</label>#}
-                        <input type="text" class="form-control" id="position" name="position" placeholder="Position" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label font-weight-bold text-info" for="date_of_birth">Date of Birth:</label>
-                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" placeholder="Date Of Birth 1989/04/01" required>
-                    </div>
-                    <div class="form-group">
-{#                        <label class="control-label" for="salary">Salary:</label>#}
-                        <input type="number" class="form-control" id="salary" name="salary" placeholder="Salary" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label" for="role">Employee Role</label>
-                        <select name="role" id="role" class="form-control">
-                        <option value="" selected>Select Employee Role</option>
-                            {% for role in employee_roles %}
-                                <option value="{{ role }}">{{ role }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
 
                     <!-- Submit Button -->
                     <div class="form-group">

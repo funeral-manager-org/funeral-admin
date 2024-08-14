@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template
 from sqlalchemy.orm import joinedload
 
+from src.database.sql.companies import CompanyBranchesORM
+from src.database.sql.user import UserORM
 from src.controller import Controllers, error_handler
 from src.controller.auth import UserController
 from src.controller.company_controller import CompanyController
@@ -134,11 +136,22 @@ class SubscriptionsController(Controllers):
             return payment
 
     @error_handler
+    async def updated_branch_details(self, account: User) -> User:
+        with self.get_session() as session:
+            account_orm = session.query(UserORM).filter_by(uid=account.uid).first()
+            branch_orm = session.query(CompanyBranchesORM).filter_by(company_id=account.company_id).first()
+            if isinstance(branch_orm, CompanyBranchesORM):
+                account_orm.branch_id = branch_orm.to_dict().get('branch_id')
+
+            return User(**account_orm.to_dict())
+    @error_handler
     async def send_email_to_company_admins(self, company_data, email_template, subject):
         company_accounts: list[User] = await self.user_controller.get_company_accounts(
             company_id=company_data.company_id)
         for account in company_accounts:
             if account.is_company_admin and account.account_verified:
+                if not account.branch_id:
+                    account = await self.updated_branch_details(account=account)
                 await self.messaging_controller.send_email(email=EmailCompose(to_email=account.email,
                                                                               subject=subject,
                                                                               message=email_template,

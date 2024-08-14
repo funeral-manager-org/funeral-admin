@@ -91,6 +91,10 @@ async def get_policy_holders_paged(user: User, page: int = 0, count: int = 25):
     :param count:
     :return:
     """
+    # Guard statement: ensure page and count are not both more than 100
+    if (page > 1000) or (count > 1000):
+        flash(message="your request is out of bounds", category="danger")
+        return redirect(url_for('home.get_home'))
 
     policy_holders_list = await company_controller.get_policy_holders_paged(
         company_id=user.company_id, page=page, count=count)

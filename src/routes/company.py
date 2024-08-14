@@ -517,32 +517,39 @@ async def get_employee(user: User, branch_id: str, employee_id: str):
     """
     employee_detail: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
     employee_roles: list[str] = await company_controller.get_employee_roles(company_id=user.company_id)
+    if not employee_detail:
+        flash(message="Unable to find Employee please try again later", category="danger")
+        return redirect(url_for('company.get_employees'))
 
-    if employee_detail:
-        branch = await company_controller.get_branch_by_id(branch_id=branch_id)
-        context = dict(user=user, employee_detail=employee_detail, branch=branch, employee_roles=employee_roles)
+    branch = await company_controller.get_branch_by_id(branch_id=branch_id)
 
-        if employee_detail.uid:
-            user_employee: User = await user_controller.get_account_by_uid(uid=employee_detail.uid)
-            context.update(user_employee=user_employee)
+    if not branch:
+        flash(message="Unable to find branch data please try again later", category="danger")
+        return redirect(url_for('company.get_employees'))
 
-        if employee_detail.address_id:
-            address = await company_controller.get_address(address_id=employee_detail.address_id)
-            context.update(address=address)
+    context = dict(user=user, employee_detail=employee_detail, branch=branch, employee_roles=employee_roles)
 
-        if employee_detail.postal_id:
-            postal_address = await company_controller.get_postal_address(postal_id=employee_detail.postal_id)
-            context.update(postal_address=postal_address)
+    if employee_detail.uid:
+        user_employee: User = await user_controller.get_account_by_uid(uid=employee_detail.uid)
+        context.update(user_employee=user_employee)
 
-        if employee_detail.bank_account_id:
-            bank_account = await company_controller.get_bank_account(bank_account_id=employee_detail.bank_account_id)
-            context.update(bank_account=bank_account)
+    if employee_detail.address_id:
+        address = await company_controller.get_address(address_id=employee_detail.address_id)
+        context.update(address=address)
 
-        if employee_detail.contact_id:
-            contact = await company_controller.get_contact(contact_id=employee_detail.contact_id)
-            context.update(contact=contact)
-        print(context)
-        return render_template('admin/managers/branches/employee.html', **context)
+    if employee_detail.postal_id:
+        postal_address = await company_controller.get_postal_address(postal_id=employee_detail.postal_id)
+        context.update(postal_address=postal_address)
+
+    if employee_detail.bank_account_id:
+        bank_account = await company_controller.get_bank_account(bank_account_id=employee_detail.bank_account_id)
+        context.update(bank_account=bank_account)
+
+    if employee_detail.contact_id:
+        contact = await company_controller.get_contact(contact_id=employee_detail.contact_id)
+        context.update(contact=contact)
+    print(context)
+    return render_template('admin/managers/branches/employee.html', **context)
 
 
 @company_route.post('/admin/company/branch/employee/address/add/<string:branch_id>/<string:employee_id>')
@@ -559,6 +566,11 @@ async def add_employee_address(user: User, branch_id: str, employee_id: str):
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
     employee: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
+
+    if not employee:
+        flash(message="Unable to find Employee please try again later", category="danger")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
     if employee.company_id != user.company_id:
         flash(message="You are not authorized to perform this action please contact admin", category="danger")
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
@@ -600,6 +612,11 @@ async def add_employee_bank_account(user: User, branch_id: str, employee_id: str
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
     employee: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
+
+    if not employee:
+        flash(message="Unable to find Employee please try again later", category="danger")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
     if employee.company_id != user.company_id:
         flash(message="You are not authorized to perform this action please contact admin", category="danger")
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
@@ -641,6 +658,11 @@ async def add_employee_contacts(user: User, branch_id: str, employee_id: str):
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
     employee: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
+
+    if not employee:
+        flash(message="Unable to find Employee please try again later", category="danger")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
     if employee.company_id != user.company_id:
         flash(message="You are not authorized to perform this action please contact admin", category="danger")
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
@@ -677,13 +699,19 @@ async def add_employee_postal_address(user: User, branch_id: str, employee_id: s
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
     employee: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
+    if not employee:
+        flash(message="Unable to find Employee please try again later", category="danger")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
+
     if employee.company_id != user.company_id:
         flash(message="You are not authorized to perform this action please contact admin", category="danger")
         return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
 
     # Updating Employee Postal ID
     postal_address = await company_controller.add_postal_address(postal_address=postal_address)
-
+    if not postal_address:
+        flash(message="Unable to create or update employee postal address", category="danger")
+        return redirect(url_for('company.get_employee', branch_id=branch_id, employee_id=employee_id))
     employee.postal_id = postal_address.postal_id
 
     is_updated, _ = await company_controller.add_update_employee(employee=employee)

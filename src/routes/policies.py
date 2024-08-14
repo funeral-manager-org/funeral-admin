@@ -76,6 +76,10 @@ async def get_active_policies_paged(user: User, page: int = 0, count: int = 25):
     :param count:
     :return:
     """
+    if (page > 1000) or count > 1000:
+        flash(message="your request is out of bounds", category="danger")
+        return redirect(url_for('home.get_home'))
+
     if not user.company_id:
         flash(message="No Registered Funeral Company", category="danger")
         return redirect(url_for('policy.get_policies_home'))
@@ -96,6 +100,11 @@ async def get_lapsed_policies_paged(user: User, page: int = 0, count: int = 25):
     :param count:
     :return:
     """
+    if (page > 1000) or count > 1000:
+        flash(message="your request is out of bounds", category="danger")
+        return redirect(url_for('home.get_home'))
+
+
     if not user.company_id:
         flash(message="No Registered Funeral Company", category="danger")
         return redirect(url_for('policy.get_policies_home'))

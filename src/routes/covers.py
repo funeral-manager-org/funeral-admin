@@ -63,7 +63,7 @@ async def get_plan_cover(user: User, company_id: str, plan_number: str):
     """
     if user.company_id != company_id:
         flash(message="You are not authorized to view the cover details", category="danger")
-        return redirect('home.get_home')
+        return redirect(url_for('home.get_home'))
 
     plan_cover = await company_controller.get_plan_cover(company_id=company_id, plan_number=plan_number)
     policy_subscribers = await company_controller.get_plan_subscribers(plan_number=plan_number)
@@ -121,6 +121,10 @@ async def get_current_premiums_paged(user: User, page: int = 0, count: int = 25)
     :param user:
     :return:
     """
+    if (page > 1000) or (count > 1000):
+        flash(message="your request is out of bounds", category="danger")
+        return redirect(url_for('home.get_home'))
+
     branch_id, company_branches, clients_list = await get_client_list(user=user)
     if not branch_id:
         flash(message="Error retrieving premiums please try again later", category="danger")
@@ -159,6 +163,10 @@ async def get_outstanding_premiums(user: User, page: int = 0, count: int = 25):
     :param user:
     :return:
     """
+    if (page > 1000) or (count > 1000):
+        flash(message="your request is out of bounds", category="danger")
+        return redirect(url_for('home.get_home'))
+
     branch_id, company_branches, clients_list = await get_client_list(user=user)
     if not branch_id:
         flash(message="Error retrieving premiums please try again later", category="danger")

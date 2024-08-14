@@ -18,6 +18,21 @@ covers_route = Blueprint('covers', __name__)
 covers_logger = init_logger('covers_logger')
 
 
+def validate_page_and_count(page: int, count: int, max_value: int = 1000, redirect_route: str = 'home.get_home'):
+    """
+    Validates the page and count values and handles out-of-bounds errors.
+
+    :param page: The page number to check.
+    :param count: The count number to check.
+    :param max_value: The maximum allowed value for page and count.
+    :param redirect_route: The route to redirect to in case of error.
+    :return: A boolean indicating whether the validation passed.
+    """
+    if page > max_value or count > max_value:
+        flash(message="Your request is out of bounds", category="danger")
+        return redirect(url_for(redirect_route))
+    return None
+
 @covers_route.get('/admin/administrator/plans')
 @login_required
 async def get_covers(user: User):
@@ -44,6 +59,7 @@ async def get_covers(user: User):
     context = dict(user=user, branches=company_branches, cover_details=cover_details)
     return render_template('admin/managers/covers.html', **context)
 
+
 @covers_route.post('/admin/administrator/plans/add-plan-cover')
 @login_required
 async def add_plan_cover(user: User):
@@ -63,7 +79,6 @@ async def add_plan_cover(user: User):
         flash(message="User Not Registered in a company", category="danger")
         return redirect(url_for('covers.get_covers'))
 
-
     plan_cover.company_id = user.company_id
 
     # Create the plan cover and flash success
@@ -73,9 +88,9 @@ async def add_plan_cover(user: User):
         flash(message="Bad Error updating or creating a new cover please try again later", category="danger")
         return redirect(url_for('covers.get_covers'))
 
-
     flash(message="Successfully created plan.", category="success")
     return redirect(url_for('covers.get_covers'))
+
 
 @covers_route.get('/admin/administrator/plan/<string:company_id>/<string:plan_number>')
 @login_required
@@ -130,7 +145,8 @@ async def get_plan_cover(user: User, company_id: str, plan_number: str):
     return render_template('admin/managers/covers/view.html', **context)
 
 
-async def get_client_list(user: User) -> tuple[str| None, list[CompanyBranches]| None, list[ClientPersonalInformation]| None]:
+async def get_client_list(user: User) -> tuple[
+    str | None, list[CompanyBranches] | None, list[ClientPersonalInformation] | None]:
     """
 
     :param user:
@@ -154,12 +170,15 @@ async def get_client_list(user: User) -> tuple[str| None, list[CompanyBranches]|
 @login_required
 async def get_current_premiums_paged(user: User, page: int = 0, count: int = 25):
     """
-
     :param count:
     :param page:
     :param user:
     :return:
     """
+    redirect_on_bad_page_count = validate_page_and_count(page=page, count=count)
+    if redirect_on_bad_page_count:
+        return redirect_on_bad_page_count
+
     if (page > 1000) or (count > 1000):
         flash(message="your request is out of bounds", category="danger")
         return redirect(url_for('home.get_home'))
@@ -191,9 +210,9 @@ async def get_outstanding_premiums(user: User, page: int = 0, count: int = 25):
     :param user:
     :return:
     """
-    if (page > 1000) or (count > 1000):
-        flash(message="your request is out of bounds", category="danger")
-        return redirect(url_for('home.get_home'))
+    redirect_on_bad_page_count = validate_page_and_count(page=page, count=count)
+    if redirect_on_bad_page_count:
+        return redirect_on_bad_page_count
 
     branch_id, company_branches, clients_list = await get_client_list(user=user)
     if (not branch_id) or (not company_branches):
@@ -282,9 +301,10 @@ async def premiums_payments(user: User):
                 return redirect(url_for('home.get_home'))
 
         except StopIteration as e:
-            covers_logger.error("Unable to find branch details - this should not happen")
+            covers_logger.error(str(e))
             flash(message="This is a Terrible Error - We Obviously Did Something wrong please report this",
                   category="danger")
+
             branch_details = {}
 
         if branch_details:
@@ -364,13 +384,13 @@ async def premiums_payments(user: User):
             company_details: Company = await company_controller.get_company_details(company_id=user.company_id)
             if company_details:
                 receipt = await covers_controller.create_invoice_record(premium=paid_premium)
-                context.update(company=company_details,  receipt=receipt, premium=paid_premium, generated_on=datetime.now())
+                context.update(company=company_details, receipt=receipt, premium=paid_premium,
+                               generated_on=datetime.now())
                 # TODO - create a better invoice title
                 title = f"{company_details.company_name} Invoice - Premium Payment"
                 context.update(title=title)
 
             return render_template('admin/premiums/receipt.html', **context)
-
 
         message: str = "Premium is already paid" if premium else ("There are not active premiums associated with "
                                                                   "this policy holder")
@@ -398,7 +418,6 @@ async def receipt_reprint_receipt_number(user: User, receipt_number: str):
         flash(message="Receipt not found", category="danger")
         return redirect(url_for('covers.get_quick_pay'))
 
-
     policy_number = receipt.premium.policy_number
     policy_data: PolicyRegistrationDataORM = await covers_controller.get_policy_data(policy_number=policy_number)
     if not isinstance(policy_data, PolicyRegistrationData):
@@ -413,8 +432,7 @@ async def receipt_reprint_receipt_number(user: User, receipt_number: str):
         flash(message="Receipt not found", category="danger")
         return redirect(url_for('covers.get_quick_pay'))
 
-
-    context.update(company=company_details, policy_data=policy_data, selected_client=selected_client,  receipt=receipt,
+    context.update(company=company_details, policy_data=policy_data, selected_client=selected_client, receipt=receipt,
                    premium=receipt.premium, generated_on=datetime.now())
 
     return render_template('admin/premiums/receipt.html', **context)
@@ -441,7 +459,6 @@ async def last_receipt_reprint(user: User, premium_id: str):
         flash(message="Receipt not found", category="danger")
         return redirect(url_for('covers.get_quick_pay'))
 
-
     policy_number = receipt.premium.policy_number
     policy_data: PolicyRegistrationDataORM = await covers_controller.get_policy_data(policy_number=policy_number)
     covers_logger.info(f"Policy Data: {policy_data}")
@@ -457,8 +474,7 @@ async def last_receipt_reprint(user: User, premium_id: str):
         flash(message="Receipt not found", category="danger")
         return redirect(url_for('covers.get_quick_pay'))
 
-
-    context.update(company=company_details,policy_data=policy_data, selected_client=selected_client, receipt=receipt,
+    context.update(company=company_details, policy_data=policy_data, selected_client=selected_client, receipt=receipt,
                    premium=receipt.premium, generated_on=datetime.now())
 
     return render_template('admin/premiums/receipt.html', **context)

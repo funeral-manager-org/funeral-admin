@@ -15,6 +15,15 @@ class PaymentMethod(Enum):
     DIRECT_DEPOSIT = "direct_deposit"
     BANK_TRANSFER = "bank_transfer"
 
+def is_valid_ulid(value: str):
+    # Valid ULID characters: 0-9, A-Z (excluding I, L, O, U)
+
+    ulid_regex = re.compile(r'^[0-9A-HJKMNP-TV-Z]{1,26}$')
+    return ulid_regex.match(value)
+
+def is_valid_ulid_strict(value):
+    ulid_regex = re.compile(r'^[0-9A-HJKMNP-TV-Z]{26}$')
+    return ulid_regex.match(value)
 
 def get_payment_methods() -> list[str]:
     """

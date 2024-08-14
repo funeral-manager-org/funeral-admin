@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
+from ulid import ULID
 
 from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
@@ -11,6 +12,7 @@ from src.authentication import login_required, user_details
 from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company
 from src.database.models.users import User
 from src.main import company_controller, covers_controller
+from src.utils import is_valid_ulid, is_valid_ulid_strict
 
 covers_route = Blueprint('covers', __name__)
 covers_logger = init_logger('covers_logger')
@@ -20,36 +22,60 @@ covers_logger = init_logger('covers_logger')
 @login_required
 async def get_covers(user: User):
     """
-
-        :param user:
-        :return:
+    :param user:
+    :return:
     """
+    # Retrieve company branches and cover details
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     cover_details = await company_controller.get_company_covers(company_id=user.company_id)
+
+    # Validate that the returned data is not empty or None
+    if not company_branches:
+        covers_logger.warning(f"Company branches not found for company ID {user.company_id}")
+        flash('Company branches not found.', 'danger')
+        return redirect(url_for('company.get_admin'))
+
+    if not cover_details:
+        covers_logger.warning(f"Cover details not found for company ID {user.company_id}")
+        flash('Cover details not found.', 'danger')
+        return redirect(url_for('company.get_admin'))
+
+    # Create context and render template if data is valid
     context = dict(user=user, branches=company_branches, cover_details=cover_details)
     return render_template('admin/managers/covers.html', **context)
-
 
 @covers_route.post('/admin/administrator/plans/add-plan-cover')
 @login_required
 async def add_plan_cover(user: User):
     """
-        :param user:
-        :return:
+    :param user:
+    :return:
     """
+    # Attempt to create a plan cover using form data
     try:
         plan_cover = CoverPlanDetails(**request.form)
-        plan_cover.company_id = user.company_id
     except ValidationError as e:
         covers_logger.error(str(e))
         flash(message="Unable to create plan please provide all necessary details", category="danger")
         return redirect(url_for('covers.get_covers'))
 
+    if not user.company_id:
+        flash(message="User Not Registered in a company", category="danger")
+        return redirect(url_for('covers.get_covers'))
+
+
+    plan_cover.company_id = user.company_id
+
+    # Create the plan cover and flash success
     updated_plan_cover = await company_controller.create_plan_cover(plan_cover=plan_cover)
 
-    flash(message="successfully created plan", category="success")
-    return redirect(url_for('covers.get_covers'))
+    if not updated_plan_cover:
+        flash(message="Bad Error updating or creating a new cover please try again later", category="danger")
+        return redirect(url_for('covers.get_covers'))
 
+
+    flash(message="Successfully created plan.", category="success")
+    return redirect(url_for('covers.get_covers'))
 
 @covers_route.get('/admin/administrator/plan/<string:company_id>/<string:plan_number>')
 @login_required
@@ -61,16 +87,30 @@ async def get_plan_cover(user: User, company_id: str, plan_number: str):
     :param plan_number:
     :return:
     """
-    if user.company_id != company_id:
+    if not is_valid_ulid(value=plan_number):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    if not is_valid_ulid(value=company_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    if (user.company_id is None) or (user.company_id != company_id):
         flash(message="You are not authorized to view the cover details", category="danger")
         return redirect(url_for('home.get_home'))
 
     plan_cover = await company_controller.get_plan_cover(company_id=company_id, plan_number=plan_number)
+    if not plan_cover:
+        flash(message="Unable to retrieve cover details, please try again later", category="danger")
+        return redirect(url_for('company.get_admin'))
+
     policy_subscribers = await company_controller.get_plan_subscribers(plan_number=plan_number)
 
     sorted_by_paid = sorted(policy_subscribers, key=lambda policy: bool(
         policy.get_this_month_premium()) and policy.get_this_month_premium().is_paid)
+
     sorted_by_paid.reverse()
+
     subscribed_clients = dict(
         policies=sorted_by_paid,
         total_policies=len(policy_subscribers),
@@ -90,7 +130,7 @@ async def get_plan_cover(user: User, company_id: str, plan_number: str):
     return render_template('admin/managers/covers/view.html', **context)
 
 
-async def get_client_list(user: User) -> tuple[str, list[CompanyBranches], list[ClientPersonalInformation]]:
+async def get_client_list(user: User) -> tuple[str| None, list[CompanyBranches]| None, list[ClientPersonalInformation]| None]:
     """
 
     :param user:
@@ -106,8 +146,7 @@ async def get_client_list(user: User) -> tuple[str, list[CompanyBranches], list[
     if not branch_id and company_branches:
         branch_id = company_branches[-1].branch_id
 
-    clients_list: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
-        branch_id=branch_id)
+    clients_list = await company_controller.get_branch_policy_holders(branch_id=branch_id)
     return branch_id, company_branches, clients_list
 
 
@@ -126,23 +165,12 @@ async def get_current_premiums_paged(user: User, page: int = 0, count: int = 25)
         return redirect(url_for('home.get_home'))
 
     branch_id, company_branches, clients_list = await get_client_list(user=user)
-    if not branch_id:
+    if (not branch_id) or (not company_branches):
         flash(message="Error retrieving premiums please try again later", category="danger")
         return redirect(url_for('admin.get_admin'))
 
     policy_data_list: list[PolicyRegistrationData] = await covers_controller.get_branch_policy_data_list(
         branch_id=branch_id, page=page, count=count)
-    client_policy_data = {}
-
-    # TODO use this structure instead to display results
-    for client in clients_list:
-        for policy in policy_data_list:
-            if client.policy_number == policy.policy_number:
-                client_policy_data[client.uid] = {
-                    "policy_number": client.policy_number,
-                    "client": client.dict(),
-                    "policy_data": policy.dict()
-                }
 
     context = dict(user=user, clients_list=clients_list, branch_id=branch_id,
                    company_branches=company_branches,
@@ -168,7 +196,7 @@ async def get_outstanding_premiums(user: User, page: int = 0, count: int = 25):
         return redirect(url_for('home.get_home'))
 
     branch_id, company_branches, clients_list = await get_client_list(user=user)
-    if not branch_id:
+    if (not branch_id) or (not company_branches):
         flash(message="Error retrieving premiums please try again later", category="danger")
         return redirect(url_for('admin.get_admin'))
 
@@ -360,6 +388,10 @@ async def receipt_reprint_receipt_number(user: User, receipt_number: str):
     :param user:
     :return:
     """
+    if not is_valid_ulid(value=receipt_number):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
     context = dict(user=user)
     receipt = await covers_controller.get_receipt_by_receipt_number(receipt_number=receipt_number)
     if not isinstance(receipt, PremiumReceipt):
@@ -396,6 +428,9 @@ async def last_receipt_reprint(user: User, premium_id: str):
     :param user:
     :return:
     """
+    if not is_valid_ulid(value=premium_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
 
     context = dict(user=user)
     receipt = await covers_controller.get_last_receipt_by_premium_number(premium_id=premium_id)

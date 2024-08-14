@@ -18,8 +18,8 @@
                         </div>
                         <div class="col-6 text-right">
                             <h5>Date Paid: {{ receipt.datetime_paid.strftime('%Y-%m-%d') }}</h5>
-                            <h5>Payment Method: {{ premium.payment_method }}</h5>
-                            <h5>Policy Holder: {{ selected_client.client_display_name }}</h5>
+                            <h5>Payment Method: {{ premium.payment_method|title }}</h5>
+                            <h5>Policy Holder: {{ selected_client.client_display_name|title }}</h5>
                         </div>
                     </div>
                     <hr>

@@ -82,7 +82,9 @@ class CoversController(Controllers):
     @error_handler
     async def add_premium_receipt(self, receipt: PremiumReceipt) -> PremiumReceipt:
         with self.get_session() as session:
-            session.add(PremiumReceiptORM(**receipt.dict()))
+            if not receipt:
+                return
+            session.add(PremiumReceiptORM(**receipt.dict(exclude={'premium'})))
             return receipt
 
     @error_handler

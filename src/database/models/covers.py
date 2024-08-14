@@ -13,7 +13,7 @@ def create_ulid() -> str:
     """
     Generate a ULID (Universally Unique Lexicographically Sortable Identifier).
     """
-    return str(ULID.from_datetime(datetime.now()))
+    return str(ULID.from_datetime(datetime.now()))[12:]
 
 
 class PaymentMethods(Enum):
@@ -224,7 +224,6 @@ class PremiumReceipt(BaseModel):
     @classmethod
     def from_premium(cls, premium: Premiums) -> 'PremiumReceipt':
         return cls(
-            premium=premium,
             premium_id=premium.premium_id,
             paid_amount=premium.amount_paid,
             policy_number=premium.policy_number

@@ -6,9 +6,9 @@
         <div class="col-12">
             <div class="card shadow-lg border-primary">
                 <div class="card-header text-center">
-                    <h1 class="card-title">{{ company.company_name }}</h1>
-                    <p class="card-subtitle">{{ company.company_slogan }}</p>
-                    <p>{{ company.company_description }}</p>
+                    <h1 class="card-title font-weight-bold">{{ company.company_name|title }}</h1>
+                    <p class="card-subtitle">{{ company.company_slogan|title }}</p>
+                    <p class="font-italic">{{ company.company_description|title }}</p>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -32,23 +32,29 @@
                         <tbody>
                             <tr>
                                 <td>Payment Amount</td>
-                                <td>{{ premium.payment_amount }}</td>
+                                <td>R {{ premium.payment_amount|number }}.00</td>
                             </tr>
                             <tr>
                                 <td>Amount Paid</td>
-                                <td>{{ receipt.paid_amount }}</td>
+                                <td>R {{ receipt.paid_amount|number }}.00</td>
                             </tr>
                             <tr>
                                 <td>Next Payment Date</td>
-                                <td>{{ premium.next_payment_date.strftime('%Y-%m-%d') }}</td>
+                                <td class="font-weight-bold text-warning">{{ premium.next_payment_date.strftime('%Y-%m-%d') }}</td>
                             </tr>
-                        </tbody>
-                        <tfoot>
                             <tr>
-                                <th>Total Paid</th>
-                                <th>{{ receipt.paid_amount }}</th>
+                                <td></td>
+                                <td></td>
                             </tr>
-                        </tfoot>
+                            <tr>
+                                <td class="font-weight-bold">Total Paid</td>
+                                <td class="font-weight-bold">R {{ receipt.paid_amount|number }}.00</td>
+                            </tr>
+
+
+                        </tbody>
+
+
                     </table>
                     <hr>
                     <p class="text-center">
@@ -60,7 +66,7 @@
                             <p>Phone: {{ company.phone }}</p>
                         </div>
                         <div class="col-6 text-right">
-                            <p>VAT Number: {{ company.vat_number }}</p>
+                            <p >VAT Number: {{ company.vat_number }}</p>
                             <p>Registration Number: {{ company.reg_ck }}</p>
                         </div>
                     </div>

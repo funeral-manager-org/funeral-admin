@@ -103,10 +103,10 @@
                     </div>
                 {% else %}
                     <div class="form-group">
-                        {% if selected_client %}
-                            <button type="submit" class="btn btn-block btn-outline-success btn-rounded btn-lg">
+                        {% if selected_client and premium %}
+                            <a href="{{ url_for('covers.last_receipt_reprint', premium_id=premium.premium_id) }}" class="btn btn-block btn-outline-success btn-rounded btn-lg">
                                 <i class="fa fa-print"></i> Reprint Receipt
-                            </button>
+                            </a>
                             <button type="submit" class="btn btn-block btn-outline-primary btn-rounded btn-lg">
                                 <i class="fa fa-send-o"></i> Resend Notifications
                             </button>

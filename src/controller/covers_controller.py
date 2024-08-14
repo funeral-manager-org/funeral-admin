@@ -253,3 +253,32 @@ class CoversController(Controllers):
         :return:
         """
         return await self.add_premium_receipt(receipt=PremiumReceipt.from_premium(premium=premium))
+
+    @error_handler
+    async def get_receipt_by_receipt_number(self, receipt_number: str) -> PremiumReceipt:
+        """
+
+        :param receipt_number:
+        :return:
+        """
+        with self.get_session() as session:
+            receipt_orm = (session.query(PremiumReceiptORM)
+                           .filter_by(receipt_number=receipt_number)
+                           .options(joinedload(PremiumReceiptORM.premium))
+                           .first())
+
+            return PremiumReceipt(**receipt_orm.to_dict(include_relationships=True)) if receipt_orm else None
+
+    @error_handler
+    async def get_last_receipt_by_premium_number(self, premium_id: str) -> PremiumReceipt:
+        """
+
+        :param premium_number:
+        :return:
+        """
+        with self.get_session() as session:
+            receipt_orm = (session.query(PremiumReceiptORM)
+                           .filter_by(premium_id=premium_id)
+                           .options(joinedload(PremiumReceiptORM.premium))
+                           .first())
+            return PremiumReceipt(**receipt_orm.to_dict(include_relationships=True)) if receipt_orm else None

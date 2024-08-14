@@ -3,10 +3,11 @@ from datetime import datetime
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
+from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentFrequency, \
-    PaymentStatus
-from src.authentication import login_required
+    PaymentStatus, PremiumReceipt
+from src.authentication import login_required, user_details
 from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company
 from src.database.models.users import User
 from src.main import company_controller, covers_controller
@@ -98,7 +99,7 @@ async def get_client_list(user: User) -> tuple[str, list[CompanyBranches], list[
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     if not company_branches:
         flash(message="please define your company branches", category="danger")
-        return redirect(url_for('admin.get_admin'))
+        return None, None, None
 
     # if this is not a post message then the request is being sent by menu links
     branch_id = request.form.get('branch_id', None)
@@ -121,6 +122,9 @@ async def get_current_premiums_paged(user: User, page: int = 0, count: int = 25)
     :return:
     """
     branch_id, company_branches, clients_list = await get_client_list(user=user)
+    if not branch_id:
+        flash(message="Error retrieving premiums please try again later", category="danger")
+        return redirect(url_for('admin.get_admin'))
 
     policy_data_list: list[PolicyRegistrationData] = await covers_controller.get_branch_policy_data_list(
         branch_id=branch_id, page=page, count=count)
@@ -156,6 +160,9 @@ async def get_outstanding_premiums(user: User, page: int = 0, count: int = 25):
     :return:
     """
     branch_id, company_branches, clients_list = await get_client_list(user=user)
+    if not branch_id:
+        flash(message="Error retrieving premiums please try again later", category="danger")
+        return redirect(url_for('admin.get_admin'))
 
     policy_data_list: list[PolicyRegistrationData] = await covers_controller.get_outstanding_branch_policy_data_list(
         branch_id=branch_id, page=page, count=count)
@@ -288,11 +295,14 @@ async def premiums_payments(user: User):
         else:
             flash(message="Select Client to Make / Check Payment", category="success")
 
+    if policy_data:
+        premium: Premiums = policy_data.get_this_month_premium()
+        context.update(premium=premium)
     # Process the premium payment if all required data is available
     if selected_client and policy_data and actual_amount > 0 and payment_method:
         # should rather allow the employee to choose the premium to make payment for
 
-        premium: Premiums = policy_data.get_this_month_premium()
+
 
         if premium and not premium.is_paid:
             premium.amount_paid = actual_amount
@@ -327,6 +337,7 @@ async def premiums_payments(user: User):
 
             return render_template('admin/premiums/receipt.html', **context)
 
+
         message: str = "Premium is already paid" if premium else ("There are not active premiums associated with "
                                                                   "this policy holder")
 
@@ -335,12 +346,74 @@ async def premiums_payments(user: User):
     return render_template('admin/premiums/pay.html', **context)
 
 
-@covers_route.get('/admin/premiums/receipt/<string:invoice_number>')
-@login_required
-async def receipt_reprint(user: User):
+@covers_route.get('/admin/premiums/receipt/<string:receipt_number>')
+@user_details
+async def receipt_reprint_receipt_number(user: User, receipt_number: str):
     """
 
     :param user:
     :return:
     """
-    pass
+    context = dict(user=user)
+    receipt = await covers_controller.get_receipt_by_receipt_number(receipt_number=receipt_number)
+    if not isinstance(receipt, PremiumReceipt):
+        flash(message="Receipt not found", category="danger")
+        return redirect(url_for('covers.get_quick_pay'))
+
+
+    policy_number = receipt.premium.policy_number
+    policy_data: PolicyRegistrationDataORM = await covers_controller.get_policy_data(policy_number=policy_number)
+    if not isinstance(policy_data, PolicyRegistrationData):
+        flash(message="Receipt not found", category="danger")
+        return redirect(url_for('covers.get_quick_pay'))
+
+
+    company_details = await company_controller.get_company_details(company_id=policy_data.company_id)
+
+    if not isinstance(company_details, Company):
+        flash(message="Receipt not found", category="danger")
+        return redirect(url_for('covers.get_quick_pay'))
+
+
+    context.update(company=company_details,  receipt=receipt, premium=receipt.premium, generated_on=datetime.now())
+
+    return render_template('admin/premiums/receipt.html', **context)
+
+
+@covers_route.get('/admin/premiums/last-receipt/<string:premium_id>')
+@user_details
+async def last_receipt_reprint(user: User, premium_id: str):
+    """
+
+    :param user:
+    :return:
+    """
+
+    context = dict(user=user)
+    receipt = await covers_controller.get_last_receipt_by_premium_number(premium_id=premium_id)
+
+    covers_logger.info(f'Receipt Ticket: {receipt}')
+
+    if not isinstance(receipt, PremiumReceipt):
+        flash(message="Receipt not found", category="danger")
+        return redirect(url_for('covers.get_quick_pay'))
+
+
+    policy_number = receipt.premium.policy_number
+    policy_data: PolicyRegistrationDataORM = await covers_controller.get_policy_data(policy_number=policy_number)
+    covers_logger.info(f"Policy Data: {policy_data}")
+    if not isinstance(policy_data, PolicyRegistrationData):
+        flash(message="Receipt not found", category="danger")
+        return redirect(url_for('covers.get_quick_pay'))
+
+
+    company_details = await company_controller.get_company_details(company_id=policy_data.company_id)
+    covers_logger.info(f"Company Details : {company_details}")
+    if not isinstance(company_details, Company):
+        flash(message="Receipt not found", category="danger")
+        return redirect(url_for('covers.get_quick_pay'))
+
+
+    context.update(company=company_details,  receipt=receipt, premium=receipt.premium, generated_on=datetime.now())
+
+    return render_template('admin/premiums/receipt.html', **context)

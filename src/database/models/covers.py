@@ -219,10 +219,12 @@ class PremiumReceipt(BaseModel):
     sms_notification_sent: bool = Field(default=False)
     email_notification_sent: bool = Field(default=False)
     whatsapp_notification_sent: bool = Field(default=False)
+    premium : Premiums | None
 
     @classmethod
     def from_premium(cls, premium: Premiums) -> 'PremiumReceipt':
         return cls(
+            premium=premium,
             premium_id=premium.premium_id,
             paid_amount=premium.amount_paid,
             policy_number=premium.policy_number

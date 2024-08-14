@@ -319,8 +319,8 @@ async def premiums_payments(user: User):
             # TODO Create payment Receipt - right now
             company_details: Company = await company_controller.get_company_details(company_id=user.company_id)
             if company_details:
-                invoice_created = await covers_controller.create_invoice_record(premium=paid_premium)
-                context.update(company=company_details)
+                receipt = await covers_controller.create_invoice_record(premium=paid_premium)
+                context.update(company=company_details,  receipt=receipt, premium=paid_premium, generated_on=datetime.now())
                 # TODO - create a better invoice title
                 title = f"{company_details.company_name} Invoice - Premium Payment"
                 context.update(title=title)

@@ -1,35 +1,75 @@
-
-
 {% include "layouts/invoice.html" %}
 
-
 {% block content %}
-    <div class="card shadow-lg border-primary">
-        <div class="card-header">
-            <h3 class="card-title">{{ title }}</h3>
-        </div>
-
-        <div class="card-body">
-            <table class="table table-bordered table-striped">
-                <thead>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-primary">
+                <div class="card-header text-center">
+                    <h1 class="card-title">{{ company.company_name }}</h1>
+                    <p class="card-subtitle">{{ company.company_slogan }}</p>
+                    <p>{{ company.company_description }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <h5>Policy Number: {{ receipt.policy_number }}</h5>
+                            <h5>Receipt Number: {{ receipt.receipt_number }}</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <h5>Date Paid: {{ receipt.datetime_paid.strftime('%Y-%m-%d') }}</h5>
+                            <h5>Payment Method: {{ premium.payment_method }}</h5>
+                        </div>
+                    </div>
+                    <hr>
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Payment Amount</td>
+                                <td>{{ premium.payment_amount }}</td>
+                            </tr>
+                            <tr>
+                                <td>Amount Paid</td>
+                                <td>{{ receipt.paid_amount }}</td>
+                            </tr>
+                            <tr>
+                                <td>Next Payment Date</td>
+                                <td>{{ premium.next_payment_date.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Total Paid</th>
+                                <th>{{ receipt.paid_amount }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <hr>
+                    <p class="text-center">
+                        Thank you for your payment!
+                    </p>
+                    <div class="row">
+                        <div class="col-6">
+                            <p>Email: {{ company.email }}</p>
+                            <p>Phone: {{ company.phone }}</p>
+                        </div>
+                        <div class="col-6 text-right">
+                            <p>VAT Number: {{ company.vat_number }}</p>
+                            <p>Registration Number: {{ company.reg_ck }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <small>Generated on {{ generated_on.strftime('%Y-%m-%d') }}</small>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 {% endblock %}

@@ -735,6 +735,19 @@ class CompanyController(Controllers):
             if isinstance(policy_holder_orm, ClientPersonalInformationORM):
                 return ClientPersonalInformation(**policy_holder_orm.to_dict())
             return None
+    async def get_policy_holder_by_policy_number(self, policy_number: str) -> ClientPersonalInformation| None:
+        """
+
+        :param policy_number:
+        :return:
+        """
+        with self.get_session() as session:
+            insured_party = InsuredParty.POLICY_HOLDER.value
+            policy_holder_orm = session.query(ClientPersonalInformationORM).filter_by(
+                policy_number=policy_number, insured_party=insured_party).first()
+            if isinstance(policy_holder_orm, ClientPersonalInformationORM):
+                return ClientPersonalInformation(**policy_holder_orm.to_dict())
+            return None
 
     @cached_ttl()
     @error_handler

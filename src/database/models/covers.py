@@ -83,6 +83,9 @@ class ClientPersonalInformation(BaseModel):
 
     bank_account_id: str | None
 
+    @property
+    def client_display_name(self):
+        return f"{self.full_names} {self.surname}"
 
 class ClaimStatus(Enum):
     REJECTED = "Rejected"

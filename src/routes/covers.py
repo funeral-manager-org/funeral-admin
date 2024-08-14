@@ -297,12 +297,10 @@ async def premiums_payments(user: User):
 
     if policy_data:
         premium: Premiums = policy_data.get_this_month_premium()
-        context.update(premium=premium)
+        context.update(premium=premium, policy_data=policy_data)
     # Process the premium payment if all required data is available
     if selected_client and policy_data and actual_amount > 0 and payment_method:
         # should rather allow the employee to choose the premium to make payment for
-
-
 
         if premium and not premium.is_paid:
             premium.amount_paid = actual_amount
@@ -367,6 +365,7 @@ async def receipt_reprint_receipt_number(user: User, receipt_number: str):
         flash(message="Receipt not found", category="danger")
         return redirect(url_for('covers.get_quick_pay'))
 
+    selected_client = await company_controller.get_policy_holder_by_policy_number(policy_number=policy_number)
 
     company_details = await company_controller.get_company_details(company_id=policy_data.company_id)
 
@@ -375,7 +374,8 @@ async def receipt_reprint_receipt_number(user: User, receipt_number: str):
         return redirect(url_for('covers.get_quick_pay'))
 
 
-    context.update(company=company_details,  receipt=receipt, premium=receipt.premium, generated_on=datetime.now())
+    context.update(company=company_details, policy_data=policy_data, selected_client=selected_client,  receipt=receipt,
+                   premium=receipt.premium, generated_on=datetime.now())
 
     return render_template('admin/premiums/receipt.html', **context)
 
@@ -406,6 +406,7 @@ async def last_receipt_reprint(user: User, premium_id: str):
         flash(message="Receipt not found", category="danger")
         return redirect(url_for('covers.get_quick_pay'))
 
+    selected_client = await company_controller.get_policy_holder_by_policy_number(policy_number=policy_number)
 
     company_details = await company_controller.get_company_details(company_id=policy_data.company_id)
     covers_logger.info(f"Company Details : {company_details}")
@@ -414,6 +415,7 @@ async def last_receipt_reprint(user: User, premium_id: str):
         return redirect(url_for('covers.get_quick_pay'))
 
 
-    context.update(company=company_details,  receipt=receipt, premium=receipt.premium, generated_on=datetime.now())
+    context.update(company=company_details,policy_data=policy_data, selected_client=selected_client, receipt=receipt,
+                   premium=receipt.premium, generated_on=datetime.now())
 
     return render_template('admin/premiums/receipt.html', **context)

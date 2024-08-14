@@ -13,12 +13,14 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6">
+                            <h5>Policy Type: {{ policy_data.policy_type|title }}</h5>
                             <h5>Policy Number: {{ receipt.policy_number }}</h5>
                             <h5>Receipt Number: {{ receipt.receipt_number }}</h5>
                         </div>
                         <div class="col-6 text-right">
                             <h5>Date Paid: {{ receipt.datetime_paid.strftime('%Y-%m-%d') }}</h5>
                             <h5>Payment Method: {{ premium.payment_method }}</h5>
+                            <h5>Policy Holder: {{ selected_client.client_display_name }}
                         </div>
                     </div>
                     <hr>

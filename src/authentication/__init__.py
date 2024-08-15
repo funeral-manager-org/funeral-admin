@@ -11,7 +11,7 @@ from src.main import system_cache
 cached_ttl = system_cache.cached_ttl
 auth_logger = init_logger('auth_logger')
 # Your route handlers go here
-@cached_ttl(ttl=60 * 30)
+
 async def get_user_details(uid: str) -> User:
     """Get the details for a user by their ID."""
 

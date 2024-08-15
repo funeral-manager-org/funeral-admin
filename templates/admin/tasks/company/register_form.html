@@ -11,48 +11,48 @@
         <div class="card-body m-t-4">
 
             <form
-                    {% if company_details %}
+                    {% if company_detail %}
                         action="{{ url_for('company.update_company_details') }}"
                     {% else %}
                         action="{{ url_for('company.do_register') }}"
                     {% endif %} method="POST">
                 {# Company ID Details  #}
-                {% if company_details %}
-                    <input type="hidden" id="company_id" name="company_id" value="{{ company_details.company_id }}" />
-                    <input type="hidden" id="admin_uid" name="admin_uid" value="{{ company_details.admin_uid }}" />
+                {% if company_detail %}
+                    <input type="hidden" id="company_id" name="company_id" value="{{ company_detail.company_id }}" />
+                    <input type="hidden" id="admin_uid" name="admin_uid" value="{{ company_detail.admin_uid }}" />
                 {% endif %}
                 <div class="form-group">
                     <label class="font-weight-bold text-info" for="reg_ck">Reg CK:<span class="font-weight-bold text-danger">*</span></label>
                     <input type="text" class="form-control" id="reg_ck" name="reg_ck"
-                           {% if company_details %}value="{{ company_details.reg_ck }}"{% endif %}
+                           {% if company_detail %}value="{{ company_detail.reg_ck }}"{% endif %}
                            required>
                 </div>
                 <div class="form-group">
                     <label class="font-weight-bold text-info" for="vat_number">Vat Number:</label>
 
                     <input type="text" class="form-control" id="vat_number" name="vat_number"
-                           {% if company_details %}value="{{ company_details.vat_number }}{% endif %}">
+                           {% if company_detail %}value="{{ company_detail.vat_number }}{% endif %}">
                 </div>
 
                 <div class="form-group">
                     <label class="font-weight-bold text-info" for="company_name">Company Name: <span class="font-weight-bold text-danger">*</span></label>
                     <input type="text" class="form-control" id="company_name" name="company_name"
-                           {% if company_details %}value="{{ company_details.company_name }}"{% endif %}
+                           {% if company_detail %}value="{{ company_detail.company_name }}"{% endif %}
                            required>
                 </div>
                 <div class="form-group">
                     <label class="font-weight-bold text-info" for="company_description">Company Description:<span class="font-weight-bold text-danger">*</span></label>
                 <div class="form-group">
                     <textarea id="company_description" name="company_description" class="form-control"
-                              rows="6" cols="12" required>{% if company_details %}{{ company_details.company_description }}{% endif %}</textarea>
+                              rows="6" cols="12" required>{% if company_detail %}{{ company_detail.company_description }}{% endif %}</textarea>
                 </div>
                 </div>
                 <div class="form-group">
                     <label class="font-weight-bold text-info" for="company_slogan">Company Slogan / Corporate Moto:<span class="font-weight-bold text-danger">*</span></label>
-                    <input type="text" class="form-control" id="company_slogan" name="company_slogan" {% if company_details %}value="{{ company_details.company_slogan }}"{% endif %}>
+                    <input type="text" class="form-control" id="company_slogan" name="company_slogan" {% if company_detail %}value="{{ company_detail.company_slogan }}"{% endif %}>
                 </div>
                 <button type="submit" class="btn btn-rounded btn-lg btn-outline-primary">
-                    {% if company_details %}
+                    {% if company_detail %}
                         <i class="fa fa-save"> </i>
                         Update
 

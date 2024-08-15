@@ -16,10 +16,12 @@ class PaymentMethod(Enum):
     BANK_TRANSFER = "bank_transfer"
 
 def is_valid_ulid(value: str):
-    # Valid ULID characters: 0-9, A-Z (excluding I, L, O, U)
-
-    ulid_regex = re.compile(r'^[0-9A-HJKMNP-TV-Z]{1,26}$')
+    ulid_regex = re.compile(r'^[0-9A-HJKMNP-TV-Z]{9,26}$')
     return ulid_regex.match(value)
+#
+# def is_valid_ulid(value: str) -> bool:
+#     ulid_regex = re.compile(r'^[0-9A-HJKMNP-TV-Z]{26}$')  # Fixed regex for ULID (26 characters)
+#     return bool(ulid_regex.match(value))
 
 def is_valid_ulid_strict(value):
     ulid_regex = re.compile(r'^[0-9A-HJKMNP-TV-Z]{26}$')
@@ -145,31 +147,20 @@ def create_id() -> str:
 
 
 def create_plan_number():
-    # Generate a random alphanumeric string of length 9
-    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=9))
-    # Convert all letters to uppercase
-    random_chars_uppercase = random_chars.upper()
-    return random_chars_uppercase
-
+    ulid = create_id()
+    return ulid[16:25]  # Extract a random part (9 characters)
 
 def create_claim_number():
-    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
-    random_chars_uppercase = random_chars.upper()
-    return random_chars_uppercase
-
+    ulid = create_id()
+    return ulid[10:22]  # Extract a random part (12 characters)
 
 def create_policy_number():
-    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
-    random_chars_uppercase = random_chars.upper()
-    return random_chars_uppercase
+    ulid = create_id()
+    return ulid[10:22]  # Extract a random part (12 characters)
 
-
-def create_employee_id():
-    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=9))
-    random_chars_uppercase = random_chars.upper()
-    return random_chars_uppercase
-
-
+def create_employee_id() -> str:
+    ulid = create_id()
+    return ulid[16:25]  # Extract a random part (9 characters)
 def string_today():
     return str(datetime.today().date())
 

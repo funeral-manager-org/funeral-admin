@@ -4,33 +4,35 @@ from typing import Optional, Union, TypeVar
 
 from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel, Field, EmailStr
+
+from src.database.constants import NAME_LEN
 from src.utils import create_id, string_today, create_plan_number, create_employee_id
 
 
 class Company(BaseModel):
-    company_id: str = Field(default_factory=create_id)
-    admin_uid: str
-    reg_ck: str
-    vat_number: str | None
-    company_name: str
-    company_description: str
-    company_slogan: str
-    date_registered: str = Field(default_factory=string_today)
-    total_users: int = Field(default=1)
-    total_clients: int = Field(default=0)
+    company_id: str = Field(default_factory=create_id, min_length=26, max_length=26)
+    admin_uid: str = Field(min_length=26, max_length=26)
+    reg_ck: str = Field(min_length=14,max_length=14)
+    vat_number: str | None = Field(min_length=10, max_length=16)
+    company_name: str = Field(min_length=4, max_length=NAME_LEN)
+    company_description: str = Field(min_length=4, max_length=255)
+    company_slogan: str = Field(min_length=4, max_length=255)
+    date_registered: str = Field(default_factory=string_today, min_length=10, max_length=19)
+    total_users: int =  Field(default=0, ge=0)
+    total_clients: int = Field(default=0, ge=0)
 
 
 class CompanyBranches(BaseModel):
     """
 
     """
-    branch_id: str = Field(default_factory=create_id)
-    company_id: str
-    branch_name: str
-    branch_description: str
-    date_registered: str = Field(default_factory=string_today)
-    total_clients: int = Field(default=0)
-    total_employees: int = Field(default=1)
+    branch_id: str = Field(default_factory=create_id, min_length=26, max_length=26)
+    company_id: str = Field(min_length=26, max_length=26)
+    branch_name: str =  Field(min_length=4, max_length=NAME_LEN)
+    branch_description: str = Field(min_length=4, max_length=255)
+    date_registered: str = Field(default_factory=string_today, min_length=10, max_length=16)
+    total_clients: int = Field(default=0, ge=0)
+    total_employees: int = Field(default=0, ge=0)
 
     address_id: str | None
     contact_id: str | None
@@ -42,8 +44,8 @@ class PlanTypes(BaseModel):
     """
         User defined model to allow managers to create their own plan types
     """
-    branch_id: str
-    company_id: str
+    branch_id: str = Field(min_length=26, max_length=26)
+    company_id: str = Field(min_length=26, max_length=26)
 
     plan_number: str
     plan_type: str
@@ -152,7 +154,7 @@ employee_roles = {
 
 
 class TimeRecord(BaseModel):
-    time_id: str = Field(default_factory=create_id)
+    time_id: str = Field(default_factory=create_id, min_length=26, max_length=26)
     attendance_id: str
     normal_minutes_per_session: int = Field(default=8 * 60)
     clock_in: datetime

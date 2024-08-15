@@ -52,8 +52,7 @@ async def get_covers(user: User):
 
     if not cover_details:
         covers_logger.warning(f"Cover details not found for company ID {user.company_id}")
-        flash('Cover details not found.', 'danger')
-        return redirect(url_for('company.get_admin'))
+        flash('Cover details not found. please create new covers for your company', 'success')
 
     # Create context and render template if data is valid
     context = dict(user=user, branches=company_branches, cover_details=cover_details)

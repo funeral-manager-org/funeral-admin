@@ -8,6 +8,7 @@ from src.database.models.covers import ClientPersonalInformation, PolicyRegistra
 from src.database.models.users import User
 from src.logger import init_logger
 from src.main import company_controller, covers_controller
+from src.utils import is_valid_ulid
 
 clients_route = Blueprint('clients', __name__)
 error_logger = init_logger('clients')
@@ -138,17 +139,28 @@ async def add_client(user: User):
         error_logger.error(str(e))
         flash(message="Unable to create or update client please provide all required details", category="danger")
         return redirect(url_for('clients.get_clients'))
+
     # when client was being registered the plan was selected
     plan_cover = await company_controller.get_plan_cover(
         company_id=user.company_id, plan_number=policy_holder.plan_number)
-    # new policy is being generated for the client
-    policy = PolicyRegistrationData(uid=policy_holder.uid,
-                                    branch_id=policy_holder.branch_id,
-                                    company_id=policy_holder.company_id,
-                                    plan_number=policy_holder.plan_number,
-                                    policy_type=plan_cover.plan_type,
-                                    total_premiums=plan_cover.premium_costs,
-                                    premiums=[])
+
+    if not plan_cover:
+        flash(message="Could not find the cover you just selected for the client", category="danger")
+        return redirect(url_for('clients.get_client', uid=policy_holder.uid))
+
+    try:
+        # new policy is being generated for the client
+        policy = PolicyRegistrationData(uid=policy_holder.uid,
+                                        branch_id=policy_holder.branch_id,
+                                        company_id=policy_holder.company_id,
+                                        plan_number=policy_holder.plan_number,
+                                        policy_type=plan_cover.plan_type,
+                                        total_premiums=plan_cover.premium_costs,
+                                        premiums=[])
+    except ValidationError as e:
+        error_logger.warning(str(e))
+        flash(message="Unable to register policy possibly because of missing data", category="danger")
+        return redirect(url_for('clients.get_clients'))
 
     # set policy number for the policyholder to the newly created policy
     policy_holder.policy_number = policy.policy_number
@@ -156,7 +168,11 @@ async def add_client(user: User):
     # adding the policyholder to the database
     policy_holder = await company_controller.add_policy_holder(policy_holder=policy_holder)
 
-    policy_ = await company_controller.add_policy_data(policy_data=policy)
+    policy_data_updated = await company_controller.add_policy_data(policy_data=policy)
+    if not policy_data_updated:
+        flash(message="Unable to update Policy Registration data this will lead to possible bad data", category="danger")
+        return redirect(url_for('clients.get_clients'))
+
     await covers_controller.create_forecasted_premiums(policy_number=policy_holder.policy_number)
 
     message = "Successfully created new client Please Remember to add family members"
@@ -178,12 +194,19 @@ async def edit_policy_details(user: User):
     try:
         policy_data = PolicyRegistrationData(**request.form, premiums=[])
         uid = policy_data.uid
+        if not is_valid_ulid(value=uid):
+            flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+            return redirect(url_for('home.get_home'))
+
     except ValidationError as e:
         error_logger.error(str(e))
         flash(message="there was an error trying to edit policy data", category="danger")
         return redirect(url_for("clients.get_clients"))
 
-    policy_ = await company_controller.add_policy_data(policy_data=policy_data)
+    policy_updated = await company_controller.add_policy_data(policy_data=policy_data)
+    if not policy_updated:
+        flash(message="Unable to update Policy Data", category="danger")
+        return redirect(url_for("clients.get_client", uid=uid))
 
     flash(message="Successfully updated Policy Data", category="success")
     return redirect(url_for("clients.get_client", uid=uid))
@@ -198,6 +221,10 @@ async def add_beneficiary_dependent(user: User, policy_number: str):
     :param user:
     :return:
     """
+    if not is_valid_ulid(value=policy_number):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('home.get_home'))
+
     try:
         policy_data = await company_controller.get_policy_with_policy_number(policy_number=policy_number)
         beneficiary_data = ClientPersonalInformation(**request.form)
@@ -222,6 +249,10 @@ async def add_bank_account(user: User, uid: str):
     :param user:
     :return:
     """
+    if not is_valid_ulid(value=uid):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('home.get_home'))
+
     try:
         client_bank_account = BankAccount(**request.form)
     except ValidationError as e:
@@ -230,7 +261,7 @@ async def add_bank_account(user: User, uid: str):
         return url_for('clients.get_client', uid=uid)
 
     stored_bank_account = await company_controller.add_bank_account(bank_account=client_bank_account)
-    if stored_bank_account:
+    if stored_bank_account and stored_bank_account.bank_account_id:
         client_personal_data = await company_controller.get_policy_holder(uid=uid)
         client_personal_data.bank_account_id = stored_bank_account.bank_account_id
         updated_client_data = await company_controller.add_policy_holder(policy_holder=client_personal_data)
@@ -251,6 +282,10 @@ async def add_address(user: User, uid: str):
     :param uid:
     :return:
     """
+    if not is_valid_ulid(value=uid):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('home.get_home'))
+
     try:
         client_address = Address(**request.form)
     except ValidationError as e:
@@ -259,7 +294,7 @@ async def add_address(user: User, uid: str):
         return url_for('clients.get_client', uid=uid)
 
     stored_address = await company_controller.add_update_address(address=client_address)
-    if stored_address.address_id:
+    if stored_address and stored_address.address_id:
         client_personal_data = await company_controller.get_policy_holder(uid=uid)
         client_personal_data.address_id = stored_address.address_id
         updated_client_data = await company_controller.add_policy_holder(policy_holder=client_personal_data)
@@ -280,6 +315,10 @@ async def add_postal_address(user: User, uid: str):
     :param uid:
     :return:
     """
+    if not is_valid_ulid(value=uid):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('home.get_home'))
+
     try:
         client_postal_address = PostalAddress(**request.form)
     except ValidationError as e:
@@ -288,7 +327,7 @@ async def add_postal_address(user: User, uid: str):
         return url_for('clients.get_client', uid=uid)
 
     stored_postal_address = await company_controller.add_postal_address(postal_address=client_postal_address)
-    if stored_postal_address.postal_id:
+    if stored_postal_address and stored_postal_address.postal_id:
         client_personal_data = await company_controller.get_policy_holder(uid=uid)
         client_personal_data.postal_id = stored_postal_address.postal_id
         updated_client_data = await company_controller.add_policy_holder(policy_holder=client_personal_data)
@@ -309,6 +348,10 @@ async def add_contacts(user: User, uid: str):
     :param uid:
     :return:
     """
+    if not is_valid_ulid(value=uid):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('home.get_home'))
+
     try:
         client_contacts = Contacts(**request.form)
     except ValidationError as e:
@@ -317,7 +360,7 @@ async def add_contacts(user: User, uid: str):
         return url_for('clients.get_client', uid=uid)
 
     stored_contacts = await company_controller.add_contacts(contact=client_contacts)
-    if stored_contacts.contact_id:
+    if stored_contacts and stored_contacts.contact_id:
         client_personal_data = await company_controller.get_policy_holder(uid=uid)
         client_personal_data.contact_id = stored_contacts.contact_id
         updated_client_data = await company_controller.add_policy_holder(policy_holder=client_personal_data)

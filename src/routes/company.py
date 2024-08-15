@@ -8,7 +8,7 @@ from src.authentication import login_required, admin_login
 from src.database.models.companies import Company, CompanyBranches, EmployeeDetails, Salary
 from src.database.models.users import User
 from src.main import company_controller, user_controller, encryptor, employee_controller
-from src.utils import create_id
+from src.utils import create_id, is_valid_ulid
 
 company_route = Blueprint('company', __name__)
 error_logger = init_logger('company_logger')
@@ -22,23 +22,25 @@ async def get_admin(user: User):
     :return:
     """
     context = dict(user=user)
-
     if user.company_id:
         company_data: Company = await company_controller.get_company_details(company_id=user.company_id)
         company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     else:
-        company_data = {}
+        company_data = None
         company_branches = []
-    context.update(company=company_data, company_branches=company_branches)
+
+    context.update(company_detail=company_data, company_branches=company_branches)
 
     if user.is_system_admin:
         return render_template('admin/managers/manager.html', **context)
     elif user.is_company_admin:
         return render_template('admin/managers/manager.html', **context)
-    elif user.can_access_employee_record:
-        return render_template('admin/employees/employee.html', **context)
-    elif user.is_client:
-        return render_template('admin/clients/clients.html', **context)
+    # elif user.can_access_employee_record:
+    #     #TODO there is no Employee Record Here Maybe this is not needed at all
+    #     return render_template('admin/employees/employee.html', **context)
+    # elif user.is_client:
+    #     #TODO Same here no client record - may should include claim data here
+    # return render_template('admin/clients/clients.html', **context)
 
     message = """If you want to register your funeral company please click on register company below
     If you are an employee of a funeral company that uses this system please inform your administrator so they can register you
@@ -90,6 +92,9 @@ async def update_company_administrator(user: User):
                                                                      uid=user.uid, company_id=user.company_id)
         else:
             admin_employee_detail: EmployeeDetails = EmployeeDetails(**request.form)
+            if user.company_id != admin_employee_detail.company_id:
+                flash(message="You are not Authorized to Edit this company Admin", category="danger")
+                return redirect(url_for('company.get_admin'))
 
     except ValidationError as e:
         error_logger.error(str(e))
@@ -136,24 +141,32 @@ async def get_register(user: User):
     context = dict(user=user)
     if user.company_id:
         company_details = await company_controller.get_company_details(company_id=user.company_id)
-        context.update(company_details=company_details)
+        context.update(company_detail=company_details)
     return render_template('admin/tasks/company/register.html', **context)
 
 
 @company_route.post('/admin/company/register')
 @login_required
 async def do_register(user: User):
+
     company_name = request.form.get('company_name')
     company_description = request.form.get('company_description')
     company_slogan = request.form.get('company_slogan')
     reg_ck = request.form.get('reg_ck')
     vat_number = request.form.get('vat_number')
 
-    company = Company(reg_ck=reg_ck, vat_number=vat_number,
-                      company_name=company_name,
-                      company_slogan=company_slogan,
-                      company_description=company_description,
-                      admin_uid=user.uid)
+    try:
+        company = Company(reg_ck=reg_ck, vat_number=vat_number,
+                          company_name=company_name,
+                          company_slogan=company_slogan,
+                          company_description=company_description,
+                          admin_uid=user.uid)
+
+    except ValidationError as e:
+        error_logger.warning(str(e))
+        message: str = "Unable to register company details please ensure to fill in all required details"
+        flash(message=message, category="danger")
+        return redirect(url_for('company.get_admin'))
 
     registered_company = await company_controller.register_company(company=company)
     if not registered_company:
@@ -214,7 +227,8 @@ async def add_company_branch(user: User):
     company_branch = request.form.get('branch_name')
     company_description = request.form.get('branch_description')
 
-    company_branch = CompanyBranches(company_id=user.company_id, branch_name=company_branch,
+    company_branch = CompanyBranches(company_id=user.company_id,
+                                     branch_name=company_branch,
                                      branch_description=company_description)
 
     added_branch = await company_controller.add_company_branch(company_branch=company_branch)
@@ -267,6 +281,10 @@ async def get_branch(user: User, branch_id: str):
     :param branch_id:
     :return:
     """
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     if not branch:
         flash(message="Error fetching branch", category="danger")
@@ -309,9 +327,17 @@ async def add_branch_address(user: User, branch_id: str):
     """
     try:
         branch_address: Address = Address(**request.form)
+        if not is_valid_ulid(value=branch_address.address_id):
+            flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+            return redirect(url_for('company.get_admin'))
+
     except ValidationError as e:
         flash(message="Error adding branch address please input all fields", category="danger")
         return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
 
     branch_address_ = await company_controller.add_update_address(address=branch_address)
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
@@ -341,6 +367,10 @@ async def add_postal_address(user: User, branch_id: str):
         flash(message="Error adding branch address please input all fields", category="danger")
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
     branch_postal_address_ = await company_controller.add_postal_address(postal_address=branch_postal_address)
 
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
@@ -367,9 +397,17 @@ async def add_update_branch_contacts(user: User, branch_id: str):
     try:
 
         branch_contacts = Contacts(**request.form)
+        if not is_valid_ulid(value=branch_contacts.contact_id):
+            flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+            return redirect(url_for('company.get_admin'))
+
     except ValidationError as e:
         flash(message="Please ensure to fill in all required fields", category="danger")
         return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
 
     branch_contacts_ = await company_controller.add_contacts(contact=branch_contacts)
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
@@ -396,9 +434,14 @@ async def add_bank_account(user: User, branch_id: str):
     """
     try:
         branch_bank_account = BankAccount(**request.form)
+
     except ValidationError as e:
         flash(message="Please fill in all required fields", category="danger")
         return redirect(url_for('company.get_branch', branch_id=branch_id))
+
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
 
     branch_bank_account_ = await company_controller.add_bank_account(bank_account=branch_bank_account)
 
@@ -421,6 +464,10 @@ async def add_employee(user: User, branch_id: str):
     :return:
     """
     try:
+        if not is_valid_ulid(value=branch_id):
+            flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+            return redirect(url_for('company.get_admin'))
+
         new_employee = EmployeeDetails(**request.form)
 
         # Employee is added to the company of the Company Admin and to the branch presently opened
@@ -432,6 +479,7 @@ async def add_employee(user: User, branch_id: str):
         error_logger.warning(str(e))
         flash(message="Please fill in all required employee details", category='danger')
         return redirect(url_for('company.get_branch', branch_id=branch_id))
+
 
     new_employee, employee_ = await company_controller.add_update_employee(employee=new_employee)
     if new_employee:
@@ -515,6 +563,14 @@ async def get_employee(user: User, branch_id: str, employee_id: str):
     :param branch_id:
     :return:
     """
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    if not is_valid_ulid(value=employee_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
     employee_detail: EmployeeDetails = await company_controller.get_employee(employee_id=employee_id)
     employee_roles: list[str] = await company_controller.get_employee_roles(company_id=user.company_id)
     if not employee_detail:
@@ -559,6 +615,14 @@ async def add_employee_address(user: User, branch_id: str, employee_id: str):
 
     :return:
     """
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    if not is_valid_ulid(value=employee_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
     try:
         address = Address(**request.form)
     except ValidationError as e:
@@ -604,6 +668,14 @@ async def add_employee_bank_account(user: User, branch_id: str, employee_id: str
     :param employee_id:
     :return:
     """
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    if not is_valid_ulid(value=employee_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
     try:
         bank_account = BankAccount(**request.form)
     except ValidationError as e:
@@ -651,6 +723,14 @@ async def add_employee_contacts(user: User, branch_id: str, employee_id: str):
     :param employee_id:
     :return:
     """
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    if not is_valid_ulid(value=employee_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
     try:
         contact = Contacts(**request.form)
     except ValidationError as e:
@@ -692,6 +772,14 @@ async def add_employee_postal_address(user: User, branch_id: str, employee_id: s
     :param employee_id:
     :return:
     """
+    if not is_valid_ulid(value=branch_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
+    if not is_valid_ulid(value=employee_id):
+        flash(message="Could not verify your request (Request Contains bad data)", category="danger")
+        return redirect(url_for('company.get_admin'))
+
     try:
         postal_address = PostalAddress(**request.form)
     except ValidationError as e:

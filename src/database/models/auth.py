@@ -3,6 +3,8 @@ from src.utils import create_id
 
 
 class Auth(BaseModel):
+
+
     email: str
     username: str | None
     password: str

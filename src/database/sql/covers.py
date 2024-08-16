@@ -8,6 +8,7 @@ from src.database.sql import Base, engine
 
 
 class ClientPersonalInformationORM(Base):
+    """client personal information"""
     __tablename__ = "client_personal_information"
     uid = Column(String(ID_LEN), primary_key=True, index=True)
     branch_id = Column(String(ID_LEN), index=True)

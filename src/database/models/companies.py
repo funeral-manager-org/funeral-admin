@@ -3,36 +3,35 @@ from datetime import datetime, date, timedelta
 from typing import Optional, Union, TypeVar
 
 from dateutil.relativedelta import relativedelta
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, conint, field_validator
 
 from src.database.constants import NAME_LEN
 from src.utils import create_id, string_today, create_plan_number, create_employee_id
-
-
+from src.database.models import ID_LEN, CK_LEN, MIN_NAME_LEN, MAX_CLIENTS,MAX_EMPLOYEES, MIN_SALARY, MAX_SALARY
 class Company(BaseModel):
-    company_id: str = Field(default_factory=create_id, min_length=26, max_length=26)
-    admin_uid: str = Field(min_length=26, max_length=26)
-    reg_ck: str = Field(min_length=14,max_length=14)
+    company_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
+    admin_uid: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    reg_ck: str = Field(min_length=CK_LEN, max_length=CK_LEN)
     vat_number: str | None = Field(default=None, min_length=10, max_length=16)
-    company_name: str = Field(min_length=4, max_length=NAME_LEN)
-    company_description: str = Field(min_length=4, max_length=255)
-    company_slogan: str = Field(min_length=4, max_length=255)
+    company_name: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
+    company_description: str = Field(min_length=MIN_NAME_LEN, max_length=255)
+    company_slogan: str = Field(min_length=MIN_NAME_LEN, max_length=255)
     date_registered: str = Field(default_factory=string_today, min_length=10, max_length=19)
-    total_users: int =  Field(default=0, ge=0)
-    total_clients: int = Field(default=0, ge=0)
+    total_users: conint(ge=0, le=MAX_EMPLOYEES) =  Field(default=0)
+    total_clients: conint(ge=0, le=MAX_CLIENTS) = Field(default=0)
 
 
 class CompanyBranches(BaseModel):
     """
 
     """
-    branch_id: str = Field(default_factory=create_id, min_length=26, max_length=26)
-    company_id: str = Field(min_length=26, max_length=26)
+    branch_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
+    company_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
     branch_name: str =  Field(min_length=4, max_length=NAME_LEN)
     branch_description: str = Field(min_length=4, max_length=255)
     date_registered: str = Field(default_factory=string_today, min_length=10, max_length=16)
-    total_clients: int = Field(default=0, ge=0)
-    total_employees: int = Field(default=0, ge=0)
+    total_clients: conint(ge=0, le=MAX_CLIENTS) = Field(default=0, ge=0)
+    total_employees: conint(ge=0, le=MAX_EMPLOYEES) = Field(default=0, ge=0)
 
     address_id: str | None = Field(default=None)
     contact_id: str | None = Field(default=None)
@@ -44,8 +43,8 @@ class PlanTypes(BaseModel):
     """
         User defined model to allow managers to create their own plan types
     """
-    branch_id: str = Field(min_length=26, max_length=26)
-    company_id: str = Field(min_length=26, max_length=26)
+    branch_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    company_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
 
     plan_number: str
     plan_type: str
@@ -71,17 +70,17 @@ class CoverPlanDetails(BaseModel):
     company_id: str | None = Field(default=None)
 
     plan_number: str = Field(default_factory=create_plan_number)
-    plan_name: str
-    plan_type: str
+    plan_name: str = Field(min_length=MIN_NAME_LEN, max_length=255)
+    plan_type: str = Field(min_length=MIN_NAME_LEN, max_length=255)
 
-    benefits: str
-    coverage_amount: int
-    premium_costs: int
-    additional_details: str
-    terms_and_conditions: str
-    inclusions: str
-    exclusions: str
-    contact_information: str
+    benefits: str = Field(min_length=MIN_NAME_LEN, max_length=255*5)
+    coverage_amount: conint(ge=0, le=5_000_000)
+    premium_costs: conint(ge=0, le=5_000_000)
+    additional_details: str = Field(min_length=MIN_NAME_LEN, max_length=255*5)
+    terms_and_conditions: str = Field(min_length=MIN_NAME_LEN, max_length=255*36)
+    inclusions: str = Field(min_length=MIN_NAME_LEN, max_length=255*5)
+    exclusions: str = Field(min_length=MIN_NAME_LEN, max_length=255*5)
+    contact_information: str = Field(min_length=MIN_NAME_LEN, max_length=16)
 
 
 ###########################################################################################
@@ -154,11 +153,27 @@ employee_roles = {
 
 
 class TimeRecord(BaseModel):
-    time_id: str = Field(default_factory=create_id, min_length=26, max_length=26)
-    attendance_id: str
-    normal_minutes_per_session: int = Field(default=8 * 60)
+    time_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
+    attendance_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    normal_minutes_per_session: conint(ge=480,le=1080) = Field(default=8 * 60)
     clock_in: datetime
     clock_out: datetime | None = Field(default=None)
+
+    @field_validator('clock_in')
+    def validate_clock_in(cls, v):
+        # Adjust the timedelta values as needed
+        min_allowed_date = datetime.now() - timedelta(days=7)  # 7 days in the past
+        max_allowed_date = datetime.now() + timedelta(days=1)  # One day in the future
+
+        if v < min_allowed_date or v > max_allowed_date:
+            raise ValueError('Clock in time must be within a reasonable range')
+        return v
+
+    @field_validator('clock_out')
+    def validate_clock_out(cls, v, values):
+        if v and v <= values['clock_in']:
+            raise ValueError('Clock out time must be after clock in time')
+        return v
 
     @property
     def normal_minutes_worked(self) -> int:
@@ -220,8 +235,8 @@ TypePaySlip = TypeVar("Payslip")
 TypeSalary = TypeVar("Salary")
 class AttendanceSummary(BaseModel):
     attendance_id: str = Field(default_factory=create_id)
-    employee_id: str
-    name: str
+    employee_id: str = Field(min_length=9, max_length=ID_LEN)
+    name: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
     records: list[TimeRecord] | None = Field(default=[])
     employee: TypeEMployeeDetails | None = Field(default=None)
     work_summary: TypeWorkSummary | None = Field(default=None)
@@ -318,17 +333,17 @@ class AttendanceSummary(BaseModel):
 
 
 class WorkSummary(BaseModel):
-    work_id: str = Field(default_factory=create_id)
-    attendance_id: str | None = Field(default=None)
-    payslip_id: str | None = Field(default=None)
-    employee_id: str
+    work_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
+    attendance_id: str | None = Field(default=None, min_length=ID_LEN, max_length=ID_LEN)
+    payslip_id: str | None = Field(default=None, min_length=ID_LEN, max_length=ID_LEN)
+    employee_id: str = Field(min_length=9, max_length=ID_LEN)
 
-    normal_sign_in_hour: int = Field(default=7)
-    normal_sign_off_hour: int = Field(default=17)
+    normal_sign_in_hour: conint(ge=0, le=23) = Field(default=7)
+    normal_sign_off_hour: conint(ge=10, le=23) = Field(default=17)
 
-    normal_minutes_per_week: int = Field(default=40 * 60)
+    normal_minutes_per_week: conint(ge=480, le=960) = Field(default=40 * 60)
 
-    normal_weeks_in_month: int = Field(default=4)
+    normal_weeks_in_month: conint(ge=4, le=5) = Field(default=4)
     normal_overtime_multiplier: float = Field(default=1.5)
     attendance: AttendanceSummary | None = Field(default=None)
     employee: TypeEMployeeDetails | None = Field(default=None)
@@ -472,17 +487,17 @@ class EmployeeDetails(BaseModel):
     company_id: str | None = Field(default=None)
     branch_id: str | None = Field(default=None)
 
-    full_names: str
-    last_name: str
-    id_number: str
+    full_names: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
+    last_name: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
+    id_number: str = Field(min_length=13, max_length=13)
     email: EmailStr
-    contact_number: str
-    position: str
-    role: str
-    date_of_birth: str
+    contact_number: str = Field(min_length=10, max_length=16)
+    position: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
+    role: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
+    date_of_birth: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
     date_joined: str = Field(default_factory=string_today)
-    salary: int
-    is_active: bool = True
+    salary: conint(ge=MIN_SALARY, le=MAX_SALARY)
+    is_active: bool = Field(default=True)
 
     address_id: str | None = Field(default=None)
     contact_id: str | None = Field(default=None)
@@ -499,11 +514,11 @@ class EmployeeDetails(BaseModel):
 
 class Salary(BaseModel):
     salary_id: str = Field(default_factory=create_id)
-    employee_id: str
-    company_id: str
-    branch_id: str
-    amount: int
-    pay_day: int
+    employee_id: str = Field(min_length=9, max_length=ID_LEN)
+    company_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    branch_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    amount: conint(ge=MIN_SALARY, le=MAX_SALARY)
+    pay_day: conint(ge=1, le=31)
 
     @property
     def effective_pay_date(self) -> date:
@@ -545,18 +560,26 @@ class Salary(BaseModel):
 
 
 class Deductions(BaseModel):
+    """cannot deduct more than 2500"""
     deduction_id: str = Field(default_factory=create_id)
-    payslip_id: str
-    amount_in_cents: int
-    reason: str
+    payslip_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    amount_in_cents: conint(ge=0, le=2_500_00)
+    reason: str = Field(min_length=12, max_length=255*10)
+
+    @property
+    def amount(self):
+        return int(self.amount_in_cents/100)
 
 
 class BonusPay(BaseModel):
     bonus_id: str = Field(default_factory=create_id)
-    payslip_id: str
-    amount_in_cents: int
-    reason: str
+    payslip_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    amount_in_cents: conint(ge=0, le=50_000_00)
+    reason: str = Field(min_length=12, max_length=255*10)
 
+    @property
+    def amount(self):
+        return int(self.amount_in_cents/100)
 
 def pay_period_start() -> date:
     return datetime.now().date().replace(day=1)
@@ -569,8 +592,8 @@ def pay_period_end() -> date:
 
 class Payslip(BaseModel):
     payslip_id: str = Field(default_factory=create_id)
-    employee_id: str
-    salary_id: str
+    employee_id: str = Field(min_length=9, max_length=ID_LEN)
+    salary_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
     pay_period_start: date = Field(default_factory=pay_period_start)
     pay_period_end: date = Field(default_factory=pay_period_end)
 
@@ -602,9 +625,9 @@ class Payslip(BaseModel):
 class WorkOrder(BaseModel):
     order_id: str = Field(default_factory=create_id)
 
-    job_title: str
-    description: str
-    assigned_roles: list[str]
+    job_title: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
+    description: str = Field(min_length=MIN_NAME_LEN, max_length=255)
+    assigned_roles: list[str] = Field(max_items=5)
 
     job_scheduled_start_time: datetime
     job_scheduled_time_completion: datetime
@@ -612,6 +635,26 @@ class WorkOrder(BaseModel):
     work_address_id: str
     contact_person_name: str
     contact_person_contact_id: str
+
+    @field_validator('job_scheduled_start_time')
+    def validate_start_time(cls, v):
+        min_allowed_start_time = datetime.now() + timedelta(hours=1)
+        if v < min_allowed_start_time:
+            raise ValueError("Job scheduled start time must be at least one hour in the future")
+        return v
+
+    @field_validator('job_scheduled_time_completion')
+    def validate_completion_time(cls, v, values):
+        if v <= values['job_scheduled_start_time']:
+            raise ValueError("Job scheduled completion time must be after start time")
+
+        # Add a check for minimum job duration here if needed
+        # For example:
+        min_job_duration = timedelta(hours=1)
+        if v - values['job_scheduled_start_time'] < min_job_duration:
+            raise ValueError("Job duration must be at least one hour")
+
+        return v
 
     @property
     def total_scheduled_work_minutes(self) -> int:

@@ -42,7 +42,7 @@ class User(BaseModel):
     is_client: bool = Field(default=False)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
     def __str__(self):
         return f"User(uid={self.uid}, branch_id={self.branch_id}, company_id={self.company_id}, username={self.username}, email={self.email})"

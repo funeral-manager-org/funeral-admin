@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel, Field
 from datetime import datetime
@@ -24,14 +25,14 @@ class RecipientTypes(Enum):
 class SMSCompose(BaseModel):
 
     message_id: str = Field(default_factory=create_id)
-    reference: str | None
+    reference: Optional[str] = Field(default=None)
     message: str
-    from_cell: str | None
-    to_cell: str | None
+    from_cell: Optional[str] = Field(default=None)
+    to_cell: Optional[str] = Field(default=None)
     to_branch: str
     recipient_type: str
     date_time_composed: str = Field(default_factory=date_time)
-    date_time_sent: str | None
+    date_time_sent: Optional[str] =  Field(default=None)
     is_delivered: bool = Field(default=False)
     client_responded: bool = Field(default=False)
 
@@ -40,10 +41,10 @@ class SMSInbox(BaseModel):
 
     message_id: str = Field(default_factory=create_id)
     to_branch: str
-    parent_reference: str | None
-    from_cell: str | None
+    parent_reference: Optional[str] = Field(default=None)
+    from_cell: Optional[str] = None
     is_response: bool = Field(default=True)
-    previous_history: str | None
+    previous_history: Optional[str] = Field(default=None)
     message: str
     date_time_received: str = Field(default_factory=date_time)
     is_read: bool = Field(default=False)
@@ -54,15 +55,15 @@ class EmailCompose(BaseModel):
         email compose
     """
     message_id: str = Field(default_factory=create_id)
-    reference: str | None
-    from_email: str | None
-    to_email: str | None
+    reference: Optional[str] = Field(default=None)
+    from_email: Optional[str] = Field(default=None)
+    to_email: Optional[str] = Field(default=None)
     subject: str
     message: str
-    to_branch: str | None
+    to_branch: Optional[str] = Field(default=None)
     recipient_type: str
     is_sent: bool = Field(default=False)
-    date_time_sent: str | None
+    date_time_sent: Optional[str] = Field(default=None)
 
 
 class SMSSettings(BaseModel):

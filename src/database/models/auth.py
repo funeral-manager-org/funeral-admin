@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from src.utils import create_id
 
 
@@ -10,7 +10,7 @@ class Auth(BaseModel):
     password: str
     remember: str | None
 
-    @validator('username')
+    @field_validator('username')
     def convert_to_lower(cls, value):
         return value.lower()
 

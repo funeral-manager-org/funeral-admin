@@ -9,7 +9,7 @@ class Notification(BaseModel):
     title: str
     message: str
     category: str
-    time_read: datetime | None
+    time_read: datetime | None = Field(default=None)
     is_read: bool
     time_created: datetime
 
@@ -42,7 +42,7 @@ class CreateNotification(BaseModel):
     title: str
     message: str
     category: str
-    time_read: datetime | None
+    time_read: datetime | None = Field(default=None)
     is_read: bool = Field(default=False)
     time_created: datetime = Field(default_factory=lambda: datetime.now())
 

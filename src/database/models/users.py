@@ -28,9 +28,9 @@ class User(BaseModel):
     - contact_number (str): The contact number of the user.
     """
     uid: str
-    branch_id: str | None
-    company_id: str | None
-    username: str | None
+    branch_id: str | None = Field(default=None)
+    company_id: str | None = Field(default=None)
+    username: str | None = Field(default=None)
     password_hash: str
     email: str
 
@@ -82,7 +82,7 @@ class User(BaseModel):
 
 class CreateUser(BaseModel):
     uid: str
-    username: str | None
+    username: str | None = Field(default=None)
     password: str
     email: str
     account_verified: bool = Field(default=False)
@@ -104,7 +104,7 @@ class CreateUser(BaseModel):
 
 class PasswordResetUser(BaseModel):
     uid: str
-    username: str | None
+    username: str | None = Field(default=None)
     password: str
     email: str
     account_verified: bool = Field(default=False)
@@ -126,7 +126,7 @@ class PasswordResetUser(BaseModel):
 
 class UserUpdate(BaseModel):
     uid: str
-    username: str | None
+    username: str | None = Field(default=None)
     email: str
     account_verified: bool = Field(default=False)
 

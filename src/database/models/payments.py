@@ -15,9 +15,9 @@ class Payment(BaseModel):
     Represents a payment transaction.
    """
     transaction_id: str = Field(default_factory=create_id)
-    subscription_id: str | None
-    package_id: str | None
-    invoice_number: int | None
+    subscription_id: str | None = Field(default=None)
+    package_id: str | None = Field(default=None)
+    invoice_number: int | None = Field(default=None)
     amount_paid: PositiveInt
     date_paid: date = Field(default_factory=create_date_paid)
     payment_method: str
@@ -55,10 +55,10 @@ class CreatePayment(BaseModel):
     invoice_number: int
     amount_paid: int
     date_paid: date = Field(default_factory=lambda: create_date_paid())
-    payment_method: str | None
+    payment_method: str | None = Field(default=None)
     is_successful: bool = Field(default=False)
-    month: int | None
-    comments: str | None
+    month: int | None = Field(default=None)
+    comments: str | None = Field(default=None)
 
 
 class UpdatePayment(BaseModel):

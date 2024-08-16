@@ -61,7 +61,7 @@ class Ticket(BaseModel):
 
     user_id: str
 
-    assigned_to: str | None
+    assigned_to: str | None = Field(default=None)
     ticket_type: str
     subject: str
 

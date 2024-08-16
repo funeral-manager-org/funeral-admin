@@ -173,8 +173,8 @@ class PaymentNoticeInterval(BaseModel):
         this keeps track of payment notices sent for each company and when they where sent
     """
     company_id: str
-    last_payment_notice_sent_date: date | None
-    last_expired_notice_sent_date: date | None
+    last_payment_notice_sent_date: date | None = Field(default=None)
+    last_expired_notice_sent_date: date | None = Field(default=None)
 
     def payment_notice_sent_within_three_days(self) -> bool:
         """Check if a payment notice was sent within the last three days."""

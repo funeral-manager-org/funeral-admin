@@ -19,7 +19,7 @@ class WalletTransaction(BaseModel):
     uid: str
     date: datetime = Field(default_factory=datetime.utcnow)
     transaction_type: str
-    target_wallet: str | None
+    target_wallet: str | None = Field(default=None)
     amount: PositiveInt
 
 

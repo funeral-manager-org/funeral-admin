@@ -6,9 +6,9 @@ class Auth(BaseModel):
 
 
     email: str
-    username: str | None
+    username: str | None = Field(default=None)
     password: str
-    remember: str | None
+    remember: str | None = Field(default=None)
 
     @field_validator('username')
     def convert_to_lower(cls, value):
@@ -17,7 +17,7 @@ class Auth(BaseModel):
 
 class RegisterUser(BaseModel):
     uid: str = Field(default_factory=create_id)
-    username: str | None
+    username: str | None = Field(default=None)
     email: str
     password: str
     terms: str

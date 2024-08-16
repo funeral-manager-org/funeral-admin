@@ -13,7 +13,7 @@ class Company(BaseModel):
     company_id: str = Field(default_factory=create_id, min_length=26, max_length=26)
     admin_uid: str = Field(min_length=26, max_length=26)
     reg_ck: str = Field(min_length=14,max_length=14)
-    vat_number: str | None = Field(min_length=10, max_length=16)
+    vat_number: str | None = Field(default=None, min_length=10, max_length=16)
     company_name: str = Field(min_length=4, max_length=NAME_LEN)
     company_description: str = Field(min_length=4, max_length=255)
     company_slogan: str = Field(min_length=4, max_length=255)
@@ -34,10 +34,10 @@ class CompanyBranches(BaseModel):
     total_clients: int = Field(default=0, ge=0)
     total_employees: int = Field(default=0, ge=0)
 
-    address_id: str | None
-    contact_id: str | None
-    postal_id: str | None
-    bank_account_id: str | None
+    address_id: str | None = Field(default=None)
+    contact_id: str | None = Field(default=None)
+    postal_id: str | None = Field(default=None)
+    bank_account_id: str | None = Field(default=None)
 
 
 class PlanTypes(BaseModel):
@@ -68,7 +68,7 @@ class CoverPlanDetails(BaseModel):
         exclusions (List[str]): List of exclusions from the plan.
         contact_information (str): Contact information for inquiries about the plan.
     """
-    company_id: str | None
+    company_id: str | None = Field(default=None)
 
     plan_number: str = Field(default_factory=create_plan_number)
     plan_name: str
@@ -158,7 +158,7 @@ class TimeRecord(BaseModel):
     attendance_id: str
     normal_minutes_per_session: int = Field(default=8 * 60)
     clock_in: datetime
-    clock_out: datetime | None
+    clock_out: datetime | None = Field(default=None)
 
     @property
     def normal_minutes_worked(self) -> int:
@@ -222,9 +222,9 @@ class AttendanceSummary(BaseModel):
     attendance_id: str = Field(default_factory=create_id)
     employee_id: str
     name: str
-    records: list[TimeRecord] | None
-    employee: TypeEMployeeDetails | None
-    work_summary: TypeWorkSummary | None
+    records: list[TimeRecord] | None = Field(default=[])
+    employee: TypeEMployeeDetails | None = Field(default=None)
+    work_summary: TypeWorkSummary | None = Field(default=None)
 
     def total_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
         """
@@ -319,8 +319,8 @@ class AttendanceSummary(BaseModel):
 
 class WorkSummary(BaseModel):
     work_id: str = Field(default_factory=create_id)
-    attendance_id: str | None
-    payslip_id: str | None
+    attendance_id: str | None = Field(default=None)
+    payslip_id: str | None = Field(default=None)
     employee_id: str
 
     normal_sign_in_hour: int = Field(default=7)
@@ -330,10 +330,10 @@ class WorkSummary(BaseModel):
 
     normal_weeks_in_month: int = Field(default=4)
     normal_overtime_multiplier: float = Field(default=1.5)
-    attendance: AttendanceSummary | None
-    employee: TypeEMployeeDetails | None
-    payslip: TypePaySlip | None
-    salary: TypeSalary | None
+    attendance: AttendanceSummary | None = Field(default=None)
+    employee: TypeEMployeeDetails | None = Field(default=None)
+    payslip: TypePaySlip | None = Field(default=None)
+    salary: TypeSalary | None = Field(default=None)
 
     @property
     def period_start(self):
@@ -468,9 +468,9 @@ class EmployeeDetails(BaseModel):
 
     employee_id: str = Field(default_factory=create_employee_id)
 
-    uid: str | None
-    company_id: str | None
-    branch_id: str | None
+    uid: str | None = Field(default=None)
+    company_id: str | None = Field(default=None)
+    branch_id: str | None = Field(default=None)
 
     full_names: str
     last_name: str
@@ -484,12 +484,12 @@ class EmployeeDetails(BaseModel):
     salary: int
     is_active: bool = True
 
-    address_id: str | None
-    contact_id: str | None
-    postal_id: str | None
-    bank_account_id: str | None
-    attendance_register: AttendanceSummary | None
-    work_summary: WorkSummary | None
+    address_id: str | None = Field(default=None)
+    contact_id: str | None = Field(default=None)
+    postal_id: str | None = Field(default=None)
+    bank_account_id: str | None = Field(default=None)
+    attendance_register: AttendanceSummary | None = Field(default=None)
+    work_summary: WorkSummary | None = Field(default=None)
     payslip: list["Payslip"] = Field(default_factory=list)
 
     @property
@@ -574,12 +574,12 @@ class Payslip(BaseModel):
     pay_period_start: date = Field(default_factory=pay_period_start)
     pay_period_end: date = Field(default_factory=pay_period_end)
 
-    employee: EmployeeDetails | None
-    salary: Salary | None
+    employee: EmployeeDetails | None = Field(default=None)
+    salary: Salary | None = Field(default=None)
 
-    applied_deductions: list[Deductions] | None
-    bonus_pay: list[BonusPay] | None
-    work_sheets: WorkSummary | None
+    applied_deductions: list[Deductions] | None = Field(default=[])
+    bonus_pay: list[BonusPay] | None = Field(default=[])
+    work_sheets: WorkSummary | None = Field(default=None)
 
     @property
     def month_of(self):

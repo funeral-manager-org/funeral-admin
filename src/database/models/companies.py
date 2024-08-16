@@ -7,7 +7,9 @@ from pydantic import BaseModel, Field, EmailStr, conint, field_validator
 
 from src.database.constants import NAME_LEN
 from src.utils import create_id, string_today, create_plan_number, create_employee_id
-from src.database.models import ID_LEN, CK_LEN, MIN_NAME_LEN, MAX_CLIENTS,MAX_EMPLOYEES, MIN_SALARY, MAX_SALARY
+from src.database.models import ID_LEN, CK_LEN, MIN_NAME_LEN, MAX_CLIENTS, MAX_EMPLOYEES, MIN_SALARY, MAX_SALARY
+
+
 class Company(BaseModel):
     company_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
     admin_uid: str = Field(min_length=ID_LEN, max_length=ID_LEN)
@@ -17,7 +19,7 @@ class Company(BaseModel):
     company_description: str = Field(min_length=MIN_NAME_LEN, max_length=255)
     company_slogan: str = Field(min_length=MIN_NAME_LEN, max_length=255)
     date_registered: str = Field(default_factory=string_today, min_length=10, max_length=19)
-    total_users: conint(ge=0, le=MAX_EMPLOYEES) =  Field(default=0)
+    total_users: conint(ge=0, le=MAX_EMPLOYEES) = Field(default=0)
     total_clients: conint(ge=0, le=MAX_CLIENTS) = Field(default=0)
 
 
@@ -27,7 +29,7 @@ class CompanyBranches(BaseModel):
     """
     branch_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
     company_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
-    branch_name: str =  Field(min_length=4, max_length=NAME_LEN)
+    branch_name: str = Field(min_length=4, max_length=NAME_LEN)
     branch_description: str = Field(min_length=4, max_length=255)
     date_registered: str = Field(default_factory=string_today, min_length=10, max_length=16)
     total_clients: conint(ge=0, le=MAX_CLIENTS) = Field(default=0, ge=0)
@@ -73,13 +75,13 @@ class CoverPlanDetails(BaseModel):
     plan_name: str = Field(min_length=MIN_NAME_LEN, max_length=255)
     plan_type: str = Field(min_length=MIN_NAME_LEN, max_length=255)
 
-    benefits: str = Field(min_length=MIN_NAME_LEN, max_length=255*5)
+    benefits: str = Field(min_length=MIN_NAME_LEN, max_length=255 * 5)
     coverage_amount: conint(ge=0, le=5_000_000)
     premium_costs: conint(ge=0, le=5_000_000)
-    additional_details: str = Field(min_length=MIN_NAME_LEN, max_length=255*5)
-    terms_and_conditions: str = Field(min_length=MIN_NAME_LEN, max_length=255*36)
-    inclusions: str = Field(min_length=MIN_NAME_LEN, max_length=255*5)
-    exclusions: str = Field(min_length=MIN_NAME_LEN, max_length=255*5)
+    additional_details: str = Field(min_length=MIN_NAME_LEN, max_length=255 * 5)
+    terms_and_conditions: str = Field(min_length=MIN_NAME_LEN, max_length=255 * 36)
+    inclusions: str = Field(min_length=MIN_NAME_LEN, max_length=255 * 5)
+    exclusions: str = Field(min_length=MIN_NAME_LEN, max_length=255 * 5)
     contact_information: str = Field(min_length=MIN_NAME_LEN, max_length=16)
 
 
@@ -152,10 +154,11 @@ employee_roles = {
 }
 
 
+# noinspection PyMethodParameters
 class TimeRecord(BaseModel):
     time_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
     attendance_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
-    normal_minutes_per_session: conint(ge=480,le=1080) = Field(default=8 * 60)
+    normal_minutes_per_session: conint(ge=480, le=1080) = Field(default=8 * 60)
     clock_in: datetime
     clock_out: datetime | None = Field(default=None)
 
@@ -229,21 +232,19 @@ class TimeRecord(BaseModel):
         date_worked = self.clock_out.strftime("%d %B %Y")
         return f"{day_of_week}, {date_worked}"
 
-TypeEMployeeDetails = TypeVar('EmployeeDetails')
-TypeWorkSummary = TypeVar('WorkSummary')
-TypePaySlip = TypeVar("Payslip")
-TypeSalary = TypeVar("Salary")
+
 class AttendanceSummary(BaseModel):
     attendance_id: str = Field(default_factory=create_id)
     employee_id: str = Field(min_length=9, max_length=ID_LEN)
     name: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
     records: list[TimeRecord] | None = Field(default=[])
-    employee: TypeEMployeeDetails | None = Field(default=None)
-    work_summary: TypeWorkSummary | None = Field(default=None)
+    employee: Optional["EmployeeDetails"] = Field(default=None)
+    work_summary: Optional["WorkSummary"] = Field(default=None)
 
     def total_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
         """
-        Calculates the total minutes worked by summing up the minutes worked from all records within the specified date range.
+        Calculates the total minutes worked by summing up the minutes worked from all records within the
+        specified date range.
 
         Args:
             from_date (Optional[date]): The start date for the range. Defaults to None.
@@ -261,7 +262,8 @@ class AttendanceSummary(BaseModel):
 
     def normal_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
         """
-        Calculates the total minutes worked by summing up the minutes worked from all records within the specified date range.
+        Calculates the total minutes worked by summing up the minutes worked from all
+        records within the specified date range.
 
         Args:
             from_date (Optional[date]): The start date for the range. Defaults to None.
@@ -279,7 +281,8 @@ class AttendanceSummary(BaseModel):
 
     def overtime_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
         """
-        Calculates the total minutes worked by summing up the minutes worked from all records within the specified date range.
+        Calculates the total minutes worked by summing up the minutes worked
+        from all records within the specified  date range.
 
         Args:
             from_date (Optional[date]): The start date for the range. Defaults to None.
@@ -345,10 +348,10 @@ class WorkSummary(BaseModel):
 
     normal_weeks_in_month: conint(ge=4, le=5) = Field(default=4)
     normal_overtime_multiplier: float = Field(default=1.5)
-    attendance: AttendanceSummary | None = Field(default=None)
-    employee: TypeEMployeeDetails | None = Field(default=None)
-    payslip: TypePaySlip | None = Field(default=None)
-    salary: TypeSalary | None = Field(default=None)
+    attendance: Optional[AttendanceSummary] = Field(default=None)
+    employee: Optional["EmployeeDetails"] = Field(default=None)
+    payslip: Optional["Payslip"] = Field(default=None)
+    salary: Optional["Salary"] = Field(default=None)
 
     @property
     def period_start(self):
@@ -404,7 +407,8 @@ class WorkSummary(BaseModel):
         **overtime_worked_minutes**
             Calculates the total overtime minutes worked for the employee within the specified period.
 
-        Note Overtime will not be paid if total minutes worked is less than normal time expected to be worked in the month
+        Note Overtime will not be paid if total minutes worked is less than normal time expected to
+        be worked in the month
 
         Returns:
             int: Total overtime minutes worked.
@@ -564,22 +568,23 @@ class Deductions(BaseModel):
     deduction_id: str = Field(default_factory=create_id)
     payslip_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
     amount_in_cents: conint(ge=0, le=2_500_00)
-    reason: str = Field(min_length=12, max_length=255*10)
+    reason: str = Field(min_length=12, max_length=255 * 10)
 
     @property
     def amount(self):
-        return int(self.amount_in_cents/100)
+        return int(self.amount_in_cents / 100)
 
 
 class BonusPay(BaseModel):
     bonus_id: str = Field(default_factory=create_id)
     payslip_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
     amount_in_cents: conint(ge=0, le=50_000_00)
-    reason: str = Field(min_length=12, max_length=255*10)
+    reason: str = Field(min_length=12, max_length=255 * 10)
 
     @property
     def amount(self):
-        return int(self.amount_in_cents/100)
+        return int(self.amount_in_cents / 100)
+
 
 def pay_period_start() -> date:
     return datetime.now().date().replace(day=1)
@@ -587,7 +592,6 @@ def pay_period_start() -> date:
 
 def pay_period_end() -> date:
     return datetime.now().date().replace(day=1) + relativedelta(months=1) - relativedelta(days=1)
-
 
 
 class Payslip(BaseModel):
@@ -619,9 +623,10 @@ class Payslip(BaseModel):
 
     @property
     def net_salary(self) -> int:
-        return int(self.work_sheets.net_salary_cents/100)
+        return int(self.work_sheets.net_salary_cents / 100)
 
 
+# noinspection PyMethodParameters
 class WorkOrder(BaseModel):
     order_id: str = Field(default_factory=create_id)
 

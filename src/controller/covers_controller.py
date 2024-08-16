@@ -80,7 +80,7 @@ class CoversController(Controllers):
             premium_orm.payment_status = status
 
     @error_handler
-    async def add_premium_receipt(self, receipt: PremiumReceipt) -> PremiumReceipt:
+    async def add_premium_receipt(self, receipt: PremiumReceipt) -> PremiumReceipt | None:
         with self.get_session() as session:
             if not receipt:
                 return

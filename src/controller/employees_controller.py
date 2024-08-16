@@ -232,7 +232,7 @@ class EmployeesController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            salary_orm = session.query(SalaryORM).filter_by(employee_id=salary.employee_id).first()
+            salary_orm: SalaryORM = session.query(SalaryORM).filter_by(employee_id=salary.employee_id).first()
             if isinstance(salary_orm, SalaryORM):
                 salary_orm.salary_id = salary.salary_id
                 salary.company_id = salary.company_id

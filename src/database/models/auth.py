@@ -4,7 +4,6 @@ from src.utils import create_id
 
 class Auth(BaseModel):
 
-
     email: str
     username: str | None = Field(default=None)
     password: str

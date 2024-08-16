@@ -23,7 +23,7 @@ async def get_admin(user: User):
     """
     context = dict(user=user)
     if user.company_id:
-        company_data: Company = await company_controller.get_company_details(company_id=user.company_id)
+        company_data: Company | None = await company_controller.get_company_details(company_id=user.company_id)
         company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     else:
         company_data = None
@@ -34,20 +34,16 @@ async def get_admin(user: User):
     if user.is_system_admin:
         return render_template('admin/managers/manager.html', **context)
     elif user.is_company_admin:
-        return render_template('admin/managers/manager.html', **context)
-    # elif user.can_access_employee_record:
-    #     #TODO there is no Employee Record Here Maybe this is not needed at all
-    #     return render_template('admin/employees/employee.html', **context)
-    # elif user.is_client:
-    #     #TODO Same here no client record - may should include claim data here
-    # return render_template('admin/clients/clients.html', **context)
-
-    message = """If you want to register your funeral company please click on register company below
-    If you are an employee of a funeral company that uses this system please inform your administrator so they can register you
-    on their company"""
+        message = f"""Welcome back to : {company_data.company_name} Admin Section"""
+    elif user.is_employee:
+        message = f"""Welcome to : {company_data.company_name} Admin Section"""
+    else:
+        message = f"""Welcome to funeral admin - please register your new company to get start - 
+        however if your company is already registered by your employer or adminstrator please tell them 
+        to add you as an employee first open your email for your login details 
+        """
 
     flash(message=message, category='success')
-
     return render_template('admin/managers/manager.html', **context)
 
 

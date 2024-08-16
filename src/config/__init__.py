@@ -1,13 +1,9 @@
 import socket
-
 from pydantic_settings import BaseSettings
 from pydantic import Field, ValidationError
-
 from dotenv import load_dotenv
-settings_file = load_dotenv(".env.development")
 import os
-print(type(settings_file))
-print(os.environ.get('RESEND_API_KEY'))
+load_dotenv(".env.development")
 
 class CloudFlareSettings(BaseSettings):
     EMAIL: str = Field(default=os.environ.get("CLOUDFLARE_EMAIL"))
@@ -101,7 +97,6 @@ def config_instance() -> Settings:
     :return:
     """
     try:
-
         return Settings()
     except ValidationError as e:
         print(str(e))

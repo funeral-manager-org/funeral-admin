@@ -545,14 +545,14 @@ class Salary(BaseModel):
 
 
 class Deductions(BaseModel):
-    deduction_id: str
+    deduction_id: str = Field(default_factory=create_id)
     payslip_id: str
     amount_in_cents: int
     reason: str
 
 
 class BonusPay(BaseModel):
-    bonus_id: str
+    bonus_id: str = Field(default_factory=create_id)
     payslip_id: str
     amount_in_cents: int
     reason: str

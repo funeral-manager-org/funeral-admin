@@ -18,8 +18,8 @@ class BankAccount(BaseModel):
     """
     bank_account_id: str = Field(default_factory=create_id, min_length=26, max_length=26)
 
-    account_holder: str = Field(...,min_length=2, max_length=NAME_LEN, description="The name associated with the account")
-    account_number: str = Field(...,min_length=6, max_length=NAME_LEN, description="The unique identification number assigned to the account")
-    bank_name: str = Field(...,min_length=3, max_length=NAME_LEN, description="The name of the bank where the account is held")
-    branch: str = Field(...,min_length=2, max_length=NAME_LEN, description="The specific branch of the bank where the account is held")
-    account_type: str = Field(..., min_length=4, max_length=NAME_LEN, description="The type of account, such as checking or savings")
+    account_holder: str = Field(min_length=2, max_length=NAME_LEN, description="The name associated with the account")
+    account_number: str = Field(min_length=6, max_length=NAME_LEN, description="The unique identification number assigned to the account")
+    bank_name: str = Field(min_length=3, max_length=NAME_LEN, description="The name of the bank where the account is held")
+    branch: str = Field(min_length=2, max_length=NAME_LEN, description="The specific branch of the bank where the account is held")
+    account_type: str = Field(min_length=4, max_length=NAME_LEN, description="The type of account, such as checking or savings")

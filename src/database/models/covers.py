@@ -72,16 +72,16 @@ class ClientPersonalInformation(BaseModel):
     date_of_birth: str
     nationality: str
 
-    insured_party: str | None
-    relation_to_policy_holder: str | None
-    plan_number: str | None
-    policy_number: str | None
+    insured_party: str | None = Field(default=None)
+    relation_to_policy_holder: str | None = Field(default=None)
+    plan_number: str | None = Field(default=None)
+    policy_number: str | None = Field(default=None)
 
-    address_id: str | None
-    contact_id: str | None
-    postal_id: str | None
+    address_id: str | None = Field(default=None)
+    contact_id: str | None = Field(default=None)
+    postal_id: str | None = Field(default=None)
 
-    bank_account_id: str | None
+    bank_account_id: str | None = Field(default=None)
 
     @property
     def client_display_name(self):
@@ -105,7 +105,7 @@ class Claims(BaseModel):
 
     claim_amount: int
     claim_total_paid: int
-    claimed_for_uid: str | None
+    claimed_for_uid: str | None = Field(default=None)
     date_paid: str
     claim_status: ClaimStatus
 
@@ -222,7 +222,7 @@ class PremiumReceipt(BaseModel):
     sms_notification_sent: bool = Field(default=False)
     email_notification_sent: bool = Field(default=False)
     whatsapp_notification_sent: bool = Field(default=False)
-    premium : Premiums | None
+    premium : Premiums | None = Field(default=None)
 
     @classmethod
     def from_premium(cls, premium: Premiums) -> 'PremiumReceipt':
@@ -245,15 +245,15 @@ class PolicyRegistrationData(BaseModel):
     total_family_members: int = Field(default=0)
     total_premiums: int
     payment_code_reference: str = Field(default_factory=create_policy_number)
-    date_activated: str | None
-    first_premium_date: str | None
-    payment_day: int | None
-    client_signature: str | None
-    employee_signature: str | None
+    date_activated: str | None = Field(default=None)
+    first_premium_date: str | None = Field(default=None)
+    payment_day: int | None = Field(default=None)
+    client_signature: str | None = Field(default=None)
+    employee_signature: str | None = Field(default=None)
 
-    payment_method: str | None
+    payment_method: str | None = Field(default=None)
     policy_active: bool = Field(default=False)
-    premiums: list[Premiums]
+    premiums: list[Premiums] = Field(default=[])
 
     @property
     def sorted_premiums(self) -> list[Premiums]:

@@ -27,11 +27,11 @@ class Address(BaseModel):
 class Contacts(BaseModel):
     contact_id: str = Field(default_factory=create_id)
     cell: str
-    tel: str | None
+    tel: str | None = Field(default=None)
     email: str
-    facebook: str | None
-    twitter: str | None
-    whatsapp: str | None
+    facebook: str | None = Field(default=None)
+    twitter: str | None = Field(default=None)
+    whatsapp: str | None = Field(default=None)
 
 
 class PostalAddress(BaseModel):

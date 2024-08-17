@@ -157,7 +157,6 @@ class SMSService(Controllers):
 
     # noinspection PyMethodOverriding
     def init_app(self, app: Flask, settings: Settings):
-
         super().init_app(app=app)
         self.sms_service_api = Client(settings.TWILIO.TWILIO_SID, settings.TWILIO.TWILIO_TOKEN)
         self.twilio_number = settings.TWILIO.TWILIO_NUMBER
@@ -176,12 +175,16 @@ class SMSService(Controllers):
         :return:
         """
         # TODO Complete the API Implementation to fetch incoming SMS Messages Here
-        if self.sms_service_api:
+        if self.sms_service_api or self.vonage_api:
             # Use the References to match incoming messages to previously sent messages in order to identify responses
-            for branch_id, references in self.sent_references:
-                for message_sent_reference in references:
+            for branch_id in self.sent_references.keys():
+                for message_reference in self.sent_references[branch_id]:
                     # save each reference used when constructing the inboxMessage
-                    pass
+                    # https://funeral-manager.org/api/v1/vonage/sms-status
+                    #TODO-  should check vonage of twilio if a message was delivered
+                    self.logger.info(f"Sent Message ID : {message_reference}")
+                    if self.can_use_vonage:
+                        pass
 
         return []
     async def send_with_vonage(self, composed_sms: SMSCompose) -> str:
@@ -195,6 +198,18 @@ class SMSService(Controllers):
 
         self.logger.info(f"VONAGE RESPONSE : {response}")
         return response.get('message_uuid')
+    async def send_with_twilio(self, composed_sms: SMSCompose) -> str:
+        """
+            **send_with_twilio**
+            will use twilio APi to send messages to end users
+        :param composed_sms:
+        :return:
+        """
+        return self.sms_service_api.messages.create(
+            to=composed_sms.to_cell,
+            from_=self.twilio_number,
+            body=composed_sms.message
+        )
 
     async def send_sms(self, composed_sms: SMSCompose):
         """
@@ -204,20 +219,21 @@ class SMSService(Controllers):
         """
         # Code to send SMS via SMS service API
         self.logger.info(f"Sending SMS to {composed_sms.to_cell} with message: {composed_sms.message}")
+
         if self.vonage_api and self.can_use_vonage:
             sent_reference = await self.send_with_vonage(composed_sms=composed_sms)
-            sent_references = self.sent_references.get(composed_sms.to_branch, [])
-            sent_references.append(sent_reference)
-            self.sent_references[composed_sms.to_branch] = sent_references
+            if composed_sms.to_branch not in self.sent_references:
+                self.sent_references[composed_sms.to_branch] = []
 
-        if self.sms_service_api and self.can_use_twilio:
+            self.sent_references[composed_sms.to_branch].append(sent_reference)
+            # sent_references = self.sent_references.get(composed_sms.to_branch, [])
+            # sent_references.append(sent_reference)
+            self.logger.info(f"Sent References Initial Structure : {self.sent_references}")
+
+        elif self.sms_service_api and self.can_use_twilio:
             # API is initialized do send message
             # Sending SMS with Twilio
-            sent_reference = self.sms_service_api.messages.create(
-                to=composed_sms.to_cell,
-                from_=self.twilio_number,
-                body=composed_sms.message
-            )
+            sent_reference = await self.send_with_twilio(composed_sms=composed_sms)
             self.logger.info(f"SID : {sent_reference}")
             composed_sms.reference = sent_reference
             sent_references = self.sent_references.get(composed_sms.to_branch, [])
@@ -247,11 +263,9 @@ class SMSService(Controllers):
         :return:
         """
         # Code to receive SMS from SMS service API
-        if self.sms_service_api:
-
+        if self.sms_service_api or self.vonage_api:
             # Message Retrieved from API
             incoming__messages: list[SMSInbox] = await self.check_incoming_sms_api()
-
             for message in incoming__messages:
                 inbox_messages: list[SMSInbox] = self.inbox_queue.get(message.to_branch, [])
 
@@ -260,12 +274,10 @@ class SMSService(Controllers):
                 self.sent_references[message.to_branch] = sent_references
                 original_message = await self.mark_message_as_responded(reference=message.parent_reference)
                 message.previous_history += f"""
-                -------------------------------------------------------------------------------------------------------
-                date_response : {date_time()}
-                
-                original_message:
-
-                {original_message.message}
+                ---------------------------------------------------------------------------------------------
+                    date_response : {date_time()}            
+                    original_message:
+                    {original_message.message}
                 """
 
                 inbox_messages.append(message)
@@ -327,7 +339,7 @@ class SMSService(Controllers):
     @error_handler
     async def add_sms_settings(self, settings: SMSSettings) -> SMSSettings:
         """
-
+            **add_sms_settings*8
         :param settings:
         :return:
         """
@@ -354,7 +366,7 @@ class SMSService(Controllers):
     @error_handler
     async def get_sms_settings(self, company_id: str) -> SMSSettings | None:
         """
-
+            **get_sms_settings**
         :param company_id:
         :return:
         """
@@ -374,15 +386,24 @@ class WhatsAppService(Controllers):
     # noinspection PyMethodOverriding
     def init_app(self, app: Flask, settings: Settings):
         super().init_app(app=app)
-        self.whatsapp_api = Client(settings.TWILIO.TWILIO_SID, settings.TWILIO.TWILIO_TOKEN)
+        self.whatsapp_api = vonage.Client(key= settings.VONAGE.API_KEY, secret=settings.VONAGE.SECRET)
         self.twilio_number = settings.TWILIO.TWILIO_NUMBER
 
-    async def send_whatsapp_message(self, recipient: str, message: str):
+    async def send_whatsapp_message(self,from_number: str, recipient: str, message: str) -> str:
         # Code to send WhatsApp message via WhatsApp service API
         self.logger.info(f"Sending WhatsApp message to {recipient} with message: {message}")
         # Simulate sending WhatsApp message asynchronously
         # await asyncio.sleep(3)
+        response = self.whatsapp_api.messages.send_message({
+            "channel": "whatsapp",
+            "message_type": "text",
+            "to": recipient,
+            "from": from_number,
+            "text": message
+
+        })
         self.logger.info("WhatsApp message sent successfully")
+        return response.get('message_uuid')
 
     async def receive_whatsapp_message(self, sender: str, message: str):
         # Code to receive WhatsApp message from WhatsApp service API
@@ -409,7 +430,6 @@ class MessagingController(Controllers):
         self.stop_event = asyncio.Event()
 
     async def get_sms_inbox(self, branch_id: str) -> list[SMSInbox]:
-
         return self.sms_service.inbox_queue.get(branch_id, [])
 
     # noinspection PyMethodOverriding
@@ -446,8 +466,8 @@ class MessagingController(Controllers):
 
         return True
 
-    async def send_whatsapp_message(self, recipient: str, message: str):
-        await self.whatsapp_queue.put((recipient, message))
+    async def send_whatsapp_message(self,from_number: str, recipient: str, message: str):
+        await self.whatsapp_queue.put((from_number, recipient, message))
         await self.cancel_sleep()
         return True
 
@@ -468,7 +488,6 @@ class MessagingController(Controllers):
         self.logger.info(f"Sent {str(total_emails_sent)} Email Messages")
 
     async def process_sms_queue(self):
-
         # self.logger.info("processing sms outgoing message queues")
         if self.sms_queue.empty():
             # self.logger.info("no sms messages to send")
@@ -485,16 +504,15 @@ class MessagingController(Controllers):
         self.logger.info("Processing SMS Queue: Completed")
 
     async def process_whatsapp_queue(self):
-
         # self.logger.info("processing whatsapp out going message queues")
         if self.whatsapp_queue.empty():
             # self.logger.info("No WhatsAPP Messages")
             return
 
         while not self.whatsapp_queue.empty():
-            recipient, message = await self.whatsapp_queue.get()
+            from_number, recipient, message = await self.whatsapp_queue.get()
 
-            await self.whatsapp_service.send_whatsapp_message(recipient, message)
+            await self.whatsapp_service.send_whatsapp_message(from_number, recipient, message)
             await asyncio.sleep(delay=self.burst_delay)
 
             self.whatsapp_queue.task_done()
@@ -509,7 +527,7 @@ class MessagingController(Controllers):
         if elapsed_time >= 300:  # 300 seconds is 5 minutes
             self.event_triggered_time = time_now
             self.stop_event.set()
-            self.logger.info('triggered cancel sleep event')
+            self.logger.info('Triggered cancel sleep event')
         else:
             pass
             # self.logger.info('cancel sleep event not triggered: too soon')
@@ -526,7 +544,6 @@ class MessagingController(Controllers):
             await self.process_email_queue()
             await self.process_sms_queue()
             await self.process_whatsapp_queue()
-
             self.logger.info("Started Processing Incoming Messages")
             await self.sms_service.retrieve_sms_responses_service()
 
@@ -534,16 +551,13 @@ class MessagingController(Controllers):
             display_time = await standard_time(start_time=time_started)
             self.logger.info(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")
             # await asyncio.sleep(60 * timer_multiplier)
-
             try:
                 multiplier = 60 * self.timer_multiplier
                 await asyncio.wait_for(self.stop_event.wait(), timeout=multiplier)
-
                 if self.stop_event.is_set():
                     self.logger.info("continue with execution as stop event is triggered")
                     # Incoming Message Queues
                     self.stop_event.clear()  # Reset the event
-
                 # This Ensures that the timer will keep increasing until its one hour long
                 if self.timer_multiplier < self.timer_limit:
                     self.timer_multiplier += 2
@@ -551,5 +565,4 @@ class MessagingController(Controllers):
             except asyncio.TimeoutError:
                 # If the timeout happens without the event being set, we just continue
                 # Incoming Message Queues
-
                 pass

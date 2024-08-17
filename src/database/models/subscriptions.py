@@ -66,6 +66,8 @@ class SubscriptionDetails(BaseModel):
 
         return self
 
+def create_reference() -> str:
+    return create_id()[6:].upper()
 
 class Subscriptions(BaseModel):
     company_id: str
@@ -78,6 +80,7 @@ class Subscriptions(BaseModel):
     subscription_amount: int
     subscription_period: int
     payments: list[Payment] = []
+    reference: str = Field(default_factory=create_reference)
 
     @property
     def subscribed_date(self):

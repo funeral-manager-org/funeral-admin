@@ -42,10 +42,8 @@ async def paypal_payment(subscription_details: Subscriptions, user: User):
     """
     success_url: str = url_for('subscriptions.subscription_payment_successful')
     failure_url: str = url_for('subscriptions.subscription_payment_failure')
-
     payment, is_created = await paypal_controller.create_payment(payment_details=subscription_details, user=user,
                                                                  success_url=success_url, failure_url=failure_url)
-
     if is_created:
         # Redirect user to PayPal for payment approval
         for link in payment.links:
@@ -54,6 +52,7 @@ async def paypal_payment(subscription_details: Subscriptions, user: User):
     else:
         flash(message=f"Error creating Payment : {payment.error}", category="danger")
         return redirect(url_for('company.get_admin'))
+
 async def make_direct_deposit(subscription_details: Subscriptions, user: User):
     """
 
@@ -61,7 +60,9 @@ async def make_direct_deposit(subscription_details: Subscriptions, user: User):
     :param user:
     :return:
     """
-    pass
+
+    context = dict(user=user, subscription_details=subscription_details)
+    return render_template('billing/direct_deposit.html', **context)
 
 @subscriptions_route.post('/subscriptions/payment-method')
 @admin_login
@@ -81,7 +82,7 @@ async def payment_method_selected(user: User):
     if payment_method == "paypal":
         return await paypal_payment(subscription_details=subscription_details, user=user)
     elif payment_method == "direct_deposit":
-        return make_direct_deposit(subscription_details=subscription_details, user=user)
+        return await make_direct_deposit(subscription_details=subscription_details, user=user)
     print(f"Payment Method: {payment_method}")
 
 

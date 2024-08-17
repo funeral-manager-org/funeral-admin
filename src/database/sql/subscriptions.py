@@ -51,6 +51,7 @@ class SubscriptionsORM(Base):
     __tablename__ = 'subscriptions'
     subscription_id: str = Column(String(ID_LEN), primary_key=True)
     company_id: str = Column(String(ID_LEN), index=True)
+    reference = Column(String(6))
     plan_name: str = Column(String(NAME_LEN))
     total_sms: int = Column(Integer)
     total_emails: int = Column(Integer)
@@ -77,6 +78,7 @@ class SubscriptionsORM(Base):
         return {
             "company_id": self.company_id,
             "subscription_id": self.subscription_id,
+            "reference": self.reference,
             "plan_name": self.plan_name,
             "total_sms": self.total_sms,
             "total_emails": self.total_emails,

@@ -5,7 +5,7 @@ from datetime import datetime
 import requests
 from flask import Flask
 from twilio.rest import Client
-
+import vonage
 from src.config import Settings
 from src.controller import Controllers, error_handler
 from src.database.models.messaging import SMSInbox, EmailCompose, SMSCompose, SMSSettings
@@ -139,9 +139,13 @@ class EmailService(Controllers):
             return None
 
 
+
 class SMSService(Controllers):
     def __init__(self):
         super().__init__()
+        self.can_use_vonage = True
+        self.can_use_twilio = False
+        self.vonage_api = None
         self.sms_service_api = None
         self.twilio_number = None
         # Inbox Messages
@@ -157,6 +161,14 @@ class SMSService(Controllers):
         super().init_app(app=app)
         self.sms_service_api = Client(settings.TWILIO.TWILIO_SID, settings.TWILIO.TWILIO_TOKEN)
         self.twilio_number = settings.TWILIO.TWILIO_NUMBER
+        self.vonage_api: vonage.Client = vonage.Client(key=settings.VONAGE.API_KEY, secret=settings.VONAGE.SECRET)
+
+    async def get_vonage_balance(self) -> int:
+        """
+            **get_vonage_balance**
+        :return:
+        """
+        return self.vonage_api.account.get_balance()
 
     async def check_incoming_sms_api(self) -> list[SMSInbox]:
         """
@@ -172,6 +184,17 @@ class SMSService(Controllers):
                     pass
 
         return []
+    async def send_with_vonage(self, composed_sms: SMSCompose):
+        response = self.vonage_api.messages.send_message({
+            'channel': 'sms',
+            'message_type': 'text',
+            'to': composed_sms.to_cell_za,
+            'from': 'vonage',
+            'text': composed_sms.message
+        })
+
+        self.logger.info(f"VONAGE RESPONSE : {response}")
+        return composed_sms
 
     async def send_sms(self, composed_sms: SMSCompose):
         """
@@ -181,8 +204,10 @@ class SMSService(Controllers):
         """
         # Code to send SMS via SMS service API
         self.logger.info(f"Sending SMS to {composed_sms.to_cell} with message: {composed_sms.message}")
+        if self.vonage_api and self.can_use_vonage:
+            await self.send_with_vonage(composed_sms=composed_sms)
 
-        if self.sms_service_api:
+        if self.sms_service_api and self.can_use_twilio:
             # API is initialized do send message
             # Sending SMS with Twilio
             sent_reference = self.sms_service_api.messages.create(

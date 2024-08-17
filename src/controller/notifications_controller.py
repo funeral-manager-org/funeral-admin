@@ -58,21 +58,21 @@ class NotificationsController(Controllers):
         :return:
         """
         _message = f"""
-                                {company_data.company_name}
+                    {company_data.company_name}
 
-                                Premium Payment Reminder
-                                Hello {holder.full_names} {holder.surname}
+                    Premium Payment Reminder
+                    Hello {holder.full_names} {holder.surname}
 
-                                This is to remind you that your next premium payment date will be on 
+                    This is to remind you that your next premium payment date will be on 
 
-                                {day_name} {date_str}
+                    {day_name} {date_str}
 
-                                Please be sure to make payment on or before this date.
+                    Please be sure to make payment on or before this date.
 
-                                Next Premium Amount : R {policy_registration_data.total_premiums}.00
+                    Next Premium Amount : R {policy_registration_data.total_premiums}.00
 
-                                Thank You. 
-                                """
+                    Thank You. 
+                    """
         return _message
 
     # noinspection PyMethodOverriding

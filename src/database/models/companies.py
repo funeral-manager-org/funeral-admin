@@ -1,13 +1,13 @@
 import calendar
 from datetime import datetime, date, timedelta
-from typing import Optional, Union, TypeVar
+from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel, Field, EmailStr, conint, field_validator
 
 from src.database.constants import NAME_LEN
-from src.utils import create_id, string_today, create_plan_number, create_employee_id
 from src.database.models import ID_LEN, CK_LEN, MIN_NAME_LEN, MAX_CLIENTS, MAX_EMPLOYEES, MIN_SALARY, MAX_SALARY
+from src.utils import create_id, string_today, create_plan_number, create_employee_id
 
 
 class Company(BaseModel):

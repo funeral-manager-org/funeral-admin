@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from datetime import datetime
 
+from src.database.models import ID_LEN
 from src.utils import create_id
 
 
@@ -26,16 +27,29 @@ class SMSCompose(BaseModel):
 
     message_id: str = Field(default_factory=create_id)
     reference: Optional[str] = Field(default=None)
-    message: str
-    from_cell: Optional[str] = Field(default=None)
-    to_cell: Optional[str] = Field(default=None)
-    to_branch: str
+    message: str = Field(min_length=2, max_length=255)
+    from_cell: Optional[str] = Field(default=None, min_length=10, max_length=16)
+    to_cell: Optional[str] = Field(default=None, min_length=10, max_length=16)
+    to_branch: str = Field(min_length=ID_LEN, max_length=ID_LEN)
     recipient_type: str
     date_time_composed: str = Field(default_factory=date_time)
     date_time_sent: Optional[str] =  Field(default=None)
     is_delivered: bool = Field(default=False)
     client_responded: bool = Field(default=False)
 
+    @property
+    def to_cell_za(self):
+        """Return South African international format from a ten-digit cell number."""
+        if self.to_cell and self.to_cell.startswith("0") and len(self.to_cell) == 10:
+            return f"+27{self.to_cell[1:]}"
+        return self.to_cell
+
+    @property
+    def from_cell_za(self):
+        """ South African international format of the from number:return:"""
+        if self.from_cell and self.from_cell.startswith("0") and len(self.from_cell) == 10:
+            return f"+27{self.from_cell[1:]}"
+        return self.from_cell
 
 class SMSInbox(BaseModel):
 

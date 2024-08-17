@@ -7,7 +7,7 @@ from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.authentication import login_required, admin_login
 from src.database.models.companies import Company, CompanyBranches, EmployeeDetails, Salary
 from src.database.models.users import User
-from src.main import company_controller, user_controller, encryptor, employee_controller
+from src.main import company_controller, user_controller, encryptor, employee_controller, subscriptions_controller
 from src.utils import create_id, is_valid_ulid
 
 company_route = Blueprint('company', __name__)
@@ -25,11 +25,12 @@ async def get_admin(user: User):
     if user.company_id:
         company_data: Company | None = await company_controller.get_company_details(company_id=user.company_id)
         company_branches = await company_controller.get_company_branches(company_id=user.company_id)
+        subscription_account = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
     else:
         company_data = None
         company_branches = []
 
-    context.update(company_detail=company_data, company_branches=company_branches)
+    context.update(company_detail=company_data, company_branches=company_branches, subscription_account=subscription_account)
 
     if user.is_system_admin:
         return render_template('admin/managers/manager.html', **context)

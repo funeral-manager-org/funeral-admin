@@ -80,7 +80,7 @@ class Subscriptions(BaseModel):
     subscription_amount: int
     subscription_period: int
     payments: list[Payment] = []
-    reference: str = Field(default_factory=create_reference)
+    reference: str| None = Field(default_factory=create_reference)
 
     @property
     def subscribed_date(self):

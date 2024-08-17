@@ -8,20 +8,22 @@
                     <i class="fa fa-user-circle"> </i>
                     Account
                 </h3>
-                <span class="card-title font-weight-light text-info">direct deposit payments</span>
+                <span class="card-title font-weight-light text-info">Direct Deposit Payments</span>
             </div>
             <div class="card-body">
+
                 <ul class="list-group">
-                    <li class="list-group-item">Bank Name: Capitec</li>
+                    <li class="list-group-item">Bank Name: Capitec </li>
                     <li class="list-group-item">Account Number: </li>
                     <li class="list-group-item">Account Holder: </li>
                     <li class="list-group-item">Account Type: </li>
-                    <li class="list-group-item">Reference : {{ subscription_details. }}</li>
+                    <li class="list-group-item">Reference : <span class="pull-right badge badge-info">{{ subscription_details.reference }}</span></li>
+                    <li class="list-group-item">Payment Amount : <span class="pull-right badge badge-success">R {{ subscription_details.subscription_amount|number }}.00</span></li>
                 </ul>
             </div>
+            <div class="card-footer">
+                <span class="font-weight-bold text-danger">Once payment has been made your account will be credited</span>
+            </div>
         </div>
-
     </section>
-
-
 {% endblock %}

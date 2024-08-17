@@ -184,17 +184,17 @@ class SMSService(Controllers):
                     pass
 
         return []
-    async def send_with_vonage(self, composed_sms: SMSCompose):
+    async def send_with_vonage(self, composed_sms: SMSCompose) -> str:
         response = self.vonage_api.messages.send_message({
             'channel': 'sms',
             'message_type': 'text',
-            'to': composed_sms.to_cell_za,
+            'to': composed_sms.to_cell_vonage_za,
             'from': 'vonage',
             'text': composed_sms.message
         })
 
         self.logger.info(f"VONAGE RESPONSE : {response}")
-        return composed_sms
+        return response.get('message_uuid')
 
     async def send_sms(self, composed_sms: SMSCompose):
         """
@@ -205,7 +205,10 @@ class SMSService(Controllers):
         # Code to send SMS via SMS service API
         self.logger.info(f"Sending SMS to {composed_sms.to_cell} with message: {composed_sms.message}")
         if self.vonage_api and self.can_use_vonage:
-            await self.send_with_vonage(composed_sms=composed_sms)
+            sent_reference = await self.send_with_vonage(composed_sms=composed_sms)
+            sent_references = self.sent_references.get(composed_sms.to_branch, [])
+            sent_references.append(sent_reference)
+            self.sent_references[composed_sms.to_branch] = sent_references
 
         if self.sms_service_api and self.can_use_twilio:
             # API is initialized do send message

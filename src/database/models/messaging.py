@@ -38,17 +38,17 @@ class SMSCompose(BaseModel):
     client_responded: bool = Field(default=False)
 
     @property
-    def to_cell_za(self):
+    def to_cell_vonage_za(self):
         """Return South African international format from a ten-digit cell number."""
         if self.to_cell and self.to_cell.startswith("0") and len(self.to_cell) == 10:
-            return f"+27{self.to_cell[1:]}"
+            return f"27{self.to_cell[1:]}"
         return self.to_cell
 
     @property
     def from_cell_za(self):
         """ South African international format of the from number:return:"""
         if self.from_cell and self.from_cell.startswith("0") and len(self.from_cell) == 10:
-            return f"+27{self.from_cell[1:]}"
+            return f"27{self.from_cell[1:]}"
         return self.from_cell
 
 class SMSInbox(BaseModel):

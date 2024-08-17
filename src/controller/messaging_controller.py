@@ -139,7 +139,6 @@ class EmailService(Controllers):
             return None
 
 
-
 class SMSService(Controllers):
     def __init__(self):
         super().__init__()
@@ -181,13 +180,15 @@ class SMSService(Controllers):
                 for message_reference in self.sent_references[branch_id]:
                     # save each reference used when constructing the inboxMessage
                     # https://funeral-manager.org/api/v1/vonage/sms-status
-                    #TODO-  should check vonage of twilio if a message was delivered
+                    # TODO-  should check vonage of twilio if a message was delivered
                     self.logger.info(f"Sent Message ID : {message_reference}")
                     if self.can_use_vonage:
                         pass
 
         return []
+
     async def send_with_vonage(self, composed_sms: SMSCompose) -> str:
+
         response = self.vonage_api.messages.send_message({
             'channel': 'sms',
             'message_type': 'text',
@@ -198,6 +199,7 @@ class SMSService(Controllers):
 
         self.logger.info(f"VONAGE RESPONSE : {response}")
         return response.get('message_uuid')
+
     async def send_with_twilio(self, composed_sms: SMSCompose) -> str:
         """
             **send_with_twilio**
@@ -386,10 +388,10 @@ class WhatsAppService(Controllers):
     # noinspection PyMethodOverriding
     def init_app(self, app: Flask, settings: Settings):
         super().init_app(app=app)
-        self.whatsapp_api = vonage.Client(key= settings.VONAGE.API_KEY, secret=settings.VONAGE.SECRET)
+        self.whatsapp_api = vonage.Client(key=settings.VONAGE.API_KEY, secret=settings.VONAGE.SECRET)
         self.twilio_number = settings.TWILIO.TWILIO_NUMBER
 
-    async def send_whatsapp_message(self,from_number: str, recipient: str, message: str) -> str:
+    async def send_whatsapp_message(self, from_number: str, recipient: str, message: str) -> str:
         # Code to send WhatsApp message via WhatsApp service API
         self.logger.info(f"Sending WhatsApp message to {recipient} with message: {message}")
         # Simulate sending WhatsApp message asynchronously
@@ -427,7 +429,7 @@ class MessagingController(Controllers):
         self.timer_multiplier = 1
         self.timer_limit = 60 * 60 * 1
         self.event_triggered_time = 0
-        self.stop_event = asyncio.Event()
+        self.cancel_await_event = asyncio.Event()
 
     async def get_sms_inbox(self, branch_id: str) -> list[SMSInbox]:
         return self.sms_service.inbox_queue.get(branch_id, [])
@@ -466,7 +468,7 @@ class MessagingController(Controllers):
 
         return True
 
-    async def send_whatsapp_message(self,from_number: str, recipient: str, message: str):
+    async def send_whatsapp_message(self, from_number: str, recipient: str, message: str):
         await self.whatsapp_queue.put((from_number, recipient, message))
         await self.cancel_sleep()
         return True
@@ -524,20 +526,28 @@ class MessagingController(Controllers):
         # Calculate the elapsed time since the last event trigger
         elapsed_time = (time_now - self.event_triggered_time) / 1e9  # Convert nanoseconds to seconds
 
-        if elapsed_time >= 300:  # 300 seconds is 5 minutes
+        if elapsed_time >= 30:  # 60 seconds is 1 minutes
             self.event_triggered_time = time_now
-            self.stop_event.set()
+            self.cancel_await_event.set()
             self.logger.info('Triggered cancel sleep event')
         else:
             pass
             # self.logger.info('cancel sleep event not triggered: too soon')
 
+    import asyncio
+
     async def messaging_daemon(self):
         self.logger.info("Thread Started-------------------------------------------------")
         i = 0
         time_started = time.time()
+        wait_time = 60 * 10  # 10 minutes
 
         while True:
+            # Check for cancel event immediately
+            if self.cancel_await_event.is_set():
+                self.logger.info("Cancel event triggered, processing immediately")
+                self.cancel_await_event.clear()  # Reset the event for next use
+
             # Out Going Message Queues
             self.logger.info("Loop restarted................................")
             i += 1
@@ -547,22 +557,11 @@ class MessagingController(Controllers):
             self.logger.info("Started Processing Incoming Messages")
             await self.sms_service.retrieve_sms_responses_service()
 
-            # This Means the loop will run every 5 minutes
             display_time = await standard_time(start_time=time_started)
             self.logger.info(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")
-            # await asyncio.sleep(60 * timer_multiplier)
-            try:
-                multiplier = 60 * self.timer_multiplier
-                await asyncio.wait_for(self.stop_event.wait(), timeout=multiplier)
-                if self.stop_event.is_set():
-                    self.logger.info("continue with execution as stop event is triggered")
-                    # Incoming Message Queues
-                    self.stop_event.clear()  # Reset the event
-                # This Ensures that the timer will keep increasing until its one hour long
-                if self.timer_multiplier < self.timer_limit:
-                    self.timer_multiplier += 2
 
+            try:
+                await asyncio.wait_for(self.cancel_await_event.wait(), timeout=wait_time)
             except asyncio.TimeoutError:
-                # If the timeout happens without the event being set, we just continue
-                # Incoming Message Queues
                 pass
+    # Removed the commented-out await asyncio.sleep line

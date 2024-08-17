@@ -95,20 +95,23 @@ def format_payment_method(value):
         return "Unknown"
 
 
+from datetime import datetime, timedelta
+
+
 def friendlytimestamp(value):
-    # Convert the string timestamp to a datetime object
+    # List of possible formats for the timestamp
     formats = [
         '%Y-%m-%d %H:%M:%S.%f',
         '%Y-%m-%d %H:%M:%S',
         '%Y-%m-%d'
     ]
-
-    # Try to convert the string timestamp to a datetime object using different formats
+    print(f"TIME FORMAT : {value}")
+    # Convert the string timestamp to a datetime object using different formats
     timestamp_dt = None
     for fmt in formats:
         try:
             timestamp_dt = datetime.strptime(value, fmt)
-            break
+            break  # Stop if a valid format is found
         except ValueError:
             continue
 
@@ -117,29 +120,86 @@ def friendlytimestamp(value):
 
     # Get the current date and time
     current_dt = datetime.now()
-    # Calculate the difference between the timestamps
-    time_difference = current_dt - timestamp_dt
 
-    if time_difference.total_seconds() < 60:
+    # Calculate the time difference between now and the given timestamp
+    time_difference = current_dt - timestamp_dt
+    hour = 60*60
+    one_day = 60*60*24
+    minute = 60
+    # Handle cases based on the time difference
+    if time_difference.total_seconds() < minute:
         return "just now"
-    elif time_difference.total_seconds() < 3600:
-        minutes = int(time_difference.total_seconds() / 60)
+    elif time_difference.total_seconds() < hour:
+        minutes = int(time_difference.total_seconds() / minute)
         return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
-    elif time_difference.total_seconds() < 86400:
-        hours = int(time_difference.total_seconds() / 3600)
+    elif time_difference.total_seconds() < one_day:
+        hours = int(time_difference.total_seconds() / hour)
         return f"{hours} hour{'s' if hours > 1 else ''} ago"
-    elif current_dt.date() == timestamp_dt.date():
+
+    # Check if it's the same calendar day
+    if current_dt.date() == timestamp_dt.date():
         return "today"
+    # Check if it's yesterday
     elif current_dt.date() - timestamp_dt.date() == timedelta(days=1):
         return "yesterday"
+    # Check if it's within a week
     elif time_difference.days < 7:
         return f"{time_difference.days} day{'s' if time_difference.days > 1 else ''} ago"
+    # Check if it's within a month
     elif time_difference.days < 30:
         weeks = int(time_difference.days / 7)
         return f"{weeks} week{'s' if weeks > 1 else ''} ago"
+    # Fallback to the date format for older timestamps
     else:
         return timestamp_dt.strftime("%Y-%m-%d")
 
+def friendly_calendar(value: str):
+    """
+
+    :param value:
+    :return:
+    """
+
+    formats = [
+        '%Y-%m-%d %H:%M:%S.%f',
+        '%Y-%m-%d %H:%M:%S',
+        '%Y-%m-%d'
+    ]
+    print(f"TIME FORMAT : {value}")
+    # Convert the string timestamp to a datetime object using different formats
+    timestamp_dt = None
+    for fmt in formats:
+        try:
+            timestamp_dt = datetime.strptime(value, fmt)
+            break  # Stop if a valid format is found
+        except ValueError:
+            continue
+
+    if not timestamp_dt:
+        raise ValueError(f"Time data '{value}' does not match any of the formats.")
+
+    # Get the current date and time
+    current_dt = datetime.now()
+
+    # Calculate the time difference between now and the given timestamp
+    time_difference = current_dt - timestamp_dt
+
+    # Check if it's the same calendar day
+    if current_dt.date() == timestamp_dt.date():
+        return "Today"
+    # Check if it's yesterday
+    elif current_dt.date() - timestamp_dt.date() == timedelta(days=1):
+        return "Yesterday"
+    # Check if it's within a week
+    elif time_difference.days < 7:
+        return f"{time_difference.days} Day{'s' if time_difference.days > 1 else ''} ago"
+    # Check if it's within a month
+    elif time_difference.days < 30:
+        weeks = int(time_difference.days / 7)
+        return f"{weeks} Week{'s' if weeks > 1 else ''} ago"
+    # Fallback to the date format for older timestamps
+    else:
+        return timestamp_dt.strftime("%Y-%m-%d")
 
 def create_id() -> str:
     return str(ULID.from_datetime(datetime.now()))

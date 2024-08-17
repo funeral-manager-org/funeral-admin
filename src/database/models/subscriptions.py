@@ -90,7 +90,9 @@ class Subscriptions(BaseModel):
         except ValueError:
             # Handle error, possibly log it and return None or a default datetime
             return None
-
+    @property
+    def subscribed_datetime(self):
+        return self.date_subscribed
     @property
     def is_paid_for_current_month(self) -> bool:
         """Checks if the subscription has been paid for the current month"""

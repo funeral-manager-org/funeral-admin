@@ -20,7 +20,7 @@ subscription_logger = init_logger(name="subscriptions_route_logger")
 @admin_login
 async def get_subscriptions(user: User):
     """
-
+        **get_subscriptions**
     :param user:
     :return:
     """
@@ -29,8 +29,60 @@ async def get_subscriptions(user: User):
         flash(message=message, category="danger")
         subscription_logger.info(message)
         return redirect(url_for('home.get_home'))
-    context = dict(user=user)
+
+    subscription_account: Subscriptions = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
+
+    context = dict(user=user, subscription_account=subscription_account)
     return render_template('billing/subscriptions.html', **context)
+
+async def paypal_payment(subscription_details: Subscriptions, user: User):
+    """
+
+    :return:
+    """
+    success_url: str = url_for('subscriptions.subscription_payment_successful')
+    failure_url: str = url_for('subscriptions.subscription_payment_failure')
+
+    payment, is_created = await paypal_controller.create_payment(payment_details=subscription_details, user=user,
+                                                                 success_url=success_url, failure_url=failure_url)
+
+    if is_created:
+        # Redirect user to PayPal for payment approval
+        for link in payment.links:
+            if link.method == "REDIRECT":
+                return redirect(link.href)
+    else:
+        flash(message=f"Error creating Payment : {payment.error}", category="danger")
+        return redirect(url_for('company.get_admin'))
+async def make_direct_deposit(subscription_details: Subscriptions, user: User):
+    """
+
+    :param subscription_details:
+    :param user:
+    :return:
+    """
+    pass
+
+@subscriptions_route.post('/subscriptions/payment-method')
+@admin_login
+async def payment_method_selected(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    payment_method = request.form.get('payment_method')
+    subscription_id: str = request.form.get('subscription_id')
+    subscription_details: Subscriptions = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
+
+    if subscription_details.subscription_id != subscription_id:
+        flash(message="there was a problem making payment for this subscription", category="danger")
+        return redirect(url_for('subscriptions.get_subscriptions'))
+    if payment_method == "paypal":
+        return await paypal_payment(subscription_details=subscription_details, user=user)
+    elif payment_method == "direct_deposit":
+        return make_direct_deposit(subscription_details=subscription_details, user=user)
+    print(f"Payment Method: {payment_method}")
 
 
 @subscriptions_route.post('/subscriptions/subscribe/<string:option>')
@@ -54,28 +106,16 @@ async def do_subscribe(user: User, option: str):
     subscription_details: SubscriptionDetails = SubscriptionDetails().create_plan(plan_name=option.upper())
     subscription_logger.info(f"Created plan details: {subscription_details}")
 
-    success_url: str = url_for('subscriptions.subscription_payment_successful')
-    failure_url: str = url_for('subscriptions.subscription_payment_failure')
+    subscription = Subscriptions(**subscription_details.dict(), company_id=company_detail.company_id, payments=[])
+    await subscriptions_controller.add_update_company_subscription(subscription=subscription)
+    flash(message=f"you have successfully created a {subscription.plan_name} Account",category="success")
+    return redirect(url_for('subscriptions.get_subscriptions'))
 
-    payment, is_created = await paypal_controller.create_payment(payment_details=subscription_details, user=user,
-                                                                 success_url=success_url, failure_url=failure_url)
-
-    if is_created:
-        # Redirect user to PayPal for payment approval
-        subscription = Subscriptions(**subscription_details.dict(), company_id=user.company_id, payments=[])
-        await subscriptions_controller.add_update_company_subscription(subscription=subscription)
-        for link in payment.links:
-            if link.method == "REDIRECT":
-                return redirect(link.href)
-    else:
-        flash(message=f"Error creating Payment : {payment.error}", category="danger")
-        return redirect(url_for('company.get_admin'))
 
 
 @subscriptions_route.get('/subscriptions/payment/success')
 @admin_login
 async def subscription_payment_successful(user: User):
-    pass
 
     try:
         # Load JSON data

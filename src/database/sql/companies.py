@@ -146,7 +146,7 @@ class CoverPlanDetailsORM(Base):
 
 
 class EmployeeORM(Base):
-    """Please Be verycareful when loading this Class"""
+    """Please Be very careful when loading this Class"""
     __tablename__ = "employee"
     employee_id = Column(String(9), primary_key=True, index=True)
     company_id = Column(String(ID_LEN), index=True)
@@ -193,6 +193,15 @@ class EmployeeORM(Base):
         """
         Convert the object to a dictionary representation.
         """
+
+        def make_payslip(self) -> list[dict]:
+            try:
+                payslip_list = [payslip.to_dict(include_relationships=False) for payslip in self.payslip or []
+                        if isinstance(payslip, PaySlipORM)]
+            except Exception as e:
+                print(str(e))
+            return payslip_list
+
         return {
             "uid": self.uid,
             "employee_id": self.employee_id,
@@ -217,9 +226,10 @@ class EmployeeORM(Base):
                 include_relationships=False) if include_relationships and self.attendance_register else None,
             "work_summary": self.work_summary.to_dict(
                 include_relationships=False) if include_relationships and self.work_summary else None,
-            "payslip": [payslip.to_dict(include_relationships=False) for payslip in
-                        self.payslip or []] if include_relationships and self.payslip else []
+            "payslip": make_payslip(self=self) if include_relationships and self.payslip else []
         }
+
+
 
 
 class SalaryORM(Base):
@@ -232,7 +242,7 @@ class SalaryORM(Base):
     amount = Column(Integer)
     pay_day = Column(Integer)
     effective_date = Column(Date)
-    payslip = relationship('PaySlipORM', back_populates='salary', lazy=True)
+    payslip = relationship('PaySlipORM', back_populates='salary', lazy=True, uselist=False)
 
     @classmethod
     def create_if_not_table(cls):
@@ -299,7 +309,7 @@ class TimeRecordORM(Base):
     normal_minutes_per_session: int = Column(Integer, nullable=False)
     clock_in: datetime = Column(DateTime, index=True)
     clock_out: datetime = Column(DateTime, nullable=True)
-    summary = relationship('AttendanceSummaryORM', back_populates='records')
+    summary = relationship('AttendanceSummaryORM', back_populates='records', uselist=False)
 
     @classmethod
     def create_if_not_table(cls):
@@ -332,7 +342,7 @@ class AttendanceSummaryORM(Base):
     attendance_id: str = Column(String(ID_LEN), primary_key=True)
     employee_id: str = Column(String(ID_LEN), ForeignKey('employee.employee_id'))
     name: str = Column(String(NAME_LEN))
-    records = relationship("TimeRecordORM", back_populates="summary", lazy=True, cascade="all, delete-orphan")
+    records = relationship("TimeRecordORM", back_populates="summary", lazy=True, cascade="all, delete-orphan", uselist=True)
     employee = relationship("EmployeeORM", back_populates="attendance_register", uselist=False)
     work_summary = relationship('WorkSummaryORM', uselist=False)
 

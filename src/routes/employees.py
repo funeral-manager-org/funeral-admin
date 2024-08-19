@@ -379,10 +379,11 @@ async def get_employee_detail(user: User, employee_id: str):
         :param employee_id:
         :return:
     """
-    employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
+    employee_detail: EmployeeDetails| None = await employee_controller.get_employee_complete_details_employee_id(
         employee_id=employee_id)
-    employee_logger.info(f"Employee Detail : {employee_detail}")
-    if not employee_detail:
+    employee_logger.info(f"Employee Details : {employee_detail}")
+
+    if not employee_detail or isinstance(employee_detail, ValidationError):
         flash(message="catastrophic failure", category="danger")
         return redirect(url_for('employees.get_employees'))
 

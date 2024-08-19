@@ -29,13 +29,15 @@ async def get_admin(user: User):
     else:
         company_data = None
         company_branches = []
+        subscription_account = None
 
     context.update(company_detail=company_data, company_branches=company_branches, subscription_account=subscription_account)
+
 
     if user.is_system_admin:
         return render_template('admin/managers/manager.html', **context)
     elif user.is_company_admin:
-        message = f"""Welcome back to : {company_data.company_name} Admin Section"""
+        message = f"""Welcome to : {company_data.company_name} Admin Section"""
     elif user.is_employee:
         message = f"""Welcome to : {company_data.company_name} Admin Section"""
     else:

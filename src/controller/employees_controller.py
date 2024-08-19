@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import calendar
 
 from flask import Flask
+from pydantic import ValidationError
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload
 
@@ -99,6 +100,7 @@ class EmployeesController(Controllers):
             )
             if isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
+
             return None
 
     @error_handler

@@ -22,6 +22,7 @@ def bootstrapper():
                          PaymentNoticeIntervalORM, TicketMessageORM, TicketORM, SMSSettingsORM, TimeRecordORM,
                          AttendanceSummaryORM,WorkSummaryORM, DeductionsORM, BonusPayORM, PaySlipORM, SalaryORM]
 
+
     # classes_to_create.reverse()
     for cls in classes_to_create:
         try:

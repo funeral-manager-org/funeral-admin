@@ -91,22 +91,17 @@
                             </h3>
                             <span class="card-title font-weight-light text-info">In order to start using our package select an account type</span>
                         </div>
-                            {% if subscription_account %}
+                            {% if subscription_account and company_detail %}
                                 {% include "admin/managers/subscriptions/account.html" %}
                             {% else %}
                                 {% include "admin/managers/subscriptions/plans_description.html" %}
                             {% endif %}
-
-                        <!-- if subscribed include plans dashboard -->
-{#                        {% include "admin/managers/subscriptions/plans_description.html" %}#}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
-
 {% endblock %}
-
 
 {% include "admin/managers/modals/add_branch.html" %}

@@ -158,7 +158,7 @@ employee_roles = {
 class TimeRecord(BaseModel):
     time_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
     attendance_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
-    normal_minutes_per_session: conint(ge=480, le=1080) = Field(default=8 * 60)
+    normal_minutes_per_session: conint(ge=480, le=960) = Field(default=8 * 60)
     clock_in: datetime
     clock_out: datetime | None = Field(default=None)
 
@@ -344,7 +344,7 @@ class WorkSummary(BaseModel):
     normal_sign_in_hour: conint(ge=0, le=23) = Field(default=7)
     normal_sign_off_hour: conint(ge=10, le=23) = Field(default=17)
 
-    normal_minutes_per_week: conint(ge=480, le=960) = Field(default=40 * 60)
+    normal_minutes_per_week: conint(ge=2400, le=5040) = Field(default=40 * 60)
 
     normal_weeks_in_month: conint(ge=4, le=5) = Field(default=4)
     normal_overtime_multiplier: float = Field(default=1.5)

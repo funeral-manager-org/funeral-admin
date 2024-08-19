@@ -22,19 +22,6 @@ def bootstrapper():
                          PaymentNoticeIntervalORM, TicketMessageORM, TicketORM, SMSSettingsORM, TimeRecordORM,
                          AttendanceSummaryORM,WorkSummaryORM, DeductionsORM, BonusPayORM, PaySlipORM, SalaryORM]
 
-    # for i in range(2):
-    #     classes_to_create.reverse()
-    #     for item in classes_to_create:
-    #         try:
-    #             item.delete_table()
-    #         except Exception as e:
-    #             print(str(e))
-    #     classes_to_create.reverse()
-    #     for item in classes_to_create:
-    #         try:
-    #             item.delete_table()
-    #         except Exception as e:
-    #             print(str(e))
 
     for cls in classes_to_create:
         try:

@@ -67,7 +67,7 @@ class SubscriptionDetails(BaseModel):
         return self
 
 def create_reference() -> str:
-    return create_id()[6:].upper()
+    return create_id()[-6:].upper()
 
 class Subscriptions(BaseModel):
     company_id: str

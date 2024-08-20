@@ -4,6 +4,8 @@ from pydantic import BaseModel, Field, Extra
 
 import random
 
+from src.utils import create_id
+
 
 def create_colour():
     # Generate a random color code in hexadecimal format
@@ -15,8 +17,6 @@ def timestamp() -> str:
     return str(datetime.utcnow())
 
 
-def create_id() -> str:
-    return str(uuid.uuid4())
 
 
 class ChatUser(BaseModel):

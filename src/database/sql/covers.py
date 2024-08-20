@@ -1,8 +1,6 @@
 from datetime import date, datetime
-
 from sqlalchemy import Column, String, inspect, Integer, Boolean, ForeignKey, Date, DateTime
 from sqlalchemy.orm import relationship
-
 from src.database.constants import ID_LEN, NAME_LEN
 from src.database.sql import Base, engine
 
@@ -239,7 +237,7 @@ class PremiumsORM(Base):
 
 class PremiumReceiptORM(Base):
     """
-        this are receipts for premium payments
+        This are receipts for premium payments
     """
     __tablename__ = 'premium_receipts'
     receipt_number: str = Column(String(ID_LEN), primary_key=True, index=True)

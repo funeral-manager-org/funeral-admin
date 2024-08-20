@@ -74,10 +74,17 @@ class EmployeesController(Controllers):
                 .one_or_none()
             )
 
-            if employee_orm and isinstance(employee_orm, EmployeeORM):
-                return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
-
+            if employee_orm:
+                employee_data = employee_orm.to_dict(include_relationships=True)
+                self.logger.info(f"Employee Details UID : {employee_data}")
+                try:
+                    employee_details = EmployeeDetails(**employee_data)
+                    self.logger.info(f"Employee Details UID : {employee_details}")
+                    return employee_details
+                except Exception as e:
+                    print(str(e))
             return None
+
 
     @error_handler
     async def get_employee_complete_details_employee_id(self, employee_id: str) -> EmployeeDetails | None:
@@ -98,6 +105,9 @@ class EmployeesController(Controllers):
                 )
                 .one_or_none()
             )
+
+            self.logger.info(f"GET EMPLOYEE DETAILS UID: {employee_orm.to_dict()}")
+
             if isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
 

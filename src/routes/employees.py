@@ -170,10 +170,11 @@ async def get_employee_details(user: User):
         user=user, employee_roles=employee_roles, country_list=country_list)
 
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
-    employee_logger.info(f"COMPARED TO THIS : {employee_detail}")
-    if employee_detail:
+
+    if isinstance(employee_detail, EmployeeDetails):
         # this adds postal addresses and others
 
+        employee_logger.info(f"COMPARED TO THIS : {employee_detail}")
         context = await add_data_employee(context=context, employee_detail=employee_detail)
         salary_detail: Salary = await employee_controller.get_salary_details(employee_id=employee_detail.employee_id)
         context.update(salary_detail=salary_detail)

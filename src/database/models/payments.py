@@ -87,13 +87,13 @@ class PaymentVerificationForm(BaseModel):
     comments: str
     is_successful: bool
 
-    @field_validator('amount_paid', pre=True)
+    @field_validator('amount_paid')
     def validate_amount_paid(cls, value):
         if isinstance(value, str):
             value = int(value.replace(',', ''))
         return value
 
-    @field_validator('month', pre=True)
+    @field_validator('month')
     def validate_month(cls, value):
         if isinstance(value, str):
             if value.isdecimal():

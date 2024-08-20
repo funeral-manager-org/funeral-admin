@@ -194,15 +194,13 @@ class EmployeeORM(Base):
         Convert the object to a dictionary representation.
         """
 
-        def make_payslip(self) -> list[dict]:
+        def make_payslip(payslips: list[PaySlipORM]) -> list[dict]:
             try:
-                payslip_list = [payslip.to_dict(include_relationships=False) for payslip in self.payslip or []
+                return [payslip.to_dict(include_relationships=False) for payslip in payslips
                         if isinstance(payslip, PaySlipORM)]
             except Exception as e:
                 print(str(e))
                 return []
-            return payslip_list
-
 
         return {
             "uid": self.uid,
@@ -228,7 +226,7 @@ class EmployeeORM(Base):
                 include_relationships=False) if include_relationships and self.attendance_register else None,
             "work_summary": self.work_summary.to_dict(
                 include_relationships=False) if include_relationships and self.work_summary else None,
-            "payslip": make_payslip(self=self) if include_relationships and self.payslip else []
+            "payslip": make_payslip(payslips=self.payslip) if include_relationships and self.payslip else []
         }
 
 
@@ -333,9 +331,8 @@ class TimeRecordORM(Base):
             'attendance_id': self.attendance_id,
             'normal_minutes_per_session': self.normal_minutes_per_session,
             'clock_in': self.clock_in,
-            'clock_out': self.clock_out,
-            'summary': self.summary.to_dict(
-                include_relationships=False) if include_relationships and self.summary else {}
+            'clock_out': self.clock_out
+
         }
 
 
@@ -538,10 +535,10 @@ class PaySlipORM(Base):
             "pay_period_end": self.pay_period_end.isoformat() if self.pay_period_end else None,
             "employee": self.employee.to_dict(
                 include_relationships=False) if self.employee and include_relationships else None,
-            "salary": self.salary.to_dict(include_relationships=False) if self.salary else None,
+            "salary": self.salary.to_dict(include_relationships=False) if self.salary and include_relationships else None,
             "applied_deductions": [deduction.to_dict() for deduction in
                                    self.applied_deductions] if self.applied_deductions else [],
             "bonus_pay": [bonus.to_dict() for bonus in self.bonus_pay] if self.bonus_pay else [],
             "work_sheet": self.work_sheet.to_dict(
-                include_relationships=True) if self.work_sheet and include_relationships else None,
+                include_relationships=False) if self.work_sheet and include_relationships else None,
         }

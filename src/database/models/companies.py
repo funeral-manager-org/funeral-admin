@@ -1,6 +1,7 @@
+from __future__ import annotations
 import calendar
 from datetime import datetime, date, timedelta
-from typing import Optional
+from typing import Optional, ForwardRef
 
 from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel, Field, EmailStr, conint, field_validator
@@ -155,6 +156,119 @@ employee_roles = {
 
 
 # noinspection PyMethodParameters
+
+
+
+class Salary(BaseModel):
+    salary_id: str = Field(default_factory=create_id)
+    employee_id: str = Field(max_length=ID_LEN)
+    company_id: str = Field(max_length=ID_LEN)
+    branch_id: str = Field(max_length=ID_LEN)
+    amount: conint(ge=MIN_SALARY, le=MAX_SALARY)
+    pay_day: conint(ge=1, le=31)
+
+    @property
+    def effective_pay_date(self) -> date:
+        """
+        Calculate the effective pay date for the current month.
+        Adjust the date if the pay_day falls on a weekend.
+        :return: The effective pay date as a datetime.date object.
+        """
+        today = datetime.today()
+        effective_date = datetime(today.year, today.month, self.pay_day)
+
+        if effective_date.weekday() == 5:  # Saturday
+            effective_date -= timedelta(days=1)
+        elif effective_date.weekday() == 6:  # Sunday
+            effective_date += timedelta(days=1)
+
+        return effective_date.date()
+
+    @property
+    def next_month_pay_date(self) -> date:
+        """
+        Calculate the effective pay date for the next month.
+        Adjust the date if the pay_day falls on a weekend.
+        :return: The effective pay date for the next month as a datetime.date object.
+        """
+        next_month_effective_date = self.effective_pay_date + relativedelta(months=1)
+
+        if next_month_effective_date.weekday() == 5:  # Saturday
+            next_month_effective_date -= timedelta(days=1)
+        elif next_month_effective_date.weekday() == 6:  # Sunday
+            next_month_effective_date += timedelta(days=1)
+
+        return next_month_effective_date
+
+    @property
+    def amount_in_cents(self) -> int:
+        """converts salary amount which is in rands to cents"""
+        return int(self.amount * 100)
+
+
+class Deductions(BaseModel):
+    """cannot deduct more than 2500"""
+    deduction_id: str = Field(default_factory=create_id)
+    payslip_id: str = Field(max_length=ID_LEN)
+    amount_in_cents: conint(ge=0, le=2_500_00) = Field(default=0)
+    reason: str| None = Field(min_length=12, max_length=255 * 10)
+
+    @property
+    def amount(self):
+        return int(self.amount_in_cents / 100)
+
+
+class BonusPay(BaseModel):
+    bonus_id: str = Field(default_factory=create_id)
+    payslip_id: str = Field(max_length=ID_LEN)
+    amount_in_cents: conint(ge=0, le=50_000_00) = Field(default=0)
+    reason: str| None = Field(min_length=12, max_length=255 * 10)
+
+    @property
+    def amount(self):
+        return int(self.amount_in_cents / 100)
+
+
+def pay_period_start() -> date:
+    return datetime.now().date().replace(day=1)
+
+
+def pay_period_end() -> date:
+    return datetime.now().date().replace(day=1) + relativedelta(months=1) - relativedelta(days=1)
+
+
+class Payslip(BaseModel):
+    payslip_id: str = Field(default_factory=create_id)
+    employee_id: str = Field(max_length=ID_LEN)
+    salary_id: str = Field(max_length=ID_LEN)
+    pay_period_start: date = Field(default_factory=pay_period_start)
+    pay_period_end: date = Field(default_factory=pay_period_end)
+
+    employee: EmployeeDetails | None = Field(default=None)
+    salary: Salary | None = Field(default=None)
+
+    applied_deductions: list[Deductions] | None = Field(default_factory=list)
+    bonus_pay: list[BonusPay] | None = Field(default_factory=list)
+    work_sheets: WorkSummary | None = Field(default=None)
+
+    @property
+    def month_of(self):
+        # Return the name of the month
+        return calendar.month_name[self.pay_period_start.month]
+
+    @property
+    def total_bonus(self) -> int:
+        return sum(bonus.amount_in_cents for bonus in self.bonus_pay)
+
+    @property
+    def total_deductions(self) -> int:
+        return sum(deduct.amount_in_cents for deduct in self.applied_deductions)
+
+    @property
+    def net_salary(self) -> int:
+        return int(self.work_sheets.net_salary_cents / 100)
+
+
 class TimeRecord(BaseModel):
     time_id: str = Field(default_factory=create_id, max_length=ID_LEN)
     attendance_id: str = Field(max_length=ID_LEN)
@@ -162,21 +276,23 @@ class TimeRecord(BaseModel):
     clock_in: datetime
     clock_out: datetime | None = Field(default=None)
 
-    @field_validator('clock_in')
-    def validate_clock_in(cls, v):
-        # Adjust the timedelta values as needed
-        min_allowed_date = datetime.now() - timedelta(days=7)  # 7 days in the past
-        max_allowed_date = datetime.now() + timedelta(days=1)  # One day in the future
+    # @field_validator('clock_in')
+    # def validate_clock_in(cls, v):
+    #     # Adjust the timedelta values as needed
+    #     min_allowed_date = datetime.now() - timedelta(days=7)  # 7 days in the past
+    #     max_allowed_date = datetime.now() + timedelta(days=1)  # One day in the future
+    #
+    #     if v < min_allowed_date or v > max_allowed_date:
+    #         raise ValueError('Clock in time must be within a reasonable range')
+    #     return v
 
-        if v < min_allowed_date or v > max_allowed_date:
-            raise ValueError('Clock in time must be within a reasonable range')
-        return v
-
-    @field_validator('clock_out')
-    def validate_clock_out(cls, v, values):
-        if v and v <= values['clock_in']:
-            raise ValueError('Clock out time must be after clock in time')
-        return v
+    # @field_validator('clock_out')
+    # def validate_clock_out(cls, v, values):
+    #     try:
+    #         if v and v <= values['clock_in']:
+    #             raise ValueError('Clock out time must be after clock in time')
+    #     except ex
+    #     return v
 
     @property
     def normal_minutes_worked(self) -> int:
@@ -237,9 +353,9 @@ class AttendanceSummary(BaseModel):
     attendance_id: str = Field(default_factory=create_id)
     employee_id: str = Field(max_length=ID_LEN)
     name: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
-    records: list[TimeRecord] | None = Field(default=[])
-    employee: Optional["EmployeeDetails"] = Field(default=None)
-    work_summary: Optional["WorkSummary"] = Field(default=None)
+    records: list[TimeRecord] = Field(default_factory=list)
+    employee: Optional[ForwardRef("EmployeeDetails", is_class=True)] = Field(default=None)
+    work_summary: Optional[ForwardRef("WorkSummary", is_class=True)] = Field(default=None)
 
     def total_time_worked_minutes(self, from_date: date | None = None, to_date: date | None = None) -> int:
         """
@@ -334,7 +450,6 @@ class AttendanceSummary(BaseModel):
 
         return any(True for record in self.records if has_clocked(record=record))
 
-
 class WorkSummary(BaseModel):
     work_id: str = Field(default_factory=create_id,  max_length=ID_LEN)
     attendance_id: str | None = Field(default=None, max_length=ID_LEN)
@@ -349,9 +464,9 @@ class WorkSummary(BaseModel):
     normal_weeks_in_month: conint(ge=4, le=5) = Field(default=4)
     normal_overtime_multiplier: float = Field(default=1.5)
     attendance: Optional[AttendanceSummary] = Field(default=None)
-    employee: Optional["EmployeeDetails"] = Field(default=None)
-    payslip: Optional["Payslip"] = Field(default=None)
-    salary: Optional["Salary"] = Field(default=None)
+    employee: Optional[ForwardRef("EmployeeDetails", is_class=True)] = Field(default=None)
+    payslip: Optional[Payslip] = Field(default=None)
+    salary: Optional[Salary] = Field(default=None)
 
     @property
     def period_start(self):
@@ -373,6 +488,9 @@ class WorkSummary(BaseModel):
         Returns:
             float: Number of weeks_in_period.
         """
+        if not (self.payslip.pay_period_start and self.payslip.pay_period_end):
+            return 4
+
         delta = (self.payslip.pay_period_start - self.payslip.pay_period_end).days
         return delta / 7
 
@@ -509,121 +627,11 @@ class EmployeeDetails(BaseModel):
     bank_account_id: str | None = Field(default=None)
     attendance_register: AttendanceSummary | None = Field(default=None)
     work_summary: WorkSummary | None = Field(default=None)
-    payslip: list["Payslip"] = Field(default_factory=list)
+    payslip: list[Payslip] = Field(default_factory=list)
 
     @property
     def display_names(self) -> str:
         return f"{self.full_names} {self.last_name}"
-
-
-class Salary(BaseModel):
-    salary_id: str = Field(default_factory=create_id)
-    employee_id: str = Field(max_length=ID_LEN)
-    company_id: str = Field(max_length=ID_LEN)
-    branch_id: str = Field(max_length=ID_LEN)
-    amount: conint(ge=MIN_SALARY, le=MAX_SALARY)
-    pay_day: conint(ge=1, le=31)
-
-    @property
-    def effective_pay_date(self) -> date:
-        """
-        Calculate the effective pay date for the current month.
-        Adjust the date if the pay_day falls on a weekend.
-        :return: The effective pay date as a datetime.date object.
-        """
-        today = datetime.today()
-        effective_date = datetime(today.year, today.month, self.pay_day)
-
-        if effective_date.weekday() == 5:  # Saturday
-            effective_date -= timedelta(days=1)
-        elif effective_date.weekday() == 6:  # Sunday
-            effective_date += timedelta(days=1)
-
-        return effective_date.date()
-
-    @property
-    def next_month_pay_date(self) -> date:
-        """
-        Calculate the effective pay date for the next month.
-        Adjust the date if the pay_day falls on a weekend.
-        :return: The effective pay date for the next month as a datetime.date object.
-        """
-        next_month_effective_date = self.effective_pay_date + relativedelta(months=1)
-
-        if next_month_effective_date.weekday() == 5:  # Saturday
-            next_month_effective_date -= timedelta(days=1)
-        elif next_month_effective_date.weekday() == 6:  # Sunday
-            next_month_effective_date += timedelta(days=1)
-
-        return next_month_effective_date
-
-    @property
-    def amount_in_cents(self) -> int:
-        """converts salary amount which is in rands to cents"""
-        return int(self.amount * 100)
-
-
-class Deductions(BaseModel):
-    """cannot deduct more than 2500"""
-    deduction_id: str = Field(default_factory=create_id)
-    payslip_id: str = Field(max_length=ID_LEN)
-    amount_in_cents: conint(ge=0, le=2_500_00)
-    reason: str = Field(min_length=12, max_length=255 * 10)
-
-    @property
-    def amount(self):
-        return int(self.amount_in_cents / 100)
-
-
-class BonusPay(BaseModel):
-    bonus_id: str = Field(default_factory=create_id)
-    payslip_id: str = Field(max_length=ID_LEN)
-    amount_in_cents: conint(ge=0, le=50_000_00)
-    reason: str = Field(min_length=12, max_length=255 * 10)
-
-    @property
-    def amount(self):
-        return int(self.amount_in_cents / 100)
-
-
-def pay_period_start() -> date:
-    return datetime.now().date().replace(day=1)
-
-
-def pay_period_end() -> date:
-    return datetime.now().date().replace(day=1) + relativedelta(months=1) - relativedelta(days=1)
-
-
-class Payslip(BaseModel):
-    payslip_id: str = Field(default_factory=create_id)
-    employee_id: str = Field(max_length=ID_LEN)
-    salary_id: str = Field(max_length=ID_LEN)
-    pay_period_start: date = Field(default_factory=pay_period_start)
-    pay_period_end: date = Field(default_factory=pay_period_end)
-
-    employee: EmployeeDetails | None = Field(default=None)
-    salary: Salary | None = Field(default=None)
-
-    applied_deductions: list[Deductions] | None = Field(default=[])
-    bonus_pay: list[BonusPay] | None = Field(default=[])
-    work_sheets: WorkSummary | None = Field(default=None)
-
-    @property
-    def month_of(self):
-        # Return the name of the month
-        return calendar.month_name[self.pay_period_start.month]
-
-    @property
-    def total_bonus(self) -> int:
-        return sum(bonus.amount_in_cents for bonus in self.bonus_pay)
-
-    @property
-    def total_deductions(self) -> int:
-        return sum(deduct.amount_in_cents for deduct in self.applied_deductions)
-
-    @property
-    def net_salary(self) -> int:
-        return int(self.work_sheets.net_salary_cents / 100)
 
 
 # noinspection PyMethodParameters
@@ -666,6 +674,10 @@ class WorkOrder(BaseModel):
         return int((self.job_scheduled_time_completion - self.job_scheduled_start_time).total_seconds() * 60)
 
 
-EmployeeDetails.update_forward_refs()
-WorkSummary.update_forward_refs()
-AttendanceSummary.update_forward_refs()
+Payslip.model_rebuild(raise_errors=False, force=True, _parent_namespace_depth=4)
+TimeRecord.model_rebuild(raise_errors=False, force=True, _parent_namespace_depth=4)
+AttendanceSummary.model_rebuild(raise_errors=False, force=True, _parent_namespace_depth=4)
+WorkSummary.model_rebuild(raise_errors=False, force=True, _parent_namespace_depth=4)
+EmployeeDetails.model_rebuild(raise_errors=False, force=True, _parent_namespace_depth=4)
+WorkOrder.model_rebuild(raise_errors=False, force=True, _parent_namespace_depth=4)
+

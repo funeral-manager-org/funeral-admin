@@ -613,7 +613,7 @@ async def get_payroll(user: User):
 
     latest_payslips: LatestPaySlipType = await get_latest_payslips(employee_list=employee_list)
     historical_payslips: HistorocalPaySlipType = await get_historical_payslips(employee_list=employee_list)
-
+    # employee_logger.info(f"Latest PaySlips : {latest_payslips}")
     context = dict(user=user, latest_payslips=latest_payslips, historical_payslips=historical_payslips)
     return render_template('hr/payroll.html', **context)
 

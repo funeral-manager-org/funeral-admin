@@ -535,7 +535,7 @@ class PaySlipORM(Base):
             "pay_period_end": self.pay_period_end.isoformat() if self.pay_period_end else None,
             "employee": self.employee.to_dict(
                 include_relationships=False) if self.employee and include_relationships else None,
-            "salary": self.salary.to_dict(include_relationships=False) if self.salary and include_relationships else None,
+            "salary": self.salary.to_dict(include_relationships=False) if self.salary else None,
             "applied_deductions": [deduction.to_dict() for deduction in
                                    self.applied_deductions] if self.applied_deductions else [],
             "bonus_pay": [bonus.to_dict() for bonus in self.bonus_pay] if self.bonus_pay else [],

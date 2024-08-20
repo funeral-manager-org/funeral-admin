@@ -285,13 +285,14 @@ class TimeRecord(BaseModel):
     #     if v < min_allowed_date or v > max_allowed_date:
     #         raise ValueError('Clock in time must be within a reasonable range')
     #     return v
-
+    #
     # @field_validator('clock_out')
     # def validate_clock_out(cls, v, values):
     #     try:
-    #         if v and v <= values['clock_in']:
+    #         if v and v >= values['clock_in']:
     #             raise ValueError('Clock out time must be after clock in time')
-    #     except ex
+    #     except Exception as e:
+    #         raise ValueError('Clock out time must be after clock in time')
     #     return v
 
     @property

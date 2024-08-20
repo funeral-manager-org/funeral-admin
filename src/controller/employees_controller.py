@@ -74,15 +74,8 @@ class EmployeesController(Controllers):
                 .one_or_none()
             )
 
-            if employee_orm:
-                employee_data = employee_orm.to_dict(include_relationships=True)
-                self.logger.info(f"Employee Details UID : {employee_data}")
-                try:
-                    employee_details = EmployeeDetails(**employee_data)
-                    self.logger.info(f"Employee Details UID : {employee_details}")
-                    return employee_details
-                except Exception as e:
-                    print(str(e))
+            if isinstance(employee_orm, EmployeeORM):
+                return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
             return None
 
 
@@ -105,12 +98,8 @@ class EmployeesController(Controllers):
                 )
                 .one_or_none()
             )
-
-            self.logger.info(f"GET EMPLOYEE DETAILS UID: {employee_orm.to_dict()}")
-
             if isinstance(employee_orm, EmployeeORM):
                 return EmployeeDetails(**employee_orm.to_dict(include_relationships=True))
-
             return None
 
     @error_handler
@@ -147,9 +136,7 @@ class EmployeesController(Controllers):
             # Create new time record for clock in
             time_record = TimeRecord(attendance_id=attendance_register.attendance_id, clock_in=datetime.now())
             session.add(TimeRecordORM(**time_record.dict()))
-
         self.logger.info("Successfully Signed In")
-
         return True
 
     @error_handler
@@ -319,7 +306,6 @@ class EmployeesController(Controllers):
         :return: A WorkSummary instance representing the current work summary, or None if not found.
         """
         start_of_this_month = datetime.now().date().replace(day=1)
-        self.logger.info(f"Current Work Summary Start Date: {start_of_this_month}")
 
         with self.get_session() as session:
             work_summary_orm = session.query(WorkSummaryORM).filter_by(

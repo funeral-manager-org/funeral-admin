@@ -1,0 +1,62 @@
+<div class="card shadow-lg border-success">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-user-circle"></i>
+            Account Details
+        </h3>
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            <li class="list-group-item font-weight-bold">
+                Plan Name: <span class="pull-right badge badge-success">{{ subscription_account.plan_name }}</span>
+            </li>
+            <li class="list-group-item font-weight-bold">
+                Total SMS: <span class="pull-right">{{ subscription_account.total_sms }}</span>
+            </li>
+            <li class="list-group-item font-weight-bold">
+                Total Emails: <span class="pull-right">{{ subscription_account.total_emails }}</span>
+            </li>
+            <li class="list-group-item font-weight-bold">
+                Total Clients: <span class="pull-right">{{ subscription_account.total_clients }}</span>
+            </li>
+            <li class="list-group-item font-weight-bold">
+                Since Subscribed: <span class="pull-right">{{ subscription_account.subscribed_datetime|days_ago }}</span>
+            </li>
+            <li class="list-group-item font-weight-bold">
+                Subscription Amount: <span class="pull-right">R {{ subscription_account.subscription_amount|number }}.00</span>
+            </li>
+            <li class="list-group-item font-weight-bold">
+                Subscription Period: <span class="pull-right">{{ subscription_account.subscription_period }} Months</span>
+            </li>
+            <li class="list-group-item font-weight-bold">
+                Is Paid for Current Month:
+                {% if subscription_account.is_paid_for_current_month %}
+                     <span class="pull-right badge badge-success">Yes </span>
+                {% else %}
+                    <span class="pull-right badge badge-danger">No</span>
+                {% endif %}
+            </li>
+            <li class="list-group-item font-weight-bold">
+
+                Subscription Status:
+                {% if  subscription_account.is_expired() %}
+                    <span class="pull-right badge badge-danger">{{ subscription_account.is_expired() and "Expired" or "Active" }}
+                {% else %}
+                    <span class="pull-right badge badge-success">{{ subscription_account.is_expired() and "Expired" or "Active" }}
+                {% endif %}
+
+                </span>
+            </li>
+        </ul>
+        {% if not subscription_account.is_paid_for_current_month %}
+            <button class="btn btn-outline-info btn-block btn-rounded"
+                data-toggle="modal" data-target="#paymentMethodsModal"
+            >
+                Make Payment
+            </button>
+        {% endif %}
+    </div>
+</div>
+
+
+{% include "admin/managers/subscriptions/payment_methods.html" %}

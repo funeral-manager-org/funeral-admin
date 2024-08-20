@@ -142,7 +142,6 @@ class EmployeesController(Controllers):
 
             if existing_record:
                 # Employee already signed in
-                self.logger.info("Already Signed IN")
                 return False
 
             # Create new time record for clock in

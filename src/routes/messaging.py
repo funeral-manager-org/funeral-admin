@@ -11,6 +11,7 @@ from src.database.models.covers import ClientPersonalInformation
 from src.authentication import login_required
 from src.database.models.users import User
 from src.main import company_controller, messaging_controller
+from src.utils import create_id
 
 messaging_route = Blueprint('messaging', __name__)
 messaging_logger = init_logger("messaging_logger")
@@ -309,9 +310,9 @@ async def send_sms_to_branch_policy_holders(composed_sms: SMSCompose):
     recipient_list = [contact.cell for contact in contact_list if contact.cell]
     # For Every Cell Number Send a Message - this will insert the message into the out message Queue
     for cell in recipient_list:
-        composed_sms.to_cell = cell
-        composed_sms.date_time_composed = date_time()
-        is_sent = await messaging_controller.send_sms(composed_sms=composed_sms)
+        sms = SMSCompose(to_cell=cell, message=composed_sms.message, to_branch=composed_sms.to_branch,
+                         recipient_type=composed_sms.recipient_type)
+        is_sent = await messaging_controller.send_sms(composed_sms=sms)
         print(f"is SMS Sent : {is_sent}")
 
         # on the Queue after its delivered we can update the message delivered on the local database
@@ -326,22 +327,24 @@ async def send_sms_to_branch_employees(composed_sms: SMSCompose):
     :return:
     """
     branch_employees = await company_controller.get_branch_employees(branch_id=composed_sms.to_branch)
-    employees_contact_numbers = []
+    employees_contact_numbers = set()
     for employee in branch_employees:
         # Check if the employee has a contact number
-        if employee.contact_number:
-            employees_contact_numbers.append(employee.contact_number)
         # If not, but has a contact ID, get the contact's cell number
-        elif employee.contact_id:
+        if employee.contact_id:
             # Fetch contact details
             contact = await company_controller.get_contact(contact_id=employee.contact_id)
             # Extract cell numbers from contacts
-            employees_contact_numbers.append(contact.cell)
+            employees_contact_numbers.add(contact.cell)
+
+        elif employee.contact_number:
+            employees_contact_numbers.add(employee.contact_number)
+
     # Send SMS to each employee's contact number
     for cell in employees_contact_numbers:
-        composed_sms.to_cell = cell
-        composed_sms.date_time_composed = date_time()
-        is_sent = await messaging_controller.send_sms(composed_sms=composed_sms)
+        sms = SMSCompose(message=composed_sms.message, to_cell=cell, to_branch=composed_sms.to_branch,
+                         recipient_type=composed_sms.recipient_type)
+        is_sent = await messaging_controller.send_sms(composed_sms=sms)
         # TODO - we can start updating the local database showing the sms was sent
         # on the Queue after its delivered we can update the message delivered on the local database
 
@@ -356,19 +359,19 @@ async def send_sms_to_branch_lapsed_policy_holders(composed_sms: SMSCompose):
     lapsed_policy_holders: list[
         ClientPersonalInformation] = await company_controller.get_branch_policy_holders_with_lapsed_policies(
         branch_id=composed_sms.to_branch)
-    policy_holder_contact_numbers = []
+    policy_holder_contact_numbers = set()
 
     for policy_holder in lapsed_policy_holders:
         if policy_holder.contact_id:
             # Fetch contact details
             contact = await company_controller.get_contact(contact_id=policy_holder.contact_id)
             # Extract cell numbers from contacts
-            policy_holder_contact_numbers.append(contact.cell)
+            policy_holder_contact_numbers.add(contact.cell)
 
     for cell in policy_holder_contact_numbers:
-        composed_sms.to_cell = cell
-        composed_sms.date_time_composed = date_time()
-        is_sent = await messaging_controller.send_sms(composed_sms=composed_sms)
+        sms = SMSCompose(to_cell=cell, message=composed_sms.message, to_branch=composed_sms.to_branch,
+                         recipient_type=composed_sms.recipient_type)
+        is_sent = await messaging_controller.send_sms(composed_sms=sms)
 
 
 def date_time() -> str:
@@ -414,6 +417,7 @@ async def send_emails(composed_email: EmailCompose,
         if person.contact_id:
             contact = await company_controller.get_contact(contact_id=person.contact_id)
             if contact.email:
+                composed_email.message_id = create_id()
                 composed_email.to_email = contact.email
                 is_sent = await messaging_controller.send_email(composed_email)
 

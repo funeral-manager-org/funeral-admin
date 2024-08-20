@@ -1,3 +1,4 @@
+
 import asyncio
 import time
 from datetime import datetime
@@ -226,15 +227,10 @@ class SMSService(Controllers):
             sent_reference = await self.send_with_vonage(composed_sms=composed_sms)
             if composed_sms.to_branch not in self.sent_references:
                 self.sent_references[composed_sms.to_branch] = []
-
             self.sent_references[composed_sms.to_branch].append(sent_reference)
-            # sent_references = self.sent_references.get(composed_sms.to_branch, [])
-            # sent_references.append(sent_reference)
             self.logger.info(f"Sent References Initial Structure : {self.sent_references}")
 
         elif self.sms_service_api and self.can_use_twilio:
-            # API is initialized do send message
-            # Sending SMS with Twilio
             sent_reference = await self.send_with_twilio(composed_sms=composed_sms)
             self.logger.info(f"SID : {sent_reference}")
             composed_sms.reference = sent_reference
@@ -249,13 +245,9 @@ class SMSService(Controllers):
         composed_messages.append(composed_sms)
 
         self.sent_messages_queue[composed_sms.to_branch] = composed_messages
-
         # Saving Sent Messages to the Database
         with self.get_session() as session:
             session.add(SMSComposeORM(**composed_sms.dict()))
-
-        # Simulate sending SMS asynchronously
-        # await asyncio.sleep(1)
         self.logger.info("SMS sent successfully")
 
     async def retrieve_sms_responses_service(self):
@@ -281,7 +273,6 @@ class SMSService(Controllers):
                     original_message:
                     {original_message.message}
                 """
-
                 inbox_messages.append(message)
                 self.inbox_queue[message.to_branch] = inbox_messages
 
@@ -464,8 +455,8 @@ class MessagingController(Controllers):
     async def send_sms(self, composed_sms: SMSCompose):
         await self.sms_queue.put(composed_sms)
         self.logger.info(f"SMS in Queue : {composed_sms}")
-        await self.cancel_sleep()
 
+        await self.cancel_sleep()
         return True
 
     async def send_whatsapp_message(self, from_number: str, recipient: str, message: str):
@@ -491,18 +482,15 @@ class MessagingController(Controllers):
 
     async def process_sms_queue(self):
         # self.logger.info("processing sms outgoing message queues")
-        if self.sms_queue.empty():
-            # self.logger.info("no sms messages to send")
-            return
-        self.logger.info("started processing SMS Queue")
         while not self.sms_queue.empty():
-            composed_sms: SMSCompose = await self.sms_queue.get()
-            if composed_sms:
-                _ = await self.sms_service.send_sms(composed_sms=composed_sms)
-            await asyncio.sleep(delay=self.burst_delay)  # sleep for
-            # response will carry a response message from the api provider at this point
-            # TO
-            self.sms_queue.task_done()
+            try:
+                composed_sms: SMSCompose = await self.sms_queue.get()
+                if composed_sms:
+                    _ = await self.sms_service.send_sms(composed_sms=composed_sms)
+                    await asyncio.sleep(delay=self.burst_delay)  # sleep for response
+                    self.sms_queue.task_done()
+            except Exception as e:
+                self.logger.error(f"Error processing SMS queue: {e}")
         self.logger.info("Processing SMS Queue: Completed")
 
     async def process_whatsapp_queue(self):
@@ -513,10 +501,8 @@ class MessagingController(Controllers):
 
         while not self.whatsapp_queue.empty():
             from_number, recipient, message = await self.whatsapp_queue.get()
-
             await self.whatsapp_service.send_whatsapp_message(from_number, recipient, message)
             await asyncio.sleep(delay=self.burst_delay)
-
             self.whatsapp_queue.task_done()
 
     async def cancel_sleep(self):
@@ -538,30 +524,26 @@ class MessagingController(Controllers):
 
     async def messaging_daemon(self):
         self.logger.info("Thread Started-------------------------------------------------")
-        i = 0
-        time_started = time.time()
-        wait_time = 60 * 10  # 10 minutes
-
+        wait_time = 60 * 1  # 10 minutes
         while True:
-            # Check for cancel event immediately
             if self.cancel_await_event.is_set():
                 self.logger.info("Cancel event triggered, processing immediately")
                 self.cancel_await_event.clear()  # Reset the event for next use
 
-            # Out Going Message Queues
-            self.logger.info("Loop restarted................................")
-            i += 1
-            await self.process_email_queue()
-            await self.process_sms_queue()
-            await self.process_whatsapp_queue()
-            self.logger.info("Started Processing Incoming Messages")
-            await self.sms_service.retrieve_sms_responses_service()
-
-            display_time = await standard_time(start_time=time_started)
-            self.logger.info(f"Counter {str(i)}--------------------------- Time Elapsed : {display_time}")
-
+            # Check for cancel event immediately
+            await self.run_events()
             try:
                 await asyncio.wait_for(self.cancel_await_event.wait(), timeout=wait_time)
             except asyncio.TimeoutError:
                 pass
-    # Removed the commented-out await asyncio.sleep line
+
+    async def run_events(self):
+        # Outgoing Message Queues
+        self.logger.info("started running tasks")
+        # Create a list of tasks for outgoing message queues
+        tasks = [self.process_email_queue(),self.process_sms_queue(),self.process_whatsapp_queue()]
+        # Run the tasks concurrently
+        await asyncio.gather(*tasks)
+        await self.sms_service.retrieve_sms_responses_service() # Removed the commented-out await asyncio.sleep line
+        self.logger.info("completed this round")
+        # Handle incoming SMS responses

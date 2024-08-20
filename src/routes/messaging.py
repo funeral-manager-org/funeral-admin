@@ -170,8 +170,6 @@ async def get_sent_sms_paged(user: User, page: int = 0, count: int = 25):
     print(request.form)
     branches: list[CompanyBranches] = await company_controller.get_company_branches(company_id=user.company_id)
 
-    print(f"BRANCH ID : {branch_id}")
-
     if not branches:
         return redirect(url_for('messaging.get_admin'))
 
@@ -417,9 +415,15 @@ async def send_emails(composed_email: EmailCompose,
         if person.contact_id:
             contact = await company_controller.get_contact(contact_id=person.contact_id)
             if contact.email:
-                composed_email.message_id = create_id()
-                composed_email.to_email = contact.email
-                is_sent = await messaging_controller.send_email(composed_email)
+                email = EmailCompose(to_email=contact.email, to_branch=composed_email.to_branch,
+                                     message=composed_email.message, subject=composed_email.subject,
+                                     recipient_type=composed_email.recipient_type)
+                await messaging_controller.send_email(email=email)
+        elif person.email:
+            email = EmailCompose(to_email=person.email, to_branch=composed_email.to_branch,
+                                 message=composed_email.message, subject=composed_email.subject,
+                                 recipient_type=composed_email.recipient_type)
+            await messaging_controller.send_email(email=email)
 
     return True
 

@@ -41,9 +41,9 @@
                     <tbody>
                         {% for email in email_messages %}
                         <tr>
-                            <td>{{ email.subject| safe }}</td>
+                            <td class="font-weight-bold">{{ email.subject| safe }}</td>
                             <td>{{ email.to_email }}</td>
-                            <td>{{ email.date_time_sent or 'Not Sent' }}</td>
+                            <td>{{ email.date_time_sent|time or 'Not Sent' }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

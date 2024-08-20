@@ -36,10 +36,10 @@
                     <tbody>
                         {% for sms in sms_messages %}
                         <tr>
-                            <td>{{ sms.message[:60] }}</td>
+                            <td class="font-weight-bold">{{ sms.message[:60] }}</td>
 {#                            <td>{{ sms.from_cell or 'N/A' }}</td>#}
                             <td>{{ sms.to_cell or 'N/A' }}</td>
-                            <td>{{ sms.date_time_sent or 'Not Sent' }}</td>
+                            <td>{{ sms.date_time_sent|time or 'Not Sent' }}</td>
 {#                            <td>{{ 'Yes' if sms.is_delivered else 'No' }}</td>#}
 {#                            <td>{{ 'Yes' if sms.client_responded else 'No' }}</td>#}
                         </tr>

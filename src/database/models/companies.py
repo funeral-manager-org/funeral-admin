@@ -11,8 +11,8 @@ from src.utils import create_id, string_today, create_plan_number, create_employ
 
 
 class Company(BaseModel):
-    company_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
-    admin_uid: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    company_id: str = Field(default_factory=create_id, max_length=ID_LEN)
+    admin_uid: str = Field(max_length=ID_LEN)
     reg_ck: str = Field(min_length=CK_LEN, max_length=CK_LEN)
     vat_number: str | None = Field(default=None, min_length=10, max_length=16)
     company_name: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)

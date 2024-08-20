@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field, validator, PositiveInt
+from pydantic import BaseModel, Field, field_validator, PositiveInt
 
 from src.database.tools import create_transaction_id
 from src.utils import create_id
@@ -87,13 +87,13 @@ class PaymentVerificationForm(BaseModel):
     comments: str
     is_successful: bool
 
-    @validator('amount_paid', pre=True)
+    @field_validator('amount_paid', pre=True)
     def validate_amount_paid(cls, value):
         if isinstance(value, str):
             value = int(value.replace(',', ''))
         return value
 
-    @validator('month', pre=True)
+    @field_validator('month', pre=True)
     def validate_month(cls, value):
         if isinstance(value, str):
             if value.isdecimal():

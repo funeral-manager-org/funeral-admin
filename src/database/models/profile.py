@@ -12,7 +12,7 @@ class Profile(BaseModel):
     main_game_id: str | None
     profile_name: str | None
     notes: str | None
-    currency: str = Field(default="$")
+    currency: str = Field(default="R")
 
     # class Config:
     #     extra = Extra.ignore

@@ -204,23 +204,22 @@ def friendly_calendar(value: str):
 def create_id() -> str:
     return str(ULID.from_datetime(datetime.now()))
 
+def create_reference() -> str:
+    """payment reference"""
+    return create_id()[-6:].upper()
 
 
-def create_plan_number():
-    ulid = create_id()
-    return ulid[-9:]  # Extract a random part (9 characters)
+def create_plan_number() -> str:
+    return create_id()[-9:].upper()  # Extract a random part (9 characters)
 
-def create_claim_number():
-    ulid = create_id()
-    return ulid[-12:]  # Extract a random part (12 characters)
+def create_claim_number() -> str:
+    return create_id()[-12:].upper()  # Extract a random part (12 characters)
 
-def create_policy_number():
-    ulid = create_id()
-    return ulid[-9:]  # Extract a random part (9 characters)
+def create_policy_number() -> str:
+    return create_id()[-9:].upper()  # Extract a random part (9 characters)
 
 def create_employee_id() -> str:
-    ulid = create_id()
-    return ulid[-9:]  # Extract a random part (9 characters)
+    return create_id()[-9:].upper()  # Extract a random part (9 characters)
 def string_today():
     return str(datetime.today().date())
 

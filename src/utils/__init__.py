@@ -1,11 +1,10 @@
-from dateutil.relativedelta import relativedelta
-from ulid import ULID
-import random
 import re
-import string
 from datetime import datetime, timedelta
 from enum import Enum
 from os import path
+
+from dateutil.relativedelta import relativedelta
+from ulid import ULID
 
 
 # TODO create a class to contain this enum types for the entire project
@@ -93,9 +92,6 @@ def format_payment_method(value):
         return value.replace("_", " ").title()
     else:
         return "Unknown"
-
-
-from datetime import datetime, timedelta
 
 
 def friendlytimestamp(value):

@@ -28,7 +28,7 @@ class CompanyBranches(BaseModel):
 
     """
     branch_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
-    company_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    company_id: str = Field(max_length=ID_LEN)
     branch_name: str = Field(min_length=4, max_length=NAME_LEN)
     branch_description: str = Field(min_length=4, max_length=255)
     date_registered: str = Field(default_factory=string_today, min_length=10, max_length=16)
@@ -45,8 +45,8 @@ class PlanTypes(BaseModel):
     """
         User defined model to allow managers to create their own plan types
     """
-    branch_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
-    company_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    branch_id: str = Field(max_length=ID_LEN)
+    company_id: str = Field(max_length=ID_LEN)
 
     plan_number: str
     plan_type: str
@@ -156,8 +156,8 @@ employee_roles = {
 
 # noinspection PyMethodParameters
 class TimeRecord(BaseModel):
-    time_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
-    attendance_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    time_id: str = Field(default_factory=create_id, max_length=ID_LEN)
+    attendance_id: str = Field(max_length=ID_LEN)
     normal_minutes_per_session: conint(ge=480, le=960) = Field(default=8 * 60)
     clock_in: datetime
     clock_out: datetime | None = Field(default=None)
@@ -235,7 +235,7 @@ class TimeRecord(BaseModel):
 
 class AttendanceSummary(BaseModel):
     attendance_id: str = Field(default_factory=create_id)
-    employee_id: str = Field(min_length=9, max_length=ID_LEN)
+    employee_id: str = Field(max_length=ID_LEN)
     name: str = Field(min_length=MIN_NAME_LEN, max_length=NAME_LEN)
     records: list[TimeRecord] | None = Field(default=[])
     employee: Optional["EmployeeDetails"] = Field(default=None)
@@ -336,10 +336,10 @@ class AttendanceSummary(BaseModel):
 
 
 class WorkSummary(BaseModel):
-    work_id: str = Field(default_factory=create_id, min_length=ID_LEN, max_length=ID_LEN)
-    attendance_id: str | None = Field(default=None, min_length=ID_LEN, max_length=ID_LEN)
-    payslip_id: str | None = Field(default=None, min_length=ID_LEN, max_length=ID_LEN)
-    employee_id: str = Field(min_length=9, max_length=ID_LEN)
+    work_id: str = Field(default_factory=create_id,  max_length=ID_LEN)
+    attendance_id: str | None = Field(default=None, max_length=ID_LEN)
+    payslip_id: str | None = Field(default=None, max_length=ID_LEN)
+    employee_id: str = Field(max_length=ID_LEN)
 
     normal_sign_in_hour: conint(ge=0, le=23) = Field(default=7)
     normal_sign_off_hour: conint(ge=10, le=23) = Field(default=17)
@@ -518,9 +518,9 @@ class EmployeeDetails(BaseModel):
 
 class Salary(BaseModel):
     salary_id: str = Field(default_factory=create_id)
-    employee_id: str = Field(min_length=9, max_length=ID_LEN)
-    company_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
-    branch_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    employee_id: str = Field(max_length=ID_LEN)
+    company_id: str = Field(max_length=ID_LEN)
+    branch_id: str = Field(max_length=ID_LEN)
     amount: conint(ge=MIN_SALARY, le=MAX_SALARY)
     pay_day: conint(ge=1, le=31)
 
@@ -566,7 +566,7 @@ class Salary(BaseModel):
 class Deductions(BaseModel):
     """cannot deduct more than 2500"""
     deduction_id: str = Field(default_factory=create_id)
-    payslip_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    payslip_id: str = Field(max_length=ID_LEN)
     amount_in_cents: conint(ge=0, le=2_500_00)
     reason: str = Field(min_length=12, max_length=255 * 10)
 
@@ -577,7 +577,7 @@ class Deductions(BaseModel):
 
 class BonusPay(BaseModel):
     bonus_id: str = Field(default_factory=create_id)
-    payslip_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    payslip_id: str = Field(max_length=ID_LEN)
     amount_in_cents: conint(ge=0, le=50_000_00)
     reason: str = Field(min_length=12, max_length=255 * 10)
 
@@ -596,8 +596,8 @@ def pay_period_end() -> date:
 
 class Payslip(BaseModel):
     payslip_id: str = Field(default_factory=create_id)
-    employee_id: str = Field(min_length=9, max_length=ID_LEN)
-    salary_id: str = Field(min_length=ID_LEN, max_length=ID_LEN)
+    employee_id: str = Field(max_length=ID_LEN)
+    salary_id: str = Field(max_length=ID_LEN)
     pay_period_start: date = Field(default_factory=pay_period_start)
     pay_period_end: date = Field(default_factory=pay_period_end)
 

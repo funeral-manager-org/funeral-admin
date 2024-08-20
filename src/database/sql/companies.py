@@ -200,7 +200,9 @@ class EmployeeORM(Base):
                         if isinstance(payslip, PaySlipORM)]
             except Exception as e:
                 print(str(e))
+                return []
             return payslip_list
+
 
         return {
             "uid": self.uid,

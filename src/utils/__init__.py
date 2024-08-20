@@ -208,19 +208,19 @@ def create_id() -> str:
 
 def create_plan_number():
     ulid = create_id()
-    return ulid[16:25]  # Extract a random part (9 characters)
+    return ulid[-9:]  # Extract a random part (9 characters)
 
 def create_claim_number():
     ulid = create_id()
-    return ulid[10:22]  # Extract a random part (12 characters)
+    return ulid[-12:]  # Extract a random part (12 characters)
 
 def create_policy_number():
     ulid = create_id()
-    return ulid[10:22]  # Extract a random part (12 characters)
+    return ulid[-9:]  # Extract a random part (9 characters)
 
 def create_employee_id() -> str:
     ulid = create_id()
-    return ulid[16:25]  # Extract a random part (9 characters)
+    return ulid[-9:]  # Extract a random part (9 characters)
 def string_today():
     return str(datetime.today().date())
 

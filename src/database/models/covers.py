@@ -1,19 +1,10 @@
 import math
-from datetime import date, datetime, timedelta
-
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from ulid import ULID
-
 from enum import Enum
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 from src.utils import create_id, create_policy_number, create_claim_number
 
-
-def create_ulid() -> str:
-    """
-    Generate a ULID (Universally Unique Lexicographically Sortable Identifier).
-    """
-    return str(ULID.from_datetime(datetime.now()))[12:]
 
 
 class PaymentMethods(Enum):
@@ -150,7 +141,7 @@ class Premiums(BaseModel):
     late_payment_threshold_days: int = Field(default=10)
     percent_charged: int = Field(default=5)
 
-    premium_id: str = Field(default_factory=create_ulid)
+    premium_id: str = Field(default_factory=create_id)
     policy_number: str
     scheduled_payment_date: date = Field(default_factory=lambda: datetime.now().date())
 
@@ -213,7 +204,7 @@ class Premiums(BaseModel):
 
 
 class PremiumReceipt(BaseModel):
-    receipt_number: str = Field(default_factory=create_ulid)
+    receipt_number: str = Field(default_factory=create_id)
     premium_id: str
 
     datetime_paid: datetime = Field(default_factory=datetime.now)

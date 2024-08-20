@@ -340,6 +340,7 @@ class TimeRecord(BaseModel):
 
     def day_and_date_clocked_out(self) -> str:
         """
+
             Returns the day of the week and the exact date worked in the format "Monday, 22 June 2025".
             Returns:
                 str: Day of the week and date worked.

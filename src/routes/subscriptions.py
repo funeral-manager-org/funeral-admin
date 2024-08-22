@@ -88,10 +88,10 @@ async def payfast_ipn():
                         amount_paid=amount_gross,
                         payment_method="payfast",
                         is_successful=True,
-                        month=1  # Assuming the payment covers 1 month, adjust if needed
+                        month=1,  # Assuming the payment covers 1 month, adjust if needed
+                        comments=f"payfast payment for company : {company_id}"
                     )
                     subscription_logger.info(f"Created Payment Type : {payment}")
-
 
                     # Store the payment in the database
                     payment_data = await subscriptions_controller.add_company_payment(payment=payment)
@@ -99,10 +99,8 @@ async def payfast_ipn():
                     # Return a success response
                     return jsonify(
                         dict(message=f"Successfully paid for {plan_name} subscription", data=payfast_dict_data)), 200
-
                 except ValidationError as e:
                     subscription_logger.warning(str(e))
-
 
             else:
                 subscription_logger.warning(f"Could not Verify if subscription is of the type Subscrtiption")

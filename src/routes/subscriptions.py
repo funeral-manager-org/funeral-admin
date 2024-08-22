@@ -89,13 +89,15 @@ async def payfast_ipn():
                     is_successful=True,
                     month=1  # Assuming the payment covers 1 month, adjust if needed
                 )
-
+                subscription_logger.info(f"Created Payment Type : {payment}")
                 # Store the payment in the database
                 payment_data = await subscriptions_controller.add_company_payment(payment=payment)
                 subscription_logger.info(f"Payment Record Created: {payment_data}")
                 # Return a success response
                 return jsonify(
                     dict(message=f"Successfully paid for {plan_name} subscription", data=payfast_dict_data)), 200
+            else:
+                subscription_logger.warning(f"Could not Verify if subscription is of the type Subscrtiption")
         else:
             # Log the issue or handle failed payment status
             subscription_logger.warning(f"Payment not complete or not a subscription: {payfast_dict_data}")

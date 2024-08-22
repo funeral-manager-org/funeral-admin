@@ -123,7 +123,7 @@ class SubscriptionsController(Controllers):
         return subscription
 
     @error_handler
-    async def add_company_payment(self, payment: Payment):
+    async def add_company_payment(self, payment: Payment) -> Payment:
         """
 
         :param payment:
@@ -132,7 +132,7 @@ class SubscriptionsController(Controllers):
         with self.get_session() as session:
             session.add(PaymentORM(**payment.dict()))
             session.commit(payment)
-
+            self.logger.info(f"Added PAYEMTN Record {payment}")
             return payment
 
     @error_handler

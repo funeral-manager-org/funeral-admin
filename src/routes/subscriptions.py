@@ -1,47 +1,20 @@
 import json
-from flask import Blueprint, url_for, flash, redirect, request, render_template, Response, jsonify
-from pydantic import ValidationError
-import hashlib
 from typing import Dict
-from src.database.models.payfast import PayFastPay
-from src.logger import init_logger
+
+from flask import Blueprint, url_for, flash, redirect, request, render_template, jsonify
+from pydantic import ValidationError
+
 from src.authentication import admin_login
 from src.database.models.companies import Company
 from src.database.models.payments import Payment
 from src.database.models.subscriptions import PlanNames, SubscriptionDetails, Subscriptions, TopUpPacks, Package
 from src.database.models.users import User
+from src.logger import init_logger
 from src.main import company_controller, paypal_controller, subscriptions_controller, payfast_controller
 
 subscriptions_route = Blueprint('subscriptions', __name__)
 
 subscription_logger = init_logger(name="subscriptions_route_logger")
-
-
-
-async def is_valid_payfast_data(payfast_dict_data: dict[str, str]) -> bool:
-    """
-    Validates the data received from PayFast by checking the signature.
-
-    :param payfast_dict_data: Dictionary containing the data received from PayFast.
-    :param passphrase: The secret passphrase provided by PayFast.
-    :return: True if the data is valid, False otherwise.
-    """
-    # Copy the data to avoid modifying the original dictionary
-    payfast_data = payfast_dict_data.copy()
-    # Remove the signature from the data as it shouldn't be part of the signature generation
-    received_signature = payfast_data.pop('signature', None)
-    if not received_signature:
-        return False  # No signature provided, invalid data
-    # Sort the data alphabetically by keys to match the signature creation order
-    sorted_data = {k: v for k, v in sorted(payfast_data.items()) if v != ""}
-    # Convert the dictionary to a URL-encoded query string
-    query_string = "&".join(f"{key}={value}" for key, value in sorted_data.items())
-
-    # Generate the signature by hashing the query string with MD5
-    generated_signature = hashlib.md5(query_string.encode('utf-8')).hexdigest()
-    return True
-    # Compare the received signature with the generated one
-    # return received_signature == generated_signature
 
 
 @subscriptions_route.post('/_ipn/payfast')
@@ -51,7 +24,7 @@ async def payfast_ipn():
     subscription_logger.info(f"Incoming Payment Notification: {payfast_dict_data}")
 
     # Validate the received data
-    if await is_valid_payfast_data(payfast_dict_data=payfast_dict_data):
+    if await payfast_controller.is_valid_payfast_data(payfast_dict_data=payfast_dict_data):
         # Extracting relevant fields from the data
         payment_status = payfast_dict_data.get('payment_status')
         amount_gross = payfast_dict_data.get('amount_gross')
@@ -169,29 +142,6 @@ async def paypal_payment(subscription_details: Subscriptions, user: User):
         flash(message=f"Error creating Payment : {payment.error}", category="danger")
         return redirect(url_for('company.get_admin'))
 
-async def payfast_payment(subscription_details: Subscriptions, user: User) -> Response:
-    from flask import url_for
-
-    # Generate HTTPS URLs for PayFast
-    return_url: str = url_for('subscriptions.payfast_payment_complete', _external=True, _scheme='https')
-    cancel_url: str = url_for('subscriptions.payfast_payment_failed', _external=True, _scheme='https')
-    notify_url: str = url_for('subscriptions.payfast_ipn', _external=True, _scheme='https')
-
-    amount: int = subscription_details.subscription_amount
-    item_name: str = f"{subscription_details.plan_name} Subscription"
-    item_description: str = f"{subscription_details.plan_name} monthly subscription"
-    payfast_payment_data = PayFastPay(return_url=return_url,
-                                      cancel_url=cancel_url,
-                                      notify_url=notify_url,
-                                      amount=amount,
-                                      item_name=item_name,
-                                      item_description=item_description,
-                                      uid=user.uid,
-                                      company_id=user.company_id,
-                                      subscription_id=subscription_details.subscription_id)
-
-    payfast_endpoint_url: str = await payfast_controller.create_payment_request(payfast_payment=payfast_payment_data)
-    return redirect(payfast_endpoint_url)
 
 async def make_direct_deposit(subscription_details: Subscriptions, user: User):
     """
@@ -222,7 +172,7 @@ async def payment_method_selected(user: User):
     if payment_method == "paypal":
         return await paypal_payment(subscription_details=subscription_details, user=user)
     elif payment_method == "payfast":
-        return await payfast_payment(subscription_details=subscription_details, user=user)
+        return await payfast_controller.payfast_payment(subscription_details=subscription_details, user=user)
     elif payment_method == "direct_deposit":
         return await make_direct_deposit(subscription_details=subscription_details, user=user)
     print(f"Payment Method: {payment_method}")

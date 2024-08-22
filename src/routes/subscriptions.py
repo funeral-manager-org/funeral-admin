@@ -1,11 +1,8 @@
 import json
-
 from flask import Blueprint, url_for, flash, redirect, request, render_template, Response, jsonify
 from pydantic import ValidationError
-
 import hashlib
 from typing import Dict
-
 from src.database.models.payfast import PayFastPay
 from src.logger import init_logger
 from src.authentication import admin_login
@@ -31,19 +28,14 @@ async def is_valid_payfast_data(payfast_dict_data: dict[str, str]) -> bool:
     """
     # Copy the data to avoid modifying the original dictionary
     payfast_data = payfast_dict_data.copy()
-
     # Remove the signature from the data as it shouldn't be part of the signature generation
     received_signature = payfast_data.pop('signature', None)
-
     if not received_signature:
         return False  # No signature provided, invalid data
-
     # Sort the data alphabetically by keys to match the signature creation order
     sorted_data = {k: v for k, v in sorted(payfast_data.items()) if v != ""}
-
     # Convert the dictionary to a URL-encoded query string
     query_string = "&".join(f"{key}={value}" for key, value in sorted_data.items())
-
 
     # Generate the signature by hashing the query string with MD5
     generated_signature = hashlib.md5(query_string.encode('utf-8')).hexdigest()
@@ -94,7 +86,7 @@ async def payfast_ipn():
                     subscription_logger.info(f"Created Payment Type : {payment}")
 
                     # Store the payment in the database
-                    payment_data = await subscriptions_controller.add_company_payment(payment=payment)
+                    payment_data: Payment = await subscriptions_controller.add_company_payment(payment=payment)
                     subscription_logger.info(f"Payment Record Created: {payment_data}")
                     # Return a success response
                     return jsonify(
@@ -122,7 +114,6 @@ async def payfast_ipn():
 @admin_login
 async def payfast_payment_complete(user: User):
     """
-
     :param user:
     :return:
     """
@@ -320,7 +311,6 @@ async def subscription_payment_failure():
 @admin_login
 async def messaging_top_up(user: User):
     """
-
     :param user:
     :return:
     """

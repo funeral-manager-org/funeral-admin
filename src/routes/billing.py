@@ -25,7 +25,7 @@ async def get_billing(user: User):
     if not subscription:
         subscription = {}
     billing_logger.info(f"{subscription}")
-    context = dict(user=user, subscription=subscription)
+    context = dict(user=user, subscription_account=subscription)
     return render_template('billing/billing.html', **context)
 
 

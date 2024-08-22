@@ -13,27 +13,27 @@
         <div class="card-body">
             <div class="card-header">
                 <h3 class="card-title font-weight-bold text-info">
-                    Account Type: {{ subscription.plan_name }}
+                    Account Type: {{ subscription_account.plan_name }}
                 </h3>
             </div>
-            {% if subscription %}
+            {% if subscription_account %}
                 <ul class="list-group">
                     <div class="card-header">
                         <h3 class="card-title font-weight-bold text-success"> Account Details</h3>
                     </div>
                     <li class="list-group-item">
                         <span class="font-weight-bold">
-                            Total Clients: <span class="text-info pull-right">{{ subscription.total_clients| number }} clients</span>
+                            Total Clients: <span class="text-info pull-right">{{ subscription_account.total_clients| number }} clients</span>
                         </span>
                     </li>
                     <li class="list-group-item">
                         <span class="font-weight-bold">
-                            Total SMS: <span class="text-info pull-right">{{ subscription.total_sms| number }} sms messages</span>
+                            Total SMS: <span class="text-info pull-right">{{ subscription_account.total_sms| number }} sms messages</span>
                         </span>
                     </li>
                     <li class="list-group-item">
                         <span class="font-weight-bold">
-                            Total Emails: <span class="text-info pull-right">{{ subscription.total_emails| number }} email messages</span>
+                            Total Emails: <span class="text-info pull-right">{{ subscription_account.total_emails| number }} email messages</span>
                         </span>
                     </li>
 
@@ -43,12 +43,12 @@
 
                     <li class="list-group-item">
                         <span class="font-weight-bold">
-                            Date Registered: <span class="text-info pull-right">{{ subscription.date_subscribed if subscription.date_subscribed else 'N/A' }}</span>
+                            Date Registered: <span class="text-info pull-right">{{ subscription_account.date_subscribed if subscription_account.date_subscribed else 'N/A' }}</span>
                         </span>
                     </li>
                     <li class="list-group-item">
                         <span class="font-weight-bold">
-                            Monthly Payment Amount: <span class="text-success pull-right">R {{ subscription.subscription_amount| number }}.00</span>
+                            Monthly Payment Amount: <span class="text-success pull-right">R {{ subscription_account.subscription_amount| number }}.00</span>
                         </span>
                     </li>
                 </ul>
@@ -60,7 +60,7 @@
                         </h3>
                     </div>
                         <div class="card-body">
-                                {% if subscription.payments %}
+                                {% if subscription_account and  subscription_account.payments %}
                                     <h4 class="mt-4">Payments</h4>
                                     <table class="table table-striped">
                                         <thead>
@@ -73,7 +73,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for payment in subscription.payments %}
+                                            {% for payment in subscription_account.payments %}
                                                 <tr>
                                                     <td>{{ payment.date_paid.strftime('%Y-%m-%d') }}</td>
                                                     <td>R {{ payment.amount_paid| number }}.00</td>
@@ -103,26 +103,16 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="card card-columns shadow-lg border-primary">
-                            <form class="form-horizontal" method="POST" action="{{ url_for('billing.do_pay_now') }}">
-                                <button class="btn btn-block btn-outline-primary btn-lg btn-rounded">
-                                    <i class="fa fa-paypal"> </i>
-                                    PAY NOW
-                                </button>
-                            </form>
-{#                                <button class="btn btn-block btn-outline-success btn-lg btn-rounded">#}
-{#                                    <i class="fa fa-arrow-up"> </i>#}
-{#                                    Upgrade Account#}
-{#                                </button>#}
-{##}
-{##}
-{#                            <button class="btn btn-block btn-outline-danger btn-lg btn-rounded">#}
-{#                                <i class="fa fa-arrow-down"> </i>#}
-{#                                Downgrade Account#}
-{#                            </button>#}
+                        {% if subscription_account and not subscription_account.is_paid_for_current_month %}
+                                <div class="card card-columns shadow-lg border-primary">
+                                    <button  class="btn btn-lg btn-outline-info btn-rounded btn-block"
+                                    data-toggle="modal" data-target="#paymentMethodsModal"
+                                    >
+                                        PAY NOW
+                                    </button>
 
-                        </div>
-
+                                </div>
+                        {% endif %}
             {% else %}
                 <p>No subscription data available.</p>
             {% endif %}
@@ -131,3 +121,6 @@
 </section>
 
 {% endblock %}
+
+
+{% include "admin/managers/subscriptions/payment_methods.html" %}

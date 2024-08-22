@@ -21,7 +21,7 @@ subscription_logger = init_logger(name="subscriptions_route_logger")
 
 
 
-async def is_valid_payfast_data(payfast_dict_data: dict[str, str], passphrase: str) -> bool:
+async def is_valid_payfast_data(payfast_dict_data: dict[str, str]) -> bool:
     """
     Validates the data received from PayFast by checking the signature.
 
@@ -44,15 +44,12 @@ async def is_valid_payfast_data(payfast_dict_data: dict[str, str], passphrase: s
     # Convert the dictionary to a URL-encoded query string
     query_string = "&".join(f"{key}={value}" for key, value in sorted_data.items())
 
-    # Append the passphrase to the query string if provided
-    if passphrase:
-        query_string += f"&passphrase={passphrase}"
 
     # Generate the signature by hashing the query string with MD5
     generated_signature = hashlib.md5(query_string.encode('utf-8')).hexdigest()
-    return True
+
     # Compare the received signature with the generated one
-    # return received_signature == generated_signature
+    return received_signature == generated_signature
 
 
 @subscriptions_route.post('/_ipn/payfast')

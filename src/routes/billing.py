@@ -21,10 +21,10 @@ async def get_billing(user: User):
     :return:
     """
 
-    subscription = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
+    subscription: Subscriptions = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
     if not subscription:
         subscription = {}
-
+    billing_logger.info(f"{subscription}")
     context = dict(user=user, subscription=subscription)
     return render_template('billing/billing.html', **context)
 

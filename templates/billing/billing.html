@@ -68,14 +68,29 @@
                                                 <th class="font-weight-bold text-info">Date</th>
                                                 <th class="font-weight-bold text-info">Amount</th>
                                                 <th class="font-weight-bold text-info">Status</th>
+                                                <th class="font-weight-bold text-info">Print</th>
+                                                <th class="font-weight-bold text-info"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for payment in subscription.payments %}
                                                 <tr>
-                                                    <td>{{ payment.payment_date if payment.payment_date else 'N/A' }}</td>
-                                                    <td>R {{ payment.amount| number }}.00</td>
-                                                    <td>{{ payment.payment_status }}</td>
+                                                    <td>{{ payment.date_paid.strftime('%Y-%m-%d') }}</td>
+                                                    <td>R {{ payment.amount_paid| number }}.00</td>
+                                                    <td>
+                                                        {% if payment.is_successful %}
+                                                            <span class="badge badge-success">Sucess</span>
+                                                        {% else %}
+                                                            <span class="badge badge-danger">Failed</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-rounded btn-outline-info">
+                                                        <i class="fa fa-print"> </i>
+                                                        Invoice
+                                                        </button>
+                                                    </td>
+                                                    <td></td>
                                                 </tr>
                                             {% endfor %}
                                         </tbody>

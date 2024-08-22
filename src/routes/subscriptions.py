@@ -20,7 +20,7 @@ subscription_logger = init_logger(name="subscriptions_route_logger")
 async def is_valid_payfast_data(payfast_dict_data: dict[str, str]):
     return True
 
-@subscriptions_route.get('/_ipn/payfast')
+@subscriptions_route.post('/_ipn/payfast')
 async def payfast_ipn():
     """
 

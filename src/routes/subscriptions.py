@@ -78,11 +78,11 @@ async def payfast_ipn():
         subscription_id = payfast_dict_data.get("custom_str1")
         company_id = payfast_dict_data.get("custom_str2")
         uid = payfast_dict_data.get("custom_str3")
-
+        subscription_logger.info(f"Verified Request Data For ITN of company: {company_id} ")
         if payment_status == "COMPLETE" and payment_type.casefold() == "subscription":
             # Fetch the subscription details based on company_id
             subscription = await subscriptions_controller.get_company_subscription(company_id=company_id)
-
+            subscription_logger.info(f"Able to Retrive the Company Subsciption: {subscription}")
             if isinstance(subscription, Subscriptions):
                 # Create a Payment record for the subscription
                 payment = Payment(
@@ -94,8 +94,8 @@ async def payfast_ipn():
                 )
 
                 # Store the payment in the database
-                _ = await subscriptions_controller.add_company_payment(payment=payment)
-
+                payment_data = await subscriptions_controller.add_company_payment(payment=payment)
+                subscription_logger.info(f"Payment Record Created: {payment_data}")
                 # Return a success response
                 return jsonify(
                     dict(message=f"Successfully paid for {plan_name} subscription", data=payfast_dict_data)), 200
@@ -109,7 +109,7 @@ async def payfast_ipn():
         return jsonify(dict(message="Invalid data received", data=payfast_dict_data)), 400
 
 
-@subscriptions_route.get('/subscriptions/payfast')
+@subscriptions_route.get('/subscriptions/payfast-success')
 @admin_login
 async def payfast_payment_complete(user: User):
     """
@@ -117,9 +117,20 @@ async def payfast_payment_complete(user: User):
     :param user:
     :return:
     """
-    request_form_data = request.form.to_dict()
-    subscription_logger.info(f"Request Form Data {request_form_data}")
-    return jsonify(dict(message=f"successfully paid for ", data=request_form_data)), 200
+    flash(message="Payment completed successfully", category="success")
+    return redirect(url_for('company.get_admin'))
+
+@subscriptions_route.get('/subscriptions/payfast-failure')
+@admin_login
+async def payfast_payment_failed(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    flash(message="Payment was cancelled please try again later", category="danger")
+    return redirect(url_for('company.get_admin'))
+
 
 @subscriptions_route.get('/subscriptions/subscriptions')
 @admin_login
@@ -163,7 +174,7 @@ async def payfast_payment(subscription_details: Subscriptions, user: User) -> Re
 
     # Generate HTTPS URLs for PayFast
     return_url: str = url_for('subscriptions.payfast_payment_complete', _external=True, _scheme='https')
-    cancel_url: str = url_for('subscriptions.get_subscriptions', _external=True, _scheme='https')
+    cancel_url: str = url_for('subscriptions.payfast_payment_failed', _external=True, _scheme='https')
     notify_url: str = url_for('subscriptions.payfast_ipn', _external=True, _scheme='https')
 
     amount: int = subscription_details.subscription_amount

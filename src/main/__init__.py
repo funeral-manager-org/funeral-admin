@@ -14,6 +14,7 @@ from src.controller.company_controller import CompanyController
 from src.controller.employees_controller import EmployeesController
 from src.controller.covers_controller import CoversController
 from src.controller.paypal_controller import PayPalController
+from src.controller.payfast_controller import PayfastController
 from src.controller.chat_controller import ChatController
 from src.controller.messaging_controller import MessagingController
 from src.controller.notifications_controller import NotificationsController
@@ -30,6 +31,7 @@ employee_controller = EmployeesController()
 
 covers_controller = CoversController()
 paypal_controller = PayPalController()
+payfast_controller = PayfastController()
 chat_controller = ChatController()
 messaging_controller = MessagingController()
 notifications_controller = NotificationsController()
@@ -103,6 +105,7 @@ def create_app(config):
         employee_controller.init_app(app=app)
 
         paypal_controller.init_app(app=app, config_instance=config)
+        payfast_controller.init_app(app=app, settings=config)
         chat_controller.init_app(app=app)
         system_controller.init_app(app=app)
 

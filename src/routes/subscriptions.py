@@ -1,20 +1,71 @@
 import json
 
-from flask import Blueprint, url_for, flash, redirect, request, render_template
+from flask import Blueprint, url_for, flash, redirect, request, render_template, Response, jsonify
 from pydantic import ValidationError
 
+from src.database.models.payfast import PayFastPay
 from src.logger import init_logger
 from src.authentication import admin_login
 from src.database.models.companies import Company
 from src.database.models.payments import Payment
 from src.database.models.subscriptions import PlanNames, SubscriptionDetails, Subscriptions, TopUpPacks, Package
 from src.database.models.users import User
-from src.main import company_controller, paypal_controller, subscriptions_controller
+from src.main import company_controller, paypal_controller, subscriptions_controller, payfast_controller
 
 subscriptions_route = Blueprint('subscriptions', __name__)
 
 subscription_logger = init_logger(name="subscriptions_route_logger")
 
+
+async def is_valid_payfast_data(payfast_dict_data: dict[str, str]):
+    return True
+
+@subscriptions_route.get('/_ipn/payfast')
+async def payfast_ipn():
+    """
+
+    :return:
+    """
+
+    payfast_dict_data: dict[str, str] = request.form.to_dict()
+    subscription_logger.info(f"Payfast IPN : {payfast_dict_data}")
+    subscription_logger.info(f"Incoming Payment Notification: {payfast_dict_data}")
+
+    if await is_valid_payfast_data(payfast_dict_data=payfast_dict_data):
+        payment_status = payfast_dict_data.get('payment_status')
+        amount_gross = payfast_dict_data.get('amount_gross')
+        pf_payment_id = payfast_dict_data.get('pf_payment_id')
+        item_name = payfast_dict_data.get('item_name')
+        email_address = payfast_dict_data.get('email_address')
+        merchant_id = payfast_dict_data.get('merchant_id')
+        plan_name, payment_type = item_name.split(" ")
+        subscription_id = payfast_dict_data.get("subscription_id")
+        company_id = payfast_dict_data.get("company_id")
+        uid = payfast_dict_data.get("uid")
+        if payment_type.casefold() == "subscription":
+            subscription = await subscriptions_controller.get_company_subscription(company_id=company_id)
+            if isinstance(subscription, Subscriptions):
+                payment = Payment(subscription_id=subscription.subscription_id,
+                                  amount_paid=amount_gross,
+                                  payment_method="payfast",
+                                  is_successful=True,
+                                  month=1)
+
+                _ = await subscriptions_controller.add_company_payment(payment=payment)
+
+            return jsonify(dict(message=f"successfully paid for {plan_name}", data=payfast_dict_data)), 200
+
+@subscriptions_route.get('/subscriptions/payfast')
+@admin_login
+async def payfast_payment_complete(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    request_form_data = request.form.to_dict()
+    subscription_logger.info(f"Request Form Data {request_form_data}")
+    return jsonify(dict(message=f"successfully paid for ", data=request_form_data)), 200
 
 @subscriptions_route.get('/subscriptions/subscriptions')
 @admin_login
@@ -40,8 +91,8 @@ async def paypal_payment(subscription_details: Subscriptions, user: User):
 
     :return:
     """
-    success_url: str = url_for('subscriptions.subscription_payment_successful')
-    failure_url: str = url_for('subscriptions.subscription_payment_failure')
+    success_url: str = url_for('subscriptions.subscription_payment_successful', _external=True)
+    failure_url: str = url_for('subscriptions.subscription_payment_failure', _external=True)
     payment, is_created = await paypal_controller.create_payment(payment_details=subscription_details, user=user,
                                                                  success_url=success_url, failure_url=failure_url)
     if is_created:
@@ -52,6 +103,28 @@ async def paypal_payment(subscription_details: Subscriptions, user: User):
     else:
         flash(message=f"Error creating Payment : {payment.error}", category="danger")
         return redirect(url_for('company.get_admin'))
+
+async def payfast_payment(subscription_details: Subscriptions, user: User) -> Response:
+
+    return_url:str =  str(url_for('subscriptions.payfast_payment_complete', _external=True))
+    cancel_url:str = str(url_for('subscriptions.get_subscriptions', _external=True))
+    notify_url:str = str(url_for('subscriptions.payfast_ipn', _external=True))
+
+    amount: int = subscription_details.subscription_amount
+    item_name: str = f"{subscription_details.plan_name} Subscription"
+    item_description: str = f"{subscription_details.plan_name} monthly subscription"
+    payfast_payment_data = PayFastPay(return_url=return_url,
+                                      cancel_url=cancel_url,
+                                      notify_url=notify_url,
+                                      amount=amount,
+                                      item_name=item_name,
+                                      item_description=item_description,
+                                      uid=user.uid,
+                                      company_id=user.company_id,
+                                      subscription_id=subscription_details.subscription_id)
+
+    payfast_endpoint_url: str = await payfast_controller.create_payment_request(payfast_payment=payfast_payment_data)
+    return redirect(payfast_endpoint_url)
 
 async def make_direct_deposit(subscription_details: Subscriptions, user: User):
     """
@@ -81,6 +154,8 @@ async def payment_method_selected(user: User):
         return redirect(url_for('subscriptions.get_subscriptions'))
     if payment_method == "paypal":
         return await paypal_payment(subscription_details=subscription_details, user=user)
+    elif payment_method == "payfast":
+        return await payfast_payment(subscription_details=subscription_details, user=user)
     elif payment_method == "direct_deposit":
         return await make_direct_deposit(subscription_details=subscription_details, user=user)
     print(f"Payment Method: {payment_method}")
@@ -111,7 +186,6 @@ async def do_subscribe(user: User, option: str):
     await subscriptions_controller.add_update_company_subscription(subscription=subscription)
     flash(message=f"you have successfully created a {subscription.plan_name} Account",category="success")
     return redirect(url_for('subscriptions.get_subscriptions'))
-
 
 
 @subscriptions_route.get('/subscriptions/payment/success')

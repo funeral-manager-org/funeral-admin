@@ -80,6 +80,12 @@ class EmailSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
     RESEND: ResendSettings = ResendSettings()
 
+class PayfastSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
+    MERCHANT_ID: str = Field(default=os.environ.get("PAYFAST_MERCHANT_ID"))
+    MERCHANT_KEY: str = Field(default=os.environ.get("PAYFAST_MERCHANT_KEY"))
+    SANDBOX_MERCHANT_ID:str = Field(default=os.environ.get("PAYFAST_SANDBOX_MERCHANT_ID"))
+    SANDBOX_MERCHANT_KEY:str = Field(default=os.environ.get("PAYFAST_SANDBOX_MERCHANT_KEY"))
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
@@ -93,7 +99,7 @@ class Settings(BaseSettings):
     DEVELOPMENT_SERVER_NAME: str = Field(default="mothetho")
     LOGGING: Logging = Logging()
     HOST_ADDRESSES: str = Field(default=os.environ.get('HOST_ADDRESSES'))
-    PAY_FAST_SECRET_KEY: str = Field(default=os.environ.get("PAYFAST_SECRET_KEY"))
+    PAYFAST: PayfastSettings = PayfastSettings()
     FLUTTERWAVE_SECRET_ID: str = Field(default=os.environ.get("FLUTTERWAVE_SECRET_ID"))
     FLUTTERWAVE_FLW_SECRET_KEY: str = Field(default=os.environ.get("FLUTTERWAVE_SECRET_KEY"))
     FLUTTERWAVE_HASH: str = Field(default=os.environ.get("FLUTTERWAVE_HASH"))

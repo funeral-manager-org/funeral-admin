@@ -25,10 +25,13 @@ class PayfastController(Controllers):
         self.payfast_data.item_description = payfast_payment.item_description
         self.payfast_data.amount = payfast_payment.amount
         self.payfast_data.uid = payfast_payment.uid
-        self.company_id = payfast_payment.company_id
-        self.subscription_id = payfast_payment.subscription_id
+        self.payfast_data.company_id = payfast_payment.company_id
+        self.payfast_data.subscription_id = payfast_payment.subscription_id
 
         data = self.payfast_data.dict()
+        data.update(custom_str1=payfast_payment.subscription_id)
+        data.update(custom_str2=payfast_payment.company_id)
+        data.update(custom_str3=payfast_payment.uid)
 
         return self.payfast_api_endpoint + '&'.join([f'{key}={value}' for key, value in data.items()])
 

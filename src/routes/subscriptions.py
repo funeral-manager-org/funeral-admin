@@ -3,6 +3,9 @@ import json
 from flask import Blueprint, url_for, flash, redirect, request, render_template, Response, jsonify
 from pydantic import ValidationError
 
+import hashlib
+from typing import Dict
+
 from src.database.models.payfast import PayFastPay
 from src.logger import init_logger
 from src.authentication import admin_login
@@ -17,43 +20,94 @@ subscriptions_route = Blueprint('subscriptions', __name__)
 subscription_logger = init_logger(name="subscriptions_route_logger")
 
 
-async def is_valid_payfast_data(payfast_dict_data: dict[str, str]):
-    return True
+
+async def is_valid_payfast_data(payfast_dict_data: dict[str, str], passphrase: str) -> bool:
+    """
+    Validates the data received from PayFast by checking the signature.
+
+    :param payfast_dict_data: Dictionary containing the data received from PayFast.
+    :param passphrase: The secret passphrase provided by PayFast.
+    :return: True if the data is valid, False otherwise.
+    """
+    # Copy the data to avoid modifying the original dictionary
+    payfast_data = payfast_dict_data.copy()
+
+    # Remove the signature from the data as it shouldn't be part of the signature generation
+    received_signature = payfast_data.pop('signature', None)
+
+    if not received_signature:
+        return False  # No signature provided, invalid data
+
+    # Sort the data alphabetically by keys to match the signature creation order
+    sorted_data = {k: v for k, v in sorted(payfast_data.items()) if v != ""}
+
+    # Convert the dictionary to a URL-encoded query string
+    query_string = "&".join(f"{key}={value}" for key, value in sorted_data.items())
+
+    # Append the passphrase to the query string if provided
+    if passphrase:
+        query_string += f"&passphrase={passphrase}"
+
+    # Generate the signature by hashing the query string with MD5
+    generated_signature = hashlib.md5(query_string.encode('utf-8')).hexdigest()
+
+    # Compare the received signature with the generated one
+    return received_signature == generated_signature
+
 
 @subscriptions_route.post('/_ipn/payfast')
 async def payfast_ipn():
-    """
-
-    :return:
-    """
-
-    payfast_dict_data: dict[str, str] = request.form.to_dict()
-    subscription_logger.info(f"Payfast IPN : {payfast_dict_data}")
+    # Convert the incoming form data to a dictionary
+    payfast_dict_data: Dict[str, str] = request.form.to_dict()
     subscription_logger.info(f"Incoming Payment Notification: {payfast_dict_data}")
 
+    # Validate the received data
     if await is_valid_payfast_data(payfast_dict_data=payfast_dict_data):
+        # Extracting relevant fields from the data
         payment_status = payfast_dict_data.get('payment_status')
         amount_gross = payfast_dict_data.get('amount_gross')
         pf_payment_id = payfast_dict_data.get('pf_payment_id')
         item_name = payfast_dict_data.get('item_name')
         email_address = payfast_dict_data.get('email_address')
         merchant_id = payfast_dict_data.get('merchant_id')
-        plan_name, payment_type = item_name.split(" ")
-        subscription_id = payfast_dict_data.get("subscription_id")
-        company_id = payfast_dict_data.get("company_id")
-        uid = payfast_dict_data.get("uid")
-        if payment_type.casefold() == "subscription":
-            subscription = await subscriptions_controller.get_company_subscription(company_id=company_id)
-            if isinstance(subscription, Subscriptions):
-                payment = Payment(subscription_id=subscription.subscription_id,
-                                  amount_paid=amount_gross,
-                                  payment_method="payfast",
-                                  is_successful=True,
-                                  month=1)
 
+        # Parsing the item_name to get plan_name and payment_type
+        plan_name, payment_type = item_name.split(" ")
+
+        # Custom fields which might not be present
+        subscription_id = payfast_dict_data.get("custom_str1")
+        company_id = payfast_dict_data.get("custom_str2")
+        uid = payfast_dict_data.get("custom_str3")
+
+        if payment_status == "COMPLETE" and payment_type.casefold() == "subscription":
+            # Fetch the subscription details based on company_id
+            subscription = await subscriptions_controller.get_company_subscription(company_id=company_id)
+
+            if isinstance(subscription, Subscriptions):
+                # Create a Payment record for the subscription
+                payment = Payment(
+                    subscription_id=subscription.subscription_id,
+                    amount_paid=amount_gross,
+                    payment_method="payfast",
+                    is_successful=True,
+                    month=1  # Assuming the payment covers 1 month, adjust if needed
+                )
+
+                # Store the payment in the database
                 _ = await subscriptions_controller.add_company_payment(payment=payment)
 
-            return jsonify(dict(message=f"successfully paid for {plan_name}", data=payfast_dict_data)), 200
+                # Return a success response
+                return jsonify(
+                    dict(message=f"Successfully paid for {plan_name} subscription", data=payfast_dict_data)), 200
+        else:
+            # Log the issue or handle failed payment status
+            subscription_logger.warning(f"Payment not complete or not a subscription: {payfast_dict_data}")
+            return jsonify(dict(message="Payment not complete or invalid payment type", data=payfast_dict_data)), 400
+    else:
+        # Handle invalid data, possibly log and alert
+        subscription_logger.warning(f"Invalid PayFast data received: {payfast_dict_data}")
+        return jsonify(dict(message="Invalid data received", data=payfast_dict_data)), 400
+
 
 @subscriptions_route.get('/subscriptions/payfast')
 @admin_login

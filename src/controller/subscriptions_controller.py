@@ -131,8 +131,7 @@ class SubscriptionsController(Controllers):
         """
         with self.get_session() as session:
             session.add(PaymentORM(**payment.dict()))
-            session.commit(payment)
-            self.logger.info(f"Added PAYEMTN Record {payment}")
+            self.logger.info(f"Added PAYMENT Record {payment}")
             return payment
 
     @error_handler

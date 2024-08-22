@@ -82,22 +82,34 @@ async def payfast_ipn():
             subscription_logger.info(f"Able to Retrive the Company Subsciption: {subscription}")
             if isinstance(subscription, Subscriptions):
                 # Create a Payment record for the subscription
-                payment = Payment(
-                    subscription_id=subscription.subscription_id,
-                    amount_paid=amount_gross,
-                    payment_method="payfast",
-                    is_successful=True,
-                    month=1  # Assuming the payment covers 1 month, adjust if needed
-                )
-                subscription_logger.info(f"Created Payment Type : {payment}")
-                # Store the payment in the database
-                payment_data = await subscriptions_controller.add_company_payment(payment=payment)
-                subscription_logger.info(f"Payment Record Created: {payment_data}")
-                # Return a success response
-                return jsonify(
-                    dict(message=f"Successfully paid for {plan_name} subscription", data=payfast_dict_data)), 200
+                try:
+                    payment = Payment(
+                        subscription_id=subscription.subscription_id,
+                        amount_paid=amount_gross,
+                        payment_method="payfast",
+                        is_successful=True,
+                        month=1  # Assuming the payment covers 1 month, adjust if needed
+                    )
+                    subscription_logger.info(f"Created Payment Type : {payment}")
+
+
+                    # Store the payment in the database
+                    payment_data = await subscriptions_controller.add_company_payment(payment=payment)
+                    subscription_logger.info(f"Payment Record Created: {payment_data}")
+                    # Return a success response
+                    return jsonify(
+                        dict(message=f"Successfully paid for {plan_name} subscription", data=payfast_dict_data)), 200
+
+                except ValidationError as e:
+                    subscription_logger.warning(str(e))
+
+
             else:
                 subscription_logger.warning(f"Could not Verify if subscription is of the type Subscrtiption")
+
+            subscription_logger.warning(f"Payment not complete or not a subscription: {payfast_dict_data}")
+            return jsonify(dict(message="Payment not complete or invalid payment type", data=payfast_dict_data)), 400
+
         else:
             # Log the issue or handle failed payment status
             subscription_logger.warning(f"Payment not complete or not a subscription: {payfast_dict_data}")

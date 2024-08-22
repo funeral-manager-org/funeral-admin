@@ -91,8 +91,8 @@ async def paypal_payment(subscription_details: Subscriptions, user: User):
 
     :return:
     """
-    success_url: str = url_for('subscriptions.subscription_payment_successful', _external=True)
-    failure_url: str = url_for('subscriptions.subscription_payment_failure', _external=True)
+    success_url: str = url_for('subscriptions.subscription_payment_successful', _external=True, _scheme='https')
+    failure_url: str = url_for('subscriptions.subscription_payment_failure', _external=True, _scheme='https')
     payment, is_created = await paypal_controller.create_payment(payment_details=subscription_details, user=user,
                                                                  success_url=success_url, failure_url=failure_url)
     if is_created:
@@ -105,10 +105,12 @@ async def paypal_payment(subscription_details: Subscriptions, user: User):
         return redirect(url_for('company.get_admin'))
 
 async def payfast_payment(subscription_details: Subscriptions, user: User) -> Response:
+    from flask import url_for
 
-    return_url:str =  str(url_for('subscriptions.payfast_payment_complete', _external=True))
-    cancel_url:str = str(url_for('subscriptions.get_subscriptions', _external=True))
-    notify_url:str = str(url_for('subscriptions.payfast_ipn', _external=True))
+    # Generate HTTPS URLs for PayFast
+    return_url: str = url_for('subscriptions.payfast_payment_complete', _external=True, _scheme='https')
+    cancel_url: str = url_for('subscriptions.get_subscriptions', _external=True, _scheme='https')
+    notify_url: str = url_for('subscriptions.payfast_ipn', _external=True, _scheme='https')
 
     amount: int = subscription_details.subscription_amount
     item_name: str = f"{subscription_details.plan_name} Subscription"

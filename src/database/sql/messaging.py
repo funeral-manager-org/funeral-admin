@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, inspect, Integer, Boolean, Text
+from sqlalchemy import Column, String, inspect, Integer, Boolean, Text, DateTime, func
 
 from src.database.constants import ID_LEN, NAME_LEN
 from src.database.sql import Base, engine
@@ -58,7 +58,7 @@ class SMSComposeORM(Base):
     date_time_sent: str = Column(String(36))
     is_delivered: bool = Column(Boolean)
     client_responded: bool = Column(Boolean)
-
+    sent_at = Column(DateTime, default=func.now())
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
@@ -100,6 +100,8 @@ class EmailComposeORM(Base):
     recipient_type = Column(String(NAME_LEN))
     is_sent = Column(Boolean)
     date_time_sent = Column(String(36))
+    sent_at = Column(DateTime, default=func.now())
+
 
     @classmethod
     def create_if_not_table(cls):

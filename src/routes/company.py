@@ -398,7 +398,6 @@ async def add_update_branch_contacts(user: User, branch_id: str):
     :return:
     """
     try:
-
         branch_contacts = Contacts(**request.form)
         if not is_valid_ulid(value=branch_contacts.contact_id):
             flash(message="Could not verify your request (Request Contains bad data)", category="danger")
@@ -527,6 +526,11 @@ async def create_new_employee_user_detail(branch_id: str, employee_: EmployeeDet
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+
     password = await user_controller.create_employee_password()
     password_hash = encryptor.create_hash(password=password)
 
@@ -618,6 +622,10 @@ async def add_employee_address(user: User, branch_id: str, employee_id: str):
 
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if not is_valid_ulid(value=branch_id):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('company.get_admin'))
@@ -671,6 +679,10 @@ async def add_employee_bank_account(user: User, branch_id: str, employee_id: str
     :param employee_id:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if not is_valid_ulid(value=branch_id):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('company.get_admin'))
@@ -726,6 +738,10 @@ async def add_employee_contacts(user: User, branch_id: str, employee_id: str):
     :param employee_id:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if not is_valid_ulid(value=branch_id):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('company.get_admin'))
@@ -775,6 +791,11 @@ async def add_employee_postal_address(user: User, branch_id: str, employee_id: s
     :param employee_id:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+
     if not is_valid_ulid(value=branch_id):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('company.get_admin'))

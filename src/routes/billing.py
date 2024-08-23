@@ -2,13 +2,12 @@ import datetime
 
 from flask import Blueprint, render_template, url_for, redirect, flash, request
 
+from src.authentication import admin_login
 from src.database.models.payments import Payment
 from src.database.models.subscriptions import Subscriptions, SubscriptionDetails
-from src.database.models.companies import Company
-from src.main import subscriptions_controller, company_controller, paypal_controller
-from src.authentication import admin_login
 from src.database.models.users import User
 from src.logger import init_logger
+from src.main import subscriptions_controller, paypal_controller
 
 billing_route = Blueprint('billing', __name__)
 billing_logger = init_logger('billing_logger')
@@ -61,11 +60,11 @@ async def do_pay_now(user: User):
     :param user:
     :return:
     """
-    company_detail: Company = await company_controller.get_company_details(company_id=user.company_id)
+    # company_detail: Company = await company_controller.get_company_details(company_id=user.company_id)
     subscription: Subscriptions = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
 
-    success_url: str = url_for('billing.payment_successful')
-    failure_url: str = url_for('billing.payment_failure')
+    success_url: str = url_for('billing.payment_successful', _external=True, _scheme='https')
+    failure_url: str = url_for('billing.payment_failure', _external=True, _scheme='https')
 
     payment, is_created = await paypal_controller.create_payment(payment_details=subscription,
                                                                  user=user,

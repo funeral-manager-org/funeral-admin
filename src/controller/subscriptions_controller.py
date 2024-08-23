@@ -1,9 +1,12 @@
 import asyncio
 from datetime import datetime, timedelta
 
-from flask import Flask, render_template
+from flask import Flask, render_template, flash, redirect, url_for
 from sqlalchemy.orm import joinedload
 
+from src.database.models.covers import InsuredParty
+from src.database.sql.messaging import EmailComposeORM, SMSComposeORM
+from src.database.sql.covers import ClientPersonalInformationORM
 from src.database.sql.companies import CompanyBranchesORM
 from src.database.sql.user import UserORM
 from src.controller import Controllers, error_handler
@@ -327,3 +330,103 @@ class SubscriptionsController(Controllers):
     async def return_all_plan_details(self) -> list[SubscriptionDetails]:
         """will return a definition of all subscription plans"""
         return [await self.return_plan_details(plan_name=plan_name) for plan_name in await self.return_plan_names() if plan_name]
+
+    async def is_subscription_active(self, user: User):
+        """
+
+        :param user:
+        :return:
+        """
+        subscription: Subscriptions = await self.get_company_subscription(company_id=user.company_id)
+        return subscription.is_expired() and subscription.is_paid_for_current_month if subscription else False
+
+    async def route_guard(self, user: User):
+        """
+
+        :param user:
+        :return:
+        """
+        if not await self.is_subscription_active(user=user):
+            mes: str = """Please ensure you are subscribed and paid for your subscription 
+            this month before proceeding with this action"""
+            flash(message=mes, category="danger")
+            return redirect(url_for('company.get_admin'))
+        return None
+
+    async def subscription_can_accept_policy_holders(self, user: User) -> bool:
+        """
+            given a subscription check if we can still add one more policy holder
+        :param user:
+        :return:
+        """
+        subscription: Subscriptions = await self.get_company_subscription(company_id=user.company_id)
+        with self.get_session() as session:
+            policy_holder = InsuredParty.POLICY_HOLDER.value
+            policy_holder_count = session.query(ClientPersonalInformationORM).filter_by(
+                company_id=user.company_id,insured_party=policy_holder).count()
+
+            return subscription.total_clients < policy_holder_count
+
+    async def subscription_can_send_emails(self, user: User, email_count: int = 1) -> bool:
+        """
+        Check if the subscription can still send emails.
+
+        :param user: User object
+        :param email_count: Number of emails intended to be sent
+        :return: True if the subscription can send the emails, False otherwise
+        """
+        subscription: Subscriptions = await self.get_company_subscription(company_id=user.company_id)
+
+        with self.get_session() as session:
+            company_branches: list[CompanyBranchesORM] = session.query(
+                CompanyBranchesORM
+            ).filter_by(
+                company_id=user.company_id
+            ).all()
+
+            total_count = 0
+            begin_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+            for branch in company_branches:
+                email_count_for_branch = session.query(EmailComposeORM).filter(
+                    EmailComposeORM.to_branch == branch.branch_id,
+                    EmailComposeORM.sent_at >= begin_of_month
+                ).count()
+
+                total_count += email_count_for_branch
+
+            # Check if adding the new emails would exceed the limit
+            return (total_count + email_count) <= subscription.total_emails
+
+
+    async def subscription_can_send_sms(self, user: User, sms_count: int = 1) -> bool:
+        """
+        Check if the subscription can still send emails.
+
+        :param user: User object
+        :param email_count: Number of emails intended to be sent
+        :return: True if the subscription can send the emails, False otherwise
+        """
+        subscription: Subscriptions = await self.get_company_subscription(company_id=user.company_id)
+
+        with self.get_session() as session:
+            company_branches: list[CompanyBranchesORM] = session.query(
+                CompanyBranchesORM
+            ).filter_by(
+                company_id=user.company_id
+            ).all()
+
+            total_count = 0
+            begin_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+            for branch in company_branches:
+                sms_count_for_branch = session.query(SMSComposeORM).filter(
+                    EmailComposeORM.to_branch == branch.branch_id,
+                    EmailComposeORM.sent_at >= begin_of_month
+                ).count()
+
+                total_count += sms_count_for_branch
+
+            # Check if adding the new emails would exceed the limit
+            return (total_count + sms_count) <= subscription.total_sms
+

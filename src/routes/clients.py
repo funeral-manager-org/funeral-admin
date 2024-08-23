@@ -7,7 +7,7 @@ from src.database.models.contacts import Address, PostalAddress, Contacts
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, InsuredParty
 from src.database.models.users import User
 from src.logger import init_logger
-from src.main import company_controller, covers_controller
+from src.main import company_controller, covers_controller, subscriptions_controller
 from src.utils import is_valid_ulid
 
 clients_route = Blueprint('clients', __name__)
@@ -24,6 +24,10 @@ async def get_client(user: User, uid: str):
     :return: Rendered template
     """
     # Retrieve all necessary data in parallel
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     policy_holder = await company_controller.get_policy_holder(uid=uid)
 
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
@@ -70,6 +74,10 @@ async def get_clients(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     plan_covers = await company_controller.get_company_covers(company_id=user.company_id)
     policy_holders_list = await company_controller.get_policy_holders(company_id=user.company_id)
@@ -92,6 +100,10 @@ async def get_policy_holders_paged(user: User, page: int = 0, count: int = 25):
     :param count:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     # Guard statement: ensure page and count are not both more than 100
     if (page > 1000) or (count > 1000):
         flash(message="your request is out of bounds", category="danger")
@@ -113,6 +125,10 @@ async def get_client_capture(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     plan_covers = await company_controller.get_company_covers(company_id=user.company_id)
     countries = await company_controller.get_countries()
@@ -128,9 +144,21 @@ async def get_client_capture(user: User):
 async def add_client(user: User):
     """
 
-    :param user:
-    :return:
+        :param user:
+        :return:
     """
+    # checking is company has an active subscription
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+    # checking if the current subscription accepts extra policy holders
+    if not await subscriptions_controller.subscription_can_accept_policy_holders(user=user):
+        message: str = """Your Subscription can no longer accept extra policy holders 
+        please upgrade your account or create a ticket"""
+        flash(message=message, category="danger")
+        return redirect('company.get_admin')
+
     try:
         policy_holder: ClientPersonalInformation = ClientPersonalInformation(**request.form)
         policy_holder.insured_party = str(InsuredParty.POLICY_HOLDER.value)
@@ -188,9 +216,13 @@ async def add_client(user: User):
 async def edit_policy_details(user: User):
     """
 
-    :param user:
-    :return:
+        :param user:
+        :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     try:
         policy_data = PolicyRegistrationData(**request.form, premiums=[])
         uid = policy_data.uid
@@ -221,6 +253,10 @@ async def add_beneficiary_dependent(user: User, policy_number: str):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if not is_valid_ulid(value=policy_number):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('home.get_home'))
@@ -249,6 +285,10 @@ async def add_bank_account(user: User, uid: str):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if not is_valid_ulid(value=uid):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('home.get_home'))
@@ -282,6 +322,10 @@ async def add_address(user: User, uid: str):
     :param uid:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if not is_valid_ulid(value=uid):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('home.get_home'))
@@ -315,6 +359,10 @@ async def add_postal_address(user: User, uid: str):
     :param uid:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if not is_valid_ulid(value=uid):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('home.get_home'))
@@ -348,6 +396,10 @@ async def add_contacts(user: User, uid: str):
     :param uid:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if not is_valid_ulid(value=uid):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('home.get_home'))

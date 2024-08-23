@@ -11,7 +11,7 @@ from src.database.models.companies import EmployeeDetails, CompanyBranches, Sala
 from src.database.models.contacts import Contacts, PostalAddress, Address
 from src.database.models.users import User
 from src.logger import init_logger
-from src.main import company_controller, employee_controller
+from src.main import company_controller, employee_controller, subscriptions_controller
 
 employee_route = Blueprint('employees', __name__)
 employee_logger = init_logger('employee_route')
@@ -24,6 +24,7 @@ LatestPaySlipType = list[tuple[EmployeeDetails, Payslip]]
 # route utils
 async def retrieve_create_this_month_payslip(employee_id: str, salary: Salary) -> Payslip | None:
     # creating a new payslip for the current pay period
+
     payslip: Payslip | None = await employee_controller.get_present_employee_payslip(employee_id=employee_id)
     if not payslip:
         try:
@@ -156,6 +157,11 @@ async def get_employee_details(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+
     employee_logger.info(user)
     employee_logger.info(f"IS COMPANY ADMIN : {user.is_company_admin}")
 
@@ -191,6 +197,10 @@ async def update_employee_details(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     employee_details: EmployeeDetails = EmployeeDetails(**request.form, uid=user.uid)
     employee_logger.info(f"Employee Logger : {employee_details}")
     if user.branch_id:
@@ -217,6 +227,10 @@ async def update_contact_details(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     try:
         contact_details: Contacts = Contacts(**request.form)
 
@@ -255,6 +269,10 @@ async def update_postal_address(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     try:
         postal_details: PostalAddress = PostalAddress(**request.form)
 
@@ -293,6 +311,10 @@ async def update_physical_address(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     try:
         physical_address: Address = Address(**request.form)
     except ValidationError as e:
@@ -328,6 +350,10 @@ async def update_banking_details(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     try:
         bank_account: BankAccount = BankAccount(**request.form)
     except ValidationError as e:
@@ -364,6 +390,10 @@ async def get_employees(user: User):
         :param user:
         :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     company_branches: CompanyBranches = await company_controller.get_company_branches(company_id=user.company_id)
     employees_list: list[EmployeeDetails] = await company_controller.get_company_employees(company_id=user.company_id)
     context = dict(user=user, employees_list=employees_list, branches=company_branches)
@@ -380,6 +410,10 @@ async def get_employee_detail(user: User, employee_id: str):
         :param employee_id:
         :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     employee_detail: EmployeeDetails| None = await employee_controller.get_employee_complete_details_employee_id(
         employee_id=employee_id)
     employee_logger.info(f"Employee Details : {employee_detail}")
@@ -403,6 +437,10 @@ async def get_attendance_register(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
     context: dict[str, User | EmployeeDetails] = dict(user=user, employee_detail=employee_detail)
 
@@ -418,6 +456,10 @@ async def employee_clocking_in(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     employee_id: str = request.form.get('employee_id')
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
     employee_logger.info(f"IS Company ADMIN : {user.is_company_admin}")
@@ -467,6 +509,10 @@ async def employee_clocking_out(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     employee_id: str = request.form.get('employee_id')
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
 
@@ -499,6 +545,10 @@ async def update_salary_record(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     try:
         salary: Salary = Salary(**request.form)
         employee_logger.info(f"Salary : {salary}")
@@ -544,6 +594,10 @@ async def get_work_summary(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
     employee_logger.info(f'Complete Employee Records : {employee_detail}')
     context = dict(user=user, employee_detail=employee_detail)
@@ -558,6 +612,10 @@ async def get_payslips(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_uid(uid=user.uid)
 
     context = dict(user=user, employee_detail=employee_detail)
@@ -603,6 +661,10 @@ async def get_payroll(user: User):
     :param user: The user requesting payroll information.
     :return: Redirects to the admin page if the user is not registered, otherwise provides payroll details.
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if user and not user.company_id:
         message: str = "Not registered on any company"
         flash(message=message, category='danger')
@@ -627,6 +689,10 @@ async def create_work_docs(user: User, employee_id: str):
     :param employee_id:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     employee_detail: EmployeeDetails = await employee_controller.get_employee_complete_details_employee_id(
         employee_id=employee_id)
 

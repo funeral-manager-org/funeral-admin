@@ -2,17 +2,16 @@ from datetime import datetime
 
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
-from ulid import ULID
 
+from src.authentication import login_required, user_details
+from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company
+from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentStatus, \
+    PremiumReceipt
+from src.database.models.users import User
 from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
-from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentFrequency, \
-    PaymentStatus, PremiumReceipt
-from src.authentication import login_required, user_details, admin_login
-from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company
-from src.database.models.users import User
-from src.main import company_controller, covers_controller
-from src.utils import is_valid_ulid, is_valid_ulid_strict
+from src.main import company_controller, covers_controller, subscriptions_controller
+from src.utils import is_valid_ulid
 
 covers_route = Blueprint('covers', __name__)
 covers_logger = init_logger('covers_logger')
@@ -40,6 +39,10 @@ async def get_covers(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     # Retrieve company branches and cover details
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     cover_details = await company_controller.get_company_covers(company_id=user.company_id)
@@ -67,6 +70,10 @@ async def add_plan_cover(user: User):
     :return:
     """
     # Attempt to create a plan cover using form data
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     try:
         plan_cover = CoverPlanDetails(**request.form)
     except ValidationError as e:
@@ -101,6 +108,10 @@ async def get_plan_cover(user: User, company_id: str, plan_number: str):
     :param plan_number:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if not is_valid_ulid(value=plan_number):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")
         return redirect(url_for('company.get_admin'))
@@ -151,6 +162,7 @@ async def get_client_list(user: User) -> tuple[
     :param user:
     :return:
     """
+
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     if not company_branches:
         flash(message="please define your company branches", category="danger")
@@ -174,6 +186,10 @@ async def get_current_premiums_paged(user: User, page: int = 0, count: int = 25)
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     redirect_on_bad_page_count = validate_page_and_count(page=page, count=count)
     if redirect_on_bad_page_count:
         return redirect_on_bad_page_count
@@ -209,6 +225,10 @@ async def get_outstanding_premiums(user: User, page: int = 0, count: int = 25):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     redirect_on_bad_page_count = validate_page_and_count(page=page, count=count)
     if redirect_on_bad_page_count:
         return redirect_on_bad_page_count
@@ -238,6 +258,10 @@ async def get_quick_pay(user: User):
     :param user:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     company_branches = await company_controller.get_company_branches(company_id=user.company_id)
     if company_branches:
         flash(message="Please Select Branch to Update or View Payment Records", category="success")
@@ -256,6 +280,10 @@ async def premiums_payments(user: User):
     Retrieve the current premiums for a branch and optionally a selected client.
     """
     # Initialize variables
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     policy_data: PolicyRegistrationData | None = None
     selected_client: ClientPersonalInformation | None = None
     clients_list: list[ClientPersonalInformation] = []

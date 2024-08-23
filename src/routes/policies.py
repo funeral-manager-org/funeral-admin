@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, url_for, flash, redirect, request
 
 from src.authentication import login_required
 from src.database.models.users import User
-from src.main import company_controller
+from src.main import company_controller, subscriptions_controller
 
 policy_route = Blueprint('policy', __name__)
 
@@ -15,6 +15,10 @@ async def get_policies_home(user: User):
         :param user:
         :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     policies_list = await company_controller.return_all_active_company_policies()
     outstanding_policies = await company_controller.return_all_outstanding_company_policies()
     context = dict(user=user, policies_list=policies_list, outstanding_policies=outstanding_policies)
@@ -29,6 +33,9 @@ async def get_search_policies(user: User):
         :param user:
         :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
 
     context = dict(user=user)
     return render_template('admin/policies/paged/search_policies.html', **context)
@@ -38,6 +45,10 @@ async def get_search_policies(user: User):
 @login_required
 async def search_policies(user: User):
     # Get form data
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     search_option = request.form.get("search-option")
     search_input = request.form.get("search-input")
 
@@ -76,6 +87,10 @@ async def get_active_policies_paged(user: User, page: int = 0, count: int = 25):
     :param count:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if (page > 1000) or count > 1000:
         flash(message="your request is out of bounds", category="danger")
         return redirect(url_for('home.get_home'))
@@ -100,6 +115,10 @@ async def get_lapsed_policies_paged(user: User, page: int = 0, count: int = 25):
     :param count:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     if (page > 1000) or count > 1000:
         flash(message="your request is out of bounds", category="danger")
         return redirect(url_for('home.get_home'))

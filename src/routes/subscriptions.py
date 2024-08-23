@@ -82,9 +82,6 @@ async def payfast_ipn():
         return jsonify(dict(message="Invalid data received", data=payfast_dict_data)), 400
 
 
-
-
-
 @subscriptions_route.get('/subscriptions/payfast-success')
 @admin_login
 async def payfast_payment_complete(user: User):

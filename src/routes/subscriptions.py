@@ -262,7 +262,6 @@ async def subscription_payment_failure():
 # MESSAGING TOP UP
 
 @subscriptions_route.post('/_ipn/payfast/package')
-@admin_login
 async def payfast_package_ipn():
     """
 

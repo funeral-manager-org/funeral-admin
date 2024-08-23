@@ -35,6 +35,7 @@ async def get_billing(user: User):
 @admin_login
 async def print_subscription_payment_tax_invoice(user: User, transaction_id: str):
     """
+
         print_subscription_payment_tax_invoice
     """
     payment: Payment = await subscriptions_controller.get_company_subscription_payment(transaction_id=transaction_id)

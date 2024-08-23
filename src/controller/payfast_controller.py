@@ -4,7 +4,7 @@ from flask import Flask, url_for, Response, redirect
 from src.database.models.subscriptions import Subscriptions, Package, TopUpPacks
 from src.database.models.users import User
 from src.config import Settings
-from src.controller import Controllers
+from src.controller import Controllers, error_handler
 from src.database.models.payfast import PayFastData, PayFastPay
 
 
@@ -14,8 +14,6 @@ class PayfastController(Controllers):
         super().__init__()
         self.settings = None
         self.payfast_api_endpoint = "https://sandbox.payfast.co.za/eng/process?"
-        self.payfast_data: PayFastData = PayFastData()
-        self.payfast_live_data: PayFastData = PayFastData()
         self.use_live_data: bool = True
 
     def is_demo_account(self, user: User):
@@ -23,23 +21,22 @@ class PayfastController(Controllers):
             return False
         return user.username == self.settings.DEMO_ACCOUNT
 
+    # noinspection PyMethodOverriding
     def init_app(self, app: Flask, settings: Settings):
         super().init_app(app=app)
         self.settings = settings
-        self.payfast_data = PayFastData(
-            merchant_id=settings.PAYFAST.SANDBOX_MERCHANT_ID,
-            merchant_key=settings.PAYFAST.SANDBOX_MERCHANT_KEY
-        )
-        self.payfast_live_data = PayFastData(
-            merchant_id=settings.PAYFAST.MERCHANT_ID,
-            merchant_key=settings.PAYFAST.MERCHANT_KEY
-        )
 
+    @error_handler
     async def create_payment_request(self, payfast_payment: PayFastPay, user: User) -> str:
         if self.is_demo_account(user=user):
-            data = self.payfast_data
+            data = PayFastData(
+                merchant_id=self.settings.PAYFAST.SANDBOX_MERCHANT_ID,
+                merchant_key=self.settings.PAYFAST.SANDBOX_MERCHANT_KEY)
         else:
-            data = self.payfast_live_data
+            data = PayFastData(
+                merchant_id=self.settings.PAYFAST.MERCHANT_ID,
+                merchant_key=self.settings.PAYFAST.MERCHANT_KEY
+            )
             self.payfast_api_endpoint = "https://www.payfast.co.za/eng/process?"
 
         data.return_url = payfast_payment.return_url
@@ -62,7 +59,7 @@ class PayfastController(Controllers):
 
         return self.payfast_api_endpoint + '&'.join([f'{key}={value}' for key, value in data_dict.items()])
 
-
+    @error_handler
     async def is_valid_payfast_data(self, payfast_dict_data: dict[str, str]) -> bool:
         """
         Validates the data received from PayFast by checking the signature.
@@ -88,7 +85,7 @@ class PayfastController(Controllers):
         # Compare the received signature with the generated one
         # return received_signature == generated_signature
 
-
+    @error_handler
     async def payfast_subscription_payment(self, subscription_details: Subscriptions, user: User) -> Response:
 
         # Generate HTTPS URLs for PayFast
@@ -109,9 +106,10 @@ class PayfastController(Controllers):
                                           company_id=user.company_id,
                                           subscription_id=subscription_details.subscription_id)
 
-        payfast_endpoint_url: str = await self.create_payment_request(payfast_payment=payfast_payment_data)
+        payfast_endpoint_url: str = await self.create_payment_request(payfast_payment=payfast_payment_data, user=user)
         return redirect(payfast_endpoint_url)
 
+    @error_handler
     async def payfast_package_payment(self, subscription_details: Subscriptions, top_up_pack: TopUpPacks, user: User):
         """
 
@@ -137,7 +135,7 @@ class PayfastController(Controllers):
                                           company_id=user.company_id,
                                           subscription_id=subscription_details.subscription_id)
 
-        payfast_endpoint_url: str = await self.create_payment_request(payfast_payment=payfast_payment_data)
+        payfast_endpoint_url: str = await self.create_payment_request(payfast_payment=payfast_payment_data, user=user)
         return redirect(payfast_endpoint_url)
 
 

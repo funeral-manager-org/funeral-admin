@@ -15,6 +15,7 @@ class PayFastPay(BaseModel):
     company_id: str
     uid: str
     subscription_id: str
+    package_id: str | None = Field(default=None)
 
 
 class PayFastData(BaseModel):
@@ -28,6 +29,7 @@ class PayFastData(BaseModel):
     company_id: str | None = Field(default=None)
     uid: str | None = Field(default=None)
     subscription_id: str | None = Field(default=None)
+    package_id: str | None = Field(default=None)
     amount: PositiveInt = Field(default=0)
 
 

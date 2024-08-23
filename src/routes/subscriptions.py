@@ -173,7 +173,8 @@ async def payment_method_selected(user: User):
     if payment_method == "paypal":
         return await paypal_payment(subscription_details=subscription_details, user=user)
     elif payment_method == "payfast":
-        return await payfast_controller.payfast_payment(subscription_details=subscription_details, user=user)
+        return await payfast_controller.payfast_subscription_payment(subscription_details=subscription_details,
+                                                                     user=user)
     elif payment_method == "direct_deposit":
         return await make_direct_deposit(subscription_details=subscription_details, user=user)
     print(f"Payment Method: {payment_method}")
@@ -258,6 +259,84 @@ async def subscription_payment_failure():
     return redirect(url_for('company.get_admin'))
 
 
+
+# MESSAGING TOP UP
+
+@subscriptions_route.post('/_ipn/payfast/package')
+@admin_login
+async def payfast_package_ipn():
+    """
+
+    :return:
+    """
+    payfast_dict_data: Dict[str, str] = request.form.to_dict()
+    subscription_logger.info(f"Incoming Payment Notification: {payfast_dict_data}")
+
+    # Validate the received data
+    if await payfast_controller.is_valid_payfast_data(payfast_dict_data=payfast_dict_data):
+        # Extracting relevant fields from the data
+        payment_status = payfast_dict_data.get('payment_status')
+        amount_gross = payfast_dict_data.get('amount_gross')
+        pf_payment_id = payfast_dict_data.get('pf_payment_id')
+        item_name = payfast_dict_data.get('item_name')
+        email_address = payfast_dict_data.get('email_address')
+        merchant_id = payfast_dict_data.get('merchant_id')
+        # TODO - send payment receipt and notice welcoming the client to our services
+        # Parsing the item_name to get plan_name and payment_type
+        plan_name, payment_type = item_name.split("_")
+
+        # Custom fields which might not be present
+        subscription_id = payfast_dict_data.get("custom_str1")
+        company_id = payfast_dict_data.get("custom_str2")
+        uid = payfast_dict_data.get("custom_str3")
+        package_id = payfast_dict_data.get("custom_str4")
+        subscription_logger.info(f"Verified Request Data For ITN of company: {company_id} ")
+
+        if payment_status == "COMPLETE":
+            # Fetch the subscription details based on company_id
+            subscription = await subscriptions_controller.get_company_subscription(company_id=company_id)
+            subscription_logger.info(f"Able to Retrive the Company Subsciption: {subscription}")
+            if isinstance(subscription, Subscriptions):
+                # Create a Payment record for the subscription
+                try:
+                    payment = Payment(
+                        subscription_id=subscription.subscription_id,
+                        package_id=package_id,
+                        amount_paid=amount_gross,
+                        payment_method="payfast",
+                        is_successful=True,
+                        month=1,  # Assuming the payment covers 1 month, adjust if needed
+                        comments=f"payfast package payment for company : {company_id}"
+                    )
+                    subscription_logger.info(f"Created Payment Type : {payment}")
+
+                    # Store the payment in the database
+                    payment_data: Payment = await subscriptions_controller.add_company_payment(payment=payment)
+                    package_paid = await subscriptions_controller.set_package_to_paid(package_id=package_id)
+
+                    subscription_logger.info(f"Payment Record Created: {payment_data}")
+                    # Return a success response
+                    return jsonify(
+                        dict(message=f"Successfully paid for {plan_name} subscription", data=payfast_dict_data)), 200
+                except ValidationError as e:
+                    subscription_logger.warning(str(e))
+
+            else:
+                subscription_logger.warning(f"Could not Verify if subscription is of the type Subscrtiption")
+
+            subscription_logger.warning(f"Payment not complete or not a subscription: {payfast_dict_data}")
+            return jsonify(dict(message="Payment not complete or invalid payment type", data=payfast_dict_data)), 400
+
+        else:
+            # Log the issue or handle failed payment status
+            subscription_logger.warning(f"Payment not complete or not a subscription: {payfast_dict_data}")
+            return jsonify(dict(message="Payment not complete or invalid payment type", data=payfast_dict_data)), 400
+    else:
+        # Handle invalid data, possibly log and alert
+        subscription_logger.warning(f"Invalid PayFast data received: {payfast_dict_data}")
+        return jsonify(dict(message="Invalid data received", data=payfast_dict_data)), 400
+
+
 @subscriptions_route.post('/subscriptions/topup')
 @admin_login
 async def messaging_top_up(user: User):
@@ -300,21 +379,15 @@ async def messaging_top_up(user: User):
         subscription_logger.info(message)
         return redirect(url_for('company.get_admin'))
 
+
     top_up_package: Package = await subscriptions_controller.add_update_sms_email_package(top_up_pack=top_up_pack)
+    if top_up_package:
+        can_pay = await payfast_controller.payfast_package_payment(subscription_details=subscription,
+                                                                         top_up_pack=top_up_package,
+                                                                         user=user)
+        if can_pay:
+            return can_pay
 
-    success_url: str = url_for('subscriptions.package_payment_successful', package_id=top_up_package.package_id)
-    failure_url: str = url_for('subscriptions.package_payment_failure', package_id=top_up_package.package_id)
-
-    payment, is_created = await paypal_controller.create_payment(payment_details=top_up_pack, user=user,
-                                                                 success_url=success_url, failure_url=failure_url)
-    if is_created:
-        for link in payment.links:
-            if link.method == "REDIRECT":
-                return redirect(link.href)
-
-    else:
-        flash(message=f"Error creating Payment : {payment.error}", category="danger")
-        return redirect(url_for('company.get_admin'))
 
 
 @subscriptions_route.get('/subscriptions/package/success/<string:package_id>')

@@ -1,8 +1,7 @@
 import hashlib
-
 from flask import Flask, url_for, Response, redirect
 
-from src.database.models.subscriptions import Subscriptions
+from src.database.models.subscriptions import Subscriptions, Package, TopUpPacks
 from src.database.models.users import User
 from src.config import Settings
 from src.controller import Controllers
@@ -31,11 +30,14 @@ class PayfastController(Controllers):
         self.payfast_data.uid = payfast_payment.uid
         self.payfast_data.company_id = payfast_payment.company_id
         self.payfast_data.subscription_id = payfast_payment.subscription_id
+        self.payfast_data.package_id = payfast_payment.package_id
 
         data = self.payfast_data.dict()
         data.update(custom_str1=payfast_payment.subscription_id)
         data.update(custom_str2=payfast_payment.company_id)
         data.update(custom_str3=payfast_payment.uid)
+        if payfast_payment.package_id:
+            data.update(custom_str4=payfast_payment.package_id)
 
         return self.payfast_api_endpoint + '&'.join([f'{key}={value}' for key, value in data.items()])
 
@@ -66,7 +68,7 @@ class PayfastController(Controllers):
         # return received_signature == generated_signature
 
 
-    async def payfast_payment(self, subscription_details: Subscriptions, user: User) -> Response:
+    async def payfast_subscription_payment(self, subscription_details: Subscriptions, user: User) -> Response:
 
         # Generate HTTPS URLs for PayFast
         return_url: str = url_for('subscriptions.payfast_payment_complete', _external=True, _scheme='https')
@@ -88,3 +90,33 @@ class PayfastController(Controllers):
 
         payfast_endpoint_url: str = await self.create_payment_request(payfast_payment=payfast_payment_data)
         return redirect(payfast_endpoint_url)
+
+    async def payfast_package_payment(self, subscription_details: Subscriptions, top_up_pack: TopUpPacks, user: User):
+        """
+
+        :param package:
+        :param user:
+        :return:
+        """
+        return_url: str = url_for('subscriptions.payfast_payment_complete', _external=True, _scheme='https')
+        cancel_url: str = url_for('subscriptions.payfast_payment_failed', _external=True, _scheme='https')
+        notify_url: str = url_for('subscriptions.payfast_package_ipn', _external=True, _scheme='https')
+
+        amount: int = top_up_pack.payment_amount
+        item_name: str = top_up_pack.plan_name
+        item_description: str = top_up_pack.plan_name
+        payfast_payment_data = PayFastPay(return_url=return_url,
+                                          cancel_url=cancel_url,
+                                          notify_url=notify_url,
+                                          amount=amount,
+                                          item_name=item_name,
+                                          item_description=item_description,
+                                          uid=user.uid,
+                                          package_id=top_up_pack.package_id,
+                                          company_id=user.company_id,
+                                          subscription_id=subscription_details.subscription_id)
+
+        payfast_endpoint_url: str = await self.create_payment_request(payfast_payment=payfast_payment_data)
+        return redirect(payfast_endpoint_url)
+
+

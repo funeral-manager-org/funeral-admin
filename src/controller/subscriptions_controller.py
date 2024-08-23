@@ -338,7 +338,7 @@ class SubscriptionsController(Controllers):
         :return:
         """
         subscription: Subscriptions = await self.get_company_subscription(company_id=user.company_id)
-        return subscription.is_expired() and subscription.is_paid_for_current_month if subscription else False
+        return (not subscription.is_expired()) and subscription.is_paid_for_current_month if subscription else False
 
     async def route_guard(self, user: User):
         """

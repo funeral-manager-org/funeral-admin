@@ -26,6 +26,12 @@ async def get_cloudflare(user: User):
 @messaging_route.get('/admin/administrator/messaging/top-up')
 @login_required
 async def get_topup(user: User):
+
+    if not await subscriptions_controller.is_subscription_active(user=user):
+        message: str = "You cannot topup with sms before paying for your subscription"
+        flash(message=message,category='danger')
+        return redirect('company.get_admin')
+
     context = dict(user=user)
     return render_template('admin/managers/messaging/topup.html', **context)
 

@@ -19,6 +19,7 @@ messaging_logger = init_logger("messaging_logger")
 @messaging_route.get('/admin/administrator/cloudflare')
 @login_required
 async def get_cloudflare(user: User):
+    """all is well"""
     context = dict(user=user)
     return render_template('admin/managers/messaging/cloudflare.html', **context)
 

@@ -13,7 +13,8 @@ from src.controller.messaging_controller import MessagingController
 from src.database.models.companies import Company
 from src.database.models.messaging import RecipientTypes, EmailCompose
 from src.database.models.payments import Payment
-from src.database.models.subscriptions import Subscriptions, SubscriptionStatus, TopUpPacks, Package
+from src.database.models.subscriptions import Subscriptions, SubscriptionStatus, TopUpPacks, Package, PlanNames, \
+    SubscriptionDetails
 from src.database.models.users import User
 from src.database.sql.subscriptions import SubscriptionsORM, PaymentORM, SubscriptionStatusORM, PackageORM
 
@@ -305,3 +306,14 @@ class SubscriptionsController(Controllers):
                 self.logger.info("We Already checked subscription status this week and sent notifications")
 
             await asyncio.sleep(delay=twelve_hours)
+
+    async def return_plan_names(self):
+        return PlanNames.plan_names()
+
+    async def return_plan_details(self, plan_name: str) -> SubscriptionDetails:
+        """given a plan name return the plan details"""
+        return SubscriptionDetails().create_plan(plan_name=plan_name)
+
+    async def return_all_plan_details(self) -> list[SubscriptionDetails]:
+        """will return a definition of all subscription plans"""
+        return [await self.return_plan_details(plan_name=plan_name) for plan_name in await self.return_plan_names() if plan_name]

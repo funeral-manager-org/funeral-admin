@@ -1,90 +1,47 @@
-
-
-
-
 <div class="container">
     <div class="row">
+        {% for plan in subscription_plans %}
+        {% set border_color = 'primary' if loop.index0 == 0 else 'success' if loop.index0 == 1 else 'warning' %}
+        {% set header_bg_color = 'primary' if loop.index0 == 0 else 'success' if loop.index0 == 1 else 'warning-dark' %}
+        {% set button_outline_color = border_color %}
 
         <div class="col-md-12">
-            <div class="card mb-4 shadow-lg border-primary">
-                <div class="card-header bg-primary text-white">
+            <div class="card mb-4 shadow-lg border-{{ border_color }}">
+                <div class="card-header bg-{{ header_bg_color }} text-white">
                     <h4 class="card-title my-0 font-weight-bold text-white">
                         <i class="fa fa-user-circle"> </i>
-                        One Month Trial</h4>
+                        {{ plan.plan_name.title() }}
+                    </h4>
                 </div>
                 <div class="card-body">
-                    <h1 class="card-title pricing-card-title mt-4 text-dark font-weight-bold">Free (50 Zar - Account Reg Fee)</h1>
-                    <ul class="list-unstyled mt-3 mb-4 mt-4">
-                        <li class="font-weight-bold text-info">Access to basic features</li>
-                        <li class="font-weight-bold text-info">20 SMS</li>
-                        <li class="font-weight-bold text-info">50 Emails</li>
-                        <li class="font-weight-bold text-info">Full customer support</li>
-                        <li class="font-weight-bold text-info">Cancel anytime</li>
-{#                        <li class="font-weight-bold text-success">If Not cancelled the plan will be converted to a Monthly Subscription</li>#}
+                    <h1 class="card-title pricing-card-title mt-4 text-dark font-weight-bold">
+                        ZAR {{ plan.subscription_amount }}
+                        <small class="text-muted">
+                            {% if plan.subscription_amount == 0 %}
+                                (Free)
+                            {% else %}
+                                / {{ plan.subscription_period }} Month{{ 's' if plan.subscription_period > 1 }}
+                            {% endif %}
+                        </small>
+                    </h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li class="font-weight-bold text-info">Access to all features</li>
+                        <li class="font-weight-bold text-info">{{ plan.total_sms }} SMS per Month</li>
+                        <li class="font-weight-bold text-info">{{ plan.total_emails }} Emails per Month</li>
+                        <li class="font-weight-bold text-info">Up to {{ plan.total_clients }} Clients</li>
+                        <li class="font-weight-bold text-info">24/7 priority customer support</li>
                     </ul>
-                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="FREE") }}">
-
-                        <button type="submit" class="btn btn-lg btn-block btn-outline-primary btn-rounded"
-
-                        >
-                            <i class="fa fa-credit-card"> </i>
-                            Start Free Trial
+                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option=plan.plan_name) }}">
+                        <button type="submit" class="btn btn-lg btn-block btn-outline-{{ button_outline_color }} btn-rounded">
+                            <i class="fa fa-credit-card-alt"> </i>
+                            {{ 'Start Free Trial' if plan.subscription_amount == 0 else 'Create ' + plan.plan_name.title() + ' Account' }}
                         </button>
                     </form>
                 </div>
             </div>
         </div>
-        <div class="col-md-12">
-            <div class="card mb-4 shadow-lg border-success">
-                <div class="card-header bg-success text-white">
-                    <h4 class="card-title my-0 font-weight-bold text-white">
-                        <i class="fa fa-user-circle"> </i>
-                        Business
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <h1 class="card-title pricing-card-title m-t-4 text-dark font-weight-bold">ZAR 1500 <small class="text-muted">/ month</small></h1>
-                    <ul class="list-unstyled mt-3 mb-4">
-                        <li class="font-weight-bold text-info">Access to all features</li>
-                        <li class="font-weight-bold text-info">100 Free SMS Per Month (Extra SMS Packages can be added)</li>
-                        <li class="font-weight-bold text-info">100 Free Emails Per Month (Extra Email Packages can be added)</li>
-                        <li class="font-weight-bold text-info">Upto 500 Clients there after ZAR 10.00 per client</li>
-                        <li class="font-weight-bold text-info">24/7 priority customer support</li>
-                    </ul>
-                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="BUSINESS") }}">
-                        <button type="submit" class="btn btn-lg btn-block btn-outline-success btn-rounded">
-                            <i class="fa fa-credit-card-alt"> </i>
-                            Create Business Account
-                        </button>
-                    </form>
-                </div>
-            </div>
-            <div class="card mb-4 shadow-lg border-warning">
-                <div class="card-header bg-warning-dark">
-                    <h4 class="card-title my-0 font-weight-bold text-white">
-                        <i class="fa fa-user-circle"> </i>
-                        Premium
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <h1 class="card-title pricing-card-title m-t-4 text-dark font-weight-bold">ZAR 3,000 <small class="text-muted">/ Month</small></h1>
-                    <ul class="list-unstyled mt-3 mb-4">
-                        <li class="font-weight-bold text-info">Access to all features</li>
-                        <li class="font-weight-bold text-info">500 SMS Per Month (Extra SMS Packages can be added)</li>
-                        <li class="font-weight-bold text-info">Unlimited Emails</li>
-                        <li class="font-weight-bold text-info">Upto 1000 Clients or Covers there after ZAR 5.00 per client</li>
-                        <li class="font-weight-bold text-info">24/7 priority customer support</li>
-                    </ul>
-                    <form method="POST" class="form-horizontal" action="{{ url_for('subscriptions.do_subscribe', option="PREMIUM") }}">
-
-                        <button type="submit" class="btn btn-lg btn-block btn-outline-warning btn-rounded">
-                            <i class="fa fa-credit-card-alt"> </i>
-                            Create Premium Account
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
+
 {% include "admin/managers/subscriptions/payment_methods.html" %}

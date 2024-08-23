@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request
 
 from src.database.models.payments import Payment
-from src.database.models.subscriptions import Subscriptions
+from src.database.models.subscriptions import Subscriptions, SubscriptionDetails
 from src.database.models.companies import Company
 from src.main import subscriptions_controller, company_controller, paypal_controller
 from src.authentication import admin_login
@@ -25,7 +25,8 @@ async def get_billing(user: User):
     if not subscription:
         subscription = {}
     billing_logger.info(f"{subscription}")
-    context = dict(user=user, subscription_account=subscription)
+    plan_details: SubscriptionDetails = await subscriptions_controller.return_plan_details(plan_name=subscription.plan_name)
+    context = dict(user=user, subscription_account=subscription, plan_details=plan_details)
     return render_template('billing/billing.html', **context)
 
 

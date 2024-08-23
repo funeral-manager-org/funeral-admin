@@ -2,32 +2,40 @@
     <div class="card-header bg-facebook">
         <h3 class="card-title text-white">
             <i class="fa fa-user-circle"></i>
-            Account Details
+            Subscription Details
         </h3>
     </div>
     <div class="card-body">
         <ul class="list-group">
+
             <li class="list-group-item font-weight-bold">
-                Plan Name: <span class="pull-right badge badge-success">{{ subscription_account.plan_name }}</span>
+                Plan Name: <span class="pull-right badge badge-success">{{ subscription_account.plan_name|title }}</span>
             </li>
+
             <li class="list-group-item font-weight-bold">
-                Total SMS: <span class="pull-right">{{ subscription_account.total_sms }}</span>
+                Total SMS: <span class="pull-right">{{ subscription_account.total_sms }} SMS per Month</span>
             </li>
+
             <li class="list-group-item font-weight-bold">
-                Total Emails: <span class="pull-right">{{ subscription_account.total_emails }}</span>
+                Total Emails: <span class="pull-right">{{ subscription_account.total_emails }} Emails per Month</span>
             </li>
+
             <li class="list-group-item font-weight-bold">
-                Total Clients: <span class="pull-right">{{ subscription_account.total_clients }}</span>
+                Total Clients: <span class="pull-right">{{ subscription_account.total_clients }} Lifetime</span>
             </li>
+
             <li class="list-group-item font-weight-bold">
                 Since Subscribed: <span class="pull-right">{{ subscription_account.subscribed_datetime|days_ago }}</span>
             </li>
+
             <li class="list-group-item font-weight-bold">
                 Subscription Amount: <span class="pull-right">R {{ subscription_account.subscription_amount|number }}.00</span>
             </li>
+
             <li class="list-group-item font-weight-bold">
                 Subscription Period: <span class="pull-right">{{ subscription_account.subscription_period }} Months</span>
             </li>
+
             <li class="list-group-item font-weight-bold">
                 Is Paid for Current Month:
                 {% if subscription_account.is_paid_for_current_month %}
@@ -36,22 +44,24 @@
                     <span class="pull-right badge badge-danger">No</span>
                 {% endif %}
             </li>
-            <li class="list-group-item font-weight-bold">
 
+            <li class="list-group-item font-weight-bold">
                 Subscription Status:
-                {% if  subscription_account.is_expired() %}
-                    <span class="pull-right badge badge-danger">{{ subscription_account.is_expired() and "Expired" or "Active" }}
-                {% else %}
-                    <span class="pull-right badge badge-success">{{ subscription_account.is_expired() and "Expired" or "Active" }}
-                {% endif %}
+                    {% if  subscription_account.is_expired() %}
+                        <span class="pull-right badge badge-danger">{{ subscription_account.is_expired() and "Expired" or "Active" }}
+                    {% else %}
+                        <span class="pull-right badge badge-success">{{ subscription_account.is_expired() and "Expired" or "Active" }}
+                    {% endif %}
 
                 </span>
             </li>
         </ul>
+
         {% if not subscription_account.is_paid_for_current_month %}
-            <button class="btn btn-outline-info btn-block btn-rounded"
+            <button class="btn btn-outline-info btn-block btn-rounded m-t-12"
                 data-toggle="modal" data-target="#paymentMethodsModal"
             >
+            <i class="fa fa-credit-card"> </i>
                 Make Payment
             </button>
         {% endif %}

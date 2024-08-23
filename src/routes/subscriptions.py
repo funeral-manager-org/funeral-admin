@@ -120,8 +120,8 @@ async def get_subscriptions(user: User):
         return redirect(url_for('home.get_home'))
 
     subscription_account: Subscriptions = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
-
-    context = dict(user=user, subscription_account=subscription_account)
+    subscription_plans: list[SubscriptionDetails] = await subscriptions_controller.return_all_plan_details()
+    context = dict(user=user, subscription_account=subscription_account, subscription_plans=subscription_plans)
     return render_template('billing/subscriptions.html', **context)
 
 async def paypal_payment(subscription_details: Subscriptions, user: User):

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
+from src.database.models.subscriptions import SubscriptionDetails
 from src.logger import init_logger
 from src.database.models.bank_accounts import BankAccount
 from src.database.models.contacts import Address, PostalAddress, Contacts
@@ -26,12 +27,15 @@ async def get_admin(user: User):
         company_data: Company | None = await company_controller.get_company_details(company_id=user.company_id)
         company_branches = await company_controller.get_company_branches(company_id=user.company_id)
         subscription_account = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
+        subscription_plans: list[SubscriptionDetails] = await subscriptions_controller.return_all_plan_details()
     else:
         company_data = None
         company_branches = []
+        subscription_plans = []
         subscription_account = None
 
-    context.update(company_detail=company_data, company_branches=company_branches, subscription_account=subscription_account)
+    context.update(company_detail=company_data, company_branches=company_branches,
+                   subscription_account=subscription_account, subscription_plans=subscription_plans)
 
 
     if user.is_system_admin:

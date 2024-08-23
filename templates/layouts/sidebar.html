@@ -80,9 +80,9 @@
                     <li><a class="sidebar-sub-toggle"><span class="text-warning"><i class="fa fa-shopping-cart"></i> Billing</span><span
                             class="sidebar-collapse-icon ti-angle-down"></span></a>
                         <ul>
-                            <li><a href="{{ url_for('subscriptions.get_subscriptions') }}"> <i class="fa fa-universal-access"> </i> Account </a> </li>
-                            <li><a href="{{ url_for('billing.get_billing') }}"><i class="fa fa-user-circle"></i> Billing</a></li>
+                            <li><a href="{{ url_for('subscriptions.get_subscriptions') }}"> <i class="fa fa-universal-access"> </i> Subscription </a> </li>
                             <li><a href="{{ url_for('messaging.get_topup') }}"><i class="ti-credit-card"></i> Top Ups</a></li>
+                            <li><a href="{{ url_for('billing.get_billing') }}"><i class="fa fa-user-circle"></i> Billing</a></li>
                         </ul>
                     </li>
                     <li><a href="{{ url_for('support.get_support') }}"><span class="text-danger"><i class="fa fa-ticket"></i> Support</span></a></li>

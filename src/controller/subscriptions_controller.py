@@ -126,7 +126,6 @@ class SubscriptionsController(Controllers):
     @error_handler
     async def add_company_payment(self, payment: Payment) -> Payment:
         """
-
         :param payment:
         :return:
         """
@@ -134,6 +133,17 @@ class SubscriptionsController(Controllers):
             session.add(PaymentORM(**payment.dict()))
             self.logger.info(f"Added PAYMENT Record {payment}")
             return payment
+    async def get_company_subscription_payment(self, transaction_id: str) -> Payment | None:
+        """
+
+        :param payment:
+        :return:
+        """
+        with self.get_session() as session:
+            payment_orm = session.query(PaymentORM).filter_by(transaction_id=transaction_id).first()
+
+            return Payment(**payment_orm.to_dict()) if isinstance(payment_orm, PaymentORM) else None
+
 
     @error_handler
     async def updated_branch_details(self, account: User) -> User:

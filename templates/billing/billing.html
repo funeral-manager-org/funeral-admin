@@ -86,10 +86,10 @@
                                                         {% endif %}
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-sm btn-rounded btn-outline-info">
+                                                        <a href="{{ url_for('billing.print_subscription_payment_tax_invoice', transaction_id=payment.transaction_id) }}" class="btn btn-sm btn-rounded btn-outline-info">
                                                         <i class="fa fa-print"> </i>
                                                         Invoice
-                                                        </button>
+                                                        </a>
                                                     </td>
                                                     <td></td>
                                                 </tr>

@@ -1,9 +1,7 @@
 import json
 from typing import Dict
-
 from flask import Blueprint, url_for, flash, redirect, request, render_template, jsonify
 from pydantic import ValidationError
-
 from src.authentication import admin_login
 from src.database.models.companies import Company
 from src.database.models.payments import Payment
@@ -32,7 +30,7 @@ async def payfast_ipn():
         item_name = payfast_dict_data.get('item_name')
         email_address = payfast_dict_data.get('email_address')
         merchant_id = payfast_dict_data.get('merchant_id')
-
+        # TODO - send payment receipt and notice welcoming the client to our services
         # Parsing the item_name to get plan_name and payment_type
         plan_name, payment_type = item_name.split(" ")
 
@@ -41,6 +39,7 @@ async def payfast_ipn():
         company_id = payfast_dict_data.get("custom_str2")
         uid = payfast_dict_data.get("custom_str3")
         subscription_logger.info(f"Verified Request Data For ITN of company: {company_id} ")
+
         if payment_status == "COMPLETE" and payment_type.casefold() == "subscription":
             # Fetch the subscription details based on company_id
             subscription = await subscriptions_controller.get_company_subscription(company_id=company_id)
@@ -83,12 +82,17 @@ async def payfast_ipn():
         return jsonify(dict(message="Invalid data received", data=payfast_dict_data)), 400
 
 
+
+
+
 @subscriptions_route.get('/subscriptions/payfast-success')
 @admin_login
 async def payfast_payment_complete(user: User):
     """
-    :param user:
-    :return:
+    payfast_payment_complete
+        guru
+        :param user:
+        :return:
     """
     flash(message="Payment completed successfully", category="success")
     return redirect(url_for('company.get_admin'))
@@ -293,8 +297,8 @@ async def messaging_top_up(user: User):
         subscription_logger.info(message)
         return redirect(url_for('company.get_admin'))
 
-    if subscription.plan_name == PlanNames.FREE.value:
-        message: str = "You cannot buy top up packages on a free plan -- please upgrade"
+    if subscription.plan_name == PlanNames.BASIC.value:
+        message: str = "You cannot buy top up packages on a basic plan -- please upgrade"
         flash(message=message, category="danger")
         subscription_logger.info(message)
         return redirect(url_for('company.get_admin'))

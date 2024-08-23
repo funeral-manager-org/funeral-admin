@@ -8,7 +8,7 @@ from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentFrequency, \
     PaymentStatus, PremiumReceipt
-from src.authentication import login_required, user_details
+from src.authentication import login_required, user_details, admin_login
 from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company
 from src.database.models.users import User
 from src.main import company_controller, covers_controller
@@ -389,7 +389,7 @@ async def premiums_payments(user: User):
                 title = f"{company_details.company_name} Invoice - Premium Payment"
                 context.update(title=title)
 
-            return render_template('admin/premiums/receipt.html', **context)
+            return render_template('receipts/companies/premium_payment_receipt.html', **context)
 
         message: str = "Premium is already paid" if premium else ("There are not active premiums associated with "
                                                                   "this policy holder")
@@ -434,7 +434,7 @@ async def receipt_reprint_receipt_number(user: User, receipt_number: str):
     context.update(company=company_details, policy_data=policy_data, selected_client=selected_client, receipt=receipt,
                    premium=receipt.premium, generated_on=datetime.now())
 
-    return render_template('admin/premiums/receipt.html', **context)
+    return render_template('receipts/companies/premium_payment_receipt.html', **context)
 
 
 @covers_route.get('/admin/premiums/last-receipt/<string:premium_id>')
@@ -476,4 +476,7 @@ async def last_receipt_reprint(user: User, premium_id: str):
     context.update(company=company_details, policy_data=policy_data, selected_client=selected_client, receipt=receipt,
                    premium=receipt.premium, generated_on=datetime.now())
 
-    return render_template('admin/premiums/receipt.html', **context)
+    return render_template('receipts/companies/premium_payment_receipt.html', **context)
+
+
+

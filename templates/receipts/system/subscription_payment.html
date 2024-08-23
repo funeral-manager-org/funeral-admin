@@ -1,0 +1,66 @@
+{% include "layouts/invoice.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-primary">
+                <div class="card-header text-center">
+                    <h1 class="card-title font-weight-bold">Funeral Manager</h1>
+                    <p class="card-subtitle">MJ API Development</p>
+                    <p class="font-italic">https://funeral-manager.org</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <h5>Subscription Plan: {{ subscription_account.plan_name|title }}</h5>
+                            <h5>System Reference: {{ subscription_account.subscription_id }}</h5>
+                            <h5>Receipt Number: {{ payment.transaction_id }}</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <h5>Date Paid: {{ payment.date_paid.strftime('%Y-%m-%d') }}</h5>
+                            <h5>Payment Method: {{ payment.payment_method|title }}</h5>
+                            <h5>Account: {{ user.username }}</h5>
+                        </div>
+                    </div>
+                    <hr>
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ subscription_account.plan_name|title }}</td>
+                                <td>R {{ payment.amount_paid|number }}.00</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Total Paid</td>
+                                <td class="font-weight-bold">R {{ payment.amount_paid|number }}.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <p class="text-center">
+                        Thank you for your payment!
+                    </p>
+                    <div class="row">
+                        <div class="col-6">
+                            <p>Email: sales@funeral-manager.org</p>
+                            <p>Phone: +27768255575</p>
+                        </div>
+                        <div class="col-6 text-right">
+                            <p >VAT Number: 9231219263 </p>
+                            <p>Registration Number: 2022/656550/07</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer font-weight-bold text-center text-danger">
+                    <small>Generated on {{ generated_on.strftime('%Y-%m-%d') }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

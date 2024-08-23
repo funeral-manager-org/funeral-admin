@@ -12,13 +12,14 @@ def date_time() -> str:
 
 
 class PlanNames(Enum):
-    FREE = "FREE"
+    BASIC = "BASIC"
     BUSINESS = "BUSINESS"
     PREMIUM = "PREMIUM"
+    ULTIMATE = "ULTIMATE"
 
     @classmethod
     def plan_names(cls):
-        return [cls.FREE.value, cls.BUSINESS.value, cls.PREMIUM.value]
+        return [cls.BASIC.value, cls.BUSINESS.value, cls.PREMIUM.value,cls.ULTIMATE.value]
 
 
 class SubscriptionDetails(BaseModel):
@@ -35,25 +36,32 @@ class SubscriptionDetails(BaseModel):
 
     def create_plan(self, plan_name: str):
         self.plan_name = plan_name.upper()
-        if plan_name == PlanNames.FREE.value:
-            self.total_sms = 20
-            self.total_emails = 50
+        if plan_name == PlanNames.BASIC.value:
+            self.total_sms = 200
+            self.total_emails = 500
             self.total_clients = 250
-            self.subscription_amount = 50
+            self.subscription_amount = 500
             self.subscription_period = 1
             self.additional_clients = 10
         elif plan_name == PlanNames.BUSINESS.value:
             self.total_sms = 500
             self.total_emails = 500
-            self.total_clients = 500
+            self.total_clients = 1000
             self.subscription_amount = 1500
             self.subscription_period = 1
             self.additional_clients = 10
         elif plan_name == PlanNames.PREMIUM.value:
             self.total_sms = 2000
             self.total_emails = 1000
-            self.total_clients = 1000
+            self.total_clients = 3000
             self.subscription_amount = 3000
+            self.subscription_period = 1
+            self.additional_clients = 5
+        elif plan_name == PlanNames.ULTIMATE.value:
+            self.total_sms = 5000
+            self.total_emails = 10000
+            self.total_clients = 100000
+            self.subscription_amount = 9000
             self.subscription_period = 1
             self.additional_clients = 5
         else:

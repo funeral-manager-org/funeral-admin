@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Blueprint, render_template, url_for, redirect, flash, request
 
 from src.database.models.payments import Payment
@@ -29,6 +31,26 @@ async def get_billing(user: User):
     context = dict(user=user, subscription_account=subscription, plan_details=plan_details)
     return render_template('billing/billing.html', **context)
 
+@billing_route.get('/admin/billing/tax-invoice/<string:transaction_id>')
+@admin_login
+async def print_subscription_payment_tax_invoice(user: User, transaction_id: str):
+    """
+        print_subscription_payment_tax_invoice
+    """
+    payment: Payment = await subscriptions_controller.get_company_subscription_payment(transaction_id=transaction_id)
+    if not isinstance(payment, Payment):
+        message="Unable to find the invoice"
+        flash(message=message,category="danger")
+        return redirect(url_for('billing.get_billing'))
+
+    subscription_account: Subscriptions = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
+    if subscription_account.subscription_id != payment.subscription_id:
+        message="You changed your subscription since making this payment can no longer reprint your invoice"
+        flash(message=message,category="danger")
+        return redirect(url_for('billing.get_billing'))
+    generated_on = datetime.datetime.now()
+    context = dict(user=user, subscription_account=subscription_account, payment=payment, generated_on=generated_on)
+    return render_template('receipts/system/subscription_payment.html', **context)
 
 @billing_route.post('/admin/billing/paynow')
 @admin_login

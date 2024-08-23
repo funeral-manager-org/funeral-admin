@@ -112,6 +112,7 @@ class Settings(BaseSettings):
     CACHE_SETTINGS: CacheSettings = CacheSettings()
     REDIS_CACHE: RedisSettings = RedisSettings()
     DEBUG: bool = Field(default=True)
+    DEMO_ACCOUNT: str = "demo@funeral-manager.org"
 
 
 def config_instance() -> Settings:

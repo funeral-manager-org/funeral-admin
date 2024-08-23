@@ -11,35 +11,56 @@ from src.database.models.payfast import PayFastData, PayFastPay
 class PayfastController(Controllers):
 
     def __init__(self):
+        super().__init__()
+        self.settings = None
         self.payfast_api_endpoint = "https://sandbox.payfast.co.za/eng/process?"
         self.payfast_data: PayFastData = PayFastData()
-    def init_app(self,app:Flask, settings: Settings):
+        self.payfast_live_data: PayFastData = PayFastData()
+        self.use_live_data: bool = True
+
+    def is_demo_account(self, user: User):
+        if not self.settings:
+            return False
+        return user.username == self.settings.DEMO_ACCOUNT
+
+    def init_app(self, app: Flask, settings: Settings):
+        super().init_app(app=app)
+        self.settings = settings
         self.payfast_data = PayFastData(
             merchant_id=settings.PAYFAST.SANDBOX_MERCHANT_ID,
             merchant_key=settings.PAYFAST.SANDBOX_MERCHANT_KEY
         )
+        self.payfast_live_data = PayFastData(
+            merchant_id=settings.PAYFAST.MERCHANT_ID,
+            merchant_key=settings.PAYFAST.MERCHANT_KEY
+        )
 
-    async def create_payment_request(self, payfast_payment: PayFastPay) -> str:
+    async def create_payment_request(self, payfast_payment: PayFastPay, user: User) -> str:
+        if self.is_demo_account(user=user):
+            data = self.payfast_data
+        else:
+            data = self.payfast_live_data
+            self.payfast_api_endpoint = "https://www.payfast.co.za/eng/process?"
 
-        self.payfast_data.return_url = payfast_payment.return_url
-        self.payfast_data.cancel_url = payfast_payment.cancel_url
-        self.payfast_data.notify_url = payfast_payment.notify_url
-        self.payfast_data.item_name = payfast_payment.item_name
-        self.payfast_data.item_description = payfast_payment.item_description
-        self.payfast_data.amount = payfast_payment.amount
-        self.payfast_data.uid = payfast_payment.uid
-        self.payfast_data.company_id = payfast_payment.company_id
-        self.payfast_data.subscription_id = payfast_payment.subscription_id
-        self.payfast_data.package_id = payfast_payment.package_id
+        data.return_url = payfast_payment.return_url
+        data.cancel_url = payfast_payment.cancel_url
+        data.notify_url = payfast_payment.notify_url
+        data.item_name = payfast_payment.item_name
+        data.item_description = payfast_payment.item_description
+        data.amount = payfast_payment.amount
+        data.uid = payfast_payment.uid
+        data.company_id = payfast_payment.company_id
+        data.subscription_id = payfast_payment.subscription_id
+        data.package_id = payfast_payment.package_id
 
-        data = self.payfast_data.dict(exclude={"company_id", "uid", "package_id"})
-        data.update(custom_str1=payfast_payment.subscription_id)
-        data.update(custom_str2=payfast_payment.company_id)
-        data.update(custom_str3=payfast_payment.uid)
+        data_dict = data.dict(exclude={"company_id", "uid", "package_id"})
+        data_dict.update(custom_str1=payfast_payment.subscription_id)
+        data_dict.update(custom_str2=payfast_payment.company_id)
+        data_dict.update(custom_str3=payfast_payment.uid)
         if payfast_payment.package_id:
-            data.update(custom_str4=payfast_payment.package_id)
+            data_dict.update(custom_str4=payfast_payment.package_id)
 
-        return self.payfast_api_endpoint + '&'.join([f'{key}={value}' for key, value in data.items()])
+        return self.payfast_api_endpoint + '&'.join([f'{key}={value}' for key, value in data_dict.items()])
 
 
     async def is_valid_payfast_data(self, payfast_dict_data: dict[str, str]) -> bool:

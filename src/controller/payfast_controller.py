@@ -32,7 +32,7 @@ class PayfastController(Controllers):
         self.payfast_data.subscription_id = payfast_payment.subscription_id
         self.payfast_data.package_id = payfast_payment.package_id
 
-        data = self.payfast_data.dict()
+        data = self.payfast_data.dict(exclude={"company_id", "uid", "package_id"})
         data.update(custom_str1=payfast_payment.subscription_id)
         data.update(custom_str2=payfast_payment.company_id)
         data.update(custom_str3=payfast_payment.uid)

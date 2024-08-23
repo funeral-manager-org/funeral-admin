@@ -11,7 +11,6 @@ from src.database.models.covers import ClientPersonalInformation
 from src.authentication import login_required
 from src.database.models.users import User
 from src.main import company_controller, messaging_controller, subscriptions_controller
-from src.utils import create_id
 
 messaging_route = Blueprint('messaging', __name__)
 messaging_logger = init_logger("messaging_logger")
@@ -23,13 +22,11 @@ async def get_cloudflare(user: User):
     context = dict(user=user)
     return render_template('admin/managers/messaging/cloudflare.html', **context)
 
-
 @messaging_route.get('/admin/administrator/messaging/top-up')
 @login_required
 async def get_topup(user: User):
     context = dict(user=user)
     return render_template('admin/managers/messaging/topup.html', **context)
-
 
 @messaging_route.get('/admin/administrator/messaging/settings')
 @login_required
@@ -40,7 +37,6 @@ async def get_admin(user: User):
 
     context = dict(user=user)
     return render_template('admin/managers/messaging/settings.html', **context)
-
 
 @messaging_route.post('/admin/administrator/messaging/sms-settings')
 @login_required
@@ -525,8 +521,8 @@ async def send_email_message(user: User):
             branch_id=composed_email.to_branch)
 
         if not await subscriptions_controller.subscription_can_send_emails(user=user, email_count=len(branch_employees)):
-            message: str = f"""Cannot Send {len(branch_employees)} Emails as you do not have enough email credits available 
-            please buy an email package"""
+            message: str = f"""Cannot Send {len(branch_employees)} Emails as you do not have enough 
+            email credits available please buy an email package"""
             flash(message=message, category="danger")
             return redirect(url_for('messaging.get_topup'))
 

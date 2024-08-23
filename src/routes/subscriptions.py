@@ -259,7 +259,6 @@ async def subscription_payment_failure():
     return redirect(url_for('company.get_admin'))
 
 
-
 # MESSAGING TOP UP
 
 @subscriptions_route.post('/_ipn/payfast/package')
@@ -312,7 +311,13 @@ async def payfast_package_ipn():
 
                     # Store the payment in the database
                     payment_data: Payment = await subscriptions_controller.add_company_payment(payment=payment)
+
                     package_paid = await subscriptions_controller.set_package_to_paid(package_id=package_id)
+                    # This Automatically spends the package
+                    if package_paid:
+                        spent_package = await subscriptions_controller.spend_package(
+                            subscription_id=subscription_id, package_id=package_id)
+
 
                     subscription_logger.info(f"Payment Record Created: {payment_data}")
                     # Return a success response

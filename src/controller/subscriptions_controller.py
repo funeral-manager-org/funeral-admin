@@ -425,13 +425,12 @@ class SubscriptionsController(Controllers):
             # Check if adding the new emails would exceed the limit
             return (total_count + email_count) <= subscription.total_emails
 
-
     async def subscription_can_send_sms(self, user: User, sms_count: int = 1) -> bool:
         """
         Check if the subscription can still send emails.
 
+        :param sms_count:
         :param user: User object
-        :param email_count: Number of emails intended to be sent
         :return: True if the subscription can send the emails, False otherwise
         """
         subscription: Subscriptions = await self.get_company_subscription(company_id=user.company_id)

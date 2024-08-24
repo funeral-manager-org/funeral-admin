@@ -319,7 +319,6 @@ async def payfast_package_ipn():
                         if spent_package:
                             subscription_logger.info(f"Package Successfully Spent")
 
-
                     subscription_logger.info(f"Payment Record Created: {payment_data}")
                     # Return a success response
                     return jsonify(

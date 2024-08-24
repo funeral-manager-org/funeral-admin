@@ -358,7 +358,7 @@ async def send_sms_to_branch_policy_holders(composed_sms: SMSCompose, user: User
     # Obtain Cell Number from each Contact Record where there is a Cell Number
     recipient_list = [contact.cell for contact in contact_list if contact.cell]
     # For Every Cell Number Send a Message - this will insert the message into the out message Queue
-    if not await subscriptions_controller.subscription_can_send_sms(user=user, email_count=len(recipient_list)):
+    if not await subscriptions_controller.subscription_can_send_sms(user=user, sms_count=len(recipient_list)):
         message: str = f"""Cannot Send {len(recipient_list)} SMS's as you do not have enough sms credits available 
         please buy an extra sms package"""
         flash(message=message, category="danger")
@@ -384,7 +384,7 @@ async def send_sms_to_branch_employees(composed_sms: SMSCompose, user: User):
     branch_employees = await company_controller.get_branch_employees(branch_id=composed_sms.to_branch)
     employees_contact_numbers = set()
 
-    if not await subscriptions_controller.subscription_can_send_sms(user=user, email_count=len(branch_employees)):
+    if not await subscriptions_controller.subscription_can_send_sms(user=user, sms_count=len(branch_employees)):
         message: str = f"""Cannot Send {len(branch_employees)} SMS's as you do not have enough sms credits available 
         please buy an extra sms package"""
         flash(message=message, category="danger")

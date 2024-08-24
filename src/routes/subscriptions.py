@@ -316,7 +316,8 @@ async def payfast_package_ipn():
                     if package_paid:
                         spent_package = await subscriptions_controller.spend_package(
                             subscription_id=subscription_id, package_id=package_id)
-
+                        if spent_package:
+                            subscription_logger.info(f"Package Successfully Spent")
 
 
                     subscription_logger.info(f"Payment Record Created: {payment_data}")

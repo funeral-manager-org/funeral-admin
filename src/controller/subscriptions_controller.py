@@ -72,7 +72,7 @@ class SubscriptionsController(Controllers):
         """
         with self.get_session() as session:
             package_orm: PackageORM = session.query(PackageORM).filter_by(package_id=package_id).first()
-            if isinstance(package_orm, PackageORM) and package_orm.total_sms > 0:
+            if isinstance(package_orm, PackageORM):
                 package_orm.is_paid = True
 
             return isinstance(package_orm, PackageORM)

@@ -13,7 +13,8 @@ class PayfastController(Controllers):
     def __init__(self):
         super().__init__()
         self.settings = None
-        self.payfast_api_endpoint = "https://sandbox.payfast.co.za/eng/process?"
+        self.payfast_api_endpoint = "https://www.payfast.co.za/eng/process?"
+        self.payfast_api_sandbox = "https://sandbox.payfast.co.za/eng/process?"
         self.use_live_data: bool = True
 
     def is_demo_account(self, user: User):
@@ -32,12 +33,14 @@ class PayfastController(Controllers):
             data = PayFastData(
                 merchant_id=self.settings.PAYFAST.SANDBOX_MERCHANT_ID,
                 merchant_key=self.settings.PAYFAST.SANDBOX_MERCHANT_KEY)
+            end_point = self.payfast_api_sandbox
         else:
             data = PayFastData(
                 merchant_id=self.settings.PAYFAST.MERCHANT_ID,
                 merchant_key=self.settings.PAYFAST.MERCHANT_KEY
             )
-            self.payfast_api_endpoint = "https://www.payfast.co.za/eng/process?"
+            end_point = self.payfast_api_endpoint
+
 
         data.return_url = payfast_payment.return_url
         data.cancel_url = payfast_payment.cancel_url
@@ -50,14 +53,14 @@ class PayfastController(Controllers):
         data.subscription_id = payfast_payment.subscription_id
         data.package_id = payfast_payment.package_id
 
-        data_dict = data.dict(exclude={"company_id", "uid", "package_id"})
+        data_dict = data.dict(exclude={"company_id", "uid", "package_id", "subscription_id"})
         data_dict.update(custom_str1=payfast_payment.subscription_id)
         data_dict.update(custom_str2=payfast_payment.company_id)
         data_dict.update(custom_str3=payfast_payment.uid)
         if payfast_payment.package_id:
             data_dict.update(custom_str4=payfast_payment.package_id)
 
-        return self.payfast_api_endpoint + '&'.join([f'{key}={value}' for key, value in data_dict.items()])
+        return end_point + '&'.join([f'{key}={value}' for key, value in data_dict.items()])
 
     @error_handler
     async def is_valid_payfast_data(self, payfast_dict_data: dict[str, str]) -> bool:

@@ -119,14 +119,8 @@ class PackageORM(Base):
 
     def use_package(self) -> tuple[int, int]:
         if self.is_paid and not self.is_added:
-            sms_balance = self.total_sms
-            email_balance = self.total_email
-            self.total_sms = 0
-            self.total_email = 0
-            self.is_added = True
-
-            return sms_balance, email_balance
-        return 0
+            return self.total_sms, self.total_email
+        return 0, 0
 
     def to_dict(self):
         """

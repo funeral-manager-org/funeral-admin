@@ -26,8 +26,14 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>Description</th>
-                                <th>Amount</th>
+                                {% if not package %}
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                {% else %}
+                                    <th>Description</th>
+                                    <td>Qty</td>
+                                    <th>Amount</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -37,12 +43,20 @@
                                     <td>R {{ payment.amount_paid|number }}.00</td>
                                 {% else %}
                                     <td>{{ package.pack_name_display }}</td>
+                                    <td>{{ package.total_sms or package.total_email }}</td>
                                     <td>R {{ payment.amount_paid|number }}.00</td>
                                 {% endif %}
                             </tr>
                             <tr>
-                                <td class="font-weight-bold">Total Paid</td>
-                                <td class="font-weight-bold">R {{ payment.amount_paid|number }}.00</td>
+                                {% if not package %}
+                                    <td class="font-weight-bold">Total Paid</td>
+                                    <td class="font-weight-bold">R {{ payment.amount_paid|number }}.00</td>
+                                {% else %}
+                                    <td class="font-weight-bold">Total Paid</td>
+                                    <td></td>
+                                    <td class="font-weight-bold">R {{ payment.amount_paid|number }}.00</td>
+
+                                {% endif %}
                             </tr>
                         </tbody>
                     </table>

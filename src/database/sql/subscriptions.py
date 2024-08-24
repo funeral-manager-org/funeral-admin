@@ -118,7 +118,9 @@ class PackageORM(Base):
             cls.__table__.drop(bind=engine)
 
     def use_package(self) -> tuple[int, int]:
+        """To Use Package just set the Is Added Flag to true"""
         if self.is_paid and not self.is_added:
+            self.is_added = True
             return self.total_sms, self.total_email
         return 0, 0
 

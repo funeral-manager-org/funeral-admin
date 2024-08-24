@@ -40,7 +40,7 @@ class SendMail:
     async def send_mail_resend(self, email: EmailCompose | EmailModel) -> tuple[dict[str, str], EmailCompose]:
         if isinstance(email, EmailCompose):
             params = {'from': self.from_ or email.from_email, 'to': email.to_email, 'subject': email.subject,
-                      'html': email.message}
+                      'html': email.html_template or email.message}
 
             email.from_email = self.from_
             email.date_time_sent = date_time()

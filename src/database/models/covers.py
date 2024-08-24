@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 from src.utils import create_id, create_policy_number, create_claim_number
 
 
-
 class PaymentMethods(Enum):
     direct_deposit = "Direct Deposit"
     payroll = "Payroll"
@@ -77,6 +76,7 @@ class ClientPersonalInformation(BaseModel):
     @property
     def client_display_name(self):
         return f"{self.full_names} {self.surname}"
+
 
 class ClaimStatus(Enum):
     REJECTED = "Rejected"
@@ -213,7 +213,7 @@ class PremiumReceipt(BaseModel):
     sms_notification_sent: bool = Field(default=False)
     email_notification_sent: bool = Field(default=False)
     whatsapp_notification_sent: bool = Field(default=False)
-    premium : Premiums | None = Field(default=None)
+    premium: Premiums | None = Field(default=None)
 
     @classmethod
     def from_premium(cls, premium: Premiums) -> 'PremiumReceipt':

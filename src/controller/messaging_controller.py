@@ -84,7 +84,7 @@ class EmailService(Controllers):
     async def store_sent_email_to_database(self, email_: EmailCompose):
         await system_cache.clear_mem_cache()
         with self.get_session() as session:
-            sent_email_orm = EmailComposeORM(**email_.dict())
+            sent_email_orm = EmailComposeORM(**email_.dict(exclude={'html_template'}))
             session.add(sent_email_orm)
 
     async def receive_email(self, sender: str, subject: str, body: str):

@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
 from src.logger import init_logger
-from src.database.models.companies import EmployeeDetails, CompanyBranches
+from src.database.models.companies import EmployeeDetails, CompanyBranches, Company
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose, SMSInbox, SMSSettings
 from src.database.models.covers import ClientPersonalInformation
 from src.authentication import login_required
@@ -299,6 +299,7 @@ async def post_sent_email_paged(user: User, branch_id: str, page: int = 0, count
 
 # ---------------compose
 
+# noinspection DuplicatedCode
 @messaging_route.get('/admin/messaging/email/compose')
 @login_required
 async def get_email_compose(user: User):
@@ -311,7 +312,7 @@ async def get_email_compose(user: User):
     context = dict(user=user, company_branches=company_branches, recipient_list=recipient_list)
     return render_template('admin/managers/messaging/paged/compose/email.html', **context)
 
-
+# noinspection DuplicatedCode
 @messaging_route.get('/admin/messaging/sms/compose')
 @login_required
 async def get_sms_compose(user: User):
@@ -485,19 +486,26 @@ async def send_composed_sms_message(user: User):
 
 # Sending Email Messages Routes
 async def send_emails(composed_email: EmailCompose,
+                      company_details: Company,
+                      user: User,
                       persons_list: list[ClientPersonalInformation | EmployeeDetails]) -> bool:
     for person in persons_list:
+        email = None
         if person.contact_id:
             contact = await company_controller.get_contact(contact_id=person.contact_id)
             if contact.email:
                 email = EmailCompose(to_email=contact.email, to_branch=composed_email.to_branch,
                                      message=composed_email.message, subject=composed_email.subject,
                                      recipient_type=composed_email.recipient_type)
-                await messaging_controller.send_email(email=email)
-        elif person.email:
+
+        if not email and person.email:
             email = EmailCompose(to_email=person.email, to_branch=composed_email.to_branch,
                                  message=composed_email.message, subject=composed_email.subject,
                                  recipient_type=composed_email.recipient_type)
+        if email:
+            # first attempt to personalize email messages - a lot of work needs to be done here
+            display_name: str = person.display_names or person.client_display_name
+            email.create_html_template(company=company_details, user=user,  display_name=display_name)
             await messaging_controller.send_email(email=email)
 
     return True
@@ -514,7 +522,6 @@ async def send_email_message(user: User):
     result = await subscriptions_controller.route_guard(user=user)
     if result:
         return result
-
     try:
         composed_email = EmailCompose(**request.form)
     except ValidationError as e:
@@ -522,44 +529,49 @@ async def send_email_message(user: User):
         flash(message="Error sending SMS please ensure to fill in the form", category="danger")
         return redirect(url_for('messaging.get_email_compose'))
 
-    if composed_email.recipient_type == RecipientTypes.EMPLOYEES.value:
+    company_details: Company = await company_controller.get_company_details(company_id=user.company_id)
 
+    if composed_email.recipient_type == RecipientTypes.EMPLOYEES.value:
         branch_employees: list[EmployeeDetails] = await company_controller.get_branch_employees(
             branch_id=composed_email.to_branch)
 
+        # noinspection DuplicatedCode
         if not await subscriptions_controller.subscription_can_send_emails(user=user, email_count=len(branch_employees)):
             message: str = f"""Cannot Send {len(branch_employees)} Emails as you do not have enough 
             email credits available please buy an email package"""
             flash(message=message, category="danger")
             return redirect(url_for('messaging.get_topup'))
 
-        await send_emails(composed_email=composed_email, persons_list=branch_employees)
+        await send_emails(composed_email=composed_email, user=user, company_details=company_details,
+                          persons_list=branch_employees)
 
     elif composed_email.recipient_type == RecipientTypes.CLIENTS.value:
 
         policy_holders: list[ClientPersonalInformation] = await company_controller.get_branch_policy_holders(
             branch_id=composed_email.to_branch)
-
+        # noinspection DuplicatedCode
         if not await subscriptions_controller.subscription_can_send_emails(user=user, email_count=len(policy_holders)):
             message: str = f"""Cannot Send {len(policy_holders)} Emails,  as you do not have enough email credits available 
             please buy an email package"""
             flash(message=message, category="danger")
             return redirect(url_for('messaging.get_topup'))
 
-        await send_emails(composed_email=composed_email, persons_list=policy_holders)
+        await send_emails(composed_email=composed_email, user=user, company_details=company_details,
+                          persons_list=policy_holders)
 
     elif composed_email.recipient_type == RecipientTypes.LAPSED_POLICY.value:
         # obtaining policyholders with lapsed policies
         policy_holders = await company_controller.get_branch_policy_holders_with_lapsed_policies(
             branch_id=composed_email.to_branch)
-
+        # noinspection DuplicatedCode
         if not await subscriptions_controller.subscription_can_send_emails(user=user, email_count=len(policy_holders)):
             message: str = f"""Cannot Send {len(policy_holders)} Emails,  as you do not have enough email credits available 
             please buy an email package"""
             flash(message=message, category="danger")
             return redirect(url_for('messaging.get_topup'))
 
-        await send_emails(composed_email=composed_email, persons_list=policy_holders)
+        await send_emails(composed_email=composed_email, user=user, company_details=company_details,
+                          persons_list=policy_holders)
     else:
         flash(message="Could Not Send Email Message", category="success")
         return redirect(url_for('messaging.get_email_compose'))

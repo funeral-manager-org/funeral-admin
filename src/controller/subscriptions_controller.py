@@ -260,7 +260,7 @@ class SubscriptionsController(Controllers):
         Removes unpaid subscriptions older than 30 days
         """
         subscriptions = await self.get_subscriptions()
-        self.logger.info(f"Checking for Unpaid Subscriptions: {subscriptions}")
+        # self.logger.info(f"Checking for Unpaid Subscriptions: {subscriptions}")
         un_paid_subscriptions: list[Subscriptions] = [sub for sub in subscriptions if not sub.is_paid_for_current_month]
 
         thirty_days_ago = datetime.now() - timedelta(days=30)
@@ -268,7 +268,7 @@ class SubscriptionsController(Controllers):
         for subscription in un_paid_subscriptions:
             if subscription.subscribed_date < thirty_days_ago:
                 await self.remove_subscription(subscription)
-                self.logger.info(f"Removed unpaid subscription: {subscription}")
+                # self.logger.info(f"Removed unpaid subscription: {subscription}")
 
     @error_handler
     async def remove_subscription(self, subscription):

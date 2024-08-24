@@ -48,12 +48,12 @@ class Controllers:
                 self.sessions = [self.session_maker() for _ in range(self.session_limit)]
 
             session = self.sessions.pop()
-            self.logger.info(f"Session acquired: {session}")
+            self.logger.debug(f"Session acquired: {session}")
             yield session
 
             if session.dirty or session.new or session.deleted:
                 session.commit()
-                self.logger.info("Session changes committed")
+                self.logger.debug("Session changes committed")
 
         except SQLAlchemyError as e:
             self.logger.error(f"Error while using session: {e}")
@@ -63,10 +63,10 @@ class Controllers:
         finally:
             if session:
                 session.close()
-                self.logger.info(f"Session released: {session}")
+                self.logger.debug(f"Session released: {session}")
             else:
                 self.sessions.append(self.session_maker())
-                self.logger.info("Session pool replenished")
+                self.logger.debug("Session pool replenished")
 
     def __del__(self):
         for session in self.sessions:

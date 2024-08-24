@@ -1,9 +1,11 @@
 from enum import Enum
 from typing import Optional
 
+from flask import render_template
 from pydantic import BaseModel, Field
 from datetime import datetime
 
+from src.database.models.companies import Company
 from src.database.models import ID_LEN
 from src.utils import create_id
 
@@ -24,7 +26,6 @@ class RecipientTypes(Enum):
 
 
 class SMSCompose(BaseModel):
-
     message_id: str = Field(default_factory=create_id)
     reference: Optional[str] = Field(default=None)
     message: str = Field(min_length=2, max_length=255)
@@ -33,7 +34,7 @@ class SMSCompose(BaseModel):
     to_branch: str = Field(min_length=ID_LEN, max_length=ID_LEN)
     recipient_type: str
     date_time_composed: str = Field(default_factory=date_time)
-    date_time_sent: Optional[str] =  Field(default=None)
+    date_time_sent: Optional[str] = Field(default=None)
     is_delivered: bool = Field(default=False)
     client_responded: bool = Field(default=False)
 
@@ -51,8 +52,8 @@ class SMSCompose(BaseModel):
             return f"27{self.from_cell[1:]}"
         return self.from_cell
 
-class SMSInbox(BaseModel):
 
+class SMSInbox(BaseModel):
     message_id: str = Field(default_factory=create_id)
     to_branch: str
     parent_reference: Optional[str] = Field(default=None)
@@ -74,10 +75,17 @@ class EmailCompose(BaseModel):
     to_email: Optional[str] = Field(default=None)
     subject: str
     message: str
+    html_template: str | None = Field(default=None)
     to_branch: Optional[str] = Field(default=None)
     recipient_type: str
     is_sent: bool = Field(default=False)
     date_time_sent: Optional[str] = Field(default=None)
+
+    def create_html_template(self, company: Company, user: any, display_name: str):
+        message = dict(message=self.message, subject=self.subject)
+        context = dict(company=company, user=user, message=message, display_name=display_name)
+
+        self.html_template = render_template('email_templates/companies/template.html', **context)
 
 
 class SMSSettings(BaseModel):

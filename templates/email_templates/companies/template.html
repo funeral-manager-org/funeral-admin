@@ -1,0 +1,21 @@
+{% extends "email_templates/email_page.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>{{ company.company_name| title }}</h2>
+    </div>
+    <div class="card-body">
+        <h2 class="card-title">Dear {{ display_name|title }}</h2>
+
+        <h2 class="card-title">{{ message.subject|title }}</h2>
+
+             {{ message.message|safe }}
+
+        <p>Thank you,</p>
+        <p>{{ company.company_name| title }} Team</p>
+        {#TODO Consider creating Company Information Link on Funeral Admin #}
+        <span><a href="https://funeral-manager.org" target="_blank">https://funeral-manager.org</a></span>
+    </div>
+</div>
+{% endblock %}

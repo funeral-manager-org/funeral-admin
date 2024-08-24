@@ -379,12 +379,12 @@ async def messaging_top_up(user: User):
         return redirect(url_for('company.get_admin'))
 
 
-    top_up_package: Package = await subscriptions_controller.add_update_sms_email_package(top_up_pack=top_up_pack)
-    if top_up_package:
-        can_pay = await payfast_controller.payfast_package_payment(subscription_details=subscription,
-                                                                   top_up_pack=top_up_package, user=user)
-        if can_pay:
-            return can_pay
+    package: Package = await subscriptions_controller.add_update_sms_email_package(top_up_pack=top_up_pack)
+    if package:
+        payfast_payment_endpoint = await payfast_controller.payfast_package_create_payment(
+            subscription_details=subscription,top_up_pack=package, user=user)
+        if payfast_payment_endpoint:
+            return payfast_payment_endpoint
 
 
     message: str = """Please try buying Top Up Packs Later - there was an error on our side"""

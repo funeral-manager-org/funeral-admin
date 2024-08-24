@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveInt
 from datetime import datetime, date, timedelta
 
 from src.database.models.payments import Payment
@@ -148,7 +148,9 @@ class Package(BaseModel):
     total_email: int = Field(default=0)
     is_paid: bool = Field(default=False)
     is_added: bool = Field(default=False)
+    total_amount: PositiveInt = Field(default=0)
     date_bought: str = Field(default_factory=date_time)
+    payments: list[Payment]
 
     def use_package(self) -> int:
         if self.is_paid and not self.is_added:

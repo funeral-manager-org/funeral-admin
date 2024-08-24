@@ -104,6 +104,7 @@ class PackageORM(Base):
     is_paid: bool = Column(Boolean)
     is_added: bool = Column(Boolean)
     date_bought: str = Column(String(36))
+    total_amount: int = Column(Integer)
     payments = relationship('PaymentORM', backref="sms_packages")
 
     @classmethod
@@ -139,6 +140,7 @@ class PackageORM(Base):
             'is_paid': self.is_paid,
             'is_added': self.is_added,
             'date_bought': self.date_bought,
+            'total_amount': self.total_amount,
             'payments': [payment.to_dict() for payment in self.payments or []
                          if isinstance(payment, PaymentORM)]
         }

@@ -54,8 +54,12 @@ class SubscriptionsController(Controllers):
         """
         with self.get_session() as session:
             # Careful not to mixup topup packs with Package the two are not the same
-            package: Package = Package(company_id=top_up_pack.company_id, package_name=top_up_pack.top_up_name,
-                              total_sms=top_up_pack.total_sms, total_email=top_up_pack.total_emails, is_paid=False)
+            package: Package = Package(company_id=top_up_pack.company_id,
+                                       package_name=top_up_pack.top_up_name,
+                                       total_sms=top_up_pack.total_sms,
+                                       total_email=top_up_pack.total_emails,
+                                       is_paid=False,
+                                       total_amount=top_up_pack.payment_amount)
 
             session.add(PackageORM(**package.dict()))
 

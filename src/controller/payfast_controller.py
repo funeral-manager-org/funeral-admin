@@ -114,7 +114,7 @@ class PayfastController(Controllers):
         return redirect(payfast_endpoint_url)
 
     @error_handler
-    async def payfast_package_payment(self, subscription_details: Subscriptions, top_up_pack: TopUpPacks, user: User):
+    async def payfast_package_create_payment(self, subscription_details: Subscriptions, top_up_pack: Package, user: User):
         """
 
         :param package:
@@ -125,7 +125,7 @@ class PayfastController(Controllers):
         cancel_url: str = url_for('subscriptions.payfast_payment_failed', _external=True, _scheme='https')
         notify_url: str = url_for('subscriptions.payfast_package_ipn', _external=True, _scheme='https')
 
-        amount: int = top_up_pack.payment_amount
+        amount: int = top_up_pack.total_amount
         item_name: str = top_up_pack.plan_name
         item_description: str = top_up_pack.plan_name
         payfast_payment_data = PayFastPay(return_url=return_url,

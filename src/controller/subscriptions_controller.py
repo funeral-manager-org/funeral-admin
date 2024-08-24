@@ -77,14 +77,15 @@ class SubscriptionsController(Controllers):
 
             return isinstance(package_orm, PackageORM)
 
-    async def spend_package(self, subscription_id:str,  package_id: str) -> bool:
+    async def spend_package(self, subscription_id: str, package_id: str) -> bool:
         """this adds package to balance of sms and email messages"""
         with self.get_session() as session:
             package_orm: PackageORM = session.query(PackageORM).filter_by(package_id=package_id).first()
             sms_balance, email_balance = package_orm.use_package()
             self.logger.info(f"Spend SMS {str(sms_balance)}")
             self.logger.info(f"SPEND EMail : {str(email_balance)}")
-            subscription_orm: SubscriptionsORM  = session.query(SubscriptionsORM).filter_by(subscription_id=subscription_id).first()
+            subscription_orm: SubscriptionsORM = session.query(SubscriptionsORM).filter_by(
+                subscription_id=subscription_id).first()
             if isinstance(subscription_orm, SubscriptionsORM):
                 subscription_orm.total_sms += sms_balance
                 subscription_orm.total_emails += email_balance
@@ -101,6 +102,7 @@ class SubscriptionsController(Controllers):
             else:
                 pass
                 #   TODO check if its an email package
+
     async def get_package(self, package_id: str) -> Package | None:
         """
 
@@ -163,17 +165,16 @@ class SubscriptionsController(Controllers):
             session.add(PaymentORM(**payment.dict()))
             self.logger.info(f"Added PAYMENT Record {payment}")
             return payment
+
     async def get_company_subscription_payment(self, transaction_id: str) -> Payment | None:
         """
 
-        :param payment:
         :return:
         """
         with self.get_session() as session:
             payment_orm = session.query(PaymentORM).filter_by(transaction_id=transaction_id).first()
 
             return Payment(**payment_orm.to_dict()) if isinstance(payment_orm, PaymentORM) else None
-
 
     @error_handler
     async def updated_branch_details(self, account: User) -> User:
@@ -184,6 +185,7 @@ class SubscriptionsController(Controllers):
                 account_orm.branch_id = branch_orm.to_dict().get('branch_id')
 
             return User(**account_orm.to_dict())
+
     @error_handler
     async def send_email_to_company_admins(self, company_data, email_template, subject):
         company_accounts: list[User] = await self.user_controller.get_company_accounts(
@@ -350,13 +352,15 @@ class SubscriptionsController(Controllers):
     async def return_plan_names(self):
         return PlanNames.plan_names()
 
+    # noinspection PyMethodMayBeStatic
     async def return_plan_details(self, plan_name: str) -> SubscriptionDetails:
         """given a plan name return the plan details"""
         return SubscriptionDetails().create_plan(plan_name=plan_name)
 
     async def return_all_plan_details(self) -> list[SubscriptionDetails]:
         """will return a definition of all subscription plans"""
-        return [await self.return_plan_details(plan_name=plan_name) for plan_name in await self.return_plan_names() if plan_name]
+        return [await self.return_plan_details(plan_name=plan_name) for plan_name in await self.return_plan_names() if
+                plan_name]
 
     async def is_subscription_active(self, user: User):
         """
@@ -390,7 +394,7 @@ class SubscriptionsController(Controllers):
         with self.get_session() as session:
             policy_holder = InsuredParty.POLICY_HOLDER.value
             policy_holder_count = session.query(ClientPersonalInformationORM).filter_by(
-                company_id=user.company_id,insured_party=policy_holder).count()
+                company_id=user.company_id, insured_party=policy_holder).count()
 
             return subscription.total_clients < policy_holder_count
 
@@ -455,4 +459,3 @@ class SubscriptionsController(Controllers):
 
             # Check if adding the new emails would exceed the limit
             return (total_count + sms_count) <= subscription.total_sms
-

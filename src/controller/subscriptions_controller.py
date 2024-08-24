@@ -61,8 +61,7 @@ class SubscriptionsController(Controllers):
                                        is_paid=False,
                                        total_amount=top_up_pack.payment_amount)
 
-            session.add(PackageORM(**package.dict()))
-
+            session.add(PackageORM(**package.dict(exclude={'payments'})))
             return package
 
     async def set_package_to_paid(self, package_id: str):

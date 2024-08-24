@@ -150,7 +150,7 @@ class Package(BaseModel):
     is_added: bool = Field(default=False)
     total_amount: PositiveInt = Field(default=0)
     date_bought: str = Field(default_factory=date_time)
-    payments: list[Payment]
+    payments: list[Payment]| [] = Field(default=[])
 
     def use_package(self) -> int:
         if self.is_paid and not self.is_added:

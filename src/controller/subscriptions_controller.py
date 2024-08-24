@@ -77,14 +77,21 @@ class SubscriptionsController(Controllers):
 
             return isinstance(package_orm, PackageORM)
 
-    async def spend_package(self, subscription_id:str,  package_id: str):
+    async def spend_package(self, subscription_id:str,  package_id: str) -> bool:
         """this adds package to balance of sms and email messages"""
         with self.get_session() as session:
             package_orm: PackageORM = session.query(PackageORM).filter_by(package_id=package_id).first()
             sms_balance, email_balance = package_orm.use_package()
+            self.logger.info(f"Spend SMS {str(sms_balance)}")
+            self.logger.info(f"SPEND EMail : {str(email_balance)}")
             subscription_orm: SubscriptionsORM  = session.query(SubscriptionsORM).filter_by(subscription_id=subscription_id).first()
-            subscription_orm.total_sms += sms_balance
-            subscription_orm.total_emails += email_balance
+            if isinstance(subscription_orm, SubscriptionsORM):
+                subscription_orm.total_sms += sms_balance
+                subscription_orm.total_emails += email_balance
+                self.logger.info(f"New SMS Balance : {str(subscription_orm.total_sms)}")
+                self.logger.info(f"New Email Balance : {str(subscription_orm.total_emails)}")
+
+            return True
 
     async def remove_package_its_unpaid(self, package_id: str):
         with self.get_session() as session:

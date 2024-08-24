@@ -264,7 +264,7 @@ async def subscription_payment_failure():
 @subscriptions_route.post('/_ipn/payfast/package')
 async def payfast_package_ipn():
     """
-
+        IF IPN is sent it means either payment succeeded or failed
     :return:
     """
     payfast_dict_data: Dict[str, str] = request.form.to_dict()
@@ -316,6 +316,7 @@ async def payfast_package_ipn():
                     if package_paid:
                         spent_package = await subscriptions_controller.spend_package(
                             subscription_id=subscription_id, package_id=package_id)
+
 
 
                     subscription_logger.info(f"Payment Record Created: {payment_data}")
@@ -396,7 +397,7 @@ async def messaging_top_up(user: User):
 @admin_login
 async def package_payment_successful(user: User, package_id: str):
     """
-
+        This is for PayPal Payments
     :param user:
     :param package_id:
     :return:

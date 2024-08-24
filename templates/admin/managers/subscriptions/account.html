@@ -13,15 +13,15 @@
             </li>
 
             <li class="list-group-item font-weight-bold">
-                Total SMS: <span class="pull-right">{{ subscription_account.total_sms }} SMS per Month</span>
+                Total SMS: <span class="pull-right">{{ subscription_account.total_sms|number }} SMS per Month</span>
             </li>
 
             <li class="list-group-item font-weight-bold">
-                Total Emails: <span class="pull-right">{{ subscription_account.total_emails }} Emails per Month</span>
+                Total Emails: <span class="pull-right">{{ subscription_account.total_emails|number }} Emails per Month</span>
             </li>
 
             <li class="list-group-item font-weight-bold">
-                Total Clients: <span class="pull-right">{{ subscription_account.total_clients }} Lifetime</span>
+                Total Clients: <span class="pull-right">{{ subscription_account.total_clients|number }} Lifetime</span>
             </li>
 
             <li class="list-group-item font-weight-bold">

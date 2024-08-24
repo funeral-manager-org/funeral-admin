@@ -94,6 +94,15 @@ class SubscriptionsController(Controllers):
             else:
                 pass
                 #   TODO check if its an email package
+    async def get_package(self, package_id: str) -> Package | None:
+        """
+
+        :param package_id:
+        :return:
+        """
+        with self.get_session() as session:
+            package_orm = session.query(PackageORM).filter_by(package_id=package_id).first()
+            return Package(**package_orm.to_dict()) if isinstance(package_orm, PackageORM) else None
 
     @error_handler
     async def add_update_company_subscription(self, subscription: Subscriptions) -> Subscriptions:

@@ -159,7 +159,10 @@ class Package(BaseModel):
             return remaining
         return 0
 
-
+    @property
+    def pack_name_display(self) -> str:
+        product, pack_name = self.package_name.split("_")
+        return f"{product.upper()} {pack_name.upper()}"
 def this_day() -> datetime:
     """
     :return:

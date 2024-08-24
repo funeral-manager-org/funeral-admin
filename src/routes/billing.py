@@ -48,8 +48,14 @@ async def print_subscription_payment_tax_invoice(user: User, transaction_id: str
         message="You changed your subscription since making this payment can no longer reprint your invoice"
         flash(message=message,category="danger")
         return redirect(url_for('billing.get_billing'))
+
     generated_on = datetime.datetime.now()
     context = dict(user=user, subscription_account=subscription_account, payment=payment, generated_on=generated_on)
+
+    if payment.package_id:
+        package = await subscriptions_controller.get_package(package_id=payment.package_id)
+        context.update(package=package)
+
     return render_template('receipts/system/subscription_payment.html', **context)
 
 @billing_route.post('/admin/billing/paynow')

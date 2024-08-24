@@ -52,11 +52,9 @@
                     {% else %}
                         <span class="pull-right badge badge-success">{{ subscription_account.is_expired() and "Expired" or "Active" }}
                     {% endif %}
-
                 </span>
             </li>
         </ul>
-
         {% if not subscription_account.is_paid_for_current_month %}
             <button class="btn btn-outline-info btn-block btn-rounded m-t-12"
                 data-toggle="modal" data-target="#paymentMethodsModal"

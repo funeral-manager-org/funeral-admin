@@ -32,13 +32,8 @@
                         </thead>
                         <tbody>
                             <tr>
-                                {% if not package %}
-                                    <td>{{ subscription_account.plan_name|title }}</td>
-                                    <td>R {{ payment.amount_paid|number }}.00</td>
-                                {% else %}
-                                    <td>{{ package.pack_name_display }}</td>
-                                    <td>R {{ payment.amount_paid|number }}.00</td>
-                                {% endif %}
+                                <td>{{ subscription_account.plan_name|title }}</td>
+                                <td>R {{ payment.amount_paid|number }}.00</td>
                             </tr>
                             <tr>
                                 <td class="font-weight-bold">Total Paid</td>

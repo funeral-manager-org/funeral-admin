@@ -349,7 +349,7 @@ async def messaging_top_up(user: User):
     :return:
     """
     if not user.company_id:
-        message: str = "You cannot subscribe please ensure to create a company"
+        message: str = "You are not a member of any company therefore you cannot buy any topup packs"
         flash(message=message, category="danger")
         subscription_logger.info(message)
         return redirect(url_for('company.get_admin'))
@@ -372,13 +372,8 @@ async def messaging_top_up(user: User):
     subscription: Subscriptions = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
 
     if not subscription:
-        message: str = "You have no Valid subscription - please create a company"
-        flash(message=message, category="danger")
-        subscription_logger.info(message)
-        return redirect(url_for('company.get_admin'))
-
-    if subscription.plan_name == PlanNames.BASIC.value:
-        message: str = "You cannot buy top up packages on a basic plan -- please upgrade"
+        message: str = """You have no Valid subscription - please Subscribe and pay for your Subscription before 
+        buying any Top Up Packs"""
         flash(message=message, category="danger")
         subscription_logger.info(message)
         return redirect(url_for('company.get_admin'))
@@ -387,12 +382,15 @@ async def messaging_top_up(user: User):
     top_up_package: Package = await subscriptions_controller.add_update_sms_email_package(top_up_pack=top_up_pack)
     if top_up_package:
         can_pay = await payfast_controller.payfast_package_payment(subscription_details=subscription,
-                                                                         top_up_pack=top_up_package,
-                                                                         user=user)
+                                                                   top_up_pack=top_up_package, user=user)
         if can_pay:
             return can_pay
 
 
+    message: str = """Please try buying Top Up Packs Later - there was an error on our side"""
+    flash(message=message, category="danger")
+    subscription_logger.info(message)
+    return redirect(url_for('company.get_admin'))
 
 @subscriptions_route.get('/subscriptions/package/success/<string:package_id>')
 @admin_login

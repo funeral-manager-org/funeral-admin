@@ -60,6 +60,7 @@ class PayfastController(Controllers):
         if payfast_payment.package_id:
             data_dict.update(custom_str4=payfast_payment.package_id)
 
+        self.logger.info(f"Sending Data to Payfast : {data_dict}")
         return end_point + '&'.join([f'{key}={value}' for key, value in data_dict.items()])
 
     @error_handler

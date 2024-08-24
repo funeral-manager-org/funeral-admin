@@ -46,21 +46,20 @@ class SubscriptionsController(Controllers):
         self.loop.create_task(self.daemon_util())
         pass
 
-    async def add_update_sms_email_package(self, top_up_pack: TopUpPacks) -> TopUpPacks:
+    async def add_update_sms_email_package(self, top_up_pack: TopUpPacks) -> Package:
         """
 
         :param top_up_pack:
         :return:
         """
         with self.get_session() as session:
-
-            package = Package(company_id=top_up_pack.company_id, package_name=top_up_pack.top_up_name,
+            # Careful not to mixup topup packs with Package the two are not the same
+            package: Package = Package(company_id=top_up_pack.company_id, package_name=top_up_pack.top_up_name,
                               total_sms=top_up_pack.total_sms, total_email=top_up_pack.total_emails, is_paid=False)
 
-            package_orm = PackageORM(**package.dict())
-            session.add(package_orm)
+            session.add(PackageORM(**package.dict()))
 
-            return top_up_pack
+            return package
 
     async def set_package_to_paid(self, package_id: str):
         """

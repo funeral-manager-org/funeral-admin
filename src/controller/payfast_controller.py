@@ -126,8 +126,8 @@ class PayfastController(Controllers):
         notify_url: str = url_for('subscriptions.payfast_package_ipn', _external=True, _scheme='https')
 
         amount: int = top_up_pack.total_amount
-        item_name: str = top_up_pack.plan_name
-        item_description: str = top_up_pack.plan_name
+        item_name: str = top_up_pack.package_name
+        item_description: str = top_up_pack.package_name
         payfast_payment_data = PayFastPay(return_url=return_url,
                                           cancel_url=cancel_url,
                                           notify_url=notify_url,

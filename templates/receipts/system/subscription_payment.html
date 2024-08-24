@@ -12,9 +12,15 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6">
-                            <h5>Subscription Plan: {{ subscription_account.plan_name|title }}</h5>
-                            <h5>System Reference: {{ subscription_account.subscription_id }}</h5>
-                            <h5>Receipt Number: {{ payment.transaction_id }}</h5>
+                            {% if not package %}
+                                <h5>Subscription Plan: {{ subscription_account.plan_name|title }}</h5>
+                                <h5>Reference: {{ subscription_account.subscription_id }}</h5>
+                                <h5>Receipt Number: {{ payment.transaction_id }}</h5>
+                            {% else %}
+                                <h5>Email / SMS TopUp Package</h5>
+                                <h5>Reference: {{ subscription_account.subscription_id }}</h5>
+                                <h5>Receipt Number: {{ payment.transaction_id }}</h5>
+                            {% endif %}
                         </div>
                         <div class="col-6 text-right">
                             <h5>Date Paid: {{ payment.date_paid.strftime('%Y-%m-%d') }}</h5>
@@ -31,7 +37,7 @@
                                     <th>Amount</th>
                                 {% else %}
                                     <th>Description</th>
-                                    <td>Qty</td>
+                                    <th>Qty</th>
                                     <th>Amount</th>
                                 {% endif %}
                             </tr>
@@ -43,7 +49,7 @@
                                     <td>R {{ payment.amount_paid|number }}.00</td>
                                 {% else %}
                                     <td>{{ package.pack_name_display }}</td>
-                                    <td>{{ package.total_sms or package.total_email }}</td>
+                                    <td>{{ (package.total_sms or package.total_email)| number }}</td>
                                     <td>R {{ payment.amount_paid|number }}.00</td>
                                 {% endif %}
                             </tr>
@@ -61,13 +67,13 @@
                         </tbody>
                     </table>
                     <hr>
-                    <p class="text-center">
+                    <p class="text-center font-weight-bold">
                         Thank you for your payment!
                     </p>
                     <div class="row">
                         <div class="col-6">
                             <p>Email: sales@funeral-manager.org</p>
-                            <p>Phone: +27768255575</p>
+                            <p>Phone: +2776-825-5575</p>
                         </div>
                         <div class="col-6 text-right">
                             <p >VAT Number: 9231219263 </p>

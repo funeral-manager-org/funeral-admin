@@ -59,6 +59,7 @@ class SMSComposeORM(Base):
     is_delivered: bool = Column(Boolean)
     client_responded: bool = Column(Boolean)
     sent_at = Column(DateTime, default=func.now())
+
     @classmethod
     def create_if_not_table(cls):
         if not inspect(engine).has_table(cls.__tablename__):
@@ -83,6 +84,7 @@ class SMSComposeORM(Base):
             "recipient_type": self.recipient_type,
             "date_time_composed": self.date_time_composed,
             "date_time_sent": self.date_time_sent,
+
             "is_delivered": self.is_delivered,
             "client_responded": self.client_responded
         }
@@ -101,7 +103,6 @@ class EmailComposeORM(Base):
     is_sent = Column(Boolean)
     date_time_sent = Column(String(36))
     sent_at = Column(DateTime, default=func.now())
-
 
     @classmethod
     def create_if_not_table(cls):

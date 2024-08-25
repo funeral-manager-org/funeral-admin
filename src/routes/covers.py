@@ -528,8 +528,12 @@ async def retrieve_policy(user: User):
     :param user:
     :return:
     """
-    # policy_number = request.form.get('policy_number')
-    # id_number = request.form.get("id_number")
+
+    # TODO create a wrapper as a route Guard can be created in subscription controller
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     try:
         claim_init_data = BeginClaim(**request.form)
     except ValidationError as e:
@@ -539,6 +543,11 @@ async def retrieve_policy(user: User):
 
     policy_data: PolicyRegistrationData = await covers_controller.get_policy_data(
         policy_number=claim_init_data.policy_number)
+    if user.company_id != policy_data.company_id:
+        message: str = f"""You are not Authorized to process this claim please inform your administrator"""
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
     if not policy_data:
         mess: str = f"""The Policy with Policy Number : {str(claim_init_data.policy_number)} was not found please be 
         sure to enter your information correctly"""
@@ -564,8 +573,40 @@ async def retrieve_policy(user: User):
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
 
-    context = dict(policy_holder=client_data, policy_data=policy_data)
+    # TODO: Initiate the Claim
+    # - Present the policy information and claim form to the claimant or responsible employee.
+    # - Ensure that the signed policy document is attached to the claim.
+    # - Collect and attach claimant information, including contact details and relationship to the deceased.
+    # - Attach all relevant documentation related to the deceased (e.g., death certificate, identification, legal documents).
 
+    # TODO: Submit the Claim
+    # - Verify that all required documents and information are attached.
+    # - Submit the fully completed claim form for processing.
+
+    # TODO: Claim Review and Decision
+    # - Review the claim by the responsible person or department within the company.
+    # - Make a decision regarding the claim’s approval or rejection.
+
+    # TODO: Notification and Communication
+    # - Notify the employee responsible for creating the claim about the decision.
+    # - Inform the claimant and all other relevant parties about the decision.
+    # - Provide detailed information about the next steps, if any.
+
+    # TODO: Work Order Creation (if applicable)
+    # - If the claim involves services such as financial compensation, burial arrangements, or memorial services:
+    #   - Create a work order.
+    #   - Assign the work order to relevant departments (e.g., Finance, Tombstones and Graveyard, Family Services).
+
+    # TODO: Follow-Up and Support
+    # - Ensure that all involved departments carry out their responsibilities in a timely manner.
+    # - Provide ongoing communication and support to the claimant and family, ensuring they are informed of the claim’s progress.
+
+    # TODO: Completion and Documentation
+    # - Once all tasks related to the claim are completed:
+    #   - Document the outcomes.
+    #   - Close the claim, ensuring all records are securely stored and accessible for future reference.
+
+    context = dict(policy_holder=client_data, policy_data=policy_data)
     return render_template("claims/sections/policy.html", **context)
 
 

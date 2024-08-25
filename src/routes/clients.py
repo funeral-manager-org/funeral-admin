@@ -157,7 +157,7 @@ async def add_client(user: User):
         message: str = """Your Subscription can no longer accept extra policy holders 
         please upgrade your account or create a ticket"""
         flash(message=message, category="danger")
-        return redirect('company.get_admin')
+        return redirect(url_for('company.get_admin'))
 
     try:
         policy_holder: ClientPersonalInformation = ClientPersonalInformation(**request.form)

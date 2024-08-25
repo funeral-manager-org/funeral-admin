@@ -1,0 +1,31 @@
+
+
+
+
+
+<h4 class="mt-5">Claimant's Personal Information</h4>
+<form id="claim-form" action="{{ url_for('covers.log_claim') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="claimant_id_number">ID Number:</label>
+        <input type="text" id="claimant_id_number" name="claimant_id_number" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="claimant_full_name">Full Name:</label>
+        <input type="text" id="claimant_full_name" name="claimant_full_name" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="claimant_phone">Phone Number:</label>
+        <input type="tel" id="claimant_phone" name="claimant_phone" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="claimant_email">Email Address:</label>
+        <input type="email" id="claimant_email" name="claimant_email" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="claimant_address">Physical Address:</label>
+        <input type="text" id="claimant_address" name="claimant_address" class="form-control" required>
+    </div>
+</form>
+
+
+

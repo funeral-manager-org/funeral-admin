@@ -16,8 +16,8 @@ from src.controller.messaging_controller import MessagingController
 from src.database.models.companies import Company
 from src.database.models.messaging import RecipientTypes, EmailCompose
 from src.database.models.payments import Payment
-from src.database.models.subscriptions import Subscriptions, SubscriptionStatus, TopUpPacks, Package, PlanNames, \
-    SubscriptionDetails
+from src.database.models.subscriptions import (Subscriptions, SubscriptionStatus, TopUpPacks, Package, PlanNames,
+                                               SubscriptionDetails)
 from src.database.models.users import User
 from src.database.sql.subscriptions import SubscriptionsORM, PaymentORM, SubscriptionStatusORM, PackageORM
 
@@ -396,7 +396,7 @@ class SubscriptionsController(Controllers):
             policy_holder_count = session.query(ClientPersonalInformationORM).filter_by(
                 company_id=user.company_id, insured_party=policy_holder).count()
 
-            return subscription.total_clients < policy_holder_count
+            return subscription.total_clients > policy_holder_count
 
     async def subscription_can_send_emails(self, user: User, email_count: int = 1) -> bool:
         """

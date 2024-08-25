@@ -77,6 +77,10 @@ class ClientPersonalInformation(BaseModel):
     def client_display_name(self):
         return f"{self.full_names} {self.surname}"
 
+    @property
+    def is_policy_holder(self):
+        return self.insured_party == InsuredParty.POLICY_HOLDER.value
+
 
 class ClaimStatus(Enum):
     REJECTED = "Rejected"
@@ -84,13 +88,18 @@ class ClaimStatus(Enum):
     COMPLETED = "Completed"
     IN_PROGRESS = "In Progress"
 
+# 8101245336238 , J0AYTC03Y
+class BeginClaim(BaseModel):
+    policy_number: str = Field(min_length=9, max_length=9)
+    id_number: str = Field(min_length=13, max_length=13)
+
 
 class Claims(BaseModel):
+    claim_number: str = Field(default_factory=create_claim_number)
     uid: str
     employee_id: str | None
     branch_id: str
     company_id: str
-    claim_number: str = Field(default_factory=create_claim_number)
     plan_number: str
     policy_number: str
 
@@ -102,6 +111,7 @@ class Claims(BaseModel):
 
     funeral_company: str
     claim_type: ClaimType  # Add a field for the claim type
+    notes: str | None
 
 
 def this_year() -> int:

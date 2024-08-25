@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from src.authentication import login_required, user_details
 from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentStatus, \
-    PremiumReceipt
+    PremiumReceipt, BeginClaim, InsuredParty
 from src.database.models.users import User
 from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
@@ -31,6 +31,7 @@ def validate_page_and_count(page: int, count: int, max_value: int = 1000, redire
         flash(message="Your request is out of bounds", category="danger")
         return redirect(url_for(redirect_route))
     return None
+
 
 @covers_route.get('/admin/administrator/plans')
 @login_required
@@ -507,4 +508,84 @@ async def last_receipt_reprint(user: User, premium_id: str):
     return render_template('receipts/companies/premium_payment_receipt.html', **context)
 
 
+@covers_route.get('/covers/get-claim-form')
+@login_required
+async def get_claim_form(user: User):
+    """
 
+    :param user:
+    :return:
+    """
+    context = dict(user=user)
+    return render_template("claims/claim_form.html", **context)
+
+
+@covers_route.post('/covers/claims/retrive-policy')
+@login_required
+async def retrieve_policy(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    # policy_number = request.form.get('policy_number')
+    # id_number = request.form.get("id_number")
+    try:
+        claim_init_data = BeginClaim(**request.form)
+    except ValidationError as e:
+        covers_logger.warning(str(e))
+        flash(message="Please ensure your policy number and id number are correct", category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    policy_data: PolicyRegistrationData = await covers_controller.get_policy_data(
+        policy_number=claim_init_data.policy_number)
+    if not policy_data:
+        mess: str = f"""The Policy with Policy Number : {str(claim_init_data.policy_number)} was not found please be 
+        sure to enter your information correctly"""
+
+        flash(message=mess, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    if policy_data.total_balance_due > 0:
+        mess: str = f"There is an Outstanding Premium to the amount of R {policy_data.total_balance_due} on this Policy"
+        flash(message=mess, category="success")
+
+    client_data: ClientPersonalInformation = await company_controller.get_client_data_with_id_number(
+        id_number=claim_init_data.id_number)
+
+    if not client_data.is_policy_holder:
+        message: str = f"""The Supplied ID Number is not of the Policy Holder- please submit the 
+        Policy Holder ID Number"""
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    if client_data.policy_number != claim_init_data.policy_number:
+        message: str = f"""We are unable to ascertain any relationship between the id number and policy number"""
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    context = dict(policy_holder=client_data, policy_data=policy_data)
+
+    return render_template("claims/sections/policy.html", **context)
+
+
+@covers_route.get('/covers/claims/log-claim')
+@login_required
+async def log_claim(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    pass
+
+
+@covers_route.get('/covers/claims-status')
+@login_required
+async def retrieve_claim_status(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    pass

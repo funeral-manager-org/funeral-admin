@@ -1,0 +1,33 @@
+{% extends "layouts/page.html" %}
+{% block content %}
+    <section id="main-content">
+        <div class="card shadow-lg border-info">
+            <div class="card-header bg-facebook">
+                <h3 class="card-title text-white">
+                    <i class="fa fa-user-circle"></i>
+                    Funeral Policy Claim Form
+                </h3>
+                <span class="card-title font-weight-light text-white">
+                    Log new claims or obtain the status of a claim using this form
+                </span>
+            </div>
+            <div class="card-body m-t-12">
+
+                <form id="retrieve-policy-form" action="{{ url_for('covers.retrieve_policy') }}" method="POST">
+                    <div class="form-group">
+                        <label for="policy_number" class="font-weight-bold">Policy Number:</label>
+                        <input type="text" id="policy_number" name="policy_number" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="policy_holder_id_number" class="font-weight-bold">Policy Holder ID Number:</label>
+                        <input type="text" id="id_number" name="id_number" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Start Claim Processing</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}

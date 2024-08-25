@@ -1,0 +1,91 @@
+{% extends "layouts/page.html" %}
+{% block content %}
+    <section id="main-content">
+        <div class="container mt-4">
+            <!-- Policy Data Card -->
+            <div class="card shadow-lg border-info mb-4">
+                <div class="card-header bg-facebook">
+                    <h3 class="card-title text-white">
+                        <i class="fa fa-user-circle"></i>
+                        Policy Data
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title font-weight-bold m-b-12">Policy Details</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>Policy Number:</strong><span class="pull-right "> {{ policy_data.policy_number }}</span></li>
+                        <li class="list-group-item"><strong>Plan Number:</strong> <span class="pull-right "> {{ policy_data.plan_number }}</span></li>
+                        <li class="list-group-item"><strong>Policy Type:</strong> <span class="pull-right "> {{ policy_data.policy_type|title }}</span></li>
+                        <li class="list-group-item"><strong>Date Activated:</strong> <span class="pull-right "> {{ policy_data.date_activated or 'N/A' }}</span></li>
+                        <li class="list-group-item"><strong>First Premium Date:</strong> <span class="pull-right "> {{ policy_data.first_premium_date or 'N/A' }}</span></li>
+                        <li class="list-group-item"><strong>Payment Day:</strong> <span class="pull-right "> {{ policy_data.payment_day or 'N/A' }}</span></li>
+                        <li class="list-group-item"><strong>Payment Method:</strong> <span class="pull-right ">{{ policy_data.payment_method|title or 'N/A' }}</span></li>
+                        <li class="list-group-item"><strong>Policy Active:</strong> <span class="pull-right ">{{ 'Yes' if policy_data.policy_active else 'No' }}</span></li>
+                        <li class="list-group-item"><strong>Total Family Members:</strong> <span class="pull-right ">{{ policy_data.total_family_members }}</span></li>
+                        <li class="list-group-item"><strong>Total Premiums:</strong><span class="pull-right "> R {{ policy_data.total_premiums|number }}.00</span></li>
+                        <li class="list-group-item"><strong>Payment Code Reference:</strong> <span class="pull-right ">{{ policy_data.payment_code_reference }}</span></li>
+                    </ul>
+                    <h4 class="card-title font-weight-bold m-b-12">Premiums</h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Scheduled Payment Date</th>
+                                <th>Balance Due</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for premium in policy_data.sorted_premiums[:3] %}
+                                <tr>
+                                    <td>{{ premium.scheduled_payment_date }}</td>
+                                    <td>R {{ premium.balance_due|number }}.00</td>
+                                    <td>{{ 'Paid' if premium.is_paid else 'Unpaid' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    {% if policy_data.total_balance_due %}
+                        <span class="badge badge-danger">This Policy Is in Areas for R {{ policy_data.total_balance_due|number }}.00</span>
+                    {% else %}
+                        <span class="badge badge-info">Policy is Upto Date</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Client/Policy Holder Information Card -->
+            <div class="card shadow-lg border-info mb-4">
+                <div class="card-header bg-facebook">
+                    <h3 class="card-title text-white">
+                        <i class="fa fa-user"></i>
+                        Client/Policy Holder Information
+                    </h3>
+                </div>
+                <div class="card-body">
+
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>Full Names:</strong> <span class="pull-right ">{{ policy_holder.full_names }}</span></li>
+                        <li class="list-group-item"><strong>Surname:</strong> <span class="pull-right ">{{ policy_holder.surname }}</span></li>
+                        <li class="list-group-item"><strong>Title:</strong> <span class="pull-right">{{ policy_holder.title }}</span></li>
+                        <li class="list-group-item"><strong>ID Number:</strong> <span class="pull-right">{{ policy_holder.id_number }}</span></li>
+                        <li class="list-group-item"><strong>Date of Birth:</strong> <span class="pull-right">{{ policy_holder.date_of_birth }}</span></li>
+                        <li class="list-group-item"><strong>Nationality:</strong> <span class="pull-right">{{ policy_holder.nationality }}</span></li>
+                        <li class="list-group-item"><strong>Insured Party:</strong> <span class="pull-right">{{ policy_holder.insured_party or 'N/A' }}</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Signature Section -->
+            <div class="card shadow-lg border-info">
+                <div class="card-body text-center">
+                    <p class="font-weight-bold">Please ensure that the claimant verifies the information above and signs below before proceeding with the claim.</p>
+                    <p><strong>Claimant Signature:</strong> _________________________</p>
+                    <p><strong>Date:</strong> _________________________</p>
+                    <p><strong>Employee Signature:</strong> _________________________</p>
+                    <p><strong>Date:</strong> _________________________</p>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

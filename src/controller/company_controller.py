@@ -87,7 +87,8 @@ class CompanyController(Controllers):
                 if company_detail.admin_uid:
                     employee_detail_orm = session.query(EmployeeORM).filter_by(uid=company_detail.admin_uid).first()
                     if isinstance(employee_detail_orm, EmployeeORM):
-                        self.logger.info(f"Employee Detail ORM : {employee_detail_orm.to_dict(include_relationships=False)}")
+                        self.logger.info(
+                            f"Employee Detail ORM : {employee_detail_orm.to_dict(include_relationships=False)}")
                         return EmployeeDetails(**employee_detail_orm.to_dict(include_relationships=False))
 
             return None
@@ -735,7 +736,8 @@ class CompanyController(Controllers):
             if isinstance(policy_holder_orm, ClientPersonalInformationORM):
                 return ClientPersonalInformation(**policy_holder_orm.to_dict())
             return None
-    async def get_policy_holder_by_policy_number(self, policy_number: str) -> ClientPersonalInformation| None:
+
+    async def get_policy_holder_by_policy_number(self, policy_number: str) -> ClientPersonalInformation | None:
         """
 
         :param policy_number:
@@ -747,6 +749,18 @@ class CompanyController(Controllers):
                 policy_number=policy_number, insured_party=insured_party).first()
             if isinstance(policy_holder_orm, ClientPersonalInformationORM):
                 return ClientPersonalInformation(**policy_holder_orm.to_dict())
+            return None
+
+    async def get_client_data_with_id_number(self, id_number: str) -> ClientPersonalInformation | None:
+        """
+
+        :param id_number:
+        :return:
+        """
+        with self.get_session() as session:
+            client_personal_orm = session.query(ClientPersonalInformationORM).filter_by(id_number=id_number).first()
+            if isinstance(client_personal_orm, ClientPersonalInformationORM):
+                return ClientPersonalInformation(**client_personal_orm.to_dict())
             return None
 
     @cached_ttl()

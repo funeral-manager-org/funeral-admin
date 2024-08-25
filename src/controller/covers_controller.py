@@ -274,8 +274,7 @@ class CoversController(Controllers):
     @error_handler
     async def get_last_receipt_by_premium_number(self, premium_id: str) -> PremiumReceipt:
         """
-
-        :param premium_number:
+        :param premium_id:
         :return:
         """
         with self.get_session() as session:

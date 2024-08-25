@@ -45,7 +45,15 @@
                                     <li><a href="{{ url_for('covers.get_outstanding_premiums', page=0, count=25) }}"><i class="ti-credit-card"></i> Outstanding</a></li>
                                 </ul>
                             </li>
-{#                            <li><a href="{{ url_for('clients.get_clients') }}"><i class="ti-briefcase"></i> Clients</a></li>#}
+                            <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-credit-card-alt"></i> Claims</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
+                                <ul>
+                                    <li><a href="{{ url_for('covers.get_claim_form') }}"><i class="ti-credit-card"></i> New Claims </a></li>
+                                    <li><a href="#"><i class="ti-credit-card"></i> Processed Claims </a></li>
+                                    <li><a href="#"><i class="ti-credit-card"></i> Outstanding</a></li>
+                                </ul>
+                            </li>
+
+
                         </ul>
                     </li>
                     <li><a class="sidebar-sub-toggle"><span class="text-success"><i class="ti-dashboard"></i> Human Resource</span><span

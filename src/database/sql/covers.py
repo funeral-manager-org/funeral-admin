@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from sqlalchemy import Column, String, inspect, Integer, Boolean, ForeignKey, Date, DateTime
+from sqlalchemy import Column, String, inspect, Integer, Boolean, ForeignKey, Date, DateTime, Text
 from sqlalchemy.orm import relationship
 from src.database.constants import ID_LEN, NAME_LEN
 from src.database.sql import Base, engine
@@ -67,8 +67,8 @@ class ClientPersonalInformationORM(Base):
 class ClaimsORM(Base):
     __tablename__ = "claims"
 
-    uid = Column(String(ID_LEN), index=True)
     claim_number = Column(String(9), primary_key=True, index=True)
+    uid = Column(String(ID_LEN), index=True)
     branch_uid = Column(String(ID_LEN), index=True)
     company_uid = Column(String(ID_LEN), index=True)
 
@@ -84,6 +84,7 @@ class ClaimsORM(Base):
     claim_status = Column(String(36))
     funeral_company = Column(String(255))
     claim_type = Column(String(36))
+    notes = Column(Text)
 
     @classmethod
     def create_if_not_table(cls):
@@ -100,6 +101,7 @@ class ClaimsORM(Base):
         Convert the object to a dictionary representation.
         """
         return {
+            "uid": self.uid,
             "employee_id": self.employee_id,
             "branch_uid": self.branch_uid,
             "company_uid": self.company_uid,
@@ -112,7 +114,8 @@ class ClaimsORM(Base):
             "date_paid": self.date_paid,
             "claim_status": self.claim_status,
             "funeral_company": self.funeral_company,
-            "claim_type": self.claim_type
+            "claim_type": self.claim_type,
+            "notes": self.notes
         }
 
 

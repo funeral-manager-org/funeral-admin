@@ -67,11 +67,11 @@ class ClientPersonalInformationORM(Base):
 class ClaimsORM(Base):
     __tablename__ = "claims"
 
-    claim_number = Column(String(9), primary_key=True, index=True)
+    claim_number = Column(String(12), primary_key=True, index=True)
     employee_id = Column(String(ID_LEN), nullable=True, index=True)
 
-    branch_uid = Column(String(ID_LEN), index=True)
-    company_uid = Column(String(ID_LEN), index=True)
+    branch_id = Column(String(ID_LEN), index=True)
+    company_id = Column(String(ID_LEN), index=True)
 
     plan_number = Column(String(9), index=True)
     policy_number = Column(String(9), index=True)
@@ -80,6 +80,8 @@ class ClaimsORM(Base):
     claim_total_paid = Column(Integer)
     claimed_for_uid = Column(String(ID_LEN), nullable=True)
     date_paid = Column(DateTime)
+    date_claim_logged = Column(DateTime)
+    date_of_service = Column(DateTime)
     claim_status = Column(String(36))
 
     claim_type = Column(String(36))
@@ -102,8 +104,8 @@ class ClaimsORM(Base):
         return {
             "claim_number": self.claim_number,
             "employee_id": self.employee_id,
-            "branch_uid": self.branch_uid,
-            "company_uid": self.company_uid,
+            "branch_id": self.branch_uid,
+            "company_id": self.company_uid,
 
             "plan_number": self.plan_number,
             "policy_number": self.policy_number,
@@ -114,10 +116,52 @@ class ClaimsORM(Base):
             "claimed_for_uid": self.claimed_for_uid,
 
             "date_paid": self.date_paid,
+            "date_claim_logged": self.date_claim_logged,
+            "date_of_service": self.date_of_service,
             "claim_status": self.claim_status,
 
             "claim_type": self.claim_type,
             "notes": self.notes
+        }
+
+
+class ClaimantORM(Base):
+    __tablename__ = "claimant_personal"
+
+    claim_number: str = Column(String(12), primary_key=True)
+    id_number: str = Column(String(13), index=True)
+    full_names: str = Column(String(NAME_LEN))
+    surname: str = Column(String(NAME_LEN))
+    cell: str = Column(String(16))
+    alt_cell: str = Column(String(16))
+    email: str = Column(String(255))
+    address_id: str = Column(String(ID_LEN))
+    bank_id: str = Column(String(ID_LEN))
+    relationship_to_deceased: str = Column(String(NAME_LEN))
+
+
+    @classmethod
+    def create_if_not_table(cls):
+        if not inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.create(bind=engine)
+
+    @classmethod
+    def delete_table(cls):
+        if inspect(engine).has_table(cls.__tablename__):
+            cls.__table__.drop(bind=engine)
+
+    def to_dict(self):
+        return {
+            "claim_number": self.claim_number,
+            "id_number": self.id_number,
+            "full_names": self.full_names,
+            "surname": self.surname,
+            "cell": self.cell,
+            "alt_cell": self.alt_cell,
+            "email": self.email,
+            "address_id": self.address_id,
+            "bank_id": self.bank_id,
+            "relationship_to_deceased": self.relationship_to_deceased,
         }
 
 

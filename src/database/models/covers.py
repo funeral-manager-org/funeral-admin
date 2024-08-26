@@ -31,12 +31,16 @@ class RelationshipToPolicyHolder(Enum):
     BUSINESS_PARTNER = "Business Partner"
     OTHER = "Other"
 
+    @classmethod
+    def relationships(cls):
+        return [relationship.value for relationship in cls]
+
 
 class ClaimType(Enum):
     MONEY = "Money"
     SERVICES = "Services"
     GROCERIES = "Groceries"
-    BOTH = "Both"
+    FUNERAL_COVER = "Funeral Cover"
 
 
 class InsuredParty(Enum):
@@ -106,9 +110,10 @@ class Claims(BaseModel):
     claim_amount: PositiveInt
     claim_total_paid: PositiveInt = Field(default=0)
     claimed_for_uid: str | None = Field(default=None)
-    date_paid: datetime
-    claim_status: str = Field(default=ClaimStatus.IN_PROGRESS.value)
+    date_paid: datetime | None = Field(default=None)
+    date_of_service: datetime | None = Field(default=None)
     date_claim_logged: datetime = Field(default_factory=datetime.now)
+    claim_status: str = Field(default=ClaimStatus.IN_PROGRESS.value)
     claim_type: ClaimType  # Add a field for the claim type
     notes: str | None = Field(default=None)
 
@@ -121,7 +126,7 @@ class ClaimantPersonalDetails(BaseModel):
     cell: str
     email: str
     address_id: str
-    bank_id: str
+    bank_id: str = Field(max_length=26)
     relationship_to_deceased: str
 
     @property

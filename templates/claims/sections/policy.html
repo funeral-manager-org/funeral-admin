@@ -87,10 +87,13 @@
                 </div>
             </div>
             <div class="card-footer shadow-lg border-warning">
+
                 <span>Print this before you proceed with the claim</span>
-                <button class="btn btn-outline-info btn-block btn-rounded">
-                    Save and Proceed
-                </button>
+                <form class="form-horizontal" method="get" action="{{ url_for('covers.log_claim', policy_number=policy_data.policy_number, id_number=policy_holder.id_number) }}">
+                    <button type="submit" class="btn btn-outline-info btn-block btn-rounded">
+                        Save and Proceed
+                    </button>
+                </form>
             </div>
         </div>
     </section>

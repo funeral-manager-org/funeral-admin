@@ -16,7 +16,7 @@ class BankAccount(BaseModel):
     - account_type = Column(String(NAME_LEN))
 
     """
-    bank_account_id: str = Field(default_factory=create_id, min_length=26, max_length=26)
+    bank_account_id: str = Field(default_factory=create_id, max_length=26)
 
     account_holder: str = Field(min_length=2, max_length=NAME_LEN, description="The name associated with the account")
     account_number: str = Field(min_length=6, max_length=NAME_LEN, description="The unique identification number assigned to the account")

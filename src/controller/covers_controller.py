@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from flask import Flask, render_template
 from sqlalchemy.orm import joinedload
 
+from src.database.models.bank_accounts import BankAccount
 from src.database.models.messaging import SMSCompose, RecipientTypes, EmailCompose
 from src.controller.messaging_controller import MessagingController
 from src.database.models.companies import Company, CompanyBranches
@@ -13,9 +14,9 @@ from src.database.sql.companies import CompanyORM, CompanyBranchesORM
 from src.database.sql.contacts import ContactsORM
 from src.controller import Controllers, error_handler
 from src.database.models.covers import Premiums, PolicyRegistrationData, ClientPersonalInformation, PremiumReceipt, \
-    Claims
+    Claims, ClaimantPersonalDetails
 from src.database.sql.covers import PremiumsORM, PolicyRegistrationDataORM, ClientPersonalInformationORM, \
-    PremiumReceiptORM, ClaimsORM
+    PremiumReceiptORM, ClaimsORM, ClaimantORM
 
 
 def next_due_date(start_date: date) -> date:
@@ -293,3 +294,56 @@ class CoversController(Controllers):
         with self.get_session() as session:
             session.add(ClaimsORM(**claim_data.dict()))
             return claim_data
+    async def get_claim_data(self, claim_number: str) -> Claims | None:
+        """
+
+        :param claim_id:
+        :return:
+        """
+        with self.get_session() as session:
+            claim_orm = session.query(ClaimsORM).filter_by(claim_number=claim_number).first()
+            return Claims(**claim_orm.to_dict()) if isinstance(claim_orm, ClaimsORM) else None
+
+    async def add_claimant_data(self, claimant_details: ClaimantPersonalDetails) -> ClaimantPersonalDetails | None:
+        """
+
+        :param claimant_details:
+        :return:
+        """
+        with self.get_session() as session:
+            session.add(ClaimantORM(**claimant_details.dict()))
+            return claimant_details
+
+    async def get_claimant_data(self, claim_number: str) -> ClaimantPersonalDetails | None:
+        """
+
+        :param claim_number:
+        :return:
+        """
+        with self.get_session() as session:
+            claimant_orm = session.query(ClaimantORM).filter_by(claim_number=claim_number).filter_by()
+            return ClaimantPersonalDetails(**claimant_orm.to_dict()) if isinstance(claimant_orm, ClaimantORM) else None
+
+    async def update_claimant_bank_account_id(self, claim_number: str, bank_account_id: str ) -> bool:
+
+        """
+
+        :param claimant_details:
+        :return:
+        """
+        with self.get_session() as session:
+            claimant_orm: ClaimantORM = session.query(ClaimantORM).filter_by(claim_number=claim_number).first()
+            if claimant_orm:
+                claimant_orm.bank_id = bank_account_id
+                return True
+            return False
+
+    async def get_claim_bank_details(self, claim_number: str) -> BankAccount:
+        """
+
+        :param claim_number:
+        :return:
+        """
+        with self.get_session() as session:
+            bank_account_orm = session.query(BankAccountORM).filter_by(bank_account_id)
+

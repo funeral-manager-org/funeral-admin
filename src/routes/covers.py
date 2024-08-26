@@ -524,7 +524,7 @@ async def get_claim_form(user: User):
 @login_required
 async def retrieve_policy(user: User):
     """
-
+        **retrieve_policy**
     :param user:
     :return:
     """
@@ -582,11 +582,9 @@ async def retrieve_policy(user: User):
     # - Ensure that the signed policy document is attached to the claim.
     # - Collect and attach claimant information, including contact details and relationship to the deceased.
     # - Attach all relevant documentation related to the deceased (e.g., death certificate, identification, legal documents).
-
     # TODO: Submit the Claim
     # - Verify that all required documents and information are attached.
     # - Submit the fully completed claim form for processing.
-
     # TODO: Claim Review and Decision
     # - Review the claim by the responsible person or department within the company.
     # - Make a decision regarding the claim’s approval or rejection.

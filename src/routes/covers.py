@@ -512,7 +512,7 @@ async def last_receipt_reprint(user: User, premium_id: str):
 @login_required
 async def get_claim_form(user: User):
     """
-
+        **get_claim_form**
     :param user:
     :return:
     """
@@ -543,18 +543,20 @@ async def retrieve_policy(user: User):
 
     policy_data: PolicyRegistrationData = await covers_controller.get_policy_data(
         policy_number=claim_init_data.policy_number)
+    # Ensuring there is a Policy Attached to the Policy Number
+    if not policy_data:
+        mess: str = f"""The Policy with Policy Number : {str(claim_init_data.policy_number)} was not found please be 
+        sure to enter your information correctly"""
+        flash(message=mess, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    # Ensuring the User Should be processing the Claim
     if user.company_id != policy_data.company_id:
         message: str = f"""You are not Authorized to process this claim please inform your administrator"""
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
 
-    if not policy_data:
-        mess: str = f"""The Policy with Policy Number : {str(claim_init_data.policy_number)} was not found please be 
-        sure to enter your information correctly"""
-
-        flash(message=mess, category="danger")
-        return redirect(url_for('covers.get_claim_form'))
-
+    # if Policy Owes Some Amount it will inform the employee and Continue
     if policy_data.total_balance_due > 0:
         mess: str = f"There is an Outstanding Premium to the amount of R {policy_data.total_balance_due} on this Policy"
         flash(message=mess, category="success")
@@ -562,12 +564,14 @@ async def retrieve_policy(user: User):
     client_data: ClientPersonalInformation = await company_controller.get_client_data_with_id_number(
         id_number=claim_init_data.id_number)
 
-    if not client_data.is_policy_holder:
+    # Checking if PolicyHolder is Found
+    if not (client_data and client_data.is_policy_holder):
         message: str = f"""The Supplied ID Number is not of the Policy Holder- please submit the 
         Policy Holder ID Number"""
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
 
+    # Ensuring The Policy Holder has the Same Policy Number as the Supplied Policy Number
     if client_data.policy_number != claim_init_data.policy_number:
         message: str = f"""We are unable to ascertain any relationship between the id number and policy number"""
         flash(message=message, category="danger")

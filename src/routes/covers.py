@@ -4,9 +4,9 @@ from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
 from src.authentication import login_required, user_details
-from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company
+from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company, EmployeeDetails
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentStatus, \
-    PremiumReceipt, BeginClaim, InsuredParty
+    PremiumReceipt, BeginClaim, Claims
 from src.database.models.users import User
 from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
@@ -612,15 +612,78 @@ async def retrieve_policy(user: User):
     return render_template("claims/sections/policy.html", **context)
 
 
-@covers_route.get('/covers/claims/log-claim')
+async def create_claim_return_context(policy_number: str, id_number: str):
+    policy_data: PolicyRegistrationData = await covers_controller.get_policy_data(policy_number=policy_number)
+
+    if not policy_data:
+        message: str = "Policy Does not Exist"
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    client_data: ClientPersonalInformation = await company_controller.get_client_data_with_id_number(
+        id_number=id_number)
+
+    if not client_data:
+        message: str = "Client Data Does Not Exist"
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    employee_details: EmployeeDetails = await company_controller.get_employee_by_uid(uid=user.uid)
+    if not (employee_details and employee_details.company_id != policy_data.company_id):
+        message: str = "Employee not Authorized to process this claim"
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    plan_details: CoverPlanDetails = await company_controller.get_plan_cover(company_id=policy_data.company_id,
+                                                                             plan_number=policy_data.plan_number)
+    if not plan_details:
+        message: str = "Fatal Error processing Claim please inform admin"
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    new_claim: Claims = Claims(employee_id=employee_details.employee_id,
+                               branch_id=policy_data.branch_id,
+                               company_id=policy_data.company_id,
+                               plan_number=policy_data.plan_number,
+                               policy_number=policy_data.policy_number,
+                               claim_amount=plan_details.coverage_amount,
+                               claimed_for_uid=client_data.uid,
+                               claim_type=plan_details.plan_type)
+
+    claim_data = await covers_controller.add_claim(claim_data=new_claim)
+    if not claim_data:
+        message: str = "Unable to create claim please try again later"
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.get_claim_form'))
+
+    context = dict(policy_data=policy_data, client_data=client_data, employee_details=employee_details,
+                   plan_details=plan_details, claim_data=claim_data)
+    return context
+
+
+@covers_route.route('/covers/claims/log-claim/<string:policy_number>/<string:id_number>', methods=['POST', 'GET'])
 @login_required
-async def log_claim(user: User):
+async def log_claim(user: User, policy_number: str, id_number: str):
     """
 
     :param user:
+    :param policy_number:
+    :param id_number:
     :return:
     """
-    pass
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+    if request.method.casefold() == "get":
+        is_context = await create_claim_return_context(policy_number=policy_number, id_number=id_number)
+        if not isinstance(is_context, dict):
+            # if it is not context then its a redirect return it
+            return is_context
+
+        context = is_context
+        return render_template('claims/sections/claimant_data.html', **context)
+    # Request is Post - we need to capture Claimant personal information
 
 
 @covers_route.get('/covers/claims-status')

@@ -12,9 +12,10 @@ from src.database.models.contacts import Contacts
 from src.database.sql.companies import CompanyORM, CompanyBranchesORM
 from src.database.sql.contacts import ContactsORM
 from src.controller import Controllers, error_handler
-from src.database.models.covers import Premiums, PolicyRegistrationData, ClientPersonalInformation, PremiumReceipt
+from src.database.models.covers import Premiums, PolicyRegistrationData, ClientPersonalInformation, PremiumReceipt, \
+    Claims
 from src.database.sql.covers import PremiumsORM, PolicyRegistrationDataORM, ClientPersonalInformationORM, \
-    PremiumReceiptORM
+    PremiumReceiptORM, ClaimsORM
 
 
 def next_due_date(start_date: date) -> date:
@@ -114,7 +115,6 @@ class CoversController(Controllers):
         :return: List of PolicyRegistrationData
         """
         with self.get_session() as session:
-
             policy_data_orm_list = (
                 session.query(PolicyRegistrationDataORM)
                 .filter_by(branch_id=branch_id)
@@ -283,3 +283,13 @@ class CoversController(Controllers):
                            .options(joinedload(PremiumReceiptORM.premium))
                            .first())
             return PremiumReceipt(**receipt_orm.to_dict(include_relationships=True)) if receipt_orm else None
+
+    async def add_claim(self, claim_data: Claims) -> Claims | None:
+        """
+
+        :param claim_data:
+        :return:
+        """
+        with self.get_session() as session:
+            session.add(ClaimsORM(**claim_data.dict()))
+            return claim_data

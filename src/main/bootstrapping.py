@@ -20,8 +20,7 @@ def bootstrapper():
                          ClaimsORM, PremiumReceiptORM, PremiumsORM, PolicyRegistrationDataORM, SMSComposeORM,
                          SMSInboxORM, EmailComposeORM, SubscriptionsORM, PackageORM, PaymentORM, SubscriptionStatusORM,
                          PaymentNoticeIntervalORM, TicketMessageORM, TicketORM, SMSSettingsORM, TimeRecordORM,
-                         AttendanceSummaryORM,WorkSummaryORM, DeductionsORM, BonusPayORM, PaySlipORM, SalaryORM]
-
+                         AttendanceSummaryORM, WorkSummaryORM, DeductionsORM, BonusPayORM, PaySlipORM, SalaryORM]
 
     for cls in classes_to_create:
         try:

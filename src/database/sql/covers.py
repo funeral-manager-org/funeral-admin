@@ -68,21 +68,20 @@ class ClaimsORM(Base):
     __tablename__ = "claims"
 
     claim_number = Column(String(9), primary_key=True, index=True)
-    uid = Column(String(ID_LEN), index=True)
+    employee_id = Column(String(ID_LEN), nullable=True, index=True)
+
     branch_uid = Column(String(ID_LEN), index=True)
     company_uid = Column(String(ID_LEN), index=True)
 
-    employee_id = Column(String(ID_LEN), nullable=True, index=True)
     plan_number = Column(String(9), index=True)
     policy_number = Column(String(9), index=True)
 
     claim_amount = Column(Integer)
     claim_total_paid = Column(Integer)
     claimed_for_uid = Column(String(ID_LEN), nullable=True)
-
-    date_paid = Column(String(10))
+    date_paid = Column(DateTime)
     claim_status = Column(String(36))
-    funeral_company = Column(String(255))
+
     claim_type = Column(String(36))
     notes = Column(Text)
 
@@ -101,19 +100,22 @@ class ClaimsORM(Base):
         Convert the object to a dictionary representation.
         """
         return {
-            "uid": self.uid,
+            "claim_number": self.claim_number,
             "employee_id": self.employee_id,
             "branch_uid": self.branch_uid,
             "company_uid": self.company_uid,
-            "claim_number": self.claim_number,
+
             "plan_number": self.plan_number,
             "policy_number": self.policy_number,
+
             "claim_amount": self.claim_amount,
             "claim_total_paid": self.claim_total_paid,
+
             "claimed_for_uid": self.claimed_for_uid,
+
             "date_paid": self.date_paid,
             "claim_status": self.claim_status,
-            "funeral_company": self.funeral_company,
+
             "claim_type": self.claim_type,
             "notes": self.notes
         }

@@ -2,7 +2,7 @@ import math
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveInt
 from src.utils import create_id, create_policy_number, create_claim_number
 
 
@@ -88,6 +88,7 @@ class ClaimStatus(Enum):
     COMPLETED = "Completed"
     IN_PROGRESS = "In Progress"
 
+
 # 8101245336238 , J0AYTC03Y
 class BeginClaim(BaseModel):
     policy_number: str = Field(min_length=9, max_length=9)
@@ -96,22 +97,36 @@ class BeginClaim(BaseModel):
 
 class Claims(BaseModel):
     claim_number: str = Field(default_factory=create_claim_number)
-    uid: str
-    employee_id: str | None
+    employee_id: str | None = Field(default=None)
     branch_id: str
     company_id: str
     plan_number: str
     policy_number: str
 
-    claim_amount: int
-    claim_total_paid: int
+    claim_amount: PositiveInt
+    claim_total_paid: PositiveInt = Field(default=0)
     claimed_for_uid: str | None = Field(default=None)
-    date_paid: str
-    claim_status: ClaimStatus
-
-    funeral_company: str
+    date_paid: datetime
+    claim_status: str = Field(default=ClaimStatus.IN_PROGRESS.value)
+    date_claim_logged: datetime = Field(default_factory=datetime.now)
     claim_type: ClaimType  # Add a field for the claim type
-    notes: str | None
+    notes: str | None = Field(default=None)
+
+
+class ClaimantPersonalDetails(BaseModel):
+    claim_number: str
+    id_number: str = Field(min_length=13, max_length=13)
+    full_names: str
+    surname: str
+    cell: str
+    email: str
+    address_id: str
+    bank_id: str
+    relationship_to_deceased: str
+
+    @property
+    def display_name(self) -> str:
+        return f"{self.full_names.capitalize()} {self.surname.capitalize()}"
 
 
 def this_year() -> int:

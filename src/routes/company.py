@@ -37,7 +37,6 @@ async def get_admin(user: User):
     context.update(company_detail=company_data, company_branches=company_branches,
                    subscription_account=subscription_account, subscription_plans=subscription_plans)
 
-
     if user.is_system_admin:
         return render_template('admin/managers/manager.html', **context)
     elif user.is_company_admin:
@@ -151,7 +150,6 @@ async def get_register(user: User):
 @company_route.post('/admin/company/register')
 @login_required
 async def do_register(user: User):
-
     company_name = request.form.get('company_name')
     company_description = request.form.get('company_description')
     company_slogan = request.form.get('company_slogan')
@@ -482,7 +480,6 @@ async def add_employee(user: User, branch_id: str):
         flash(message="Please fill in all required employee details", category='danger')
         return redirect(url_for('company.get_branch', branch_id=branch_id))
 
-
     new_employee, employee_ = await company_controller.add_update_employee(employee=new_employee)
     if new_employee:
         branch = await company_controller.get_branch_by_id(branch_id=branch_id)
@@ -529,7 +526,6 @@ async def create_new_employee_user_detail(branch_id: str, employee_: EmployeeDet
     result = await subscriptions_controller.route_guard(user=user)
     if result:
         return result
-
 
     password = await user_controller.create_employee_password()
     password_hash = encryptor.create_hash(password=password)
@@ -794,7 +790,6 @@ async def add_employee_postal_address(user: User, branch_id: str, employee_id: s
     result = await subscriptions_controller.route_guard(user=user)
     if result:
         return result
-
 
     if not is_valid_ulid(value=branch_id):
         flash(message="Could not verify your request (Request Contains bad data)", category="danger")

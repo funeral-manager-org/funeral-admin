@@ -1,7 +1,19 @@
+from enum import Enum
+
 from pydantic import BaseModel, Field
 
 from src.database.constants import NAME_LEN
 from src.utils import create_id
+
+
+class AccountTypes(Enum):
+    SAVINGS = "Savings"
+    CHEQUE = "Cheque"
+    TRANSMISSION = "Transmission"
+
+    @classmethod
+    def account_types(cls):
+        return [item.value for item in cls]
 
 
 class BankAccount(BaseModel):
@@ -19,7 +31,11 @@ class BankAccount(BaseModel):
     bank_account_id: str = Field(default_factory=create_id, max_length=26)
 
     account_holder: str = Field(min_length=2, max_length=NAME_LEN, description="The name associated with the account")
-    account_number: str = Field(min_length=6, max_length=NAME_LEN, description="The unique identification number assigned to the account")
-    bank_name: str = Field(min_length=3, max_length=NAME_LEN, description="The name of the bank where the account is held")
-    branch: str = Field(min_length=2, max_length=NAME_LEN, description="The specific branch of the bank where the account is held")
-    account_type: str = Field(min_length=4, max_length=NAME_LEN, description="The type of account, such as checking or savings")
+    account_number: str = Field(min_length=6, max_length=NAME_LEN,
+                                description="The unique identification number assigned to the account")
+    bank_name: str = Field(min_length=3, max_length=NAME_LEN,
+                           description="The name of the bank where the account is held")
+    branch: str = Field(min_length=2, max_length=NAME_LEN,
+                        description="The specific branch of the bank where the account is held")
+    account_type: str = Field(min_length=4, max_length=NAME_LEN,
+                              description="The type of account, such as checking or savings")

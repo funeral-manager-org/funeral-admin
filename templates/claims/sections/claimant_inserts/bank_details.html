@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+
+
+
+
+            <div class="card shadow-lg border-info mb-4">
+                <div class="card-header bg-facebook">
+                    <h3 class="card-title text-white">
+                        <i class="fa fa-user-circle"></i>
+                            Claims Bank Account
+                    </h3>
+                </div>
+                <div class="card-body">
+
+                <form id="bank-form" action="{{ url_for('covers.add_claimant_bank_details', policy_number=policy_number, claim_number=claim_data.claim_number) }}" method="POST">
+                        <input type="hidden" name="claim_number" value="{{ claim_data.claim_number }}">
+                        <div class="form-group">
+                            <label for="account_holder">Account Holder: :</label>
+                            <input type="text" id="account_holder" name="account_holder" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bank_name">Bank Name:</label>
+                            <input type="text" id="bank_name" name="bank_name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="account_number">Account Number:</label>
+                            <input type="text" id="account_number" name="account_number" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="branch_code">Branch:</label>
+                            <input type="text" id="branch_code" name="branch" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control" name="account_type" id="account_type">
+                                <option value="" disabled selected>Select Account Type</option>
+                                {% for account_type in account_types %}
+                                    <option value="{{ account_type }}">{{ account_type|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-block btn-outline-info btn-rounded">
+                                Add Bank Details & Proceed
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>

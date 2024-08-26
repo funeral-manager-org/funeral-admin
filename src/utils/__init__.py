@@ -1,7 +1,14 @@
-import re
+import glob
+import os, re
 from datetime import datetime, timedelta
 from enum import Enum
 from os import path
+from werkzeug.utils import secure_filename
+
+ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png'}
+
+def allowed_file(filename: str) -> bool:
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 from dateutil.relativedelta import relativedelta
 from ulid import ULID
@@ -14,9 +21,12 @@ class PaymentMethod(Enum):
     DIRECT_DEPOSIT = "direct_deposit"
     BANK_TRANSFER = "bank_transfer"
 
+
 def is_valid_ulid(value: str):
     ulid_regex = re.compile(r'^[0-9A-HJKMNP-TV-Z]{9,26}$')
     return ulid_regex.match(value)
+
+
 #
 # def is_valid_ulid(value: str) -> bool:
 #     ulid_regex = re.compile(r'^[0-9A-HJKMNP-TV-Z]{26}$')  # Fixed regex for ULID (26 characters)
@@ -25,6 +35,7 @@ def is_valid_ulid(value: str):
 def is_valid_ulid_strict(value):
     ulid_regex = re.compile(r'^[0-9A-HJKMNP-TV-Z]{26}$')
     return ulid_regex.match(value)
+
 
 def get_payment_methods() -> list[str]:
     """
@@ -41,6 +52,48 @@ def static_folder() -> str:
 
 def template_folder() -> str:
     return path.join(path.dirname(path.abspath(__file__)), '../../templates')
+
+
+def claims_upload_folder(company_id: str, claim_number: str) -> str:
+    folder_path = f"{static_folder()}/company_files/{company_id}/uploads/{claim_number}"
+
+    # Ensure the directory exists
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    return folder_path
+def save_files_to_folder(folder_path:str, file_list: list):
+    """
+
+    :param folder_path:
+    :param file_list:
+    :return:
+    """
+    saved_files = []
+    for file in file_list:
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(folder_path, filename)
+            file.save(file_path)
+            saved_files.append(filename)
+    return saved_files
+
+def basename_filter(path: str) -> str:
+    return os.path.basename(path)
+
+def load_claims_files_in_folder(folder_path: str):
+    # Define the patterns for pictures and PDFs
+    picture_files = glob.glob(os.path.join(folder_path, "*.png")) + \
+                    glob.glob(os.path.join(folder_path, "*.jpg")) + \
+                    glob.glob(os.path.join(folder_path, "*.jpeg")) + \
+                    glob.glob(os.path.join(folder_path, "*.gif"))
+
+    pdf_files = glob.glob(os.path.join(folder_path, "*.pdf"))
+
+    # Combine all files into a single list
+    all_files = picture_files + pdf_files
+
+    return all_files
 
 
 def format_with_grouping(number):
@@ -119,8 +172,8 @@ def friendlytimestamp(value):
 
     # Calculate the time difference between now and the given timestamp
     time_difference = current_dt - timestamp_dt
-    hour = 60*60
-    one_day = 60*60*24
+    hour = 60 * 60
+    one_day = 60 * 60 * 24
     minute = 60
     # Handle cases based on the time difference
     if time_difference.total_seconds() < minute:
@@ -148,6 +201,7 @@ def friendlytimestamp(value):
     # Fallback to the date format for older timestamps
     else:
         return timestamp_dt.strftime("%Y-%m-%d")
+
 
 def friendly_calendar(value: str):
     """
@@ -197,8 +251,10 @@ def friendly_calendar(value: str):
     else:
         return timestamp_dt.strftime("%Y-%m-%d")
 
+
 def create_id() -> str:
     return str(ULID.from_datetime(datetime.now()))
+
 
 def create_reference() -> str:
     """payment reference"""
@@ -208,14 +264,19 @@ def create_reference() -> str:
 def create_plan_number() -> str:
     return create_id()[-9:].upper()  # Extract a random part (9 characters)
 
+
 def create_claim_number() -> str:
     return create_id()[-12:].upper()  # Extract a random part (12 characters)
+
 
 def create_policy_number() -> str:
     return create_id()[-9:].upper()  # Extract a random part (9 characters)
 
+
 def create_employee_id() -> str:
     return create_id()[-9:].upper()  # Extract a random part (9 characters)
+
+
 def string_today():
     return str(datetime.today().date())
 

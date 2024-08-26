@@ -311,7 +311,9 @@ class CoversController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            session.add(ClaimantORM(**claimant_details.dict()))
+            claimant_orm = session.query(ClaimantORM).filter_by(claim_number=claimant_details.claim_number).first()
+            if not claimant_orm:
+                session.add(ClaimantORM(**claimant_details.dict()))
             return claimant_details
 
     async def get_claimant_data(self, claim_number: str) -> ClaimantPersonalDetails | None:
@@ -321,14 +323,14 @@ class CoversController(Controllers):
         :return:
         """
         with self.get_session() as session:
-            claimant_orm = session.query(ClaimantORM).filter_by(claim_number=claim_number).filter_by()
+            claimant_orm = session.query(ClaimantORM).filter_by(claim_number=claim_number).first()
             return ClaimantPersonalDetails(**claimant_orm.to_dict()) if isinstance(claimant_orm, ClaimantORM) else None
 
-    async def update_claimant_bank_account_id(self, claim_number: str, bank_account_id: str ) -> bool:
+    async def update_claimant_bank_account_id(self, claim_number: str, bank_account_id: str) -> bool:
 
         """
-
-        :param claimant_details:
+        :param claim_number:
+        :param bank_account_id:
         :return:
         """
         with self.get_session() as session:
@@ -338,12 +340,14 @@ class CoversController(Controllers):
                 return True
             return False
 
-    async def get_claim_bank_details(self, claim_number: str) -> BankAccount:
+    async def get_company_claims(self, company_id: str) -> list[Claims]:
         """
 
-        :param claim_number:
+        :param company_id:
         :return:
         """
         with self.get_session() as session:
-            bank_account_orm = session.query(BankAccountORM).filter_by(bank_account_id)
+            claims_orm_list = session.query(ClaimsORM).filter_by(company_id=company_id).all()
+            return [Claims(**claim_orm.to_dict()) for claim_orm in claims_orm_list
+                    if isinstance(claim_orm, ClaimsORM)] if claims_orm_list else []
 

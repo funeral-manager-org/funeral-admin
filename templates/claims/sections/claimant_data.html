@@ -1,5 +1,3 @@
-
-
 {% extends "layouts/page.html" %}
 {% block content %}
     <section id="main-content">
@@ -13,50 +11,53 @@
                     </h3>
                 </div>
                 <div class="card-body">
-                    <form id="claim-form" action="{{ url_for('covers.log_claim', policy_number=policy_data.policy_number, id_number=client_data.id_number) }}" method="POST">
-                    {% if claim_data %}
-                        <input type="hidden" id="claim_number" name="claim_number" value="{{ claim_data.claim_number  }}">
+                    <!-- Step 1: Claimant's Personal Information -->
+                    {% if claim_data and not claimant_data %}
+                        {% include "claims/sections/claimant_inserts/personal_details.html" %}
                     {% endif %}
-                        <div class="form-group">
-                            <label for="claimant_id_number">ID Number:</label>
-                            <input type="text" id="claimant_id_number" name="id_number" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="claimant_full_name">Full Name:</label>
-                            <input type="text" id="claimant_full_name" name="full_name" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="claimant_phone">Cell Number:</label>
-                            <input type="tel" id="claimant_phone" name="cell" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="claimant_phone">Alternate Cell Number:</label>
-                            <input type="tel" id="alt_cell" name="alt_cell" class="form-control" required>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="claimant_email">Email Address:</label>
-                            <input type="email" id="claimant_email" name="email" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                        <label for="relationship_to_deceased">Relationship</label>
-                            <select id="relationship_to_deceased" name="relationship_to_deceased" class="form-control">
-                                <option value="" selected disabled>Select Relation to Deceased</option>
-                                {% for relation in relation_ships %}
-                                    <option value="{{ relation }}">{{ relation|title }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-block btn-outline-info btn-rounded">
-                                Add Claimant & Proceed
-                            </button>
-                        </div>
-                    </form>
+                    <!-- Step 2: Claimant's Bank Details -->
+                    {% if claim_data and claimant_data and not bank_account %}
+                        {% include "claims/sections/claimant_inserts/bank_details.html" %}
+                    {% endif %}
+
+                    <!-- Step 3: Attach Official Documents -->
+                    {% if claim_data and claimant_data and  bank_account and not claim_files %}
+                        {% include "claims/sections/claimant_inserts/claim_files.html" %}
+                    {% endif %}
+
+                    <!-- Display Loaded Data -->
+                    {% if claim_data and claimant_data %}
+                    <div class="alert alert-info">
+                        <h5>Claim Number: {{ claim_data.claim_number }}</h5>
+                        <p>Claimant ID: {{ claimant_data.id_number }}</p>
+                        <p>Full Name: {{ claimant_data.full_names }} {{ claimant_data.surname }}</p>
+                        <p>Cell: {{ claimant_data.cell }}</p>
+                        <p>Email: {{ claimant_data.email }}</p>
+                        <p>Relationship to Deceased: {{ claimant_data.relationship_to_deceased }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if bank_account %}
+                    <div class="alert alert-info">
+                        <h5>Bank Name: {{ bank_account.bank_name }}</h5>
+                        <p>Account Number: {{ bank_account.account_number }}</p>
+                        <p>Branch Code: {{ bank_account.branch_code }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if claim_files %}
+                    <div class="alert alert-info">
+                        <h5>Uploaded Documents:</h5>
+                        <ul>
+                            {% for file in claim_files %}
+                                <li><a href="{{ url_for('static', filename=file) }}" target="_blank">{{ file|basename }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </section>
 {% endblock %}
-
-

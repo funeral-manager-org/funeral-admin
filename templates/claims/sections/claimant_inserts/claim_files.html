@@ -1,0 +1,22 @@
+<div class="card shadow-lg border-info mb-4">
+    <div class="card-header bg-facebook">
+        <h3 class="card-title text-white">
+            <i class="fa fa-user-circle"></i>
+                Claims Supporting Documents
+        </h3>
+    </div>
+    <div class="card-body">
+        <form id="docs-form" action="{{ url_for('covers.attach_official_documentation', policy_number=policy_number, claim_number=claim_data.claim_number) }}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="claim_number" value="{{ claim_data.claim_number }}">
+            <div class="form-group">
+                <label for="claim_documents">Attach Official Documents (PDF, JPG, PNG):</label>
+                <input type="file" id="claim_documents" name="claim_documents" class="form-control-file" accept=".pdf, .jpg, .jpeg, .png" multiple required>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-block btn-outline-info btn-rounded">
+                    Upload Documents & Complete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

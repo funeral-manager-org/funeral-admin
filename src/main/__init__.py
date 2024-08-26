@@ -3,7 +3,7 @@ from flask import Flask
 from src.cache.caching import Caching
 from src.controller.encryptor import Encryptor
 from src.emailer import SendMail
-from src.utils import format_with_grouping, friendlytimestamp, friendly_calendar
+from src.utils import format_with_grouping, friendlytimestamp, friendly_calendar, basename_filter
 
 system_cache = Caching()
 encryptor = Encryptor()
@@ -38,6 +38,7 @@ notifications_controller = NotificationsController()
 subscriptions_controller = SubscriptionsController()
 system_controller = SystemController()
 support_controller = SupportController()
+
 
 # chat_io = SocketIO()
 
@@ -80,6 +81,7 @@ def _add_filters(app: Flask):
     app.jinja_env.filters['number'] = format_with_grouping
     app.jinja_env.filters['time'] = friendlytimestamp
     app.jinja_env.filters['days_ago'] = friendly_calendar
+    app.jinja_env.filters['basename'] = basename_filter
 
 
 def create_app(config):

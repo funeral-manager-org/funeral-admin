@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
-from src.database.models.bank_accounts import BankAccount
+from src.database.models.bank_accounts import BankAccount, AccountTypes
 from src.authentication import login_required, user_details
 from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company, EmployeeDetails
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentStatus, \
@@ -12,7 +12,7 @@ from src.database.models.users import User
 from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
 from src.main import company_controller, covers_controller, subscriptions_controller
-from src.utils import is_valid_ulid
+from src.utils import is_valid_ulid, claims_upload_folder, load_claims_files_in_folder, save_files_to_folder
 
 covers_route = Blueprint('covers', __name__)
 covers_logger = init_logger('covers_logger')
@@ -658,10 +658,16 @@ async def create_claim_return_context(user: User, policy_number: str, id_number:
         message: str = "Unable to create claim please try again later"
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
-    relation_ships = RelationshipToPolicyHolder.relationships()
+
     context = dict(user=user, policy_data=policy_data, client_data=client_data, employee_details=employee_details,
-                   plan_details=plan_details, claim_data=claim_data, relation_ships=relation_ships)
+                   plan_details=plan_details, claim_data=claim_data)
     return context
+
+
+async def redirect_log_claim_with_query(claim_number: str, id_number: str, policy_number: str):
+    _url = url_for('covers.log_claim', policy_number=policy_number, id_number=id_number)
+    _redirect_link = f"{_url}?claim_number={claim_number}"
+    return redirect(_redirect_link)
 
 
 @covers_route.route('/covers/claims/log-claim/<string:policy_number>/<string:id_number>', methods=['POST', 'GET'])
@@ -685,27 +691,29 @@ async def log_claim(user: User, policy_number: str, id_number: str):
             covers_logger.info(f"Claim number {claim_number} found in query parameters.")
             # Use the claim_number to retrieve additional data or attach it to the context
             claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
-            context = dict(claim_data=claim_data, user=user)
+            context = dict(claim_data=claim_data, user=user, policy_number=policy_number, id_number=id_number)
         else:
             context = await create_claim_return_context(user=user, policy_number=policy_number, id_number=id_number)
             if not isinstance(context, dict):
                 # If it is not context then it's a redirect, return it
                 return context
 
-        covers_logger.info(context)
+        relation_ships = RelationshipToPolicyHolder.relationships()
+        context.update(policy_number=policy_number, id_number=id_number, relation_ships=relation_ships)
+
         return render_template('claims/sections/claimant_data.html', **context)
 
     # Request is POST - we need to capture Claimant personal information
     try:
         claimant_details = ClaimantPersonalDetails(**request.form)
+        covers_logger.info(f"CLAIMANT DATA : {claimant_details}")
     except ValidationError as e:
         covers_logger.warning(str(e))
         # claim number is always present on claimant data form
         claim_number = request.form.get('claim_number') or request.args.get('claim_number')
-        claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
+        # claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
         flash(message="Please provide all the information for the claimant - Correctly", category="danger")
-        return redirect(url_for('covers.log_claim', policy_number=policy_number, id_number=id_number,
-                                claim_number=claim_data.claim_number))
+        return await redirect_log_claim_with_query(claim_number, id_number, policy_number)
 
     # if we are here it means claimant data is provided correctly
     claimant_data: ClaimantPersonalDetails = await covers_controller.add_claimant_data(
@@ -714,11 +722,12 @@ async def log_claim(user: User, policy_number: str, id_number: str):
     if not claimant_data:
         message: str = "Unable to Add Claimant Data - please try again"
         flash(message=message, category="danger")
-        return redirect(url_for('covers.log_claim', policy_number=policy_number,
-                                id_number=id_number, claim_number=claimant_details.claim_number))
+        claim_number = claimant_details.claim_number
+        return await redirect_log_claim_with_query(claim_number, id_number, policy_number)
 
+    covers_logger.warning("Will not try to add claimant bank details")
     return redirect(url_for('covers.add_claimant_bank_details', policy_number=policy_number,
-                            claim_number=claimant_data.claim_number, bank_id=claimant_details.bank_id))
+                            claim_number=claimant_data.claim_number))
 
 
 @covers_route.route('/covers/claims/log-claim-bank-details/<string:policy_number>/<string:claim_number>',
@@ -738,7 +747,7 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
         bank_id = request.args.get('bank_id')
 
         if bank_id:
-            bank_details = await covers_controller.get_claim_bank_details(bank_id=bank_id)
+            bank_details = await covers_controller.get_claim_bank_details(bank_account_id=bank_id)
             if bank_details:
                 context.update(bank_account=bank_details)
 
@@ -749,7 +758,9 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
         claimant_data = await covers_controller.get_claimant_data(claim_number=claim_number)
         if claimant_data:
             context.update(claimant_data=claimant_data)
+        account_types = AccountTypes.account_types()
 
+        context.update(policy_number=policy_number, claim_number=claim_number, account_types=account_types)
         covers_logger.info(context)
         return render_template('claims/sections/claimant_data.html', **context)
 
@@ -760,16 +771,21 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
         flash(message="Unable to add Bank details please ensure all your details are correct", category="danger")
         return redirect(url_for('covers.add_claimant_bank_details', policy_number=policy_number,
                                 claim_number=claim_number))
-    bank_account: BankAccount = await company_controller.add_bank_account(bank_details=bank_details)
+
+    covers_logger.info(f"Bank Account Data: {bank_details}")
+    bank_account: BankAccount = await company_controller.add_bank_account(bank_account=bank_details)
     if not bank_account:
-        pass
+        flash(message="Unable to add Bank details please ensure all your details are correct", category="danger")
+        return redirect(url_for('covers.add_claimant_bank_details', policy_number=policy_number,
+                                claim_number=claim_number))
 
     # We will load the saved bank details on the next step
     _ = await covers_controller.update_claimant_bank_account_id(bank_account_id=bank_account.bank_account_id,
                                                                 claim_number=claim_number)
 
     flash(message="Bank details updated now attach official documentations", category="success")
-    return redirect(url_for('covers.attach_official_documentation'))
+    return redirect(url_for('covers.attach_official_documentation', policy_number=policy_number,
+                            claim_number=claim_number))
 
 
 @covers_route.route('/covers/claims/log-claim-docs/<string:policy_number>/<string:claim_number>',
@@ -784,29 +800,106 @@ async def attach_official_documentation(user: User, policy_number: str, claim_nu
     :return:
     """
     context = dict(user=user)
+    claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
+    if not claim_data:
+        flash("Invalid claim number.", "danger")
+        return redirect(url_for('covers.log_claim', policy_number=policy_number, claim_number=claim_number))
+
+    context.update(claim_data=claim_data)
+
+    claimant_data = await covers_controller.get_claimant_data(claim_number=claim_number)
+    if not claimant_data:
+        flash("Invalid claim number.", "danger")
+        return redirect(url_for('covers.log_claim', policy_number=policy_number, claim_number=claim_number))
+
+    context.update(claimant_data=claimant_data)
+
+    if claimant_data.bank_id:
+        bank_account = await company_controller.get_bank_account(bank_account_id=claimant_data.bank_id)
+        context.update(bank_account=bank_account)
+
     if request.method.casefold() == "get":
 
-        claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
-        if claim_data:
-            context.update(claim_data=claim_data)
+        claims_upload_folder_path = claims_upload_folder(company_id=claim_data.company_id,
+                                                         claim_number=claimant_data.claim_number)
+        existing_claim_files = []
 
-        claimant_data = await covers_controller.get_claimant_data(claim_number=claim_number)
-        if claimant_data:
-            context.update(claimant_data=claimant_data)
+        if claims_upload_folder_path:
+            existing_claim_files = load_claims_files_in_folder(folder_path=claims_upload_folder_path)
 
-        if claimant_data.bank_id:
-            bank_account = await company_controller.get_bank_account(bank_account_id=claimant_data.bank_id)
-            context.update(bank_account=bank_account)
+        if existing_claim_files:
+            context.update(claim_files=existing_claim_files)
 
-        # TODO - with a claim number try retrieving official docs related to the claim
+        context.update(policy_number=policy_number, claim_number=claim_number)
+        return render_template('claims/sections/claimant_data.html', **context)
+
+    files = request.files.getlist('claim_documents')
+
+    claims_upload_folder_path = claims_upload_folder(company_id=claim_data.company_id, claim_number=claim_number)
+    saved_files = save_files_to_folder(folder_path=claims_upload_folder_path, file_list=files)
+
+    option_success = (f"Successfully uploaded {len(saved_files)} document(s).", "success")
+    option_failure = ("No valid files were uploaded.", "danger")
+    message, cat = option_success if saved_files else option_failure
+    flash(message=message, category=cat)
+
+    return redirect(url_for('covers.retrieve_claim_status', claim_number=claim_number))
 
 
-@covers_route.get('/covers/claims-status')
+@covers_route.get('/covers/claims-status/<string:claim_number>')
 @login_required
-async def retrieve_claim_status(user: User):
+async def retrieve_claim_status(user: User, claim_number: str):
+    """
+    Retrieve and display all claim-related information including claimant details, bank account details,
+    and uploaded files.
+
+    :param user: Logged-in user.
+    :param policy_number: Policy number related to the claim.
+    :param claim_number: Claim number to retrieve details for.
+    :return: Rendered HTML template with claim status information.
+    """
+    # Ensure user is authorized to view this information
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+    # Retrieve claim data
+    claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
+    claimant_data = await covers_controller.get_claimant_data(claim_number=claim_number)
+    bank_account = await company_controller.get_bank_account(
+        bank_account_id=claimant_data.bank_id) if claimant_data and claimant_data.bank_id else None
+
+    # Load uploaded files
+    claims_upload_folder_path = claims_upload_folder(company_id=claim_data.company_id, claim_number=claim_number)
+    existing_claim_files = load_claims_files_in_folder(
+        folder_path=claims_upload_folder_path) if claims_upload_folder_path else []
+
+    # Prepare context for rendering
+    context = {
+        'claim_data': claim_data,
+        'claimant_data': claimant_data,
+        'bank_account': bank_account,
+        'claim_files': existing_claim_files,
+        'user': user
+    }
+
+    # Render the template with the claim information
+    return render_template('claims/claim_status.html', **context)
+
+
+@covers_route.get('/covers/logged-claims')
+@login_required
+async def logged_claims(user: User):
     """
 
     :param user:
     :return:
     """
-    pass
+    # Ensure user is authorized to view this information
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+    claims = await covers_controller.get_company_claims(company_id=user.company_id)
+    context = dict(user=user, claims=claims)
+    return render_template("claims/logged_claims.html", **context)

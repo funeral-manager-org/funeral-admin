@@ -1,15 +1,84 @@
+{% extends "layouts/page.html" %}
+{% block content %}
+    <section id="main-content">
+        <div class="container mt-4">
+            <!-- Claim Data Card -->
+            <div class="card shadow-lg border-info mb-4">
+                <div class="card-header bg-facebook">
+                    <h3 class="card-title text-white">
+                        <i class="fa fa-file"></i>
+                        Claim Status
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Claim Data -->
+                    {% if claim_data %}
+                        <div class="form-group">
+                            <label for="claim_number">Claim Number:</label>
+                            <input type="text" id="claim_number" class="form-control" value="{{ claim_data.claim_number }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="policy_number">Policy Number:</label>
+                            <input type="text" id="policy_number" class="form-control" value="{{ claim_data.policy_number }}" readonly>
+                        </div>
+                        <!-- Add more fields as needed -->
+                    {% endif %}
 
+                    <!-- Claimant Data -->
+                    {% if claimant_data %}
+                        <div class="form-group">
+                            <label for="claimant_id_number">ID Number:</label>
+                            <input type="text" id="claimant_id_number" class="form-control" value="{{ claimant_data.id_number }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="claimant_full_name">Full Name:</label>
+                            <input type="text" id="claimant_full_name" class="form-control" value="{{ claimant_data.full_names }} {{ claimant_data.surname }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="claimant_phone">Cell Number:</label>
+                            <input type="tel" id="claimant_phone" class="form-control" value="{{ claimant_data.cell }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="claimant_email">Email Address:</label>
+                            <input type="email" id="claimant_email" class="form-control" value="{{ claimant_data.email }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="relationship_to_deceased">Relationship to Deceased:</label>
+                            <input type="text" id="relationship_to_deceased" class="form-control" value="{{ claimant_data.relationship_to_deceased }}" readonly>
+                        </div>
+                    {% endif %}
 
+                    <!-- Bank Account Details -->
+                    {% if bank_account %}
+                        <div class="form-group">
+                            <label for="bank_account">Bank Account:</label>
+                            <input type="text" id="bank_account" class="form-control" value="{{ bank_account.bank_account_id }}" readonly>
+                        </div>
+                        <!-- Add more fields as needed -->
+                    {% endif %}
 
-
-
-<h4 class="mt-5">Retrieve Claim Status</h4>
-<form action="{{ url_for('covers.retrieve_claim_status') }}" method="POST">
-    <div class="form-group">
-        <label for="claim_number">Claim Number:</label>
-        <input type="text" id="claim_number" name="claim_number" class="form-control" required>
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Retrieve Status</button>
-    </div>
-</form>
+                    <!-- Uploaded Files -->
+                    {% if claim_files %}
+                        <div class="card shadow-lg border-info mb-4">
+                            <div class="card-header bg-facebook">
+                                <h3 class="card-title text-white">
+                                    <i class="fa fa-file"></i>
+                                    Uploaded Documents
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    {% for file in claim_files %}
+                                        <li class="list-group-item">
+                                            <a href="{{ url_for('static', filename='company_files/' ~ claim_data.company_id ~ '/uploads/' ~ file) }}" target="_blank">{{ file|basename }}</a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

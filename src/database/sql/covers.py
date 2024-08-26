@@ -104,8 +104,8 @@ class ClaimsORM(Base):
         return {
             "claim_number": self.claim_number,
             "employee_id": self.employee_id,
-            "branch_id": self.branch_uid,
-            "company_id": self.company_uid,
+            "branch_id": self.branch_id,
+            "company_id": self.company_id,
 
             "plan_number": self.plan_number,
             "policy_number": self.policy_number,

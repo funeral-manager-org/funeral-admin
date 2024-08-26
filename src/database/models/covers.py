@@ -108,13 +108,13 @@ class Claims(BaseModel):
     policy_number: str
 
     claim_amount: PositiveInt
-    claim_total_paid: PositiveInt = Field(default=0)
+    claim_total_paid: int = Field(default=0)
     claimed_for_uid: str | None = Field(default=None)
     date_paid: datetime | None = Field(default=None)
     date_of_service: datetime | None = Field(default=None)
     date_claim_logged: datetime = Field(default_factory=datetime.now)
     claim_status: str = Field(default=ClaimStatus.IN_PROGRESS.value)
-    claim_type: ClaimType  # Add a field for the claim type
+    claim_type: str  # Add a field for the claim type
     notes: str | None = Field(default=None)
 
 
@@ -124,9 +124,10 @@ class ClaimantPersonalDetails(BaseModel):
     full_names: str
     surname: str
     cell: str
+    alt_cell: str
     email: str
-    address_id: str
-    bank_id: str = Field(max_length=26)
+    address_id: str | None = Field(default=None, max_length=26)
+    bank_id: str | None = Field(default=None, max_length=26)
     relationship_to_deceased: str
 
     @property

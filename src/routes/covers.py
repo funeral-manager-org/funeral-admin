@@ -871,7 +871,6 @@ async def attach_official_documentation(user: User, policy_number: str, claim_nu
         return redirect(url_for('covers.log_claim', policy_number=policy_number, claim_number=claim_number))
 
     context.update(claimant_data=claimant_data)
-
     if claimant_data.bank_id:
         bank_account = await company_controller.get_bank_account(bank_account_id=claimant_data.bank_id)
         context.update(bank_account=bank_account)
@@ -927,7 +926,7 @@ async def retrieve_claim_status(user: User, claim_number: str):
         return result
     # TODO Consider verifying that the user can access this claim status
     # Retrieve claim data
-    claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
+    claim_data: Claims = await covers_controller.get_claim_data(claim_number=claim_number)
 
     claimant_data = await covers_controller.get_claimant_data(claim_number=claim_number)
 
@@ -942,6 +941,8 @@ async def retrieve_claim_status(user: User, claim_number: str):
 
     client_data: ClientPersonalInformation = await company_controller.get_client_data_with_id_number(
         id_number=claim_data.member_id_number)
+    company_details: Company = await company_controller.get_company_details(company_id=user.company_id)
+    employee_details: EmployeeDetails = await company_controller.get_employee_by_uid(uid=user.uid)
 
     # Prepare context for rendering
     context = {
@@ -950,7 +951,9 @@ async def retrieve_claim_status(user: User, claim_number: str):
         'bank_account': bank_account,
         'claim_files': existing_claim_files,
         'client_data': client_data,
-        'user': user
+        'user': user,
+        'company_details':company_details,
+        'employee_details': employee_details
     }
 
     # Render the template with the claim information

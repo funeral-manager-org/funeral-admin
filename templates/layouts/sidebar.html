@@ -45,14 +45,12 @@
                                     <li><a href="{{ url_for('covers.get_outstanding_premiums', page=0, count=25) }}"><i class="ti-credit-card"></i> Outstanding</a></li>
                                 </ul>
                             </li>
-                            <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-secret"></i> Claims</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
-                                <ul>
-                                    <li><a href="{{ url_for('covers.get_claim_form') }}"><span class="text-success"> <i class="fa fa-user-circle-o"></i> Create Claim </span></a></li>
-                                    <li><a href="{{ url_for('covers.logged_claims') }}"><span class="text-info"><i class="fa fa-user-md"></i> Logged Claims </span></a></li>
-                                    <li><a href="#"><i class="ti-credit-card"></i> Successful Claims</a></li>
-                                    <li><a href="#"><i class="ti-credit-card"></i> Rejected Claims</a></li>
-                                </ul>
-                            </li>
+                        </ul>
+                    </li>
+                    <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-secret"></i> Claims</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
+                        <ul>
+                            <li><a href="{{ url_for('covers.get_claim_form') }}"><span class="text-success"> <i class="fa fa-user-circle-o"></i> Create Claim </span></a></li>
+                            <li><a href="{{ url_for('covers.logged_claims') }}"><span class="text-info"><i class="fa fa-user-md"></i> Logged Claims </span></a></li>
                         </ul>
                     </li>
                     <li><a class="sidebar-sub-toggle"><span class="text-success"><i class="ti-dashboard"></i> Human Resource</span><span

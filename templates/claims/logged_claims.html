@@ -11,59 +11,49 @@
                     </h3>
                 </div>
                 <div class="card-body">
-                    <form id="claims-form" action="#" method="GET">
                         <table class="table table-striped table-bordered">
                             <thead>
                                 <tr>
                                     <th>Select</th>
                                     <th>Claim Number</th>
                                     <th>Policy Number</th>
-                                    <th>Claimant Name</th>
                                     <th>Status</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for claim in claims %}
                                     <tr>
                                         <td>
-                                            <input type="radio" name="claim_number" value="{{ claim.claim_number }}" data-policy="{{ claim.policy_number }}" required>
+                                            <a href="{{ url_for('covers.retrieve_claim_status', claim_number=claim.claim_number) }}" class="btn btn-sm btn-outline-info btn-rounded">
+                                                Open
+                                            </a>
                                         </td>
                                         <td>{{ claim.claim_number }}</td>
                                         <td>{{ claim.policy_number }}</td>
-                                        <td>{{ claim.claimant_name }}</td>
-                                        <td>{{ claim.status }}</td>
+                                        <td>
+                                            <span class="badge
+                                                {% if claim.claim_status == 'Rejected' %}
+                                                    badge-danger
+                                                {% elif claim.claim_status == 'Approved' %}
+                                                    badge-success
+                                                {% elif claim.claim_status == 'Completed' %}
+                                                    badge-primary
+                                                {% elif claim.claim_status == 'In Progress' %}
+                                                    badge-warning
+                                                {% else %}
+                                                    badge-secondary
+                                                {% endif %}">
+                                                {{ claim.claim_status }}
+                                            </span>
+                                        </td>
+                                        <td></td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-block btn-outline-info btn-rounded">
-                                View Selected Claim Status
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </div>
-
-            <!-- Claim Status Card -->
-            {% if claim_status %}
-                <div class="card shadow-lg border-info mb-4">
-                    <div class="card-header bg-facebook">
-                        <h3 class="card-title text-white">
-                            <i class="fa fa-info-circle"></i>
-                            Claim Status
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <h4>Claim Number: {{ claim_status.claim_number }}</h4>
-                        <p><strong>Policy Number:</strong> {{ claim_status.policy_number }}</p>
-                        <p><strong>Claimant Name:</strong> {{ claim_status.claimant_name }}</p>
-                        <p><strong>Status:</strong> {{ claim_status.status }}</p>
-                        <p><strong>Details:</strong> {{ claim_status.details }}</p>
-                        <!-- Add more fields as needed -->
-                    </div>
-                </div>
-            {% endif %}
         </div>
     </section>
 {% endblock %}

@@ -6,26 +6,99 @@
             <div class="card shadow-lg border-info mb-4">
                 <div class="card-header bg-facebook">
                     <h3 class="card-title text-white">
-                        <i class="fa fa-file"></i>
-                        Claim Status
+                        <i class="fa fa-folder"></i>
+                        {{ company_details.company_name|title }}
                     </h3>
-                </div>
 
-                    {% if claim_data and client_data %}
-                        <div class="alert alert-info">
-                            <ul class="list-group">
-                                <li class="list-group-item font-weight-bold">FUNERAL COVER CLAIM Of : <span class="pull-right badge badge-success text-white">{{ client_data.client_display_name }}</span></li>
-                                <li class="list-group-item">ID Number: <span class="pull-right">{{ client_data.id_number }}</span></li>
-                                <li class="list-group-item m-t-4">DOB: <span class="pull-right">{{ client_data.date_of_birth }}</span></li>
-                                <li class="list-group-item">Nationality: <span class="pull-right">{{ client_data.nationality }}</span></li>
-                            </ul>
-                        </div>
-                    {% endif %}
+                </div>
+                {% if company_details %}
+
+                    <div class="alert alert-info">
+                        <ul class="list-group">
+                            <li class="list-group-item font-weight-bold text-info">Claims Department</li>
+                            <li class="list-group-item font-weight-bold">Contact Person: <span class="pull-right">{{ employee_details.display_names|title }}</span></li>
+                            <li class="list-group-item font-weight-bold">Cell: <span class="pull-right">{{ employee_details.contact_number }}</span></li>
+                        </ul>
+                    </div>
+                {% endif %}
+
+                {% if claim_data and client_data %}
+                    <div class="alert alert-info">
+                        <ul class="list-group">
+                            <li class="list-group-item font-weight-bold">FUNERAL COVER CLAIM Of : <span class="pull-right badge badge-success text-white">{{ client_data.client_display_name }}</span></li>
+                            <li class="list-group-item">ID Number: <span class="pull-right">{{ client_data.id_number }}</span></li>
+                            <li class="list-group-item m-t-4">DOB: <span class="pull-right">{{ client_data.date_of_birth }}</span></li>
+                            <li class="list-group-item">Nationality: <span class="pull-right">{{ client_data.nationality }}</span></li>
+                        </ul>
+                    </div>
+                {% endif %}
+
+                {% if claim_data %}
+                    <div class="alert alert-info">
+                        <ul class="list-group">
+                            <li class="list-group-item font-weight-bold">
+                                Claim Number:
+                                <span class="pull-right badge badge-success text-white">{{ claim_data.claim_number }}</span>
+                            </li>
+                            <li class="list-group-item m-t-4">
+                                Policy Number:
+                                <span class="pull-right">{{ claim_data.policy_number }}</span>
+                            </li>
+                            <li class="list-group-item">
+                                Plan Number:
+                                <span class="pull-right">{{ claim_data.plan_number }}</span>
+                            </li>
+
+                            <li class="list-group-item">
+                                Claim Amount / (Value of Services):
+                                <span class="pull-right">R {{ claim_data.claim_amount| number }}.00 </span>
+                            </li>
+                            <li class="list-group-item">
+                                Claim Total Paid / (Valued of Services to be Rendered):
+                                <span class="pull-right">R {{ claim_data.claim_total_paid| number }}.00</span>
+                            </li>
+                            <li class="list-group-item">
+                                (Expected) Date of Service:
+                                <span class="pull-right">{{ claim_data.date_of_service.strftime('%Y-%m-%d') if claim_data.date_of_service else 'N/A' }}</span>
+                            </li>
+                            <li class="list-group-item">
+                                Date Claim Logged:
+                                <span class="pull-right">{{ claim_data.date_claim_logged.strftime('%Y-%m-%d') }}</span>
+                            </li>
+                            <li class="list-group-item">
+                                Claim Type:
+                                <span class="pull-right">{{ claim_data.claim_type }}</span>
+                            </li>
+                            <li class="list-group-item">
+                                Claim Status:
+                                <span class="pull-right badge
+                                    {% if claim_data.claim_status == 'Rejected' %}
+                                        badge-danger
+                                    {% elif claim_data.claim_status == 'Approved' %}
+                                        badge-success
+                                    {% elif claim_data.claim_status == 'Completed' %}
+                                        badge-primary
+                                    {% elif claim_data.claim_status == 'In Progress' %}
+                                        badge-warning
+                                    {% else %}
+                                        badge-secondary
+                                    {% endif %}">
+                                    {{ claim_data.claim_status }}
+                                </span>
+                            </li>
+                            <li class="list-group-item">
+                                Notes:
+                                <span class="pull-right">{{ claim_data.notes if claim_data.notes else 'N/A' }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                {% endif %}
+
                     <!-- Display Loaded Data -->
                     {% if claim_data and claimant_data %}
                         <div class="alert alert-info">
                             <ul class="list-group">
-                                <li class="list-group-item font-weight-bold">Claim Number: <span class="pull-right badge badge-success text-white">{{ claim_data.claim_number }}</span></li>
+                                <li class="list-group-item font-weight-bold">Personal Details of the Responsible Person (Family Liaison) </li>
                                 <li class="list-group-item m-t-4">Names: <span class="pull-right">{{ claimant_data.display_name }}</span></li>
                                 <li class="list-group-item">ID Number: <span class="pull-right">{{ claimant_data.id_number }}</span></li>
                                 <li class="list-group-item m-t-4">Cell: <span class="pull-right">{{ claimant_data.cell }}</span></li>

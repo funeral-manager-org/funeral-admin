@@ -17,8 +17,8 @@
                             <li><a href="{{ url_for('company.get_admin') }}"><span class="text-success"><i class="ti-briefcase"></i> Company</span></a></li>
                             <li><a href="{{ url_for('covers.get_covers') }}"><span class="text-success"><i class="fa fa-user-plus"></i> Covers</span></a></li>
                             <li><a href="{{ url_for('employees.get_employees') }}"><span class="text-success"><i class="ti-briefcase"></i> Employees</span></a></li>
+                            <li><a href="{{ url_for('covers.get_claim_form') }}"><span class="text-info"> <i class="fa fa-user-circle-o"></i> Claims </span></a></li>
                             <li><a href="{{ url_for('employees.get_payroll') }}"><i class="fa fa-folder-o"></i> Payroll </a></li>
-{#                            <li><a href="{{ url_for('messaging.get_admin') }}"><span class="text-danger"><i class="fa fa-cogs"></i> Settings & Stats</span></a></li>#}
                         </ul>
                     </li>
 
@@ -45,16 +45,14 @@
                                     <li><a href="{{ url_for('covers.get_outstanding_premiums', page=0, count=25) }}"><i class="ti-credit-card"></i> Outstanding</a></li>
                                 </ul>
                             </li>
-                            <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-credit-card-alt"></i> Claims</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
+                            <li><a class="sidebar-sub-toggle"><span class="text-info"><i class="fa fa-user-secret"></i> Claims</span><span class="sidebar-collapse-icon ti-angle-down"></span></a>
                                 <ul>
-                                    <li><a href="{{ url_for('covers.get_claim_form') }}"><i class="ti-credit-card"></i> Create Claim </a></li>
-                                    <li><a href="{{ url_for('covers.logged_claims') }}"><i class="ti-credit-card"></i> Logged Claims </a></li>
+                                    <li><a href="{{ url_for('covers.get_claim_form') }}"><span class="text-success"> <i class="fa fa-user-circle-o"></i> Create Claim </span></a></li>
+                                    <li><a href="{{ url_for('covers.logged_claims') }}"><span class="text-info"><i class="fa fa-user-md"></i> Logged Claims </span></a></li>
                                     <li><a href="#"><i class="ti-credit-card"></i> Successful Claims</a></li>
                                     <li><a href="#"><i class="ti-credit-card"></i> Rejected Claims</a></li>
                                 </ul>
                             </li>
-
-
                         </ul>
                     </li>
                     <li><a class="sidebar-sub-toggle"><span class="text-success"><i class="ti-dashboard"></i> Human Resource</span><span
@@ -63,8 +61,6 @@
                             <li><a href="{{ url_for('employees.get_employee_details') }}"><i class="fa fa-user"></i> Employee Details </a></li>
                             <li><a href="{{ url_for('employees.get_attendance_register') }}"><i class="fa fa-registered"></i> Attendance Register </a></li>
                             <li><a href="{{ url_for('employees.get_work_summary') }}"><i class="fa fa-file-excel-o"></i> Work Summary </a></li>
-{#                            <li><a href="{{ url_for('employees.get_payslips') }}"><i class="fa fa-credit-card-alt"></i> Payslips </a></li>#}
-
                         </ul>
                     </li>
                     <li><a class="sidebar-sub-toggle"><i class="fa fa-envelope"></i> Messaging<span

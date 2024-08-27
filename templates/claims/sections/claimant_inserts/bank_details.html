@@ -1,14 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
             <div class="card shadow-lg border-info mb-4">
                 <div class="card-header bg-facebook">
                     <h3 class="card-title text-white">
@@ -19,35 +9,62 @@
                 <div class="card-body">
 
                 <form id="bank-form" action="{{ url_for('covers.add_claimant_bank_details', policy_number=policy_number, claim_number=claim_data.claim_number) }}" method="POST">
-                        <input type="hidden" name="claim_number" value="{{ claim_data.claim_number }}">
+{#                        <input type="hidden" name="claim_number" value="{{ claim_data.claim_number }}">#}
+                        {% if old_bank_account %}
+                            <input type="hidden" name="bank_account_id" value="{{ old_bank_account.bank_account_id }}"/>
+                        {% endif %}
                         <div class="form-group">
                             <label for="account_holder">Account Holder: :</label>
-                            <input type="text" id="account_holder" name="account_holder" class="form-control" required>
+                            <input type="text" id="account_holder" name="account_holder" class="form-control"
+                                   {% if old_bank_account and old_bank_account.account_holder %}
+                                    value="{{ old_bank_account.account_holder }}"
+                                   {% endif %}
+                                   required>
                         </div>
 
                         <div class="form-group">
                             <label for="bank_name">Bank Name:</label>
-                            <input type="text" id="bank_name" name="bank_name" class="form-control" required>
+                            <input type="text" id="bank_name" name="bank_name" class="form-control"
+                                   {% if old_bank_account and old_bank_account.bank_name %}
+                                    value="{{ old_bank_account.bank_name }}"
+                                   {% endif %}
+                                   required>
                         </div>
                         <div class="form-group">
                             <label for="account_number">Account Number:</label>
-                            <input type="text" id="account_number" name="account_number" class="form-control" required>
+                            <input type="text" id="account_number" name="account_number" class="form-control"
+                                   {% if old_bank_account and old_bank_account.account_number %}
+                                    value="{{ old_bank_account.account_number }}"
+                                   {% endif %}
+
+                                   required>
                         </div>
                         <div class="form-group">
                             <label for="branch_code">Branch:</label>
-                            <input type="text" id="branch_code" name="branch" class="form-control" required>
+                            <input type="text" id="branch_code" name="branch" class="form-control"
+                                   {% if old_bank_account and old_bank_account.branch %}
+                                    value="{{ old_bank_account.branch }}"
+                                   {% endif %}
+
+                                   required>
                         </div>
                         <div class="form-group">
                             <select class="form-control" name="account_type" id="account_type">
-                                <option value="" disabled selected>Select Account Type</option>
+                                <option value="" disabled {% if not old_bank_account %} selected{% endif %}>Select Account Type</option>
                                 {% for account_type in account_types %}
-                                    <option value="{{ account_type }}">{{ account_type|title }}</option>
+                                    <option value="{{ account_type }}"
+                                    {% if old_bank_account and old_bank_account.account_type == account_type %}selected{% endif %}
+                                    >{{ account_type|title }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-block btn-outline-info btn-rounded">
-                                Add Bank Details & Proceed
+                                {% if old_bank_account %}
+                                    Update Bank Details & Proceed
+                                {% else %}
+                                    Add Bank Details & Proceed
+                                {% endif %}
                             </button>
                         </div>
                     </form>

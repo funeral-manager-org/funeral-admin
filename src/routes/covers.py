@@ -547,7 +547,7 @@ async def retrieve_policy(user: User):
     policy_data: PolicyRegistrationData = await covers_controller.get_policy_data(
         policy_number=claim_init_data.policy_number)
     # Ensuring there is a Policy Attached to the Policy Number
-    if not policy_data:
+    if not isinstance(policy_data, PolicyRegistrationData):
         mess: str = f"""The Policy with Policy Number : {str(claim_init_data.policy_number)} was not found please be 
         sure to enter your information correctly"""
         flash(message=mess, category="danger")
@@ -568,13 +568,14 @@ async def retrieve_policy(user: User):
         id_number=claim_init_data.id_number)
 
     # Checking if PolicyHolder is Found
+    # TODO Need to Revise this to allow every covered Member to Claim on this Policy
     if not (client_data and client_data.is_policy_holder):
         message: str = f"""The Supplied ID Number is not of the Policy Holder- please submit the 
         Policy Holder ID Number"""
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
 
-    # Ensuring The Policy Holder has the Same Policy Number as the Supplied Policy Number
+    # Ensuring The Client has the Same Policy Number as the Supplied Policy Number
     if client_data.policy_number != claim_init_data.policy_number:
         message: str = f"""We are unable to ascertain any relationship between the id number and policy number"""
         flash(message=message, category="danger")
@@ -616,9 +617,17 @@ async def retrieve_policy(user: User):
 
 
 async def create_claim_return_context(user: User, policy_number: str, id_number: str):
+    """
+        Will create an Actual Claim and Returns the Context for the Employee to Continue with the Claim Process
+    :param user:
+    :param policy_number:
+    :param id_number:
+    :return:
+    """
+
     policy_data: PolicyRegistrationData = await covers_controller.get_policy_data(policy_number=policy_number)
 
-    if not policy_data:
+    if not isinstance(policy_data, PolicyRegistrationData):
         message: str = "Policy Does not Exist"
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
@@ -626,35 +635,42 @@ async def create_claim_return_context(user: User, policy_number: str, id_number:
     client_data: ClientPersonalInformation = await company_controller.get_client_data_with_id_number(
         id_number=id_number)
 
-    if not client_data:
+    if not isinstance(client_data, ClientPersonalInformation):
         message: str = "Client Data Does Not Exist"
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
 
     employee_details: EmployeeDetails = await company_controller.get_employee_by_uid(uid=user.uid)
-    if not (employee_details and employee_details.company_id == policy_data.company_id):
+    if not (isinstance(employee_details, EmployeeDetails) and employee_details.company_id == policy_data.company_id):
         message: str = "Employee not Authorized to process this claim"
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
 
     plan_details: CoverPlanDetails = await company_controller.get_plan_cover(company_id=policy_data.company_id,
                                                                              plan_number=policy_data.plan_number)
-    if not plan_details:
+    if not isinstance(plan_details, CoverPlanDetails):
         message: str = "Fatal Error processing Claim please inform admin"
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
 
-    new_claim: Claims = Claims(employee_id=employee_details.employee_id,
-                               branch_id=policy_data.branch_id,
-                               company_id=policy_data.company_id,
-                               plan_number=policy_data.plan_number,
-                               policy_number=policy_data.policy_number,
-                               claim_amount=plan_details.coverage_amount,
-                               claimed_for_uid=client_data.uid,
-                               claim_type=plan_details.plan_type)
+    # Checking if claim for this individual has already been logged
+    claim_data: Claims = await covers_controller.get_claim_with_policy_number_and_id_number(
+        policy_number=policy_number, id_number=id_number)
 
-    claim_data = await covers_controller.add_claim(claim_data=new_claim)
-    if not claim_data:
+    if not isinstance(claim_data, Claims):
+        new_claim: Claims = Claims(employee_id=employee_details.employee_id,
+                                   branch_id=policy_data.branch_id,
+                                   company_id=policy_data.company_id,
+                                   plan_number=policy_data.plan_number,
+                                   policy_number=policy_data.policy_number,
+                                   member_id_number=id_number,
+                                   claim_amount=plan_details.coverage_amount,
+                                   claimed_for_uid=client_data.uid,
+                                   claim_type=plan_details.plan_type)
+        covers_logger.info(f"Creating New Claim: {new_claim}")
+        claim_data: Claims = await covers_controller.add_claim(claim_data=new_claim)
+
+    if not isinstance(claim_data, Claims):
         message: str = "Unable to create claim please try again later"
         flash(message=message, category="danger")
         return redirect(url_for('covers.get_claim_form'))
@@ -685,21 +701,41 @@ async def log_claim(user: User, policy_number: str, id_number: str):
 
     if request.method.casefold() == "get":
         # Check if claim_number is present as a query parameter
+        old_claim = await covers_controller.get_claim_with_policy_number_and_id_number(policy_number=policy_number,
+                                                                                       id_number=id_number)
         claim_number = request.args.get('claim_number')
 
-        if claim_number:
-            covers_logger.info(f"Claim number {claim_number} found in query parameters.")
-            # Use the claim_number to retrieve additional data or attach it to the context
-            claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
-            context = dict(claim_data=claim_data, user=user, policy_number=policy_number, id_number=id_number)
+        if not isinstance(old_claim, Claims):
+            if claim_number:
+                covers_logger.info(f"Claim number {claim_number} found in query parameters.")
+                # Use the claim_number to retrieve additional data or attach it to the context
+                claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
+                context = dict(claim_data=claim_data, user=user)
+            else:
+                context = await create_claim_return_context(user=user, policy_number=policy_number, id_number=id_number)
+                if not isinstance(context, dict):
+                    # If it is not context then it's a redirect, return it
+                    return context
+
         else:
-            context = await create_claim_return_context(user=user, policy_number=policy_number, id_number=id_number)
-            if not isinstance(context, dict):
-                # If it is not context then it's a redirect, return it
-                return context
+            # Need to set the claim number to the old claims claim number
+            claim_number = old_claim.claim_number
+            context = dict(claim_data=old_claim, user=user)
+
+        # retrieve Old Information if existing
+        context.update(policy_number=policy_number, id_number=id_number)
+
+        # if a claim was previously being logged then it will be retrieved and presented to the form so the user
+        # can change it
+        old_claimant_data = await covers_controller.get_claimant_data(claim_number=claim_number)
+        # Add Existing Data into the form so the user can edit this data because the claim already exists
+        covers_logger.info(f"OLD Claimant Data: {old_claimant_data}")
+        if isinstance(old_claimant_data, ClaimantPersonalDetails):
+            context.update(old_claimant_data=old_claimant_data)
 
         relation_ships = RelationshipToPolicyHolder.relationships()
-        context.update(policy_number=policy_number, id_number=id_number, relation_ships=relation_ships)
+        if relation_ships:
+            context.update(relation_ships=relation_ships)
 
         return render_template('claims/sections/claimant_data.html', **context)
 
@@ -716,10 +752,11 @@ async def log_claim(user: User, policy_number: str, id_number: str):
         return await redirect_log_claim_with_query(claim_number, id_number, policy_number)
 
     # if we are here it means claimant data is provided correctly
+    # this will create new claimant record or update existing one
     claimant_data: ClaimantPersonalDetails = await covers_controller.add_claimant_data(
         claimant_details=claimant_details)
 
-    if not claimant_data:
+    if not isinstance(claimant_data, ClaimantPersonalDetails):
         message: str = "Unable to Add Claimant Data - please try again"
         flash(message=message, category="danger")
         claim_number = claimant_details.claim_number
@@ -741,15 +778,19 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
     :param policy_number:
     :return:
     """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
     context = dict(user=user)
     if request.method.casefold() == "get":
 
         bank_id = request.args.get('bank_id')
 
         if bank_id:
-            bank_details = await covers_controller.get_claim_bank_details(bank_account_id=bank_id)
-            if bank_details:
-                context.update(bank_account=bank_details)
+            bank_details = await company_controller.get_bank_account(bank_account_id=bank_id)
+            if isinstance(bank_details, BankAccount):
+                context.update(old_bank_account=bank_details)
 
         claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
         if claim_data:
@@ -758,12 +799,17 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
         claimant_data = await covers_controller.get_claimant_data(claim_number=claim_number)
         if claimant_data:
             context.update(claimant_data=claimant_data)
-        account_types = AccountTypes.account_types()
 
+        account_types = AccountTypes.account_types()
         context.update(policy_number=policy_number, claim_number=claim_number, account_types=account_types)
+        if claimant_data.bank_id:
+            old_bank_data = await company_controller.get_bank_account(bank_account_id=claimant_data.bank_id)
+            context.update(old_bank_account=old_bank_data)
+
         covers_logger.info(context)
         return render_template('claims/sections/claimant_data.html', **context)
 
+    # Employee Submitting Bank Account Details
     try:
         bank_details = BankAccount(**request.form)
     except ValidationError as e:
@@ -774,7 +820,7 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
 
     covers_logger.info(f"Bank Account Data: {bank_details}")
     bank_account: BankAccount = await company_controller.add_bank_account(bank_account=bank_details)
-    if not bank_account:
+    if not isinstance(bank_account, BankAccount):
         flash(message="Unable to add Bank details please ensure all your details are correct", category="danger")
         return redirect(url_for('covers.add_claimant_bank_details', policy_number=policy_number,
                                 claim_number=claim_number))

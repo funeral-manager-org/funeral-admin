@@ -75,6 +75,7 @@ class ClaimsORM(Base):
 
     plan_number = Column(String(9), index=True)
     policy_number = Column(String(9), index=True)
+    member_id_number = Column(String(13), index=True)
 
     claim_amount = Column(Integer)
     claim_total_paid = Column(Integer)
@@ -109,6 +110,7 @@ class ClaimsORM(Base):
 
             "plan_number": self.plan_number,
             "policy_number": self.policy_number,
+            "member_id_number": self.member_id_number,
 
             "claim_amount": self.claim_amount,
             "claim_total_paid": self.claim_total_paid,
@@ -138,7 +140,6 @@ class ClaimantORM(Base):
     address_id: str = Column(String(ID_LEN))
     bank_id: str = Column(String(ID_LEN))
     relationship_to_deceased: str = Column(String(NAME_LEN))
-
 
     @classmethod
     def create_if_not_table(cls):

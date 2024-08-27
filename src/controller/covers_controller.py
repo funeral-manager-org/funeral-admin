@@ -294,6 +294,7 @@ class CoversController(Controllers):
         with self.get_session() as session:
             session.add(ClaimsORM(**claim_data.dict()))
             return claim_data
+
     async def get_claim_data(self, claim_number: str) -> Claims | None:
         """
 
@@ -304,9 +305,22 @@ class CoversController(Controllers):
             claim_orm = session.query(ClaimsORM).filter_by(claim_number=claim_number).first()
             return Claims(**claim_orm.to_dict()) if isinstance(claim_orm, ClaimsORM) else None
 
-    async def add_claimant_data(self, claimant_details: ClaimantPersonalDetails) -> ClaimantPersonalDetails | None:
+    async def get_claim_with_policy_number_and_id_number(self, policy_number: str, id_number: str) -> Claims | None:
         """
 
+        :param policy_number:
+        :param id_number:
+        :return:
+        """
+        with self.get_session() as session:
+            claim_orm = session.query(ClaimsORM).filter_by(policy_number=policy_number,
+                                                           member_id_number=id_number).first()
+            return Claims(**claim_orm.to_dict()) if isinstance(claim_orm, ClaimsORM) else None
+
+    async def add_claimant_data(self, claimant_details: ClaimantPersonalDetails) -> ClaimantPersonalDetails | None:
+        """
+            **add_claimant_data**
+                will add new claimant data or update existing data
         :param claimant_details:
         :return:
         """
@@ -314,6 +328,19 @@ class CoversController(Controllers):
             claimant_orm = session.query(ClaimantORM).filter_by(claim_number=claimant_details.claim_number).first()
             if not claimant_orm:
                 session.add(ClaimantORM(**claimant_details.dict()))
+            else:
+                claimant_orm.id_number = claimant_details.id_number
+                claimant_orm.full_names = claimant_details.full_names
+                claimant_orm.surname = claimant_details.surname
+                claimant_orm.cell = claimant_details.cell
+                claimant_orm.alt_cell = claimant_details.alt_cell
+                claimant_orm.email = claimant_details.email
+                if claimant_details.address_id:
+                    claimant_orm.address_is = claimant_details.address_id
+                if claimant_details.bank_id:
+                    claimant_orm.bank_id = claimant_details.bank_id
+                claimant_orm.relationship_to_deceased = claimant_details.relationship_to_deceased
+
             return claimant_details
 
     async def get_claimant_data(self, claim_number: str) -> ClaimantPersonalDetails | None:
@@ -350,4 +377,3 @@ class CoversController(Controllers):
             claims_orm_list = session.query(ClaimsORM).filter_by(company_id=company_id).all()
             return [Claims(**claim_orm.to_dict()) for claim_orm in claims_orm_list
                     if isinstance(claim_orm, ClaimsORM)] if claims_orm_list else []
-

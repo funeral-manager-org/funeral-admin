@@ -106,6 +106,7 @@ class Claims(BaseModel):
     company_id: str
     plan_number: str
     policy_number: str
+    member_id_number: str
 
     claim_amount: PositiveInt
     claim_total_paid: int = Field(default=0)

@@ -381,9 +381,12 @@ class CompanyController(Controllers):
         with self.get_session() as session:
             bank_account_orm = session.query(BankAccountORM).filter_by(
                 bank_account_id=bank_account.bank_account_id).first()
+
             await system_cache.clear_mem_cache()
+
             if isinstance(bank_account_orm, BankAccountORM):
                 # If the bank account already exists, update its details
+                self.logger.info(f"Found Existing Account Details: {bank_account_orm.to_dict()}")
                 if bank_account.account_holder:
                     bank_account_orm.account_holder = bank_account.account_holder
                 if bank_account.account_number:

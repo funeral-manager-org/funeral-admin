@@ -26,35 +26,51 @@
                         {% include "claims/sections/claimant_inserts/claim_files.html" %}
                     {% endif %}
 
+                    {% if claim_data and client_data %}
+                        <div class="alert alert-info">
+                            <ul class="list-group">
+                                <li class="list-group-item font-weight-bold">FUNERAL COVER CLAIM Of : <span class="pull-right badge badge-success text-white">{{ client_data.client_display_name }}</span></li>
+                                <li class="list-group-item">ID Number: <span class="pull-right">{{ client_data.id_number }}</span></li>
+                                <li class="list-group-item m-t-4">DOB: <span class="pull-right">{{ client_data.date_of_birth }}</span></li>
+                                <li class="list-group-item">Nationality: <span class="pull-right">{{ client_data.nationality }}</span></li>
+                            </ul>
+                        </div>
+                    {% endif %}
                     <!-- Display Loaded Data -->
                     {% if claim_data and claimant_data %}
-                    <div class="alert alert-info">
-                        <h5>Claim Number: {{ claim_data.claim_number }}</h5>
-                        <p>Claimant ID: {{ claimant_data.id_number }}</p>
-                        <p>Full Name: {{ claimant_data.full_names }} {{ claimant_data.surname }}</p>
-                        <p>Cell: {{ claimant_data.cell }}</p>
-                        <p>Email: {{ claimant_data.email }}</p>
-                        <p>Relationship to Deceased: {{ claimant_data.relationship_to_deceased }}</p>
-                    </div>
+                        <div class="alert alert-info">
+                            <ul class="list-group">
+                                <li class="list-group-item font-weight-bold">Claim Number: <span class="pull-right badge badge-success text-white">{{ claim_data.claim_number }}</span></li>
+                                <li class="list-group-item m-t-4">Names: <span class="pull-right">{{ claimant_data.display_name }}</span></li>
+                                <li class="list-group-item">ID Number: <span class="pull-right">{{ claimant_data.id_number }}</span></li>
+                                <li class="list-group-item m-t-4">Cell: <span class="pull-right">{{ claimant_data.cell }}</span></li>
+                                <li class="list-group-item">Alternate Cell: <span class="pull-right">{{ claimant_data.alt_cell }}</span></li>
+                                <li class="list-group-item">Email: <span class="pull-right">{{ claimant_data.email }}</span></li>
+                                <li class="list-group-item m-t-8">Relationship to Deceased: <span class="pull-right badge badge-info text-white font-weight-bold">{{ claimant_data.relationship_to_deceased }}</span></li>
+                            </ul>
+                        </div>
                     {% endif %}
 
                     {% if bank_account %}
-                    <div class="alert alert-info">
-                        <h5>Bank Name: {{ bank_account.bank_name }}</h5>
-                        <p>Account Number: {{ bank_account.account_number }}</p>
-                        <p>Branch Code: {{ bank_account.branch_code }}</p>
-                    </div>
+                        <div class="alert alert-info">
+                            <ul class="list-group">
+                                <li class="list-group-item font-weight-bold">Account Holder: <span class="pull-right badge badge-success text-white">{{ bank_account.display_account_holder }}</span></li>
+                                <li class="list-group-item m-t-4">Bank Name <span class="pull-right">{{ bank_account.bank_name }}</span></li>
+                                <li class="list-group-item">Account Number: <span class="pull-right">{{ bank_account.account_number }}</span></li>
+                                <li class="list-group-item">Account Type: <span class="pull-right">{{ bank_account.account_type|title }}</span></li>
+                            </ul>
+                        </div>
                     {% endif %}
 
                     {% if claim_files %}
-                    <div class="alert alert-info">
-                        <h5>Uploaded Documents:</h5>
-                        <ul>
-                            {% for file in claim_files %}
-                                <li><a href="{{ url_for('static', filename=file) }}" target="_blank">{{ file|basename }}</a></li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                        <div class="alert alert-info">
+                            <h5>Supporting Documents:</h5>
+                            <ul class="list-group">
+                                {% for file in claim_files %}
+                                    <li class="list-group-item"><a href="{{ url_for('static', filename=file) }}" target="_blank">{{ file|basename }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     {% endif %}
                 </div>
             </div>

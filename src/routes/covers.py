@@ -431,6 +431,7 @@ async def premiums_payments(user: User):
     return render_template('admin/premiums/pay.html', **context)
 
 
+# noinspection DuplicatedCode
 @covers_route.get('/admin/premiums/receipt/<string:receipt_number>')
 @user_details
 async def receipt_reprint_receipt_number(user: User, receipt_number: str):
@@ -569,11 +570,11 @@ async def retrieve_policy(user: User):
 
     # Checking if PolicyHolder is Found
     # TODO Need to Revise this to allow every covered Member to Claim on this Policy
-    if not (client_data and client_data.is_policy_holder):
-        message: str = f"""The Supplied ID Number is not of the Policy Holder- please submit the 
-        Policy Holder ID Number"""
-        flash(message=message, category="danger")
-        return redirect(url_for('covers.get_claim_form'))
+    # if not (client_data and client_data.is_policy_holder):
+    #     message: str = f"""The Supplied ID Number is not of the Policy Holder- please submit the
+    #     Policy Holder ID Number"""
+    #     flash(message=message, category="danger")
+    #     return redirect(url_for('covers.get_claim_form'))
 
     # Ensuring The Client has the Same Policy Number as the Supplied Policy Number
     if client_data.policy_number != claim_init_data.policy_number:
@@ -626,6 +627,7 @@ async def create_claim_return_context(user: User, policy_number: str, id_number:
     """
 
     policy_data: PolicyRegistrationData = await covers_controller.get_policy_data(policy_number=policy_number)
+
 
     if not isinstance(policy_data, PolicyRegistrationData):
         message: str = "Policy Does not Exist"
@@ -699,6 +701,9 @@ async def log_claim(user: User, policy_number: str, id_number: str):
     if result:
         return result
 
+    client_data: ClientPersonalInformation = await company_controller.get_client_data_with_id_number(
+        id_number=id_number)
+
     if request.method.casefold() == "get":
         # Check if claim_number is present as a query parameter
         old_claim = await covers_controller.get_claim_with_policy_number_and_id_number(policy_number=policy_number,
@@ -710,7 +715,7 @@ async def log_claim(user: User, policy_number: str, id_number: str):
                 covers_logger.info(f"Claim number {claim_number} found in query parameters.")
                 # Use the claim_number to retrieve additional data or attach it to the context
                 claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
-                context = dict(claim_data=claim_data, user=user)
+                context = dict(claim_data=claim_data, user=user, client_data=client_data)
             else:
                 context = await create_claim_return_context(user=user, policy_number=policy_number, id_number=id_number)
                 if not isinstance(context, dict):
@@ -720,7 +725,7 @@ async def log_claim(user: User, policy_number: str, id_number: str):
         else:
             # Need to set the claim number to the old claims claim number
             claim_number = old_claim.claim_number
-            context = dict(claim_data=old_claim, user=user)
+            context = dict(claim_data=old_claim, user=user, client_data=client_data)
 
         # retrieve Old Information if existing
         context.update(policy_number=policy_number, id_number=id_number)
@@ -782,6 +787,7 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
     if result:
         return result
 
+
     context = dict(user=user)
     if request.method.casefold() == "get":
 
@@ -805,6 +811,12 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
         if claimant_data.bank_id:
             old_bank_data = await company_controller.get_bank_account(bank_account_id=claimant_data.bank_id)
             context.update(old_bank_account=old_bank_data)
+
+        if claim_data.member_id_number:
+            client_data: ClientPersonalInformation = await company_controller.get_client_data_with_id_number(
+                id_number=claim_data.member_id_number)
+            if client_data:
+                context.update(client_data=client_data)
 
         covers_logger.info(context)
         return render_template('claims/sections/claimant_data.html', **context)
@@ -864,6 +876,12 @@ async def attach_official_documentation(user: User, policy_number: str, claim_nu
         bank_account = await company_controller.get_bank_account(bank_account_id=claimant_data.bank_id)
         context.update(bank_account=bank_account)
 
+    if claim_data.member_id_number:
+        client_data: ClientPersonalInformation = await company_controller.get_client_data_with_id_number(
+            id_number=claim_data.member_id_number)
+        if client_data:
+            context.update(client_data=client_data)
+
     if request.method.casefold() == "get":
 
         claims_upload_folder_path = claims_upload_folder(company_id=claim_data.company_id,
@@ -900,7 +918,6 @@ async def retrieve_claim_status(user: User, claim_number: str):
     and uploaded files.
 
     :param user: Logged-in user.
-    :param policy_number: Policy number related to the claim.
     :param claim_number: Claim number to retrieve details for.
     :return: Rendered HTML template with claim status information.
     """
@@ -908,17 +925,23 @@ async def retrieve_claim_status(user: User, claim_number: str):
     result = await subscriptions_controller.route_guard(user=user)
     if result:
         return result
-
+    # TODO Consider verifying that the user can access this claim status
     # Retrieve claim data
     claim_data = await covers_controller.get_claim_data(claim_number=claim_number)
+
     claimant_data = await covers_controller.get_claimant_data(claim_number=claim_number)
+
     bank_account = await company_controller.get_bank_account(
         bank_account_id=claimant_data.bank_id) if claimant_data and claimant_data.bank_id else None
 
     # Load uploaded files
     claims_upload_folder_path = claims_upload_folder(company_id=claim_data.company_id, claim_number=claim_number)
+
     existing_claim_files = load_claims_files_in_folder(
         folder_path=claims_upload_folder_path) if claims_upload_folder_path else []
+
+    client_data: ClientPersonalInformation = await company_controller.get_client_data_with_id_number(
+        id_number=claim_data.member_id_number)
 
     # Prepare context for rendering
     context = {
@@ -926,6 +949,7 @@ async def retrieve_claim_status(user: User, claim_number: str):
         'claimant_data': claimant_data,
         'bank_account': bank_account,
         'claim_files': existing_claim_files,
+        'client_data': client_data,
         'user': user
     }
 

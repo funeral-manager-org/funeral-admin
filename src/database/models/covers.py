@@ -79,7 +79,7 @@ class ClientPersonalInformation(BaseModel):
 
     @property
     def client_display_name(self):
-        return f"{self.full_names} {self.surname}"
+        return f"{self.title.upper()} {self.full_names.title()} {self.surname.title()}"
 
     @property
     def is_policy_holder(self):

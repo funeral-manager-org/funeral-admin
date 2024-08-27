@@ -39,3 +39,7 @@ class BankAccount(BaseModel):
                         description="The specific branch of the bank where the account is held")
     account_type: str = Field(min_length=4, max_length=NAME_LEN,
                               description="The type of account, such as checking or savings")
+
+    @property
+    def display_account_holder(self):
+        return f"{self.account_holder.upper()}"

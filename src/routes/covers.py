@@ -787,7 +787,6 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
     if result:
         return result
 
-
     context = dict(user=user)
     if request.method.casefold() == "get":
 
@@ -808,6 +807,7 @@ async def add_claimant_bank_details(user: User, policy_number: str, claim_number
 
         account_types = AccountTypes.account_types()
         context.update(policy_number=policy_number, claim_number=claim_number, account_types=account_types)
+
         if claimant_data.bank_id:
             old_bank_data = await company_controller.get_bank_account(bank_account_id=claimant_data.bank_id)
             context.update(old_bank_account=old_bank_data)

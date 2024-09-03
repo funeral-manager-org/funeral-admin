@@ -130,7 +130,10 @@
                                             href="{{ url_for('documents.download_claims_documents',
                                             company_id=claim_data.company_id,
                                             claim_number=claim_data.claim_number,
-                                            filename=file) }}" target="_blank">{{ file }}</a></li>
+                                            filename=file) }}" target="_blank">
+                                        <i class="ti-file"> </i>
+                                        {{ file }}
+                                    </a></li>
                                 {% endfor %}
                             </ul>
                         </div>

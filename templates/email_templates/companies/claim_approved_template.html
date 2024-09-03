@@ -1,0 +1,23 @@
+{% extends "email_templates/email_page.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>{{ company.company_name|title }}</h2>
+    </div>
+    <div class="card-body">
+        <h2 class="card-title">Dear {{ display_name|title }},</h2>
+
+        <p>We are pleased to inform you that the claim by <strong>{{ claimant.first_name }} {{ claimant.last_name }}</strong>
+        (Claim Number: <strong>{{ claim_details.claim_number }}</strong>) under the plan <strong>{{ plan.plan_name }}</strong>
+        has been approved.</p>
+
+        <p>If you have any questions or need further information, please do not hesitate to contact us.</p>
+
+        <p>Thank you,</p>
+        <p>{{ company.company_name|title }} Team</p>
+        <span><a href="https://funeral-manager.org" target="_blank">https://funeral-manager.org</a></span>
+
+    </div>
+</div>
+{% endblock %}

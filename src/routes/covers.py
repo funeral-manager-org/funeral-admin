@@ -3,15 +3,17 @@ from datetime import datetime
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from pydantic import ValidationError
 
+from src.database.models.messaging import EmailCompose, RecipientTypes, SMSCompose
+from src.database.models.contacts import Contacts
 from src.database.models.bank_accounts import BankAccount, AccountTypes
-from src.authentication import login_required, user_details
+from src.authentication import login_required, user_details, admin_login
 from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company, EmployeeDetails
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentStatus, \
     PremiumReceipt, BeginClaim, Claims, RelationshipToPolicyHolder, ClaimantPersonalDetails, ClaimStatus
 from src.database.models.users import User
 from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
-from src.main import company_controller, covers_controller, subscriptions_controller
+from src.main import company_controller, covers_controller, subscriptions_controller, messaging_controller
 from src.utils import is_valid_ulid, claims_upload_folder, load_claims_files_in_folder, save_files_to_folder, \
     basename_filter
 
@@ -936,7 +938,7 @@ async def retrieve_claim(claim_number: str, user: User):
     for file in filenames:
         covers_logger.info(f"DEBUG :")
         covers_logger.info(url_for('documents.download_claims_documents', company_id=company_details.company_id,
-                      claim_number=claim_number, filename=file))
+                                   claim_number=claim_number, filename=file))
     # Prepare context for rendering
     return {
         'claim_data': claim_data,
@@ -1011,7 +1013,7 @@ async def logged_claims(user: User):
 
 
 @covers_route.get('/admin/covers/claims')
-@login_required
+@admin_login
 async def load_admin_claims(user: User):
     """
 
@@ -1032,7 +1034,7 @@ async def load_admin_claims(user: User):
 
 
 @covers_route.get('/admin/covers/claim/<string:claim_number>/approve')
-@login_required
+@admin_login
 async def admin_approve_claim(user: User, claim_number: str):
     """
 
@@ -1040,14 +1042,59 @@ async def admin_approve_claim(user: User, claim_number: str):
     :param user:
     :return:
     """
+    claim_details: Claims = await covers_controller.get_claim_data(claim_number=claim_number)
+    if not claim_details:
+        message: str = "You are not authorized to update this claim or it does not exist"
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.load_admin_claims'))
+
+    if user.company_id != claim_details.company_id:
+        message: str = "You are not authorized to update this claim"
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.load_admin_claims'))
+
 
     status_changed = await covers_controller.change_claim_status(claim_number=claim_number,
                                                                  status=ClaimStatus.APPROVED.value)
+
+    _ = await send_claim_approved_notice_to_responsible_people(claim_details=claim_details)
+
     if status_changed:
         flash(message="successfully updated claim status to approved", category="success")
         return redirect(url_for('covers.load_admin_claims'))
 
     flash(message="Error updating claim status please try again later", category="danger")
+    return redirect(url_for('covers.load_admin_claims'))
+
+
+@covers_route.get('/admin/covers/claim/<string:claim_number>/rejected')
+@admin_login
+async def admin_reject_claim(user: User, claim_number: str):
+    """
+
+    :param user:
+    :param claim_number:
+    :return:
+    """
+    claim_details: Claims = await covers_controller.get_claim_data(claim_number=claim_number)
+
+    if not claim_details:
+        message: str = "You are not authorized to update this claim or it does not exist"
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.load_admin_claims'))
+
+    if user.company_id != claim_details.company_id:
+        message: str = "You are not authorized to update this claim"
+        flash(message=message, category="danger")
+        return redirect(url_for('covers.load_admin_claims'))
+
+    status_changed = await covers_controller.change_claim_status(claim_number=claim_number,
+                                                                 status=ClaimStatus.REJECTED.value)
+
+    message: str = f"""please be sure to send a message to the employee informing them as to why the claim was rejected
+    the employee can then rectify the mistake or inform the claimant. 
+    """
+    flash(message=message, category="success")
     return redirect(url_for('covers.load_admin_claims'))
 
 
@@ -1061,3 +1108,78 @@ async def admin_claims_workorder(user: User, claim_number: str):
     :return:
     """
     pass
+
+
+async def send_claim_approved_notice_to_responsible_people(claim_details: Claims):
+    """
+    Send an approval notice to the responsible employee and the claimant.
+    """
+    # Fetch necessary data
+    responsible_employee_id: str = claim_details.employee_id
+
+    family_member: ClaimantPersonalDetails = await covers_controller.get_claimant_data(
+        claim_number=claim_details.claim_number)
+    employee_details: EmployeeDetails = await company_controller.get_employee(
+        employee_id=claim_details.employee_id)
+
+    company_details: Company = await company_controller.get_company_details(company_id=claim_details.company_id)
+    plan_details: CoverPlanDetails = await company_controller.get_plan_cover(company_id=claim_details.company_id,
+                                                                             plan_number=claim_details.plan_number)
+    contact_details: Contacts = company_controller.get_contact(contact_id=employee_details.contact_id)
+
+    employee_contact_number = contact_details.cell or employee_details.contact_number
+    employee_email = contact_details.email or employee_details.email
+
+    # Prepare the email subject and context
+    message = dict(
+        subject=f"Claim Approved for {family_member.first_name} {family_member.last_name}",
+        message=f"We are pleased to inform you that the claim with number {claim_details.claim_number} "
+                f"under the plan {plan_details.plan_name} has been approved. "
+                f"Please contact us for further details."
+    )
+
+    context = dict(
+        company=company_details,
+        plan=plan_details,
+        employee=employee_details,
+        claimant=family_member,
+        display_name=employee_details.first_name
+    )
+
+    # Render the email template with the context
+    message_template = render_template('email_templates/companies/claim_approved_template.html', **context)
+
+    # You would then send this email using your email-sending logic
+    emp_email_message = EmailCompose(to_email=employee_email,
+                                     subject=message.get('subject'),
+                                     message=message.get('message'),
+                                     html_template=message_template,
+                                     to_branch=claim_details.branch_id,
+                                     recipient_type=RecipientTypes.EMPLOYEES.value)
+
+    send_message_to_employee = await messaging_controller.send_email(email=emp_email_message)
+
+    fam_email_message = EmailCompose(to_email=family_member.email,
+                                     subject=message.get('subject'),
+                                     message=message.get('message'),
+                                     html_template=message_template,
+                                     to_branch=claim_details.branch_id,
+                                     recipient_type=RecipientTypes.CLIENTS.value)
+
+    send_email_to_family = await messaging_controller.send_email(email=fam_email_message)
+
+    sms_message = """Claim for {{ family_member.first_name }} {{ family_member.last_name }} 
+    (No: {{ claim_details.claim_number }}) under the {{ plan_details.plan_name }} plan has been approved. 
+    Contact us for details."""
+
+    sms = SMSCompose(message=sms_message, to_cell=family_member.cell, to_branch=claim_details.branch_id,
+                     recipient_type=RecipientTypes.CLIENTS.value)
+
+    send_sms_to_family = await messaging_controller.send_sms(composed_sms=sms)
+
+    alt_sms = SMSCompose(message=sms_message, to_cell=family_member.alt_cell, to_branch=claim_details.branch_id,
+                         recipient_type=RecipientTypes.CLIENTS.value)
+
+    send_sms_to_family = await messaging_controller.send_sms(composed_sms=alt_sms)
+
+    return

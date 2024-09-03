@@ -52,6 +52,11 @@
                                                     Approve
                                                 </a>
 
+                                                <a href="{{ url_for('covers.admin_reject_claim', claim_number=claim.claim_number) }}" class="btn btn-sm btn-outline-danger btn-rounded">
+                                                    <i class="fa fa-link"></i>
+                                                    Reject
+                                                </a>
+
                                             </td>
                                             <td> <span class="font-weight-bold">{{ claim.claim_number }}</span></td>
                                             <td> <span class="font-weight-bold">{{ claim.policy_number }}</span></td>

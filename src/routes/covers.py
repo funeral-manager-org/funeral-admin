@@ -1112,7 +1112,11 @@ async def admin_claims_workorder(user: User, claim_number: str):
 
 async def send_claim_approved_notice_to_responsible_people(claim_details: Claims):
     """
-    Send an approval notice to the responsible employee and the claimant.
+    send_claim_approved_notice_to_responsible_people
+
+        Send an approval notice to the responsible employee and the claimant.
+        Will also Send the same message to the claimant Alternate Number
+        useful for noticing another family member
     """
     # Fetch necessary data
     responsible_employee_id: str = claim_details.employee_id

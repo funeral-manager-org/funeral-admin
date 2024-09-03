@@ -1157,7 +1157,9 @@ async def send_claim_approved_notice_to_responsible_people(claim_details: Claims
                                      to_branch=claim_details.branch_id,
                                      recipient_type=RecipientTypes.EMPLOYEES.value)
 
-    send_message_to_employee = await messaging_controller.send_email(email=emp_email_message)
+    # Sending Notification Email to Employee
+
+    _ = await messaging_controller.send_email(email=emp_email_message)
 
     fam_email_message = EmailCompose(to_email=family_member.email,
                                      subject=message.get('subject'),
@@ -1166,7 +1168,8 @@ async def send_claim_approved_notice_to_responsible_people(claim_details: Claims
                                      to_branch=claim_details.branch_id,
                                      recipient_type=RecipientTypes.CLIENTS.value)
 
-    send_email_to_family = await messaging_controller.send_email(email=fam_email_message)
+    # Sending Notification Email to Family Member
+    _ = await messaging_controller.send_email(email=fam_email_message)
 
     sms_message = """Claim for {{ family_member.first_name }} {{ family_member.last_name }} 
     (No: {{ claim_details.claim_number }}) under the {{ plan_details.plan_name }} plan has been approved. 
@@ -1175,11 +1178,13 @@ async def send_claim_approved_notice_to_responsible_people(claim_details: Claims
     sms = SMSCompose(message=sms_message, to_cell=family_member.cell, to_branch=claim_details.branch_id,
                      recipient_type=RecipientTypes.CLIENTS.value)
 
-    send_sms_to_family = await messaging_controller.send_sms(composed_sms=sms)
+    # Sending Notification SMS to Family Member
+    _ = await messaging_controller.send_sms(composed_sms=sms)
 
     alt_sms = SMSCompose(message=sms_message, to_cell=family_member.alt_cell, to_branch=claim_details.branch_id,
                          recipient_type=RecipientTypes.CLIENTS.value)
 
-    send_sms_to_family = await messaging_controller.send_sms(composed_sms=alt_sms)
+    # Sending Notification SMS to the Alternate Number for Family
+    _ = await messaging_controller.send_sms(composed_sms=alt_sms)
 
     return

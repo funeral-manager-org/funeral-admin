@@ -12,7 +12,8 @@ from src.database.models.users import User
 from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
 from src.main import company_controller, covers_controller, subscriptions_controller
-from src.utils import is_valid_ulid, claims_upload_folder, load_claims_files_in_folder, save_files_to_folder
+from src.utils import is_valid_ulid, claims_upload_folder, load_claims_files_in_folder, save_files_to_folder, \
+    basename_filter
 
 covers_route = Blueprint('covers', __name__)
 covers_logger = init_logger('covers_logger')
@@ -929,12 +930,19 @@ async def retrieve_claim(claim_number: str, user: User):
     company_details: Company = await company_controller.get_company_details(company_id=user.company_id)
     employee_details: EmployeeDetails = await company_controller.get_employee_by_uid(uid=user.uid)
 
+    filenames = [basename_filter(file_path) for file_path in existing_claim_files if existing_claim_files]
+
+    covers_logger.info(f"claim files: {filenames}")
+    for file in filenames:
+        covers_logger.info(f"DEBUG :")
+        covers_logger.info(url_for('documents.download_claims_documents', company_id=company_details.company_id,
+                      claim_number=claim_number, filename=file))
     # Prepare context for rendering
     return {
         'claim_data': claim_data,
         'claimant_data': claimant_data,
         'bank_account': bank_account,
-        'claim_files': existing_claim_files,
+        'claim_files': filenames,
         'client_data': client_data,
         'user': user,
         'company_details': company_details,

@@ -7,8 +7,10 @@ from werkzeug.utils import secure_filename
 
 ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png'}
 
+
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 from dateutil.relativedelta import relativedelta
 from ulid import ULID
@@ -50,19 +52,36 @@ def static_folder() -> str:
     return path.join(path.dirname(path.abspath(__file__)), '../../static')
 
 
+def documents_folder() -> str:
+    return path.join(path.dirname(path.abspath(__file__)), '../../documents')
+
+
 def template_folder() -> str:
     return path.join(path.dirname(path.abspath(__file__)), '../../templates')
 
 
+def claims_folder_path(company_id: str, claim_number: str) -> str:
+    """
+
+    :param company_id:
+    :param claim_number:
+    :return:
+    """
+
+    return f"{documents_folder()}/company_files/{company_id}/uploads/{claim_number}"
+
+
 def claims_upload_folder(company_id: str, claim_number: str) -> str:
-    folder_path = f"{static_folder()}/company_files/{company_id}/uploads/{claim_number}"
+    folder_path = claims_folder_path(company_id=company_id, claim_number=claim_number)
 
     # Ensure the directory exists
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
     return folder_path
-def save_files_to_folder(folder_path:str, file_list: list):
+
+
+def save_files_to_folder(folder_path: str, file_list: list):
     """
 
     :param folder_path:
@@ -78,8 +97,12 @@ def save_files_to_folder(folder_path:str, file_list: list):
             saved_files.append(filename)
     return saved_files
 
+
 def basename_filter(path: str) -> str:
-    return os.path.basename(path)
+    filename = os.path.basename(path)
+    print(f"File Name : {filename}")
+    return filename
+
 
 def load_claims_files_in_folder(folder_path: str):
     # Define the patterns for pictures and PDFs

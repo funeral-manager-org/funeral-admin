@@ -125,7 +125,12 @@
                             <h5>Supporting Documents:</h5>
                             <ul class="list-group">
                                 {% for file in claim_files %}
-                                    <li class="list-group-item"><a href="{{ file }}" target="_blank">{{ file|basename }}</a></li>
+                                    <li class="list-group-item"><a
+                                            class="text-success font-weight-bold"
+                                            href="{{ url_for('documents.download_claims_documents',
+                                            company_id=claim_data.company_id,
+                                            claim_number=claim_data.claim_number,
+                                            filename=file) }}" target="_blank">{{ file }}</a></li>
                                 {% endfor %}
                             </ul>
                         </div>

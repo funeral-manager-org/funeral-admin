@@ -1088,8 +1088,8 @@ async def admin_reject_claim(user: User, claim_number: str):
         flash(message=message, category="danger")
         return redirect(url_for('covers.load_admin_claims'))
 
-    status_changed = await covers_controller.change_claim_status(claim_number=claim_number,
-                                                                 status=ClaimStatus.REJECTED.value)
+    _ = await covers_controller.change_claim_status(claim_number=claim_number,
+                                                    status=ClaimStatus.REJECTED.value)
 
     message: str = f"""please be sure to send a message to the employee informing them as to why the claim was rejected
     the employee can then rectify the mistake or inform the claimant. 

@@ -26,11 +26,12 @@
                                     <tr>
                                         <td>
                                             <a href="{{ url_for('covers.retrieve_claim_status', claim_number=claim.claim_number) }}" class="btn btn-sm btn-outline-info btn-rounded">
+                                                <i class="fa fa-link"></i>
                                                 Open
                                             </a>
                                         </td>
-                                        <td>{{ claim.claim_number }}</td>
-                                        <td>{{ claim.policy_number }}</td>
+                                        <td> <span class="font-weight-bold">{{ claim.claim_number }}</span></td>
+                                        <td> <span class="font-weight-bold">{{ claim.policy_number }}</span></td>
                                         <td>
                                             <span class="badge
                                                 {% if claim.claim_status == 'Rejected' %}

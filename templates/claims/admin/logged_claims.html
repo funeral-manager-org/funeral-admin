@@ -1,0 +1,166 @@
+{% extends "layouts/page.html" %}
+{% block content %}
+    <section id="main-content">
+        <div class="container mt-4">
+            <!-- Claims Table Card -->
+            <div class="card shadow-lg border-info mb-4">
+                <div class="card-header bg-facebook">
+                    <h3 class="card-title text-white">
+                        <i class="fa fa-clipboard-list"></i>
+                        Claims
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="claimStatusTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="in-progress-tab" data-toggle="tab" href="#in-progress" role="tab">In Progress</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="approved-tab" data-toggle="tab" href="#approved" role="tab">Approved</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="completed-tab" data-toggle="tab" href="#completed" role="tab">Completed</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="rejected-tab" data-toggle="tab" href="#rejected" role="tab">Rejected</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3" id="claimStatusTabsContent">
+                        <!-- In Progress Claims -->
+                        <div class="tab-pane fade show active" id="in-progress" role="tabpanel">
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Claim Number</th>
+                                        <th>Policy Number</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for claim in claims if claim.claim_status == 'In Progress' %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('covers.admin_verify_claim', claim_number=claim.claim_number) }}" class="btn btn-sm btn-outline-info btn-rounded">
+                                                    <i class="fa fa-link"></i>
+                                                    Open
+                                                </a>
+
+                                                <a href="{{ url_for('covers.admin_approve_claim', claim_number=claim.claim_number) }}" class="btn btn-sm btn-outline-info btn-rounded">
+                                                    <i class="fa fa-link"></i>
+                                                    Approve
+                                                </a>
+
+                                            </td>
+                                            <td> <span class="font-weight-bold">{{ claim.claim_number }}</span></td>
+                                            <td> <span class="font-weight-bold">{{ claim.policy_number }}</span></td>
+                                            <td><span class="badge badge-warning">{{ claim.claim_status }}</span></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Approved Claims -->
+                        <div class="tab-pane fade" id="approved" role="tabpanel">
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Claim Number</th>
+                                        <th>Policy Number</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for claim in claims if claim.claim_status == 'Approved' %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('covers.admin_verify_claim', claim_number=claim.claim_number) }}" class="btn btn-sm btn-outline-info btn-rounded">
+                                                    <i class="fa fa-link"></i>
+                                                    Open
+                                                </a>
+                                                <a href="{{ url_for('covers.admin_claims_workorder', claim_number=claim.claim_number) }}" class="btn btn-sm btn-outline-info btn-rounded">
+                                                    <i class="fa fa-link"></i>
+                                                    Work Order
+                                                </a>
+
+                                            </td>
+                                            <td> <span class="font-weight-bold">{{ claim.claim_number }}</span></td>
+                                            <td> <span class="font-weight-bold">{{ claim.policy_number }}</span></td>
+                                            <td><span class="badge badge-success">{{ claim.claim_status }}</span></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Completed Claims -->
+                        <div class="tab-pane fade" id="completed" role="tabpanel">
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Claim Number</th>
+                                        <th>Policy Number</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for claim in claims if claim.claim_status == 'Completed' %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('covers.admin_verify_claim', claim_number=claim.claim_number) }}" class="btn btn-sm btn-outline-info btn-rounded">
+                                                    <i class="fa fa-link"></i>
+                                                    Open
+                                                </a>
+
+                                            </td>
+                                            <td> <span class="font-weight-bold">{{ claim.claim_number }}</span></td>
+                                            <td> <span class="font-weight-bold">{{ claim.policy_number }}</span></td>
+                                            <td><span class="badge badge-primary">{{ claim.claim_status }}</span></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Rejected Claims -->
+                        <div class="tab-pane fade" id="rejected" role="tabpanel">
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Claim Number</th>
+                                        <th>Policy Number</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for claim in claims if claim.claim_status == 'Rejected' %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('covers.admin_verify_claim', claim_number=claim.claim_number) }}" class="btn btn-sm btn-outline-info btn-rounded">
+                                                    <i class="fa fa-link"></i>
+                                                    Open
+                                                </a>
+                                            </td>
+                                            <td> <span class="font-weight-bold">{{ claim.claim_number }}</span></td>
+                                            <td> <span class="font-weight-bold">{{ claim.policy_number }}</span></td>
+                                            <td><span class="badge badge-danger">{{ claim.claim_status }}</span></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

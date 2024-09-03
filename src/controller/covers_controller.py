@@ -305,6 +305,19 @@ class CoversController(Controllers):
             claim_orm = session.query(ClaimsORM).filter_by(claim_number=claim_number).first()
             return Claims(**claim_orm.to_dict()) if isinstance(claim_orm, ClaimsORM) else None
 
+    async def change_claim_status(self, claim_number: str, status: str):
+        """
+
+        :param claim_number:
+        :param status:
+        :return:
+        """
+        with self.get_session() as session:
+            claim_orm = session.query(ClaimsORM).filter_by(claim_number=claim_number).first()
+            if isinstance(claim_orm, ClaimsORM):
+                claim_orm.claim_status = status
+            return True
+
     async def get_claim_with_policy_number_and_id_number(self, policy_number: str, id_number: str) -> Claims | None:
         """
 

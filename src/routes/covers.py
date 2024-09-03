@@ -7,7 +7,7 @@ from src.database.models.bank_accounts import BankAccount, AccountTypes
 from src.authentication import login_required, user_details
 from src.database.models.companies import CoverPlanDetails, CompanyBranches, Company, EmployeeDetails
 from src.database.models.covers import ClientPersonalInformation, PolicyRegistrationData, Premiums, PaymentStatus, \
-    PremiumReceipt, BeginClaim, Claims, RelationshipToPolicyHolder, ClaimantPersonalDetails
+    PremiumReceipt, BeginClaim, Claims, RelationshipToPolicyHolder, ClaimantPersonalDetails, ClaimStatus
 from src.database.models.users import User
 from src.database.sql.covers import PolicyRegistrationDataORM
 from src.logger import init_logger
@@ -628,7 +628,6 @@ async def create_claim_return_context(user: User, policy_number: str, id_number:
 
     policy_data: PolicyRegistrationData = await covers_controller.get_policy_data(policy_number=policy_number)
 
-
     if not isinstance(policy_data, PolicyRegistrationData):
         message: str = "Policy Does not Exist"
         flash(message=message, category="danger")
@@ -909,21 +908,7 @@ async def attach_official_documentation(user: User, policy_number: str, claim_nu
     return redirect(url_for('covers.retrieve_claim_status', claim_number=claim_number))
 
 
-@covers_route.get('/covers/claims-status/<string:claim_number>')
-@login_required
-async def retrieve_claim_status(user: User, claim_number: str):
-    """
-    Retrieve and display all claim-related information including claimant details, bank account details,
-    and uploaded files.
-
-    :param user: Logged-in user.
-    :param claim_number: Claim number to retrieve details for.
-    :return: Rendered HTML template with claim status information.
-    """
-    # Ensure user is authorized to view this information
-    result = await subscriptions_controller.route_guard(user=user)
-    if result:
-        return result
+async def retrieve_claim(claim_number: str, user: User):
     # TODO Consider verifying that the user can access this claim status
     # Retrieve claim data
     claim_data: Claims = await covers_controller.get_claim_data(claim_number=claim_number)
@@ -945,16 +930,55 @@ async def retrieve_claim_status(user: User, claim_number: str):
     employee_details: EmployeeDetails = await company_controller.get_employee_by_uid(uid=user.uid)
 
     # Prepare context for rendering
-    context = {
+    return {
         'claim_data': claim_data,
         'claimant_data': claimant_data,
         'bank_account': bank_account,
         'claim_files': existing_claim_files,
         'client_data': client_data,
         'user': user,
-        'company_details':company_details,
+        'company_details': company_details,
         'employee_details': employee_details
     }
+
+
+@covers_route.get('/covers/claims-status/<string:claim_number>')
+@login_required
+async def retrieve_claim_status(user: User, claim_number: str):
+    """
+    Retrieve and display all claim-related information including claimant details, bank account details,
+    and uploaded files.
+
+    :param user: Logged-in user.
+    :param claim_number: Claim number to retrieve details for.
+    :return: Rendered HTML template with claim status information.
+    """
+    # Ensure user is authorized to view this information
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+    # Prepare context for rendering
+    context = await retrieve_claim(claim_number=claim_number, user=user)
+    # Render the template with the claim information
+    return render_template('claims/claim_status.html', **context)
+
+
+@covers_route.get('/covers/verify-claim/<string:claim_number>')
+@login_required
+async def admin_verify_claim(user: User, claim_number: str):
+    """
+    :param user:
+    :param claim_number:
+    :return:
+    """
+
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+    # Prepare context for rendering
+    context = await retrieve_claim(claim_number=claim_number, user=user)
 
     # Render the template with the claim information
     return render_template('claims/claim_status.html', **context)
@@ -976,3 +1000,56 @@ async def logged_claims(user: User):
     claims = await covers_controller.get_company_claims(company_id=user.company_id)
     context = dict(user=user, claims=claims)
     return render_template("claims/logged_claims.html", **context)
+
+
+@covers_route.get('/admin/covers/claims')
+@login_required
+async def load_admin_claims(user: User):
+    """
+
+    :param user:
+    :return:
+    """
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+    result = await subscriptions_controller.route_guard(user=user)
+    if result:
+        return result
+
+    claims = await covers_controller.get_company_claims(company_id=user.company_id)
+    context = dict(user=user, claims=claims)
+    return render_template('claims/admin/logged_claims.html', **context)
+
+
+@covers_route.get('/admin/covers/claim/<string:claim_number>/approve')
+@login_required
+async def admin_approve_claim(user: User, claim_number: str):
+    """
+
+    :param claim_number:
+    :param user:
+    :return:
+    """
+
+    status_changed = await covers_controller.change_claim_status(claim_number=claim_number,
+                                                                 status=ClaimStatus.APPROVED.value)
+    if status_changed:
+        flash(message="successfully updated claim status to approved", category="success")
+        return redirect(url_for('covers.load_admin_claims'))
+
+    flash(message="Error updating claim status please try again later", category="danger")
+    return redirect(url_for('covers.load_admin_claims'))
+
+
+@covers_route.get('/admin/covers/claim/<string:claim_number>/workorder')
+@login_required
+async def admin_claims_workorder(user: User, claim_number: str):
+    """
+
+    :param user:
+    :param claim_number:
+    :return:
+    """
+    pass

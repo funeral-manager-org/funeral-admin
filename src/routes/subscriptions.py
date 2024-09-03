@@ -93,7 +93,6 @@ async def payfast_payment_complete(user: User):
     """
     flash(message="Payment completed successfully", category="success")
     return redirect(url_for('company.get_admin'))
-
 @subscriptions_route.get('/subscriptions/payfast-failure')
 @admin_login
 async def payfast_payment_failed(user: User):

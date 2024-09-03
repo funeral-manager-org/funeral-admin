@@ -86,7 +86,7 @@ class Subscriptions(BaseModel):
     subscription_amount: int
     subscription_period: int
     payments: list[Payment] = []
-    reference: str| None = Field(default_factory=create_reference)
+    reference: str | None = Field(default_factory=create_reference)
 
     @property
     def subscribed_date(self):
@@ -131,13 +131,20 @@ class Subscriptions(BaseModel):
             self.total_clients -= 1
         return self.total_clients
 
-    def is_expired(self) -> bool:
-        """Will return True if subscription is expired"""
+    def is_expired(self, grace_period_in_days: int = 6) -> bool:
+        """
+        Defaults to a grace period of 6 days.
+        Will return True if the subscription is expired.
+        """
         date_bought_dt = datetime.fromisoformat(self.date_subscribed)
         current_date = datetime.now()
-        months_diff = (current_date.year - date_bought_dt.year) * 12 + current_date.month - date_bought_dt.month
 
-        return months_diff > self.subscription_period
+        # Calculate the expiry date considering the subscription period in months
+        expiry_date = date_bought_dt + timedelta(days=grace_period_in_days)
+        expiry_date = expiry_date.replace(month=date_bought_dt.month + self.subscription_period)
+
+        # Check if the current date is past the expiry date
+        return current_date > expiry_date
 
 
 class Package(BaseModel):

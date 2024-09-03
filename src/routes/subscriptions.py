@@ -93,6 +93,8 @@ async def payfast_payment_complete(user: User):
     """
     flash(message="Payment completed successfully", category="success")
     return redirect(url_for('company.get_admin'))
+
+
 @subscriptions_route.get('/subscriptions/payfast-failure')
 @admin_login
 async def payfast_payment_failed(user: User):
@@ -119,10 +121,12 @@ async def get_subscriptions(user: User):
         subscription_logger.info(message)
         return redirect(url_for('home.get_home'))
 
-    subscription_account: Subscriptions = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
+    subscription_account: Subscriptions = await subscriptions_controller.get_company_subscription(
+        company_id=user.company_id)
     subscription_plans: list[SubscriptionDetails] = await subscriptions_controller.return_all_plan_details()
     context = dict(user=user, subscription_account=subscription_account, subscription_plans=subscription_plans)
     return render_template('billing/subscriptions.html', **context)
+
 
 async def paypal_payment(subscription_details: Subscriptions, user: User):
     """
@@ -154,6 +158,7 @@ async def make_direct_deposit(subscription_details: Subscriptions, user: User):
     context = dict(user=user, subscription_details=subscription_details)
     return render_template('billing/direct_deposit.html', **context)
 
+
 @subscriptions_route.post('/subscriptions/payment-method')
 @admin_login
 async def payment_method_selected(user: User):
@@ -164,7 +169,8 @@ async def payment_method_selected(user: User):
     """
     payment_method = request.form.get('payment_method')
     subscription_id: str = request.form.get('subscription_id')
-    subscription_details: Subscriptions = await subscriptions_controller.get_company_subscription(company_id=user.company_id)
+    subscription_details: Subscriptions = await subscriptions_controller.get_company_subscription(
+        company_id=user.company_id)
 
     if subscription_details.subscription_id != subscription_id:
         flash(message="there was a problem making payment for this subscription", category="danger")
@@ -202,14 +208,13 @@ async def do_subscribe(user: User, option: str):
 
     subscription = Subscriptions(**subscription_details.dict(), company_id=company_detail.company_id, payments=[])
     await subscriptions_controller.add_update_company_subscription(subscription=subscription)
-    flash(message=f"you have successfully created a {subscription.plan_name} Account",category="success")
+    flash(message=f"you have successfully created a {subscription.plan_name} Account", category="success")
     return redirect(url_for('subscriptions.get_subscriptions'))
 
 
 @subscriptions_route.get('/subscriptions/payment/success')
 @admin_login
 async def subscription_payment_successful(user: User):
-
     try:
         # Load JSON data
         _payload = request.json
@@ -378,19 +383,18 @@ async def messaging_top_up(user: User):
         subscription_logger.info(message)
         return redirect(url_for('company.get_admin'))
 
-
     package: Package = await subscriptions_controller.add_update_sms_email_package(top_up_pack=top_up_pack)
     if package:
         payfast_payment_endpoint = await payfast_controller.payfast_package_create_payment(
-            subscription_details=subscription,top_up_pack=package, user=user)
+            subscription_details=subscription, top_up_pack=package, user=user)
         if payfast_payment_endpoint:
             return payfast_payment_endpoint
-
 
     message: str = """Please try buying Top Up Packs Later - there was an error on our side"""
     flash(message=message, category="danger")
     subscription_logger.info(message)
     return redirect(url_for('company.get_admin'))
+
 
 @subscriptions_route.get('/subscriptions/package/success/<string:package_id>')
 @admin_login

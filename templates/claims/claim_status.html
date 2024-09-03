@@ -125,7 +125,7 @@
                             <h5>Supporting Documents:</h5>
                             <ul class="list-group">
                                 {% for file in claim_files %}
-                                    <li class="list-group-item"><a href="{{ url_for('static', filename=file) }}" target="_blank">{{ file|basename }}</a></li>
+                                    <li class="list-group-item"><a href="{{ file }}" target="_blank">{{ file|basename }}</a></li>
                                 {% endfor %}
                             </ul>
                         </div>

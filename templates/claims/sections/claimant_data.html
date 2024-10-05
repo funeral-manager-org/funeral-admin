@@ -22,7 +22,7 @@
                     {% endif %}
 
                     <!-- Step 3: Attach Official Documents -->
-                    {% if claim_data and claimant_data and  bank_account and not claim_files %}
+                    {% if claim_data and claimant_data and  bank_account %}
                         {% include "claims/sections/claimant_inserts/claim_files.html" %}
                     {% endif %}
 

@@ -3,7 +3,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, ValidationError
 from dotenv import load_dotenv
 import os
+
 load_dotenv(".env.development")
+
 
 class CloudFlareSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
@@ -26,6 +28,7 @@ class RedisSettings(BaseSettings):
     CACHE_REDIS_URL: str = Field(default=os.environ.get("MICROSOFT_REDIS_URL"))
     CACHE_DEFAULT_TIMEOUT: int = Field(default=60 * 60 * 6)
 
+
 class CacheSettings(BaseSettings):
     """Google Mem Cache Settings"""
     # NOTE: TO USE Flask_cache with redis set Cache type to redis and setup CACHE_REDIS_URL
@@ -43,6 +46,7 @@ class MySQLSettings(BaseSettings):
     PRODUCTION_DB: str = Field(default=os.environ.get("PRODUCTION_SQL_DB"))
     DEVELOPMENT_DB: str = Field(default=os.environ.get("DEV_SQL_DB"))
 
+
 class Logging(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
     filename: str = Field(default="fm.logs")
@@ -53,11 +57,13 @@ class PayPalSettings(BaseSettings):
     CLIENT_ID: str = Field(default=os.environ.get("PAYPAL_API_CLIENT_ID"))
     SECRET_KEY: str = Field(default=os.environ.get("PAYPAL_SECRET_KEY"))
 
+
 class BrainTreeSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
     MERCHANT_ID: str = Field(default=os.environ.get('BRAIN_TREE_MERCHANT_ID'))
     PUBLIC_KEY: str = Field(default=os.environ.get('BRAIN_TREE_PUBLIC_KEY'))
     PRIVATE_KEY: str = Field(default=os.environ.get('BRAIN_TREE_PRIVATE_KEY'))
+
 
 class TwilioSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
@@ -65,11 +71,13 @@ class TwilioSettings(BaseSettings):
     TWILIO_TOKEN: str = Field(default=os.environ.get('TWILIO_AUTH_TOKEN'))
     TWILIO_NUMBER: str = Field(default=os.environ.get('TWILIO_NUMBER'))
 
+
 class VonageSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
     API_KEY: str = Field(default=os.environ.get('VONAGE_API_KEY'))
     SECRET: str = Field(default=os.environ.get('VONAGE_SECRET'))
-    
+
+
 class ResendSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
     API_KEY: str = Field(default=os.environ.get("RESEND_API_KEY"))
@@ -80,12 +88,14 @@ class EmailSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
     RESEND: ResendSettings = ResendSettings()
 
+
 class PayfastSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
     MERCHANT_ID: str = Field(default=os.environ.get("PAYFAST_MERCHANT_ID"))
     MERCHANT_KEY: str = Field(default=os.environ.get("PAYFAST_MERCHANT_KEY"))
-    SANDBOX_MERCHANT_ID:str = Field(default=os.environ.get("PAYFAST_SANDBOX_MERCHANT_ID"))
-    SANDBOX_MERCHANT_KEY:str = Field(default=os.environ.get("PAYFAST_SANDBOX_MERCHANT_KEY"))
+    SANDBOX_MERCHANT_ID: str = Field(default=os.environ.get("PAYFAST_SANDBOX_MERCHANT_ID"))
+    SANDBOX_MERCHANT_KEY: str = Field(default=os.environ.get("PAYFAST_SANDBOX_MERCHANT_KEY"))
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.development", env_file_encoding="utf-8", extra="ignore")
@@ -123,7 +133,6 @@ def config_instance() -> Settings:
         return Settings()
     except ValidationError as e:
         print(str(e))
-
 
 
 def is_development():

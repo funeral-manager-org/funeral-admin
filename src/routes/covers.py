@@ -1107,8 +1107,8 @@ async def admin_claims_workorder(user: User, claim_number: str):
     :param claim_number:
     :return:
     """
-    pass
-
+    flash(message="Work orders will be sent to appropriate employees", category="success")
+    return redirect(url_for('covers.load_admin_claims'))
 
 async def send_claim_approved_notice_to_responsible_people(claim_details: Claims):
     """

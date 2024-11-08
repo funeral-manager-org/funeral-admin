@@ -23,17 +23,18 @@ async def get_cloudflare(user: User):
     context = dict(user=user)
     return render_template('admin/managers/messaging/cloudflare.html', **context)
 
+
 @messaging_route.get('/admin/administrator/messaging/top-up')
 @login_required
 async def get_topup(user: User):
-
     if not await subscriptions_controller.is_subscription_active(user=user):
         message: str = "You cannot topup with sms before paying for your subscription"
-        flash(message=message,category='danger')
+        flash(message=message, category='danger')
         return redirect(url_for('company.get_admin'))
 
     context = dict(user=user)
     return render_template('admin/managers/messaging/topup.html', **context)
+
 
 @messaging_route.get('/admin/administrator/messaging/settings')
 @login_required
@@ -44,6 +45,7 @@ async def get_admin(user: User):
 
     context = dict(user=user)
     return render_template('admin/managers/messaging/settings.html', **context)
+
 
 @messaging_route.post('/admin/administrator/messaging/sms-settings')
 @login_required
@@ -312,6 +314,7 @@ async def get_email_compose(user: User):
     context = dict(user=user, company_branches=company_branches, recipient_list=recipient_list)
     return render_template('admin/managers/messaging/paged/compose/email.html', **context)
 
+
 # noinspection DuplicatedCode
 @messaging_route.get('/admin/messaging/sms/compose')
 @login_required
@@ -505,7 +508,7 @@ async def send_emails(composed_email: EmailCompose,
         if email:
             # first attempt to personalize email messages - a lot of work needs to be done here
             display_name: str = person.display_names or person.client_display_name
-            email.create_html_template(company=company_details, user=user,  display_name=display_name)
+            email.create_html_template(company=company_details, user=user, display_name=display_name)
             await messaging_controller.send_email(email=email)
 
     return True
@@ -536,7 +539,8 @@ async def send_email_message(user: User):
             branch_id=composed_email.to_branch)
 
         # noinspection DuplicatedCode
-        if not await subscriptions_controller.subscription_can_send_emails(user=user, email_count=len(branch_employees)):
+        if not await subscriptions_controller.subscription_can_send_emails(user=user,
+                                                                           email_count=len(branch_employees)):
             message: str = f"""Cannot Send {len(branch_employees)} Emails as you do not have enough 
             email credits available please buy an email package"""
             flash(message=message, category="danger")

@@ -444,6 +444,9 @@ async def add_bank_account(user: User, branch_id: str):
         return redirect(url_for('company.get_admin'))
 
     branch_bank_account_ = await company_controller.add_bank_account(bank_account=branch_bank_account)
+    if not branch_bank_account_:
+        flash(message="Unable to create Bank Account (Possible Duplicate Data)", category="danger")
+        return redirect(url_for('company.get_admin'))
 
     branch: CompanyBranches = await company_controller.get_branch_by_id(branch_id=branch_id)
     branch.bank_account_id = branch_bank_account_.bank_account_id

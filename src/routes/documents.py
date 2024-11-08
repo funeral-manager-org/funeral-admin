@@ -33,7 +33,7 @@ async def download_claims_documents(user: User, company_id: str, claim_number: s
         return redirect(url_for('admin.get_admin'))
 
     # Check if the file exists
-    if not os.path.exists(os.path.join(file_path, filename)):
+    if not os.path.exists(os.path.join(file_path, filename )):
         return abort(404)  # Return a 404 if the file does not exist
 
     # Serve the file

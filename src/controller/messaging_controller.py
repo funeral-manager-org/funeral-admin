@@ -417,7 +417,7 @@ class MessagingController(Controllers):
 
         self.loop = asyncio.get_event_loop()
         self.burst_delay = 2
-        self.timer_multiplier = 1
+        self.timer_multiplier = 2
         self.timer_limit = 60 * 60 * 1
         self.event_triggered_time = 0
         self.cancel_await_event = asyncio.Event()
@@ -543,7 +543,9 @@ class MessagingController(Controllers):
         # Create a list of tasks for outgoing message queues
         tasks = [self.process_email_queue(),self.process_sms_queue(),self.process_whatsapp_queue()]
         # Run the tasks concurrently
+
         await asyncio.gather(*tasks)
         await self.sms_service.retrieve_sms_responses_service() # Removed the commented-out await asyncio.sleep line
         self.logger.info("completed this round")
+        await asyncio.sleep(self.timer_limit*self.timer_multiplier)
         # Handle incoming SMS responses

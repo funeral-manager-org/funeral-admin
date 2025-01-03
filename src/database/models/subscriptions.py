@@ -1,5 +1,6 @@
 from enum import Enum
 
+from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel, Field, PositiveInt
 from datetime import datetime, date, timedelta
 
@@ -136,16 +137,16 @@ class Subscriptions(BaseModel):
         Defaults to a grace period of 6 days.
         Will return True if the subscription is expired.
         """
+        # Parse the subscription date
         date_bought_dt = datetime.fromisoformat(self.date_subscribed)
         current_date = datetime.now()
 
-        # Calculate the expiry date considering the subscription period in months
-        expiry_date = date_bought_dt + timedelta(days=grace_period_in_days)
-        expiry_date = expiry_date.replace(month=date_bought_dt.month + self.subscription_period)
+        # Calculate expiry date using relativedelta for month handling
+        expiry_date = date_bought_dt + relativedelta(months=self.subscription_period)
+        expiry_date += timedelta(days=grace_period_in_days)
 
         # Check if the current date is past the expiry date
         return current_date > expiry_date
-
 
 class Package(BaseModel):
     package_id: str = Field(default_factory=create_id)

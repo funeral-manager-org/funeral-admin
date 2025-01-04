@@ -524,7 +524,7 @@ class MessagingController(Controllers):
 
     async def messaging_daemon(self):
         self.logger.info("Thread Started-------------------------------------------------")
-        wait_time = 60 * 1  # 10 minutes
+        wait_time = 60 * 60 * 10  # 10 minutes
         while True:
             if self.cancel_await_event.is_set():
                 self.logger.info("Cancel event triggered, processing immediately")

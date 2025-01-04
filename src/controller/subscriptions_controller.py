@@ -332,7 +332,7 @@ class SubscriptionsController(Controllers):
 
         :return:
         """
-        twelve_hours = 60 * 60 * 12
+        twelve_hours = 60 * 60 * 60 * 12
         while True:
             self.logger.info("Subscriptions Daemon started")
 

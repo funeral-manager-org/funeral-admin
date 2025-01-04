@@ -416,7 +416,7 @@ class MessagingController(Controllers):
         self.whatsapp_queue = asyncio.Queue()
 
         self.loop = asyncio.get_event_loop()
-        self.burst_delay = 60*5
+        self.burst_delay = 60*60
         self.timer_multiplier = 2
         self.timer_limit = 60 * 60 * 1
         self.event_triggered_time = 0
